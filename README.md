@@ -1,6 +1,6 @@
 # Twin CJ Riverside Glamping Resort Booking System
 
-Foobar is a Python library for dealing with word pluralization.
+Booking system for Twin CJ Riverside Glamping Resort
 
 ## Getting Started
 
