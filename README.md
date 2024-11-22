@@ -63,4 +63,4 @@ Follow the [Git Feature Branch Workflow](https://scribehow.com/page/GIT_Feature_
 
 ## License
 
-[MIT](LICENSE.txt)
+This project is licensed under [MIT License](LICENSE.txt).
