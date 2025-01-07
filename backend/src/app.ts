@@ -5,8 +5,19 @@ import cors from "cors";
 import helmet from "helmet";
 import router from "./routes/routes";
 import { NOT_FOUND, OK } from "./constants/http";
+import sequelize from "./config/db";
 
 const app = express();
+
+// database
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log(`Connection has been established successfully.`);
+  } catch (error) {
+    console.error(`Unable to connect to the database:`, error);
+  }
+})();
 
 // middleware
 app.use(express.json());
