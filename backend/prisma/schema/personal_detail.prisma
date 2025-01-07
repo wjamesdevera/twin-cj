@@ -1,0 +1,14 @@
+model PersonalDetail {
+    id          String   @id @default(uuid()) @map("personal_detail_id")
+    firstName   String?  @map("first_name")
+    lastName    String?  @map("last_name")
+    email       String   @unique @map("email")
+    phoneNumber String   @unique @map("phone_number")
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    userAccount UserAccount?
+
+    @@map("personal_details")
+}

@@ -5,22 +5,22 @@ import cors from "cors";
 import helmet from "helmet";
 import router from "./routes/routes";
 import { NOT_FOUND, OK } from "./constants/http";
-import sequelize from "./config/db";
-import PersonalDetail from "./models/personal_detail.model";
-import UserAccount from "./models/user_account.model";
-
+import { PrismaClient } from "@prisma/client";
 const app = express();
 
 // database
+const prisma = new PrismaClient();
 (async () => {
-  try {
-    await sequelize.authenticate();
-    await sequelize.sync({ force: true });
-    console.log(`Connection has been established successfully.`);
-  } catch (error) {
-    console.error(`Unable to connect to the database:`, error);
-  }
-})();
+  const allUsers = await prisma.userAccount.findMany();
+})()
+  .then(async () => {
+    console.log(`Database connected successfully`);
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+  });
 
 // middleware
 app.use(express.json());
