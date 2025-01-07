@@ -5,11 +5,10 @@ import cors from "cors";
 import helmet from "helmet";
 import router from "./routes/routes";
 import { NOT_FOUND, OK } from "./constants/http";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "./config/db";
 const app = express();
 
 // database
-const prisma = new PrismaClient();
 (async () => {
   const allUsers = await prisma.userAccount.findMany();
 })()

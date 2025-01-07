@@ -1,8 +1,3 @@
-import { Sequelize } from "sequelize";
+import { PrismaClient } from "@prisma/client";
 
-const sequelize = new Sequelize({
-  dialect: "sqlite",
-  storage: "twincj.db",
-});
-
-export default sequelize;
+export const prisma = new PrismaClient();
