@@ -6,6 +6,7 @@ import {
   DataTypes,
 } from "sequelize";
 import sequelize from "../config/db";
+import { hashPassword } from "../utils/password";
 
 class UserAccount extends Model<
   InferAttributes<UserAccount>,
@@ -37,5 +38,13 @@ UserAccount.init(
     sequelize,
   }
 );
+
+UserAccount.beforeCreate(async (userAccount, options) => {
+  userAccount.passwordHash = await hashPassword(userAccount.passwordHash);
+});
+
+UserAccount.beforeUpdate(async (userAccount, options) => {
+  userAccount.passwordHash = await hashPassword(userAccount.passwordHash);
+});
 
 export default UserAccount;
