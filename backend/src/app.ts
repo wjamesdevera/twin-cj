@@ -6,6 +6,8 @@ import helmet from "helmet";
 import router from "./routes/routes";
 import { NOT_FOUND, OK } from "./constants/http";
 import sequelize from "./config/db";
+import PersonalDetail from "./models/personal_detail.model";
+import UserAccount from "./models/user_account.model";
 
 const app = express();
 
@@ -13,6 +15,7 @@ const app = express();
 (async () => {
   try {
     await sequelize.authenticate();
+    await sequelize.sync({ force: true });
     console.log(`Connection has been established successfully.`);
   } catch (error) {
     console.error(`Unable to connect to the database:`, error);
