@@ -4,14 +4,15 @@ import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
 import router from "./routes/routes";
-import { NOT_FOUND, OK } from "./constants/http";
-import { prisma } from "./config/db";
+import { NOT_FOUND } from "./constants/http";
+import cookieParser from "cookie-parser";
 const app = express();
 
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(helmet());
 
