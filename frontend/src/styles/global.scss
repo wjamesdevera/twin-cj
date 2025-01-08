@@ -1,170 +1,420 @@
 :root {
-  /* Color styles */
-  --soft--peach: rgba(254, 238, 205, 1);
-  --sandy--beige: rgba(255, 238, 210, 1);
-  --ocean--teal: rgba(59, 98, 115, 1);
-  --deep--sea--blue: rgba(72, 109, 131, 1);
-  --sunset--orange: rgba(164, 95, 20, 1);
-  --warm--amber: rgba(214, 123, 29, 1);
-  --coral----accent: rgba(255, 184, 140, 1);
-  --soft--aqua----accent: rgba(148, 181, 196, 1);
-  --light--sand----accent: rgba(217, 173, 124, 1);
-  --pure--white: rgba(255, 255, 255, 1);
-  --ivory----accent: rgba(242, 230, 216, 1);
-  --text: rgba(85, 85, 85, 1);
-  --neutral---n0: rgba(255, 255, 255, 1);
-  --neutral---n10: rgba(250, 251, 251, 1);
-  --neutral---n20: rgba(245, 246, 247, 1);
-  --neutral---n30: rgba(235, 237, 240, 1);
-  --neutral---n40: rgba(223, 226, 230, 1);
-  --neutral---n50: rgba(194, 199, 208, 1);
-  --neutral---n60: rgba(179, 185, 196, 1);
-  --neutral---n70: rgba(166, 174, 187, 1);
-  --neutral---n80: rgba(152, 161, 176, 1);
-  --neutral---n90: rgba(137, 147, 164, 1);
-  --neutral---n100: rgba(122, 134, 153, 1);
-  --neutral---n200: rgba(107, 120, 142, 1);
-  --neutral---n300: rgba(93, 107, 130, 1);
-  --neutral---n400: rgba(80, 95, 121, 1);
-  --neutral---n500: rgba(66, 82, 109, 1);
-  --neutral---n600: rgba(53, 71, 100, 1);
-  --neutral---n700: rgba(36, 55, 87, 1);
-  --neutral---n800: rgba(21, 41, 75, 1);
-  --neutral---n900: rgba(9, 30, 66, 1);
-  --softpeach--softpeach-50: rgba(255, 253, 250, 1);
-  --softpeach--softpeach-100: rgba(255, 250, 240, 1);
-  --softpeach--softpeach-200: rgba(255, 247, 232, 1);
-  --softpeach--softpeach-300: rgba(254, 244, 222, 1);
-  --softpeach--softpeach-400: rgba(254, 241, 215, 1);
-  --softpeach--softpeach-500: rgba(254, 238, 205, 1);
-  --softpeach--softpeach-600: rgba(231, 217, 187, 1);
-  --softpeach--softpeach-700: rgba(180, 169, 146, 1);
-  --softpeach--softpeach-800: rgba(140, 131, 113, 1);
-  --softpeach--softpeach-900: rgba(107, 100, 86, 1);
-  --sandybeige--sandybeige-50: rgba(255, 253, 251, 1);
-  --sandybeige--sandybeige-100: rgba(255, 250, 241, 1);
-  --sandybeige--sandybeige-200: rgba(255, 247, 234, 1);
-  --sandybeige--sandybeige-300: rgba(255, 244, 225, 1);
-  --sandybeige--sandybeige-400: rgba(255, 241, 219, 1);
-  --sandybeige--sandybeige-500: rgba(255, 238, 210, 1);
-  --sandybeige--sandybeige-600: rgba(232, 217, 191, 1);
-  --sandybeige--sandybeige-700: rgba(181, 169, 149, 1);
-  --sandybeige--sandybeige-800: rgba(140, 131, 116, 1);
-  --sandybeige--sandybeige-900: rgba(107, 100, 88, 1);
-  --oceanteal--oceanteal-50: rgba(235, 239, 241, 1);
-  --oceanteal--oceanteal-100: rgba(194, 206, 212, 1);
-  --oceanteal--oceanteal-200: rgba(165, 183, 191, 1);
-  --oceanteal--oceanteal-300: rgba(124, 150, 161, 1);
-  --oceanteal--oceanteal-400: rgba(98, 129, 143, 1);
-  --oceanteal--oceanteal-500: rgba(59, 98, 115, 1);
-  --oceanteal--oceanteal-600: rgba(54, 89, 105, 1);
-  --oceanteal--oceanteal-700: rgba(42, 70, 82, 1);
-  --oceanteal--oceanteal-800: rgba(32, 54, 63, 1);
-  --oceanteal--oceanteal-900: rgba(25, 41, 48, 1);
-  --deepseablue--deepseablue-50: rgba(237, 240, 243, 1);
-  --deepseablue--deepseablue-100: rgba(198, 210, 217, 1);
-  --deepseablue--deepseablue-200: rgba(171, 188, 198, 1);
-  --deepseablue--deepseablue-300: rgba(132, 157, 172, 1);
-  --deepseablue--deepseablue-400: rgba(109, 138, 156, 1);
-  --deepseablue--deepseablue-500: rgba(72, 109, 131, 1);
-  --deepseablue--deepseablue-600: rgba(66, 99, 119, 1);
-  --deepseablue--deepseablue-700: rgba(51, 77, 93, 1);
-  --deepseablue--deepseablue-800: rgba(40, 60, 72, 1);
-  --deepseablue--deepseablue-900: rgba(30, 46, 55, 1);
-  --sunsetorange--sunsetorange-50: rgba(246, 239, 232, 1);
-  --sunsetorange--sunsetorange-100: rgba(227, 205, 182, 1);
-  --sunsetorange--sunsetorange-200: rgba(213, 181, 147, 1);
-  --sunsetorange--sunsetorange-300: rgba(194, 148, 98, 1);
-  --sunsetorange--sunsetorange-400: rgba(182, 127, 67, 1);
-  --sunsetorange--sunsetorange-500: rgba(164, 95, 20, 1);
-  --sunsetorange--sunsetorange-600: rgba(149, 86, 18, 1);
-  --sunsetorange--sunsetorange-700: rgba(116, 67, 14, 1);
-  --sunsetorange--sunsetorange-800: rgba(90, 52, 11, 1);
-  --sunsetorange--sunsetorange-900: rgba(69, 40, 8, 1);
-  --warm-amber--warm-amber-50: rgba(251, 242, 232, 1);
-  --warm-amber--warm-amber-100: rgba(242, 214, 185, 1);
-  --warm-amber--warm-amber-200: rgba(236, 194, 151, 1);
-  --warm-amber--warm-amber-300: rgba(228, 167, 104, 1);
-  --warm-amber--warm-amber-400: rgba(222, 149, 74, 1);
-  --warm-amber--warm-amber-500: rgba(214, 123, 29, 1);
-  --warm-amber--warm-amber-600: rgba(195, 112, 26, 1);
-  --warm-amber--warm-amber-700: rgba(152, 87, 21, 1);
-  --warm-amber--warm-amber-800: rgba(118, 68, 16, 1);
-  --warm-amber--warm-amber-900: rgba(90, 52, 12, 1);
-  --coral--coral-50: rgba(255, 248, 244, 1);
-  --coral--coral-100: rgba(255, 233, 219, 1);
-  --coral--coral-200: rgba(255, 222, 202, 1);
-  --coral--coral-300: rgba(255, 207, 178, 1);
-  --coral--coral-400: rgba(255, 198, 163, 1);
-  --coral--coral-500: rgba(255, 184, 140, 1);
-  --coral--coral-600: rgba(232, 167, 127, 1);
-  --coral--coral-700: rgba(181, 131, 99, 1);
-  --coral--coral-800: rgba(140, 101, 77, 1);
-  --coral--coral-900: rgba(107, 77, 59, 1);
-  --aqua--aqua-50: rgba(244, 248, 249, 1);
-  --aqua--aqua-100: rgba(222, 232, 237, 1);
-  --aqua--aqua-200: rgba(206, 221, 228, 1);
-  --aqua--aqua-300: rgba(183, 205, 215, 1);
-  --aqua--aqua-400: rgba(169, 196, 208, 1);
-  --aqua--aqua-500: rgba(148, 181, 196, 1);
-  --aqua--aqua-600: rgba(135, 165, 178, 1);
-  --aqua--aqua-700: rgba(105, 129, 139, 1);
-  --aqua--aqua-800: rgba(81, 100, 108, 1);
-  --aqua--aqua-900: rgba(62, 76, 82, 1);
-  --sand--sand-50: rgba(251, 247, 242, 1);
-  --sand--sand-100: rgba(243, 230, 214, 1);
-  --sand--sand-200: rgba(238, 217, 195, 1);
-  --sand--sand-300: rgba(230, 200, 167, 1);
-  --sand--sand-400: rgba(225, 189, 150, 1);
-  --sand--sand-500: rgba(217, 173, 124, 1);
-  --sand--sand-600: rgba(197, 157, 113, 1);
-  --sand--sand-700: rgba(154, 123, 88, 1);
-  --sand--sand-800: rgba(119, 95, 68, 1);
-  --sand--sand-900: rgba(91, 73, 52, 1);
-  --ivory--ivory-50: rgba(254, 253, 251, 1);
-  --ivory--ivory-100: rgba(251, 247, 243, 1);
-  --ivory--ivory-200: rgba(249, 244, 237, 1);
-  --ivory--ivory-300: rgba(246, 238, 229, 1);
-  --ivory--ivory-400: rgba(245, 235, 224, 1);
-  --ivory--ivory-500: rgba(242, 230, 216, 1);
-  --ivory--ivory-600: rgba(220, 209, 197, 1);
-  --ivory--ivory-700: rgba(172, 163, 153, 1);
-  --ivory--ivory-800: rgba(133, 127, 119, 1);
-  --ivory--ivory-900: rgba(102, 97, 91, 1);
-
-  /* Text-size styles */
-  /* base size: text-primary-base (16px) */
-  --text-primary-base: 1rem;
-  --text-primary-sm: 0.81rem;
-  --text-primary-xs: 0.62rem;
-  --text-primary-lg: 1.25rem;
-  --text-primary-xl: 1.56rem;
-  --text-primary-2xl: 1.94rem;
-  --text-primary-3xl: 2.44rem;
-  --text-primary-4xl: 3.06rem;
-  --text-primary-6xl: 3.81rem;
-  --text-primary-base-bold: 1rem;
-  --text-brand-base: 1rem;
-  --text-brand-sm: 0.75rem;
-  --text-brand-xs: 0.56rem;
-  --text-brand-lg: 1.31rem;
-  --text-brand-xl: 1.75rem;
-  --text-brand-2xl: 2.38rem;
-  --text-brand-3xl: 3.19rem;
-  --text-brand-4xl: 4.19rem;
-  --text-brand-5xl: 5.62rem;
-  --text-secondary-base: 1rem;
-  --text-secondary-sm: 0.81rem;
-  --text-secondary-xs: 0.62rem;
-  --text-secondary-lg: 1.25rem;
-  --text-secondary-xl: 1.56rem;
-  --text-secondary-2xl: 1.94rem;
-  --text-secondary-3xl: 2.44rem;
-  --text-secondary-4xl: 3.06rem;
-  --text-secondary-5xl: 3.81rem;
+  --SoftPeach-background: #feeecd;
+  --SandyBeige-background: #ffeed2;
+  --OceanTeal-background: #3b6273;
+  --DeepSeaBlue-background: #486d83;
+  --SunsetOrange-background: #a45f14;
+  --WarmAmber-background: #d67b1d;
+  --CoralAccent-background: #ffb88c;
+  --SoftAquaAccent-background: #94b5c4;
+  --LightSandAccent-background: #d9ad7c;
+  --PureWhite-background: #ffffff;
+  --IvoryAccent-background: #f2e6d8;
+  --text-background: #555555;
+  --navbargradient-background: linear-gradient(
+    360deg,
+    rgba(123, 114, 114, 0) 0%,
+    rgba(106, 97, 97, 0.52) 22%,
+    #111111 90%
+  );
+  --neutral__N0-background: #ffffff;
+  --neutral__N10-background: #fafbfb;
+  --neutral__N20-background: #f5f6f7;
+  --neutral__N30-background: #ebedf0;
+  --neutral__N40-background: #dfe2e6;
+  --neutral__N50-background: #c2c7d0;
+  --neutral__N60-background: #b3b9c4;
+  --neutral__N70-background: #a6aebb;
+  --neutral__N80-background: #98a1b0;
+  --neutral__N90-background: #8993a4;
+  --neutral__N100-background: #7a8699;
+  --neutral__N200-background: #6b788e;
+  --neutral__N300-background: #5d6b82;
+  --neutral__N400-background: #505f79;
+  --neutral__N500-background: #42526d;
+  --neutral__N600-background: #354764;
+  --neutral__N700-background: #243757;
+  --neutral__N800-background: #15294b;
+  --neutral__N900-background: #091e42;
+  --softpeach__softpeach50-background: #fffdfa;
+  --softpeach__softpeach100-background: #fffaf0;
+  --softpeach__softpeach200-background: #fff7e8;
+  --softpeach__softpeach300-background: #fef4de;
+  --softpeach__softpeach400-background: #fef1d7;
+  --softpeach__softpeach500-background: #feeecd;
+  --softpeach__softpeach600-background: #e7d9bb;
+  --softpeach__softpeach700-background: #b4a992;
+  --softpeach__softpeach800-background: #8c8371;
+  --softpeach__softpeach900-background: #6b6456;
+  --sandybeige__sandybeige50-background: #fffdfb;
+  --sandybeige__sandybeige100-background: #fffaf1;
+  --sandybeige__sandybeige200-background: #fff7ea;
+  --sandybeige__sandybeige300-background: #fff4e1;
+  --sandybeige__sandybeige400-background: #fff1db;
+  --sandybeige__sandybeige500-background: #ffeed2;
+  --sandybeige__sandybeige600-background: #e8d9bf;
+  --sandybeige__sandybeige700-background: #b5a995;
+  --sandybeige__sandybeige800-background: #8c8374;
+  --sandybeige__sandybeige900-background: #6b6458;
+  --oceanteal__oceanteal50-background: #ebeff1;
+  --oceanteal__oceanteal100-background: #c2ced4;
+  --oceanteal__oceanteal200-background: #a5b7bf;
+  --oceanteal__oceanteal300-background: #7c96a1;
+  --oceanteal__oceanteal400-background: #62818f;
+  --oceanteal__oceanteal500-background: #3b6273;
+  --oceanteal__oceanteal600-background: #365969;
+  --oceanteal__oceanteal700-background: #2a4652;
+  --oceanteal__oceanteal800-background: #20363f;
+  --oceanteal__oceanteal900-background: #192930;
+  --deepseablue__deepseablue50-background: #edf0f3;
+  --deepseablue__deepseablue100-background: #c6d2d9;
+  --deepseablue__deepseablue200-background: #abbcc6;
+  --deepseablue__deepseablue300-background: #849dac;
+  --deepseablue__deepseablue400-background: #6d8a9c;
+  --deepseablue__deepseablue500-background: #486d83;
+  --deepseablue__deepseablue600-background: #426377;
+  --deepseablue__deepseablue700-background: #334d5d;
+  --deepseablue__deepseablue800-background: #283c48;
+  --deepseablue__deepseablue900-background: #1e2e37;
+  --sunsetorange__sunsetorange50-background: #f6efe8;
+  --sunsetorange__sunsetorange100-background: #e3cdb6;
+  --sunsetorange__sunsetorange200-background: #d5b593;
+  --sunsetorange__sunsetorange300-background: #c29462;
+  --sunsetorange__sunsetorange400-background: #b67f43;
+  --sunsetorange__sunsetorange500-background: #a45f14;
+  --sunsetorange__sunsetorange600-background: #955612;
+  --sunsetorange__sunsetorange700-background: #74430e;
+  --sunsetorange__sunsetorange800-background: #5a340b;
+  --sunsetorange__sunsetorange900-background: #452808;
+  --warmamber__warmamber50-background: #fbf2e8;
+  --warmamber__warmamber100-background: #f2d6b9;
+  --warmamber__warmamber200-background: #ecc297;
+  --warmamber__warmamber300-background: #e4a768;
+  --warmamber__warmamber400-background: #de954a;
+  --warmamber__warmamber500-background: #d67b1d;
+  --warmamber__warmamber600-background: #c3701a;
+  --warmamber__warmamber700-background: #985715;
+  --warmamber__warmamber800-background: #764410;
+  --warmamber__warmamber900-background: #5a340c;
+  --coral__coral50-background: #fff8f4;
+  --coral__coral100-background: #ffe9db;
+  --coral__coral200-background: #ffdeca;
+  --coral__coral300-background: #ffcfb2;
+  --coral__coral400-background: #ffc6a3;
+  --coral__coral500-background: #ffb88c;
+  --coral__coral600-background: #e8a77f;
+  --coral__coral700-background: #b58363;
+  --coral__coral800-background: #8c654d;
+  --coral__coral900-background: #6b4d3b;
+  --aqua__aqua50-background: #f4f8f9;
+  --aqua__aqua100-background: #dee8ed;
+  --aqua__aqua200-background: #cedde4;
+  --aqua__aqua300-background: #b7cdd7;
+  --aqua__aqua400-background: #a9c4d0;
+  --aqua__aqua500-background: #94b5c4;
+  --aqua__aqua600-background: #87a5b2;
+  --aqua__aqua700-background: #69818b;
+  --aqua__aqua800-background: #51646c;
+  --aqua__aqua900-background: #3e4c52;
+  --sand__sand50-background: #fbf7f2;
+  --sand__sand100-background: #f3e6d6;
+  --sand__sand200-background: #eed9c3;
+  --sand__sand300-background: #e6c8a7;
+  --sand__sand400-background: #e1bd96;
+  --sand__sand500-background: #d9ad7c;
+  --sand__sand600-background: #c59d71;
+  --sand__sand700-background: #9a7b58;
+  --sand__sand800-background: #775f44;
+  --sand__sand900-background: #5b4934;
+  --ivory__ivory50-background: #fefdfb;
+  --ivory__ivory100-background: #fbf7f3;
+  --ivory__ivory200-background: #f9f4ed;
+  --ivory__ivory300-background: #f6eee5;
+  --ivory__ivory400-background: #f5ebe0;
+  --ivory__ivory500-background: #f2e6d8;
+  --ivory__ivory600-background: #dcd1c5;
+  --ivory__ivory700-background: #aca399;
+  --ivory__ivory800-background: #857f77;
+  --ivory__ivory900-background: #66615b;
+  --textprimarybase-font-size: 16px;
+  --textprimarybase-font-family: Open Sans, sans-serif;
+  --textprimarybase-font-weight: 400;
+  --textprimarybase-line-height: 125;
+  --textprimarysm-font-size: 13px;
+  --textprimarysm-font-family: Open Sans, sans-serif;
+  --textprimarysm-font-weight: 400;
+  --textprimarysm-line-height: 125;
+  --textprimaryxs-font-size: 10px;
+  --textprimaryxs-font-family: Open Sans, sans-serif;
+  --textprimaryxs-font-weight: 400;
+  --textprimaryxs-line-height: 125;
+  --textprimarylg-font-size: 20px;
+  --textprimarylg-font-family: Open Sans, sans-serif;
+  --textprimarylg-font-weight: 400;
+  --textprimarylg-line-height: 125;
+  --textprimaryxl-font-size: 25px;
+  --textprimaryxl-font-family: Open Sans, sans-serif;
+  --textprimaryxl-font-weight: 400;
+  --textprimaryxl-line-height: 125;
+  --textprimary2xl-font-size: 31px;
+  --textprimary2xl-font-family: Open Sans, sans-serif;
+  --textprimary2xl-font-weight: 400;
+  --textprimary2xl-line-height: 125;
+  --textprimary3xl-font-size: 39px;
+  --textprimary3xl-font-family: Open Sans, sans-serif;
+  --textprimary3xl-font-weight: 400;
+  --textprimary3xl-line-height: 125;
+  --textprimary4xl-font-size: 49px;
+  --textprimary4xl-font-family: Open Sans, sans-serif;
+  --textprimary4xl-font-weight: 400;
+  --textprimary4xl-line-height: 125;
+  --textprimary6xl-font-size: 61px;
+  --textprimary6xl-font-family: Open Sans, sans-serif;
+  --textprimary6xl-font-weight: 400;
+  --textprimary6xl-line-height: 125;
+  --textprimarybasebold-font-size: 16px;
+  --textprimarybasebold-font-family: Open Sans, sans-serif;
+  --textprimarybasebold-font-weight: 700;
+  --textprimarybasebold-line-height: 125;
+  --textbrandbase-font-size: 16px;
+  --textbrandbase-font-family: Abril Fatface, sans-serif;
+  --textbrandbase-font-weight: 400;
+  --textbrandbase-line-height: 120.00000476837158;
+  --textbrandsm-font-size: 12px;
+  --textbrandsm-font-family: Abril Fatface, sans-serif;
+  --textbrandsm-font-weight: 400;
+  --textbrandsm-line-height: 120.00000476837158;
+  --textbrandxs-font-size: 9px;
+  --textbrandxs-font-family: Abril Fatface, sans-serif;
+  --textbrandxs-font-weight: 400;
+  --textbrandxs-line-height: 120.00000476837158;
+  --textbrandlg-font-size: 21px;
+  --textbrandlg-font-family: Abril Fatface, sans-serif;
+  --textbrandlg-font-weight: 400;
+  --textbrandlg-line-height: 120.00000476837158;
+  --textbrandxl-font-size: 28px;
+  --textbrandxl-font-family: Abril Fatface, sans-serif;
+  --textbrandxl-font-weight: 400;
+  --textbrandxl-line-height: 120.00000476837158;
+  --textbrand2xl-font-size: 38px;
+  --textbrand2xl-font-family: Abril Fatface, sans-serif;
+  --textbrand2xl-font-weight: 400;
+  --textbrand2xl-line-height: 120.00000476837158;
+  --textbrand3xl-font-size: 51px;
+  --textbrand3xl-font-family: Abril Fatface, sans-serif;
+  --textbrand3xl-font-weight: 400;
+  --textbrand3xl-line-height: 120.00000476837158;
+  --textbrand4xl-font-size: 67px;
+  --textbrand4xl-font-family: Abril Fatface, sans-serif;
+  --textbrand4xl-font-weight: 400;
+  --textbrand4xl-line-height: 120.00000476837158;
+  --textbrand5xl-font-size: 90px;
+  --textbrand5xl-font-family: Abril Fatface, sans-serif;
+  --textbrand5xl-font-weight: 400;
+  --textbrand5xl-line-height: 120.00000476837158;
+  --textsecondarybase-font-size: 16px;
+  --textsecondarybase-font-family: Poltawski Nowy, sans-serif;
+  --textsecondarybase-font-weight: 400;
+  --textsecondarybase-line-height: 122.00000286102295;
+  --textsecondarysm-font-size: 13px;
+  --textsecondarysm-font-family: Poltawski Nowy, sans-serif;
+  --textsecondarysm-font-weight: 400;
+  --textsecondarysm-line-height: 122.00000286102295;
+  --textsecondaryxs-font-size: 10px;
+  --textsecondaryxs-font-family: Poltawski Nowy, sans-serif;
+  --textsecondaryxs-font-weight: 400;
+  --textsecondaryxs-line-height: 122.00000286102295;
+  --textsecondarylg-font-size: 20px;
+  --textsecondarylg-font-family: Poltawski Nowy, sans-serif;
+  --textsecondarylg-font-weight: 400;
+  --textsecondarylg-line-height: 122.00000286102295;
+  --textsecondaryxl-font-size: 25px;
+  --textsecondaryxl-font-family: Poltawski Nowy, sans-serif;
+  --textsecondaryxl-font-weight: 400;
+  --textsecondaryxl-line-height: 122.00000286102295;
+  --textsecondary2xl-font-size: 31px;
+  --textsecondary2xl-font-family: Poltawski Nowy, sans-serif;
+  --textsecondary2xl-font-weight: 400;
+  --textsecondary2xl-line-height: 122.00000286102295;
+  --textsecondary3xl-font-size: 39px;
+  --textsecondary3xl-font-family: Poltawski Nowy, sans-serif;
+  --textsecondary3xl-font-weight: 400;
+  --textsecondary3xl-line-height: 122.00000286102295;
+  --textsecondary4xl-font-size: 49px;
+  --textsecondary4xl-font-family: Poltawski Nowy, sans-serif;
+  --textsecondary4xl-font-weight: 400;
+  --textsecondary4xl-line-height: 122.00000286102295;
+  --textsecondary5xl-font-size: 61px;
+  --textsecondary5xl-font-family: Poltawski Nowy, sans-serif;
+  --textsecondary5xl-font-weight: 400;
+  --textsecondary5xl-line-height: 122.00000286102295;
 }
 
-.h1 {
-  font: var(--text-brand-5xl);
-  color: var(--aqua--aqua-900);
+.textprimarybase {
+  font-size: var(--textprimarybase-font-size);
+  font-family: var(--textprimarybase-font-family);
+  font-weight: var(--textprimarybase-font-weight);
+  line-height: var(--textprimarybase-line-height);
+}
+.textprimarysm {
+  font-size: var(--textprimarysm-font-size);
+  font-family: var(--textprimarysm-font-family);
+  font-weight: var(--textprimarysm-font-weight);
+  line-height: var(--textprimarysm-line-height);
+}
+.textprimaryxs {
+  font-size: var(--textprimaryxs-font-size);
+  font-family: var(--textprimaryxs-font-family);
+  font-weight: var(--textprimaryxs-font-weight);
+  line-height: var(--textprimaryxs-line-height);
+}
+.textprimarylg {
+  font-size: var(--textprimarylg-font-size);
+  font-family: var(--textprimarylg-font-family);
+  font-weight: var(--textprimarylg-font-weight);
+  line-height: var(--textprimarylg-line-height);
+}
+.textprimaryxl {
+  font-size: var(--textprimaryxl-font-size);
+  font-family: var(--textprimaryxl-font-family);
+  font-weight: var(--textprimaryxl-font-weight);
+  line-height: var(--textprimaryxl-line-height);
+}
+.textprimary2xl {
+  font-size: var(--textprimary2xl-font-size);
+  font-family: var(--textprimary2xl-font-family);
+  font-weight: var(--textprimary2xl-font-weight);
+  line-height: var(--textprimary2xl-line-height);
+}
+.textprimary3xl {
+  font-size: var(--textprimary3xl-font-size);
+  font-family: var(--textprimary3xl-font-family);
+  font-weight: var(--textprimary3xl-font-weight);
+  line-height: var(--textprimary3xl-line-height);
+}
+.textprimary4xl {
+  font-size: var(--textprimary4xl-font-size);
+  font-family: var(--textprimary4xl-font-family);
+  font-weight: var(--textprimary4xl-font-weight);
+  line-height: var(--textprimary4xl-line-height);
+}
+.textprimary6xl {
+  font-size: var(--textprimary6xl-font-size);
+  font-family: var(--textprimary6xl-font-family);
+  font-weight: var(--textprimary6xl-font-weight);
+  line-height: var(--textprimary6xl-line-height);
+}
+.textprimarybasebold {
+  font-size: var(--textprimarybasebold-font-size);
+  font-family: var(--textprimarybasebold-font-family);
+  font-weight: var(--textprimarybasebold-font-weight);
+  line-height: var(--textprimarybasebold-line-height);
+}
+.textbrandbase {
+  font-size: var(--textbrandbase-font-size);
+  font-family: var(--textbrandbase-font-family);
+  font-weight: var(--textbrandbase-font-weight);
+  line-height: var(--textbrandbase-line-height);
+}
+.textbrandsm {
+  font-size: var(--textbrandsm-font-size);
+  font-family: var(--textbrandsm-font-family);
+  font-weight: var(--textbrandsm-font-weight);
+  line-height: var(--textbrandsm-line-height);
+}
+.textbrandxs {
+  font-size: var(--textbrandxs-font-size);
+  font-family: var(--textbrandxs-font-family);
+  font-weight: var(--textbrandxs-font-weight);
+  line-height: var(--textbrandxs-line-height);
+}
+.textbrandlg {
+  font-size: var(--textbrandlg-font-size);
+  font-family: var(--textbrandlg-font-family);
+  font-weight: var(--textbrandlg-font-weight);
+  line-height: var(--textbrandlg-line-height);
+}
+.textbrandxl {
+  font-size: var(--textbrandxl-font-size);
+  font-family: var(--textbrandxl-font-family);
+  font-weight: var(--textbrandxl-font-weight);
+  line-height: var(--textbrandxl-line-height);
+}
+.textbrand2xl {
+  font-size: var(--textbrand2xl-font-size);
+  font-family: var(--textbrand2xl-font-family);
+  font-weight: var(--textbrand2xl-font-weight);
+  line-height: var(--textbrand2xl-line-height);
+}
+.textbrand3xl {
+  font-size: var(--textbrand3xl-font-size);
+  font-family: var(--textbrand3xl-font-family);
+  font-weight: var(--textbrand3xl-font-weight);
+  line-height: var(--textbrand3xl-line-height);
+}
+.textbrand4xl {
+  font-size: var(--textbrand4xl-font-size);
+  font-family: var(--textbrand4xl-font-family);
+  font-weight: var(--textbrand4xl-font-weight);
+  line-height: var(--textbrand4xl-line-height);
+}
+.textbrand5xl {
+  font-size: var(--textbrand5xl-font-size);
+  font-family: var(--textbrand5xl-font-family);
+  font-weight: var(--textbrand5xl-font-weight);
+  line-height: var(--textbrand5xl-line-height);
+}
+.textsecondarybase {
+  font-size: var(--textsecondarybase-font-size);
+  font-family: var(--textsecondarybase-font-family);
+  font-weight: var(--textsecondarybase-font-weight);
+  line-height: var(--textsecondarybase-line-height);
+}
+.textsecondarysm {
+  font-size: var(--textsecondarysm-font-size);
+  font-family: var(--textsecondarysm-font-family);
+  font-weight: var(--textsecondarysm-font-weight);
+  line-height: var(--textsecondarysm-line-height);
+}
+.textsecondaryxs {
+  font-size: var(--textsecondaryxs-font-size);
+  font-family: var(--textsecondaryxs-font-family);
+  font-weight: var(--textsecondaryxs-font-weight);
+  line-height: var(--textsecondaryxs-line-height);
+}
+.textsecondarylg {
+  font-size: var(--textsecondarylg-font-size);
+  font-family: var(--textsecondarylg-font-family);
+  font-weight: var(--textsecondarylg-font-weight);
+  line-height: var(--textsecondarylg-line-height);
+}
+.textsecondaryxl {
+  font-size: var(--textsecondaryxl-font-size);
+  font-family: var(--textsecondaryxl-font-family);
+  font-weight: var(--textsecondaryxl-font-weight);
+  line-height: var(--textsecondaryxl-line-height);
+}
+.textsecondary2xl {
+  font-size: var(--textsecondary2xl-font-size);
+  font-family: var(--textsecondary2xl-font-family);
+  font-weight: var(--textsecondary2xl-font-weight);
+  line-height: var(--textsecondary2xl-line-height);
+}
+.textsecondary3xl {
+  font-size: var(--textsecondary3xl-font-size);
+  font-family: var(--textsecondary3xl-font-family);
+  font-weight: var(--textsecondary3xl-font-weight);
+  line-height: var(--textsecondary3xl-line-height);
+}
+.textsecondary4xl {
+  font-size: var(--textsecondary4xl-font-size);
+  font-family: var(--textsecondary4xl-font-family);
+  font-weight: var(--textsecondary4xl-font-weight);
+  line-height: var(--textsecondary4xl-line-height);
+}
+.textsecondary5xl {
+  font-size: var(--textsecondary5xl-font-size);
+  font-family: var(--textsecondary5xl-font-family);
+  font-weight: var(--textsecondary5xl-font-weight);
+  line-height: var(--textsecondary5xl-line-height);
 }
