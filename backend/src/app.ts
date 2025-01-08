@@ -8,19 +8,6 @@ import { NOT_FOUND, OK } from "./constants/http";
 import { prisma } from "./config/db";
 const app = express();
 
-// database
-(async () => {
-  const allUsers = await prisma.userAccount.findMany();
-})()
-  .then(async () => {
-    console.log(`Database connected successfully`);
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-  });
-
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
