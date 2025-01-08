@@ -1,4 +1,4 @@
-import { registerSchema } from "../schemas/auth.schems";
+import { loginSchema, registerSchema } from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
 import { createAccount } from "../services/auth.service";
 import { Request, response, Response } from "express";
@@ -27,5 +27,14 @@ export const registerHandler = catchErrors(
           },
         },
       });
+  }
+);
+
+export const loginHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const requestBody = loginSchema.parse({
+      ...request.body,
+      userAgent: request.headers["user-agent"],
+    });
   }
 );
