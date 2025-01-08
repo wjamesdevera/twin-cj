@@ -14,7 +14,7 @@ model UserAccount {
     authRoleId        Int?
 
     passwordResetToken PasswordResetToken?
-    session            Session?
+    session            Session[]
 
     @@map("user_accounts")
 }
