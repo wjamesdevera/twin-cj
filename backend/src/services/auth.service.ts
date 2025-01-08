@@ -1,6 +1,8 @@
+import { sign, Verify } from "crypto";
 import { prisma } from "../config/db";
 import { CONFLICT } from "../constants/http";
 import appAssert from "../utils/appAssert";
+import { signToken } from "../utils/jwt";
 
 type CreateAccountParams = {
   email: string;
@@ -36,5 +38,38 @@ export const createAccount = async (data: CreateAccountParams) => {
         },
       },
     },
+    include: {
+      userAccount: true,
+    },
   });
+
+  const userAccountId = createUser.userAccount?.id;
+
+  // TODO: Add Email Verification
+
+  const session = await prisma.session.create({
+    data: {
+      userAccountId: userAccountId,
+      userAgent: data.userAgent,
+    },
+  });
+
+  const refreshToken = signToken({
+    sessionId: session.id,
+  });
+
+  const accessToken = signToken({
+    userId: userAccountId,
+    sessionId: session.id,
+  });
+
+  return {
+    user: {
+      firstName: createUser.firstName,
+      lastName: createUser.lastName,
+      email: createUser.email,
+    },
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+  };
 };

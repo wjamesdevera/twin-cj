@@ -1,7 +1,10 @@
 import { registerSchema } from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
 import { createAccount } from "../services/auth.service";
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
+import { setAuthCookies } from "../utils/cookies";
+import { CREATED } from "../constants/http";
+import appAssert from "../utils/appAssert";
 
 export const registerHandler = catchErrors(
   async (request: Request, response: Response) => {
@@ -9,7 +12,20 @@ export const registerHandler = catchErrors(
       ...request.body,
       userAgent: request.headers["user-agent"],
     });
-    await createAccount(requestBody);
-    response.json({ status: "success", data: requestBody });
+
+    const { user, accessToken, refreshToken } = await createAccount(
+      requestBody
+    );
+
+    setAuthCookies({ response, accessToken, refreshToken })
+      .status(CREATED)
+      .json({
+        status: "success",
+        data: {
+          user: {
+            email: user.email,
+          },
+        },
+      });
   }
 );
