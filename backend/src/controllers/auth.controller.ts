@@ -1,9 +1,9 @@
 import { loginSchema, registerSchema } from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
-import { createAccount } from "../services/auth.service";
+import { createAccount, loginAccount } from "../services/auth.service";
 import { Request, response, Response } from "express";
 import { setAuthCookies } from "../utils/cookies";
-import { CREATED } from "../constants/http";
+import { CREATED, OK } from "../constants/http";
 import appAssert from "../utils/appAssert";
 
 export const registerHandler = catchErrors(
@@ -36,5 +36,18 @@ export const loginHandler = catchErrors(
       ...request.body,
       userAgent: request.headers["user-agent"],
     });
+
+    const { user, accessToken, refreshToken } = await loginAccount(requestBody);
+
+    setAuthCookies({ response, accessToken, refreshToken })
+      .status(OK)
+      .json({
+        status: "success",
+        data: {
+          user: {
+            email: user.email,
+          },
+        },
+      });
   }
 );
