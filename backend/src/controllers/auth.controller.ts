@@ -1,0 +1,31 @@
+import { registerSchema } from "../schemas/auth.schems";
+import catchErrors from "../utils/catchErrors";
+import { createAccount } from "../services/auth.service";
+import { Request, response, Response } from "express";
+import { setAuthCookies } from "../utils/cookies";
+import { CREATED } from "../constants/http";
+import appAssert from "../utils/appAssert";
+
+export const registerHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const requestBody = registerSchema.parse({
+      ...request.body,
+      userAgent: request.headers["user-agent"],
+    });
+
+    const { user, accessToken, refreshToken } = await createAccount(
+      requestBody
+    );
+
+    setAuthCookies({ response, accessToken, refreshToken })
+      .status(CREATED)
+      .json({
+        status: "success",
+        data: {
+          user: {
+            email: user.email,
+          },
+        },
+      });
+  }
+);

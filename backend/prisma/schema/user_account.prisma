@@ -1,0 +1,20 @@
+model UserAccount {
+    id        String   @id @default(uuid()) @map("user_account_id")
+    password  String
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    personalDetail PersonalDetail @relation(fields: [personalId], references: [id])
+    personalId     String         @unique @map("personal_id")
+
+    userAccountStatus UserAccountStatus? @relation(fields: [statusId], references: [id])
+    statusId          Int?               @unique @map("user_account_status_id")
+    AuthRole          AuthRole?          @relation(fields: [authRoleId], references: [id])
+    authRoleId        Int?
+
+    passwordResetToken PasswordResetToken?
+    session            Session?
+
+    @@map("user_accounts")
+}

@@ -1,0 +1,11 @@
+model Session {
+    id String @id @default(uuid()) @map("session_id")
+
+    userAccount   UserAccount? @relation(fields: [userAccountId], references: [id])
+    userAccountId String?      @unique @map("user_account_id")
+    userAgent     String?      @map("user_agent")
+    createdAt     DateTime     @default(now()) @map("created_at")
+    updatedAt     DateTime     @updatedAt @map("updated_at")
+
+    @@map("sessions")
+}
