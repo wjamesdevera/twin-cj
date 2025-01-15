@@ -57,6 +57,17 @@ Make sure you have the following installed:
    pnpm run dev
    ```
 
+## Project Contributors
+
+- Andal, Dawn Wynette C.
+- Arellano, Patricia Bianca G.
+- De Vera, Winfrey James G.
+- Duterte, Kurt Emmanuel D.L.C.
+- Feliciano, Chrizelle C.
+- Labaguis, Ralph Kyle Y.
+- Tomaneng, Matthew Abraham L.
+- Trinidad, Paul Jeremy E.
+
 ## How to Contribute
 
 Follow the [Git Feature Branch Workflow](https://scribehow.com/page/GIT_Feature_Branch_Workflow__zpUst2jCQwmyQZumRkyF1g) to contribute to this project.
