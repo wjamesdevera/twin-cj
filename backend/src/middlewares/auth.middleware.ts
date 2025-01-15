@@ -1,11 +1,15 @@
-import { RequestHandler } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import appAssert from "../utils/appAssert";
 import { UNAUTHORIZED } from "../constants/http";
 import AppErrorCode from "../constants/appErrorCode";
 import { verifyToken } from "../utils/jwt";
 
-const authenticate: RequestHandler = (req, res, next) => {
-  const accessToken = req.cookies.accessToken as string | undefined;
+export const authenticate: RequestHandler = (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  const accessToken = request.cookies.accessToken as string | undefined;
   appAssert(
     accessToken,
     UNAUTHORIZED,
@@ -21,7 +25,7 @@ const authenticate: RequestHandler = (req, res, next) => {
     AppErrorCode.InvalidAccessToken
   );
 
-  req.userId = payload.userId;
-  req.sessionId = payload.sessionId;
+  request.userId = payload.userId;
+  request.sessionId = payload.sessionId;
   next();
 };
