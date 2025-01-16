@@ -7,12 +7,15 @@ import {
 } from "../services/auth.service";
 import { Request, response, Response } from "express";
 import {
+  clearAuthCookies,
   getAccessTokenCookieOptions,
   getRefreshTokenCookieOptions,
   setAuthCookies,
 } from "../utils/cookies";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import appAssert from "../utils/appAssert";
+import { verifyToken } from "../utils/jwt";
+import { prisma } from "../config/db";
 
 export const registerHandler = catchErrors(
   async (request: Request, response: Response) => {
@@ -84,6 +87,29 @@ export const refreshHandler = catchErrors(
         status: "success",
         data: {
           message: "Access token refreshed",
+        },
+      });
+  }
+);
+
+export const logoutHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const accessToken = request.cookies.accessToken as string | undefined;
+    const { payload } = verifyToken(accessToken || "");
+    if (payload) {
+      await prisma.session.delete({
+        where: {
+          id: payload.sessionId,
+        },
+      });
+    }
+
+    clearAuthCookies(response)
+      .status(OK)
+      .json({
+        status: "success",
+        data: {
+          message: "Logout successful",
         },
       });
   }
