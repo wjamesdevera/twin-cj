@@ -54,6 +54,9 @@ export const verifyToken = <TPayload extends object = AccessTokenPayload>(
       ...defaults,
       ...verifyOpts,
     }) as TPayload;
+    return {
+      payload,
+    };
   } catch (error: any) {
     return {
       error: error.message,
