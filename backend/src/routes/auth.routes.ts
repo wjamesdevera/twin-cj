@@ -1,10 +1,15 @@
 import { Router, Request, Response } from "express";
-import { loginHandler, registerHandler } from "../controllers/auth.controller";
+import {
+  loginHandler,
+  refreshHandler,
+  registerHandler,
+} from "../controllers/auth.controller";
 
 const router = Router();
 
 // Register Endpoint
 router.post("/register", registerHandler);
 router.post("/login", loginHandler);
+router.get("/refresh", refreshHandler);
 
 export default router;

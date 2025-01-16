@@ -51,3 +51,14 @@ export const loginHandler = catchErrors(
       });
   }
 );
+
+export const refreshHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    response.status(OK).json({
+      status: "success",
+      data: {
+        message: "refresh handler working",
+      },
+    });
+  }
+);
