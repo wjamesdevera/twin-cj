@@ -1,14 +1,25 @@
-import { sign, Verify } from "crypto";
 import { prisma } from "../config/db";
 import { CONFLICT, UNAUTHORIZED } from "../constants/http";
 import appAssert from "../utils/appAssert";
-import { signToken } from "../utils/jwt";
+import { ONE_DAY_MS, thirtyDaysFromNow } from "../utils/data";
+import {
+  RefreshTokenPayload,
+  refreshTokenSignOptions,
+  signToken,
+  verifyToken,
+} from "../utils/jwt";
 import { hashPassword, verifyPassword } from "../utils/password";
 
 type CreateAccountParams = {
   email: string;
   password: string;
   phoneNumber: string;
+  userAgent?: string;
+};
+
+type LoginAccountParams = {
+  email: string;
+  password: string;
   userAgent?: string;
 };
 
@@ -52,6 +63,7 @@ export const createAccount = async (data: CreateAccountParams) => {
     data: {
       userAccountId: userAccountId,
       userAgent: data.userAgent,
+      expiresAt: thirtyDaysFromNow(),
     },
   });
 
@@ -74,12 +86,6 @@ export const createAccount = async (data: CreateAccountParams) => {
     accessToken: accessToken,
     refreshToken: refreshToken,
   };
-};
-
-type LoginAccountParams = {
-  email: string;
-  password: string;
-  userAgent?: string;
 };
 
 export const loginAccount = async (data: LoginAccountParams) => {
@@ -107,6 +113,7 @@ export const loginAccount = async (data: LoginAccountParams) => {
     data: {
       userAccountId: userAccountId,
       userAgent: data.userAgent,
+      expiresAt: thirtyDaysFromNow(),
     },
   });
 
@@ -128,5 +135,48 @@ export const loginAccount = async (data: LoginAccountParams) => {
     },
     accessToken: accessToken,
     refreshToken: refreshToken,
+  };
+};
+
+export const refreshUserAccessToken = async (refreshToken: string) => {
+  const { payload } = verifyToken<RefreshTokenPayload>(refreshToken, {
+    secret: refreshTokenSignOptions.secret,
+  });
+  appAssert(payload, UNAUTHORIZED, "Invalid refresh token");
+
+  const session = await prisma.session.findFirst({
+    where: {
+      id: payload.sessionId,
+    },
+  });
+  const now = Date.now();
+  appAssert(
+    session && session.expiresAt.getDate() > now,
+    UNAUTHORIZED,
+    "Session expired"
+  );
+
+  const sessionNeedsRefresh = session.expiresAt.getTime() - now <= ONE_DAY_MS;
+  if (sessionNeedsRefresh) {
+    session.expiresAt = thirtyDaysFromNow();
+  }
+
+  const newRefreshToken = sessionNeedsRefresh
+    ? signToken(
+        {
+          sessionId: session.id,
+        },
+        refreshTokenSignOptions
+      )
+    : undefined;
+
+  const accessToken = signToken({
+    userId: session.userAccountId,
+    sessionId: session.id,
+  });
+
+  return {
+    accessToken,
+    newRefreshToken,
   };
 };

@@ -2,9 +2,10 @@ model Session {
     id String @id @default(uuid()) @map("session_id")
 
     userAccount   UserAccount? @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
-    userAccountId String?      @map("user_account_id")
+    userAccountId String       @map("user_account_id")
 
     userAgent String?  @map("user_agent")
+    expiresAt DateTime @map("expires_at")
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 

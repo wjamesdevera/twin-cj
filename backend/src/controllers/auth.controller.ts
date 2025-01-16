@@ -1,9 +1,17 @@
 import { loginSchema, registerSchema } from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
-import { createAccount, loginAccount } from "../services/auth.service";
+import {
+  createAccount,
+  loginAccount,
+  refreshUserAccessToken,
+} from "../services/auth.service";
 import { Request, response, Response } from "express";
-import { setAuthCookies } from "../utils/cookies";
-import { CREATED, OK } from "../constants/http";
+import {
+  getAccessTokenCookieOptions,
+  getRefreshTokenCookieOptions,
+  setAuthCookies,
+} from "../utils/cookies";
+import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import appAssert from "../utils/appAssert";
 
 export const registerHandler = catchErrors(
@@ -47,6 +55,35 @@ export const loginHandler = catchErrors(
           user: {
             email: user.email,
           },
+        },
+      });
+  }
+);
+
+export const refreshHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const refreshToken = request.cookies.refreshToken as string | undefined;
+    appAssert(refreshToken, UNAUTHORIZED, "Refresh Token required");
+
+    const { accessToken, newRefreshToken } = await refreshUserAccessToken(
+      refreshToken
+    );
+
+    if (newRefreshToken) {
+      response.cookie(
+        "refreshToken",
+        newRefreshToken,
+        getRefreshTokenCookieOptions()
+      );
+    }
+
+    response
+      .status(OK)
+      .cookie("accessToken", accessToken, getAccessTokenCookieOptions())
+      .json({
+        status: "success",
+        data: {
+          message: "Access token refreshed",
         },
       });
   }
