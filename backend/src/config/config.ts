@@ -10,6 +10,7 @@ interface AppConfig {
   databaseUrl: string;
   jwtSecret: string;
   jwtRefreshSecret: string;
+  resendApiKey: string;
   logLevel: string;
 }
 
@@ -20,6 +21,7 @@ const config: AppConfig = {
   databaseUrl: process.env.DATABASE_URL || "mongodb://localhost:27017/mydb",
   jwtSecret: process.env.JWT_SECRET || "default_secret",
   jwtRefreshSecret: process.env.JWT_SECRET || "default_secret",
+  resendApiKey: process.env.RESEND_KEY || "",
   logLevel: process.env.LOG_LEVEL || "info",
 };
 
