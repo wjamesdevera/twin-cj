@@ -1,7 +1,9 @@
+import config from "../config/config";
 import { prisma } from "../config/db";
 import { CONFLICT, UNAUTHORIZED } from "../constants/http";
 import appAssert from "../utils/appAssert";
-import { ONE_DAY_MS, thirtyDaysFromNow } from "../utils/data";
+import { ONE_DAY_MS, oneYearFromNow, thirtyDaysFromNow } from "../utils/data";
+import { getVerifyEmailTemplate } from "../utils/emailTemplates";
 import {
   RefreshTokenPayload,
   refreshTokenSignOptions,
@@ -9,6 +11,7 @@ import {
   verifyToken,
 } from "../utils/jwt";
 import { hashPassword, verifyPassword } from "../utils/password";
+import { sendMail } from "../utils/sendMail";
 
 type CreateAccountParams = {
   email: string;
@@ -57,7 +60,26 @@ export const createAccount = async (data: CreateAccountParams) => {
 
   const userAccountId = createUser.userAccount?.id;
 
+  const oneYear = oneYearFromNow();
+
   // TODO: Add Email Verification
+  const verificationCode = await prisma.verificationCode.create({
+    data: {
+      userAccountId: userAccountId,
+      expiresAt: oneYearFromNow(),
+    },
+  });
+
+  const url = `${config.appOrigin}/email/verify/${verificationCode.id}`;
+
+  // Send Email Verification
+  const { error } = await sendMail({
+    to: createUser.email,
+    ...getVerifyEmailTemplate(url),
+  });
+
+  //ignore email errors for now
+  if (error) console.log(error);
 
   const session = await prisma.session.create({
     data: {
