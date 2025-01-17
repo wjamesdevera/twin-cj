@@ -1,4 +1,8 @@
-import { loginSchema, registerSchema } from "../schemas/auth.schems";
+import {
+  emailSchema,
+  loginSchema,
+  registerSchema,
+} from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
 import {
   createAccount,
@@ -112,5 +116,18 @@ export const logoutHandler = catchErrors(
           message: "Logout successful",
         },
       });
+  }
+);
+
+export const forgotPasswordHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const requestBody = emailSchema.parse(request.body.email);
+
+    return response.status(OK).json({
+      status: "success",
+      data: {
+        message: "Password reset email sent",
+      },
+    });
   }
 );
