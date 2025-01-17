@@ -17,7 +17,7 @@ interface AppConfig {
 }
 
 const config: AppConfig = {
-  port: parseInt(process.env.PORT || "3000", 10),
+  port: parseInt(process.env.PORT || "8080", 10),
   environment: process.env.NODE_ENV || "development",
   appOrigin: process.env.APP_ORIGIN || "http://localhost:3000",
   serviceName: process.env.SERVICE_NAME || "My Express Service",
