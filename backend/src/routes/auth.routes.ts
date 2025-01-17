@@ -14,6 +14,6 @@ router.post("/register", registerHandler);
 router.post("/login", loginHandler);
 router.get("/refresh", refreshHandler);
 router.get("/logout", logoutHandler);
-router.get("/password/forgot", forgotPasswordHandler);
+router.post("/password/forgot", forgotPasswordHandler);
 
 export default router;
