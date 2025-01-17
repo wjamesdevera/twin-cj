@@ -8,6 +8,7 @@ import {
   createAccount,
   loginAccount,
   refreshUserAccessToken,
+  sendPasswordResetEmail,
 } from "../services/auth.service";
 import { Request, response, Response } from "express";
 import {
@@ -121,7 +122,9 @@ export const logoutHandler = catchErrors(
 
 export const forgotPasswordHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const requestBody = emailSchema.parse(request.body.email);
+    const email = emailSchema.parse(request.body.email);
+
+    await sendPasswordResetEmail(email);
 
     return response.status(OK).json({
       status: "success",
