@@ -16,5 +16,7 @@ model UserAccount {
     passwordResetToken PasswordResetToken?
     session            Session[]
 
+    verificationCode VerificationCode[]
+
     @@map("user_accounts")
 }
