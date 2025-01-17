@@ -1,9 +1,14 @@
-import { loginSchema, registerSchema } from "../schemas/auth.schems";
+import {
+  emailSchema,
+  loginSchema,
+  registerSchema,
+} from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
 import {
   createAccount,
   loginAccount,
   refreshUserAccessToken,
+  sendPasswordResetEmail,
 } from "../services/auth.service";
 import { Request, response, Response } from "express";
 import {
@@ -112,5 +117,20 @@ export const logoutHandler = catchErrors(
           message: "Logout successful",
         },
       });
+  }
+);
+
+export const forgotPasswordHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const email = emailSchema.parse(request.body.email);
+
+    await sendPasswordResetEmail(email);
+
+    return response.status(OK).json({
+      status: "success",
+      data: {
+        message: "Password reset email sent",
+      },
+    });
   }
 );

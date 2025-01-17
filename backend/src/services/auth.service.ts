@@ -1,7 +1,24 @@
+import config from "../config/config";
 import { prisma } from "../config/db";
-import { CONFLICT, UNAUTHORIZED } from "../constants/http";
+import {
+  CONFLICT,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  TOO_MANY_REQUESTS,
+  UNAUTHORIZED,
+} from "../constants/http";
 import appAssert from "../utils/appAssert";
-import { ONE_DAY_MS, thirtyDaysFromNow } from "../utils/data";
+import {
+  fiveMinutesAgo,
+  ONE_DAY_MS,
+  oneHourFromNow,
+  oneYearFromNow,
+  thirtyDaysFromNow,
+} from "../utils/data";
+import {
+  getPasswordResetTemplate,
+  getVerifyEmailTemplate,
+} from "../utils/emailTemplates";
 import {
   RefreshTokenPayload,
   refreshTokenSignOptions,
@@ -9,6 +26,7 @@ import {
   verifyToken,
 } from "../utils/jwt";
 import { hashPassword, verifyPassword } from "../utils/password";
+import { sendMail } from "../utils/sendMail";
 
 type CreateAccountParams = {
   email: string;
@@ -57,7 +75,25 @@ export const createAccount = async (data: CreateAccountParams) => {
 
   const userAccountId = createUser.userAccount?.id;
 
-  // TODO: Add Email Verification
+  const oneYear = oneYearFromNow();
+
+  const verificationCode = await prisma.verificationCode.create({
+    data: {
+      userAccountId: userAccountId,
+      expiresAt: oneYearFromNow(),
+    },
+  });
+
+  const url = `${config.appOrigin}/email/verify/${verificationCode.id}`;
+
+  // Send Email Verification
+  const { error } = await sendMail({
+    to: createUser.email,
+    ...getVerifyEmailTemplate(url),
+  });
+
+  //ignore email errors for now
+  if (error) console.log(error);
 
   const session = await prisma.session.create({
     data: {
@@ -179,4 +215,66 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
     accessToken,
     newRefreshToken,
   };
+};
+
+export const sendPasswordResetEmail = async (email: string) => {
+  try {
+    const user = await prisma.personalDetail.findFirst({
+      where: {
+        email: email,
+      },
+      include: {
+        userAccount: true,
+      },
+    });
+
+    appAssert(user, NOT_FOUND, "User not found");
+
+    const fiveMinAgo = fiveMinutesAgo();
+    const count = await prisma.verificationCode.count({
+      where: {
+        userAccountId: user.userAccount?.id,
+        createdAt: {
+          gt: fiveMinAgo,
+        },
+      },
+    });
+
+    appAssert(
+      count <= 1,
+      TOO_MANY_REQUESTS,
+      "Too many requests, please try again later"
+    );
+
+    const expiresAt = oneHourFromNow();
+    const passwordResetToken = await prisma.passwordResetToken.create({
+      data: {
+        userAccountId: user.userAccount?.id,
+        expiresAt: expiresAt,
+      },
+    });
+
+    const url = `${config.appOrigin}/password/reset?code=${
+      passwordResetToken.id
+    }&exp=${expiresAt.getTime()}`;
+
+    const { data, error } = await sendMail({
+      to: email,
+      ...getPasswordResetTemplate(url),
+    });
+
+    appAssert(
+      data?.id,
+      INTERNAL_SERVER_ERROR,
+      `${error?.name} - ${error?.message}`
+    );
+
+    return {
+      url,
+      emailId: data.id,
+    };
+  } catch (error: any) {
+    console.log("SendPasswordResetError:", error.message);
+    return {};
+  }
 };
