@@ -62,7 +62,6 @@ export const createAccount = async (data: CreateAccountParams) => {
 
   const oneYear = oneYearFromNow();
 
-  // TODO: Add Email Verification
   const verificationCode = await prisma.verificationCode.create({
     data: {
       userAccountId: userAccountId,
