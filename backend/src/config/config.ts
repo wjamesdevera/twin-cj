@@ -11,6 +11,7 @@ interface AppConfig {
   jwtSecret: string;
   jwtRefreshSecret: string;
   resendApiKey: string;
+  emailSender: string;
   logLevel: string;
 }
 
@@ -22,6 +23,7 @@ const config: AppConfig = {
   jwtSecret: process.env.JWT_SECRET || "default_secret",
   jwtRefreshSecret: process.env.JWT_SECRET || "default_secret",
   resendApiKey: process.env.RESEND_KEY || "",
+  emailSender: process.env.EMAIL_SENDER || "onboarding@resend.dev",
   logLevel: process.env.LOG_LEVEL || "info",
 };
 
