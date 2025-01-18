@@ -1,0 +1,156 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .pageWrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+  
+  .footerWrapper {
+    margin-top: auto; 
+  }
+  
+  .footer {
+    background-color: #FFF0E0;
+    color: #3B6273;
+    padding: 10px 20px;
+  }
+  
+  .footer .logo {
+    max-width: 200px;
+    margin-bottom: 8px;
+  }
+  
+  .footer .tagline {
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  
+  .footer .links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  
+    li {
+      margin: 3px 0;
+    }
+  
+    .link {
+      color: #3B6273;
+      font-weight: 400;
+      font-size: 14px;
+  
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .footer .contactItem {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+  
+    .icon {
+      margin-right: 6px;
+      font-size: 14px;
+    }
+  
+    span {
+      font-size: 14px;
+    }
+  }
+  
+  .lowerFooter {
+    background-color: #D9AD7C;
+    color: white;
+    padding: 0 20px;
+  }
+  
+  .lowerFooter .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+  
+  .lowerFooter .left {
+    font-size: 12px;
+    text-align: left;
+  }
+  
+  .lowerFooter .right {
+    text-align: right;
+  
+    .privacyLink {
+      color: white;
+      font-size: 12px;
+      margin-left: 5px;
+  
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 15px 20px;
+  }
+  
+  .column {
+    padding: 8px;
+  }
+  
+  .link {
+    text-decoration: none;
+  }
+  
+
+  @media (max-width: 768px) {
+    .footer {
+      padding: 10px 15px;
+    }
+  
+    .container {
+      flex-direction: column;
+      align-items: flex-start; 
+    }
+  
+    .column {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+  
+    .footer .links {
+      text-align: left; 
+    }
+  
+    .footer .contactItem {
+      justify-content: flex-start; 
+    }
+  
+    .lowerFooter .container {
+      flex-direction: column; 
+      text-align: left; 
+    }
+  
+    .lowerFooter .left,
+    .lowerFooter .right {
+      font-size: 12px;
+      margin: 5px 0;
+      text-align: left; 
+      width: 100%;
+    }
+  }
+  
