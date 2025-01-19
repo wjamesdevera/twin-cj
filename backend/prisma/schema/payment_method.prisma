@@ -1,0 +1,11 @@
+model PaymentMethod {
+    id Int @id @default(autoincrement()) @map("payment_method_id")
+    name String @map("name") // [1] Can't use @db.VarChar(100) due to "Native type VarChar is not supported for sqlite connector." [2] I think there's no direct implementation of capitalizing data in prisma so maybe do it in the back-end instead?
+    type String @map("type") // Can't use @db.VarChar(100) due to "Native type VarChar is not supported for sqlite connector."
+    createdAt DateTime @default(now()) @map("created_at") // In the STP document, the Data Dictionary signifies that it [1] accepts null values [2] it is not required.
+    updatedAt DateTime @updatedAt @map("updated_at") // In the STP document, the Data Dictionary signifies that it [1] accepts null values [2] it is not required.
+
+    // Relations
+    
+    @@map("payment_methods")
+}
