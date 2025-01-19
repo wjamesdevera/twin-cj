@@ -9,6 +9,7 @@ model PersonalDetail {
 
     // Relations
     userAccount UserAccount?
+    customer Customer?
 
     @@map("personal_details")
 }
