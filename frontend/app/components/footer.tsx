@@ -1,6 +1,8 @@
-import React from 'react';
-import styles from './footer.module.scss';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import React from "react";
+import styles from "./footer.module.scss";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import Image from "next/image";
+import Link from "next/link";
 
 const Footer: React.FC = () => {
   return (
@@ -11,34 +13,50 @@ const Footer: React.FC = () => {
           <div className={styles.container}>
             {/* Logo and Tagline */}
             <div className={styles.column}>
-              <img
+              <Image
                 src="/assets/twincjLogo.png"
                 alt="Twin CJ Riverside Resort Logo"
+                width={232.07}
+                height={65.58}
                 className={styles.logo}
               />
-              <p className={styles.tagline}>Enjoy the scenic view by the river</p>
+              <p className={styles.tagline}>
+                Enjoy the scenic view by the river
+              </p>
             </div>
 
             {/* Navigation Links */}
             <div className={styles.column}>
               <ul className={styles.links}>
                 <li>
-                  <a href="/" className={styles.link}>Home</a>
+                  <Link href="/" className={styles.link}>
+                    Home
+                  </Link>
                 </li>
                 <li>
-                  <a href="/booking" className={styles.link}>Booking</a>
+                  <Link href="/booking" className={styles.link}>
+                    Booking
+                  </Link>
                 </li>
                 <li>
-                  <a href="/facilities" className={styles.link}>Facilities</a>
+                  <Link href="/facilities" className={styles.link}>
+                    Facilities
+                  </Link>
                 </li>
                 <li>
-                  <a href="/about" className={styles.link}>About</a>
+                  <Link href="/about" className={styles.link}>
+                    About
+                  </Link>
                 </li>
                 <li>
-                  <a href="/location" className={styles.link}>Location</a>
+                  <Link href="/location" className={styles.link}>
+                    Location
+                  </Link>
                 </li>
                 <li>
-                  <a href="/contact" className={styles.link}>Contact Us</a>
+                  <Link href="/contact" className={styles.link}>
+                    Contact Us
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -72,7 +90,9 @@ const Footer: React.FC = () => {
               © 2024 Twin CJ Riverside Glamping Resort. All Rights Reserved.
             </div>
             <div className={styles.right}>
-              <a href="/privacy-policy" className={styles.privacyLink}>Privacy Policy</a>
+              <a href="/privacy-policy" className={styles.privacyLink}>
+                Privacy Policy
+              </a>
             </div>
           </div>
         </footer>
