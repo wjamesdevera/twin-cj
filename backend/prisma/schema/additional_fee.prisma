@@ -1,10 +1,10 @@
 model AdditionalFee {
-    id Int @id @default(autoincrement()) @map("additional_fee_id")
-    type String @map("type") // Can't use @db.VarChar(255) due to "Native type VarChar is not supported for sqlite connector."
-    description String @map("description") // [1] Can't use @db.Text because "Native type Text is not supported for sqlite connector." [2] Shouldn't the data/contents of this be optional?
-    amount Float @map("amount") // No "Double" data type in Prisma.
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+    id          Int      @id @default(autoincrement()) @map("additional_fee_id")
+    type        String   @map("type")
+    description String?  @map("description")
+    amount      Float    @map("amount")
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
 
     // Relations
 
