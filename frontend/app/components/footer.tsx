@@ -6,10 +6,10 @@ import Link from "next/link";
 
 const Footer: React.FC = () => {
   return (
-    <div className={`${styles.pageWrapper}`}>
+    <footer className={`${styles.footer}`}>
       {/* Footer */}
       <div className={styles.footerWrapper}>
-        <footer className={styles.footer}>
+        <div className={styles.footer}>
           <div className={styles.container}>
             {/* Logo and Tagline */}
             <div className={styles.column}>
@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
                 height={65.58}
                 className={styles.logo}
               />
-              <p className={styles.tagline}>
+              <p className={`textprimarybase`}>
                 Enjoy the scenic view by the river
               </p>
             </div>
@@ -81,7 +81,7 @@ const Footer: React.FC = () => {
               </div>
             </div>
           </div>
-        </footer>
+        </div>
 
         {/* Lower Footer */}
         <footer className={styles.lowerFooter}>
@@ -97,7 +97,7 @@ const Footer: React.FC = () => {
           </div>
         </footer>
       </div>
-    </div>
+    </footer>
   );
 };
 

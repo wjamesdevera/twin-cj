@@ -6,19 +6,9 @@
 }
 
 .footer {
-  background-color: #fff0e0;
-  color: #3b6273;
-  padding: 10px 20px;
-}
-
-.footer .logo {
-  max-width: 200px;
-  margin-bottom: 8px;
-}
-
-.footer .tagline {
-  font-size: 16px;
-  margin-top: 8px;
+  margin-top: auto;
+  background-color: var(--sandybeige__sandybeige300-background);
+  color: var(--neutral__N400-background);
 }
 
 .footer .links {
