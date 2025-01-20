@@ -4,7 +4,7 @@ import styles from "./login.module.scss";
 
 export default function Page() {
   return (
-    <div className={styles.container}>
+    <div className={styles["container"]}>
       <div className={styles["left-container"]}>
         <Image
           src="/assets/login-left-bg.png"
@@ -15,11 +15,14 @@ export default function Page() {
         />
       </div>
       <div className={styles["right-container"]}>
-        <div className={styles.title}>
-          <h1>twin cj</h1>
-        </div>
-        <div className={styles["subtitle"]}>
-          <h2>RIVERSIDE RESORT</h2>
+        <div>
+        <Image
+          src="/assets/twin-cj-login-logo.png"
+          alt="twin cj"
+          width={600}
+          height={150}
+          className="login-logo"
+          />
         </div>
         <div>
           <p className={styles["text"]}>
