@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const Footer: React.FC = () => {
   return (
-    <div className={styles.pageWrapper}>
+    <div className={`${styles.pageWrapper}`}>
       {/* Footer */}
       <div className={styles.footerWrapper}>
         <footer className={styles.footer}>
