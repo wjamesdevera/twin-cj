@@ -5,5 +5,10 @@ model Transaction {
     createdAt              DateTime @default(now()) @map("created_at")
     updatedAt              DateTime @updatedAt @map("updated_at")
 
+    // TODO: Relations
+    // booking ID
+    // payment account
+    // payment statu
+
     @@map("transactions")
 }
