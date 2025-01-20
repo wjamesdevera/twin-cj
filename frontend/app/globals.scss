@@ -488,3 +488,9 @@ h6 {
 #__next {
   isolation: isolate;
 }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
