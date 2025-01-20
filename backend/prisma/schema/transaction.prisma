@@ -8,7 +8,8 @@ model Transaction {
     // TODO: Relations
     // booking ID
     // payment account
-    // payment statu
+    paymentStatus PaymentStatus @relation(fields:[paymentStatusId], references: [id])
+    paymentStatusId Int @map("payment_status_id")
 
     @@map("transactions")
 }
