@@ -1,8 +1,8 @@
 model PaymentStatus {
-    id Int @id @default(autoincrement()) @map("payment_status_id")
-    name String @map("name") // Can't use @db.VarChar(100) due to "Native type VarChar is not supported for sqlite connector."
-    createdAt DateTime @default(now()) @map("created_at") // In the STP document, the Data Dictionary signifies that it [1] accepts null values [2] it is not required.
-    updatedAt DateTime @updatedAt @map("updated_at") // In the STP document, the Data Dictionary signifies that it [1] accepts null values [2] it is not required.
+    id        Int      @id @default(autoincrement()) @map("payment_status_id")
+    name      String   @map("name")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
 
