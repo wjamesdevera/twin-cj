@@ -1,10 +1,11 @@
 import React from "react";
 import Image from "next/image";
 import styles from "./login.module.scss";
+import twinCJLogo from "../../../public/assets/twin-cj-logo.png";
 
 export default function Page() {
   return (
-    <div className={styles["container"]}>
+    <>
       <div className={styles["left-container"]}>
         <Image
           src="/assets/login-left-bg.png"
@@ -15,29 +16,27 @@ export default function Page() {
         />
       </div>
       <div className={styles["right-container"]}>
-        <div>
-        <Image
-          src="/assets/twin-cj-login-logo.png"
-          alt="twin cj"
-          width={600}
-          height={150}
-          className="login-logo"
+        <div className={styles["right-wrapper"]}>
+          <Image
+            src={twinCJLogo}
+            alt="Twin CJ Logo"
+            className={styles["login-img"]}
           />
-        </div>
-        <div>
           <p className={styles["text"]}>
             Welcome! Please log-in with your admin account.
           </p>
-        </div>
-        <div className={styles.form}>
-          <form className={styles["login-form"]}>
-            <input type="text" placeholder="Email Address" />
-            <input type="password" placeholder="Password" />
-            <a href="#">Forgot Password?</a>
-            <button type="submit">Login</button>
-          </form>
+          <div className={styles.form}>
+            <form className={styles["login-form"]}>
+              <input type="text" placeholder="Email Address" />
+              <input type="password" placeholder="Password" />
+              <div>
+                <a href="#">Forgot Password?</a>
+                <button type="submit">Login</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
