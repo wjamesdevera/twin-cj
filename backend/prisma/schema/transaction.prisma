@@ -5,11 +5,8 @@ model Transaction {
     createdAt              DateTime @default(now()) @map("created_at")
     updatedAt              DateTime @updatedAt @map("updated_at")
 
-    // TODO: Relations
-    // booking ID
-    // payment account
-    paymentStatus PaymentStatus @relation(fields:[paymentStatusId], references: [id])
-    paymentStatusId Int @map("payment_status_id")
+    paymentStatus   PaymentStatus? @relation(fields: [paymentStatusId], references: [id])
+    paymentStatusId Int            @map("payment_status_id")
 
     @@map("transactions")
 }
