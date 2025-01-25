@@ -2,18 +2,19 @@ import React from "react";
 import Image from "next/image";
 import styles from "./login.module.scss";
 import twinCJLogo from "../../../public/assets/twin-cj-logo.png";
+import { LoginForm } from "./form";
 
 export default function Page() {
   return (
     <>
       <div className={styles["left-container"]}>
-        <Image
+        {/* <Image
           src="/assets/login-left-bg.png"
           alt="logo"
           layout="fill"
           objectFit="cover"
           className="left-bg"
-        />
+        /> */}
       </div>
       <div className={styles["right-container"]}>
         <div className={styles["right-wrapper"]}>
@@ -26,14 +27,7 @@ export default function Page() {
             Welcome! Please log-in with your admin account.
           </p>
           <div className={styles.form}>
-            <form className={styles["login-form"]}>
-              <input type="text" placeholder="Email Address" />
-              <input type="password" placeholder="Password" />
-              <div>
-                <a href="#">Forgot Password?</a>
-                <button type="submit">Login</button>
-              </div>
-            </form>
+            <LoginForm />
           </div>
         </div>
       </div>
