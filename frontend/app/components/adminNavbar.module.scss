@@ -1,0 +1,130 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    height: 60px;
+    background: white;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    font-family: "Lato", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    z-index: 10;
+    padding: 0 1rem;
+  
+    &.withSidebar {
+      width: calc(100% - 250px); 
+      left: 250px;
+    }
+  
+    &.fullWidth {
+      width: 100%; 
+      left: 0;
+    }
+  }
+  
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 1rem;
+  }
+  
+  .leftSection {
+    display: flex;
+    align-items: center;
+  }
+  
+  .rightSection {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+  }
+  
+  .hamburger {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #a45f14;
+  }
+  
+  .viewSiteLink {
+    color: #a45f14;
+    font-weight: normal;
+    text-decoration: none; 
+    margin-right: 1rem;
+  
+    &:hover {
+      font-weight: bold; 
+      text-decoration: none; 
+    }
+  }
+  
+  .adminDropdown {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .adminButton {
+    color: #a45f14;
+    background: none;
+    border: none;
+    font-weight: normal;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .bold {
+    font-weight: bold; 
+  }
+  
+  .adminButton:hover {
+    font-weight: bold;
+  }
+  
+  .chevron {
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease; 
+  }
+  
+  .adminDropdown.open .chevron {
+    transform: rotate(180deg); 
+  }
+  
+  .dropdownMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #ffffff;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    width: 150px;
+    z-index: 10;
+    display: none; 
+  }
+  
+  .dropdownMenu li {
+    margin: 0;
+  }
+  
+  .dropdownMenu a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #a45f14;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: normal;
+  }
+  
+  .dropdownMenu a:hover {
+    background-color: #f4f4f4;
+  }
+  
+  .adminDropdown.open .dropdownMenu {
+    display: block;
+  }
+  
