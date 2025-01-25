@@ -14,8 +14,7 @@ export default function Navbar() {
     <nav id="navbar" className={styles.navbar}>
 
       <div className={styles.logo}>
-        {/*<img src="" alt="Twin CJ Logo" />
-        <h1>Twin CJ</h1>*/} 
+      <img src="/assets/twincj-logo.png" alt="Twin CJ Logo" />
       </div>
 
       {/* Navigation Links */}
