@@ -340,32 +340,32 @@ $font-primary: "Open Sans", serif;
 
 .text-xs {
   font-size: var(--text-size-xs);
-  line-height: var(--text-size-xs);
+  line-height: var(--text-line-height-xs);
 }
 
 .text-sm {
   font-size: var(--text-size-sm);
-  line-height: var(--text-size-sm);
+  line-height: var(--text-line-height-sm);
 }
 
 .text-base {
   font-size: var(--text-size-base);
-  line-height: var(--text-size-base);
+  line-height: var(--text-line-height-base);
 }
 
 .text-lg {
   font-size: var(--text-size-lg);
-  line-height: var(--text-size-lg);
+  line-height: var(--text-line-height-lg);
 }
 
 .text-xl {
   font-size: var(--text-size-xl);
-  line-height: var(--text-size-xl);
+  line-height: var(--text-line-height-xl);
 }
 
 .text-2xl {
   font-size: var(--text-size-2xl);
-  line-height: var(--text-size-2xl);
+  line-height: var(--text-line-height-2xl);
 }
 
 .text-2xl {
