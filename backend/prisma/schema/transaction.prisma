@@ -8,8 +8,8 @@ model Transaction {
     paymentStatus   PaymentStatus? @relation(fields: [paymentStatusId], references: [id])
     paymentStatusId Int            @map("payment_status_id")
 
-    paymentAccount PaymentAccount @relation(fields: [paymentAccountId], references: [id])
-    paymentAccountId Int @unique @map("payment_account_id")
+    paymentAccount   PaymentAccount? @relation(fields: [paymentAccountId], references: [id])
+    paymentAccountId Int             @unique @map("payment_account_id")
 
     @@map("transactions")
 }
