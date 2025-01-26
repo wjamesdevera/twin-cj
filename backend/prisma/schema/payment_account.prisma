@@ -1,15 +1,15 @@
 model PaymentAccount {
-    id              Int         @id @default(autoincrement()) @map("payment_account_id")
-    accountName     String      @map("account_name")
-    accountNumber   Int         @map("account_number")
-    createdAt       DateTime    @default(now()) @map("created_at")
-    updatedAt       DateTime    @updatedAt @map("updated_at")
+    id            Int      @id @default(autoincrement()) @map("payment_account_id")
+    accountName   String   @map("account_name")
+    accountNumber Int      @map("account_number")
+    createdAt     DateTime @default(now()) @map("created_at")
+    updatedAt     DateTime @updatedAt @map("updated_at")
 
     // Relations
-    paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
-    paymentMethodId Int @map("payment_method_id")
+    paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+    paymentMethodId Int           @map("payment_method_id")
 
-    transaction Transaction?
+    transaction Transaction[]
 
     @@map("payment_accounts")
 }
