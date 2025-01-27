@@ -1,5 +1,9 @@
+import BookBtn from './../components/bookbtn'
+
 const page = () => {
-  return <div>booking</div>;
+  return <div>
+    <BookBtn />
+  </div>
 };
 
 export default page;
