@@ -5,5 +5,6 @@ export default function Home() {
     <MainLayout>
       <main></main>
     </MainLayout>
+
   );
 }

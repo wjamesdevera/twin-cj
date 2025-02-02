@@ -345,6 +345,7 @@ table {
   --font-primary: "Open Sans", serif;
   --font-secondary: "Poltawski Nowy", serif;
   --font-brand: "Abril Fatface", serif;
+  --navbar-height: 5rem;
 }
 
 $font-primary: "Open Sans", serif;
@@ -385,15 +386,15 @@ $font-primary: "Open Sans", serif;
 }
 
 .font-primary {
-  font-family: var(--font-primary);
+  font-family: var(--font-open-sans);
 }
 
 .font-secondary {
-  font-family: var(--font-secondary);
+  font-family: var(--font-abril-fatface);
 }
 
 .font-brand {
-  font-family: var(--font-brand);
+  font-family: var(--font-poltawski-nowy);
 }
 
 .container {
