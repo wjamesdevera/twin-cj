@@ -90,8 +90,6 @@
   display: hidden;
 }
 
-/* -- Responsive Adjustments -- */
-
 /* -- HAMBURGER MENU -- */
 
 .hamburger {
@@ -155,6 +153,13 @@
 
 /* -- RESPONSIVE DESIGN -- */
 
+@media (width <= 48rem) {
+  .nav-item {
+    font-size: var(--text-size-sm);
+    line-height: var(--text-line-height-sm);
+  }
+}
+
 @media (width <= 64rem) {
   .navlist-wrapper {
     display: none;
@@ -183,8 +188,6 @@
   }
 
   .nav-item {
-    font-size: var(--text-size-sm);
-    line-height: var(--text-line-height-sm);
     color: var(--color-neutral-600);
     font-weight: 600;
   }
