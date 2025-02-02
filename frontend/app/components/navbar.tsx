@@ -4,6 +4,46 @@ import React, { useState } from "react";
 import styles from "./navbar.module.scss";
 import Link from "next/link";
 import Image from "next/image";
+import { navlist } from "@/app/constants/navlist";
+import twinCJLogo from "@/public/assets/twincj-logo.png";
+import { usePathname } from "next/navigation";
+
+interface NavLinkProps {
+  label: string;
+  href: string;
+  isActive?: boolean;
+}
+
+const NavLink = ({ label, href, isActive }: NavLinkProps) => {
+  return (
+    <li className={styles["nav-item"]}>
+      <Link
+        href={href}
+        className={`${isActive ? styles["nav-link-active"] : ""} ${
+          styles["nav-link"]
+        }`}
+      >
+        {label}
+      </Link>
+    </li>
+  );
+};
+
+const NavLinks = () => {
+  const pathname = usePathname();
+  return (
+    <ul className={styles.navlist}>
+      {navlist.map((navlink) => (
+        <NavLink
+          isActive={pathname === navlink.href}
+          label={navlink.label}
+          href={navlink.href}
+          key={navlink.label}
+        />
+      ))}
+    </ul>
+  );
+};
 
 export default function Navbar() {
   const [isNavActive, setIsNavActive] = useState(false);
@@ -13,10 +53,10 @@ export default function Navbar() {
   };
 
   return (
-    <nav id="navbar" className={`${styles["navbar-container"]}`}>
+    <div id="navbar" className={`${styles["navbar-container"]}`}>
       <div className={`${styles["navbar-wrapper"]} container`}>
         <div className={styles.logo}>
-          <Image src="/assets/twincj-logo.png" alt="Twin CJ Logo" fill={true} />
+          <Image src={twinCJLogo} alt="Twin CJ Logo" />
         </div>
         {/* Hamburger Menu */}
         <div
@@ -33,47 +73,17 @@ export default function Navbar() {
         <div
           className={`${styles.menubar} ${isNavActive ? styles.active : ""}`}
         >
-          <ul>
-            <li>
-              <Link href="/#home">Home</Link>
-            </li>
-            <li>
-              <Link href="/#amenities">Amenities</Link>
-            </li>
-            <li>
-              <Link href="/#activities">Activities</Link>
-            </li>
-            <li>
-              <Link href="/#gallery">Gallery</Link>
-            </li>
-            <li>
-              <Link href="/#contact">Contact Us</Link>
-            </li>
-          </ul>
+          <div className={`${styles["menubar-wrapper"]} container`}>
+            <NavLinks />
+          </div>
         </div>
         {/* Navigation Links */}
         <div
-          className={`${styles.navLink} ${isNavActive ? styles.hidden : ""}`}
+          className={`${styles["navlist-wrapper"]} ${
+            isNavActive ? styles.hidden : ""
+          }`}
         >
-          <ul>
-            <li>
-              <Link href="/#home" className={styles.active}>
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link href="/#amenities">Amenities</Link>
-            </li>
-            <li>
-              <Link href="/#activities">Activities</Link>
-            </li>
-            <li>
-              <Link href="/#gallery">Gallery</Link>
-            </li>
-            <li>
-              <Link href="/#contact">Contact Us</Link>
-            </li>
-          </ul>
+          <NavLinks />
         </div>
         {/* Reservation Button */}
         <div
@@ -82,8 +92,8 @@ export default function Navbar() {
           }`}
         >
           <button className={styles.reserveBtn}>Book Now</button>
-        </div>{" "}
+        </div>
       </div>
-    </nav>
+    </div>
   );
 }

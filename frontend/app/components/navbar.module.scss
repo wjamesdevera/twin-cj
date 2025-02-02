@@ -6,157 +6,91 @@
     rgba(123, 114, 114, 0) 100%
   );
   top: 0;
-  left: 0;
-  right: 0;
   width: 100%;
   box-sizing: border-box;
   z-index: 100;
   position: fixed;
+  height: var(--navbar-height);
 }
 
 .navbar-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: inherit;
 }
 
 /* -- LOGO -- */
 
 .logo {
-  display: flex;
-  align-items: center;
-  margin-top: 1rem;
-  gap: 0.5rem;
-}
-
-.logo Image {
-  width: 10rem;
-  height: 4rem;
-  flex-shrink: 0;
-  object-fit: contain;
-}
-
-@media screen and (max-width: 1024px) {
-  .logo img {
-    width: 8rem;
-    height: 3.2rem;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .logo img {
-    width: 7rem;
-    height: 2.8rem;
-  }
-}
-
-@media screen and (max-width: 576px) {
-  .logo img {
-    width: 10rem;
-    height: 4rem;
-  }
+  position: relative;
+  display: block;
 }
 
 /* -- NAVBAR LINKS -- */
 
-.navLink {
+.navlist-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: -5.5rem;
-  margin-top: 0.4rem;
 }
-
-.navLink ul {
-  list-style: none;
+.navlist {
   display: flex;
-  padding: 0;
-  margin: 0;
   gap: 3.5rem;
-  flex-wrap: wrap;
 }
 
-.navLink ul li {
+.nav-item {
   position: relative;
   text-align: center;
 }
 
-.navLink ul li a {
-  text-decoration: none;
-  color: white;
+.nav-link {
+  color: var(--color-neutral-100);
   font-family: var(--font-primary);
-  font-size: 0.9rem;
-  font-weight: 200;
+  font-size: var(--text-size-sm);
+  line-height: var(--text-line-height-sm);
+
+  font-weight: 400;
   transition: 0.4s all ease;
   display: inline-block;
-  padding: 0 20px;
-  line-height: 1.2;
+  padding: 0 1rem;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    transform: translateY(-3.5px);
+    transition: color 0.4s ease, transform 0.5s ease-in-out;
+
+    &::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--color-amber-100);
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.5s ease-out;
+  }
 }
 
-.navLink ul li a:hover {
-  color: #ffffff;
-  transform: translateY(-3.5px);
-  transition: color 0.4s ease, transform 0.5s ease-in-out;
-}
-
-.navLink ul li a::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  bottom: -5px;
-  left: 0;
-  background-color: #f7d8a5;
-  transform: scaleX(0);
-  transform-origin: bottom right;
-  transition: transform 0.5s ease-out;
-}
-
-.navLink ul li a:hover::after,
-.navLink ul li a.active::after {
+.nav-link-active::after {
   transform: scaleX(1);
   transform-origin: bottom left;
 }
 
+.menubar {
+  display: hidden;
+}
+
 /* -- Responsive Adjustments -- */
-
-@media screen and (max-width: 1024px) {
-  .navLink ul {
-    gap: 0.1rem;
-    margin-left: 5.4rem;
-    margin-top: 0.4rem;
-  }
-
-  .navLink ul li a {
-    font-size: 0.75rem;
-    padding: 0 25px;
-    line-height: 1.1;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .navLink ul {
-    gap: 1.5rem;
-  }
-
-  .navLink ul li a {
-    font-size: 0.8rem;
-    padding: 0 10px;
-    line-height: 1;
-  }
-}
-
-@media screen and (max-width: 576px) {
-  .navLink ul {
-    gap: 1rem;
-  }
-
-  .navLink ul li a {
-    font-size: 0.75rem;
-    padding: 0 8px;
-    line-height: 1;
-  }
-}
 
 /* -- HAMBURGER MENU -- */
 
@@ -176,7 +110,7 @@
 }
 
 .hamburgerActive .line:nth-child(1) {
-  transform: translateY(10px) rotate(45deg);
+  transform: translateY(9px) rotate(45deg);
 }
 
 .hamburgerActive .line:nth-child(2) {
@@ -184,7 +118,7 @@
 }
 
 .hamburgerActive .line:nth-child(3) {
-  transform: translateY(-10px) rotate(-45deg);
+  transform: translateY(-9px) rotate(-45deg);
 }
 
 /* -- MENUBAR -- */
@@ -194,68 +128,81 @@
   right: -100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   width: 100%;
   height: 100vh;
   background: #ffeed2;
-  padding: 3rem;
   transition: all 0.5s ease-in-out;
   z-index: 999;
   opacity: 80%;
 }
 
-.menubar.active {
-  right: 0;
-}
-
-.menubar ul {
-  font-family: var(--font-primary);
-  list-style: none;
-  width: 100%;
-}
-
-.menubar ul li {
-  margin-bottom: 1.5rem;
-}
-
-.menubar ul li a {
-  text-decoration: none;
-  color: #333;
-  font-size: 1.2rem;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.menubar ul li a:hover {
-  color: #a45f14;
-}
-
 /* -- BOOK NOW BUTTON -- */
 
 .reserveBtn {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.25rem;
-  border: 1px solid #fff;
+  border: 1px solid var(--color-neutral-200);
   background: rgba(214, 130, 64, 0);
-  color: #fff;
+  color: var(--color-neutral-200);
   font-family: var(--font-primary);
-  font-size: 0.8rem;
+  font-size: var(--text-size-sm);
+  line-height: var(--text-line-height-sm);
   font-weight: 500;
-  line-height: normal;
   cursor: pointer;
-  margin-top: 1.5rem;
 }
 
 /* -- RESPONSIVE DESIGN -- */
 
-@media screen and (max-width: 790px) {
+@media (width <= 64rem) {
+  .navlist-wrapper {
+    display: none;
+  }
+
+  .reservation,
+  .reserveBtn {
+    display: none;
+  }
+
+  .menubar.active {
+    right: 0;
+  }
+
   .hamburger {
     display: block;
   }
 
-  .navLink,
-  .reservation {
-    display: none;
+  .navlist {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-top: var(--navbar-height);
+  }
+
+  .nav-item {
+    font-size: var(--text-size-sm);
+    line-height: var(--text-line-height-sm);
+    color: var(--color-neutral-600);
+    font-weight: 600;
+  }
+
+  .nav-link {
+    color: var(--color-neutral-600);
+
+    &:hover,
+    &:active,
+    &:focus {
+      color: var(--color-amber-600);
+    }
+  }
+
+  .nav-link-active {
+    color: var(--color-amber-600);
+    &::after {
+      display: none;
+    }
   }
 }
