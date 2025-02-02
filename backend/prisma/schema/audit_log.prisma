@@ -1,0 +1,12 @@
+model AuditLog {
+    id        Int      @id @default(autoincrement()) @map("audit_id")
+    action    String   @map("action")
+    timestamp DateTime @default(now()) @map("timestamp")
+    details   String   @map("details")
+
+    // Relations
+    userAccount   UserAccount? @relation(fields: [userAccountId], references: [id])
+    userAccountId String       @map("user_account_id")
+
+    @@map("audit_logs")
+}

@@ -18,5 +18,7 @@ model UserAccount {
 
     verificationCode VerificationCode[]
 
+    auditLog AuditLog[]
+
     @@map("user_accounts")
 }
