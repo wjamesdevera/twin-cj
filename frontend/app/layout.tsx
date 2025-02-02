@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.scss";
 import { Abril_Fatface, Poltawski_Nowy, Open_Sans } from "next/font/google";
-import Footer from "./components/footer";
 
 export const openSans = Open_Sans({
   variable: "--font-open-sans",
@@ -31,10 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="">
-        {children}
-        <Footer />
-      </body>
+      <body className="">{children}</body>
     </html>
   );
 }
