@@ -16,10 +16,7 @@ export const getUserHandler = catchErrors(
     });
     appAssert(user, NOT_FOUND, "User not found");
     return response.status(OK).json({
-      status: "success",
-      data: {
-        user: user,
-      },
+      user,
     });
   }
 );
