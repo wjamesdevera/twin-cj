@@ -312,6 +312,17 @@ table {
   --color-sunset-orange-700: #74430e;
   --color-sunset-orange-800: #5a340b;
   --color-sunset-orange-900: #452808;
+  --color-red-100: #fef2f2;
+  --color-red-200: #fee2e2;
+  --color-red-300: #fecaca;
+  --color-red-400: #fca5a5;
+  --color-red-500: #f87171;
+  --color-red-600: #ef4444;
+  --color-red-700: #dc2626;
+  --color-red-800: #b91c1c;
+  --color-red-900: #991b1b;
+  --color-red-1000: #7f1d1d;
+
   /* number */
   --text-line-height-xs: 1.0416rem;
   --text-line-height-sm: 1.2497rem;
@@ -334,38 +345,39 @@ table {
   --font-primary: "Open Sans", serif;
   --font-secondary: "Poltawski Nowy", serif;
   --font-brand: "Abril Fatface", serif;
+  --navbar-height: 5rem;
 }
 
 $font-primary: "Open Sans", serif;
 
 .text-xs {
   font-size: var(--text-size-xs);
-  line-height: var(--text-size-xs);
+  line-height: var(--text-line-height-xs);
 }
 
 .text-sm {
   font-size: var(--text-size-sm);
-  line-height: var(--text-size-sm);
+  line-height: var(--text-line-height-sm);
 }
 
 .text-base {
   font-size: var(--text-size-base);
-  line-height: var(--text-size-base);
+  line-height: var(--text-line-height-base);
 }
 
 .text-lg {
   font-size: var(--text-size-lg);
-  line-height: var(--text-size-lg);
+  line-height: var(--text-line-height-lg);
 }
 
 .text-xl {
   font-size: var(--text-size-xl);
-  line-height: var(--text-size-xl);
+  line-height: var(--text-line-height-xl);
 }
 
 .text-2xl {
   font-size: var(--text-size-2xl);
-  line-height: var(--text-size-2xl);
+  line-height: var(--text-line-height-2xl);
 }
 
 .text-2xl {
@@ -374,15 +386,15 @@ $font-primary: "Open Sans", serif;
 }
 
 .font-primary {
-  font-family: var(--font-primary);
+  font-family: var(--font-open-sans);
 }
 
 .font-secondary {
-  font-family: var(--font-secondary);
+  font-family: var(--font-abril-fatface);
 }
 
 .font-brand {
-  font-family: var(--font-brand);
+  font-family: var(--font-poltawski-nowy);
 }
 
 .container {
@@ -397,7 +409,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 0;
-  font-family: var(--font-open-sans);
+  font-family: var(--font-primary);
   color: var(--color-neutral-700);
   font-weight: 400;
 }
