@@ -1,0 +1,15 @@
+model Transaction {
+    id                     String   @id @default(uuid()) @map("transaction_id")
+    proofOfPaymentImageUrl String   @map("proof_of_payment_image_url")
+    amount                 Float    @map("amount")
+    createdAt              DateTime @default(now()) @map("created_at")
+    updatedAt              DateTime @updatedAt @map("updated_at")
+
+    paymentStatus   PaymentStatus? @relation(fields: [paymentStatusId], references: [id])
+    paymentStatusId Int            @map("payment_status_id")
+
+    paymentAccount   PaymentAccount? @relation(fields: [paymentAccountId], references: [id])
+    paymentAccountId Int             @unique @map("payment_account_id")
+
+    @@map("transactions")
+}
