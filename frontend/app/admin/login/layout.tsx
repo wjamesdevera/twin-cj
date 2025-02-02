@@ -5,5 +5,5 @@ export default function LoginLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className={styles.body}>{children}</div>;
+  return <section className={styles.body}>{children}</section>;
 }

@@ -1,33 +1,27 @@
 import React from "react";
 import Image from "next/image";
 import styles from "./login.module.scss";
-import twinCJLogo from "../../../public/assets/twin-cj-logo.png";
+import loginBackgroundImage from "@/public/assets/login-left-bg.png";
 import { LoginForm } from "./form";
 
 export default function Page() {
   return (
     <>
-      <div className={styles["left-container"]}>
-        {/* <Image
-          src="/assets/login-left-bg.png"
-          alt="logo"
-          layout="fill"
-          objectFit="cover"
-          className="left-bg"
-        /> */}
-      </div>
-      <div className={styles["right-container"]}>
-        <div className={styles["right-wrapper"]}>
+      <div className={styles["two-column"]}>
+        <div className={styles["left-container"]}>
           <Image
-            src={twinCJLogo}
-            alt="Twin CJ Logo"
-            className={styles["login-img"]}
+            src={loginBackgroundImage}
+            alt="Twin CJ Login Background Image"
+            fill
+            objectFit="cover"
+            className={styles["login-background-img"]}
           />
-          <p className={styles["text"]}>
-            Welcome! Please log-in with your admin account.
-          </p>
-          <div className={styles.form}>
-            <LoginForm />
+        </div>
+        <div className={`${styles["right-container"]} container`}>
+          <div className={styles["right-wrapper"]}>
+            <div className={styles.form}>
+              <LoginForm />
+            </div>
           </div>
         </div>
       </div>
