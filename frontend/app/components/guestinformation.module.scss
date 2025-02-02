@@ -1,0 +1,54 @@
+.guestInfoContainer {
+  margin-top: 1rem;
+  border-radius: 8px;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  label {
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+
+.checkboxRow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 1rem;
+  margin-bottom: 2.8rem;
+
+  label {
+    font-size: 0.9rem;
+    a {
+      text-decoration: underline;
+    }
+  }
+}
