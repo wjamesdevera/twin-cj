@@ -16,7 +16,7 @@ router.get("/health", (request: Request, response: Response) => {
 });
 
 router.use("/auth", authRoutes);
-router.use("/users", userRoutes);
+router.use("/users", authenticate, userRoutes);
 
 router.get("/auth-test", authenticate, (req, res) => {
   res.json({
