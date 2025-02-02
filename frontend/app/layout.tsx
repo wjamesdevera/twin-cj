@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
-import { Open_Sans, Geist_Mono } from "next/font/google";
 import "./globals.scss";
+import { Abril_Fatface, Poltawski_Nowy, Open_Sans } from "next/font/google";
+import Footer from "./components/footer";
 
-const openSans = Open_Sans({
+export const openSans = Open_Sans({
   variable: "--font-open-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+export const abrilFatface = Abril_Fatface({
+  variable: "--font-abril-fatface",
+  weight: "400",
+  subsets: ["latin"],
+});
+
+export const poltawskiNowy = Poltawski_Nowy({
+  variable: "--font-poltawski-nowy",
   subsets: ["latin"],
 });
 
@@ -24,8 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${openSans.variable} ${geistMono.variable}`}>
+      <body className="">
         {children}
+        <Footer />
       </body>
     </html>
   );

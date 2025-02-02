@@ -1,0 +1,11 @@
+model PaymentStatus {
+    id        Int      @id @default(autoincrement()) @map("payment_status_id")
+    name      String   @map("name")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    transactions Transaction[]
+
+    @@map("payment_statuses")
+}
