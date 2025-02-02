@@ -6,12 +6,18 @@ import helmet from "helmet";
 import router from "./routes/routes";
 import { NOT_FOUND } from "./constants/http";
 import cookieParser from "cookie-parser";
+import { config } from "dotenv";
 const app = express();
 
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(helmet());

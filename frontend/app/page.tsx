@@ -1,9 +1,9 @@
-import styles from "./page.module.scss";
+import MainLayout from "./layouts/main.layout";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <h1>Test Page</h1>
-    </div>
+    <MainLayout>
+      <main></main>
+    </MainLayout>
   );
 }
