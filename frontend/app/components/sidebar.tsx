@@ -1,109 +1,141 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { JSX, useState } from "react";
 import styles from "./sidebar.module.scss";
 import Image from "next/image";
 import Link from "next/link";
-import { FaMapMarkedAlt, FaHome } from "react-icons/fa";
+import { FaHome, FaRegUser } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp, FaRegPenToSquare } from "react-icons/fa6";
+import { LuCalendarDays } from "react-icons/lu";
+import { TbArrowBarToLeft, TbArrowBarToRight } from "react-icons/tb";
+import twinCJLogo from "@/public/assets/logo_admin.png";
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
-  const [isContentDropdownOpen, setContentDropdownOpen] = useState(false);
+interface NavItemProps {
+  href: string;
+  icon?: JSX.Element;
+  label: string;
+  collapsed: boolean;
+}
 
-  const toggleContentDropdown = () => {
-    setContentDropdownOpen(!isContentDropdownOpen);
-  };
+interface NavListProps {
+  collapsed: boolean;
+}
+
+const NavItem = ({ label, href, icon, collapsed }: NavItemProps) => {
+  return (
+    <li>
+      <Link href={href} className={styles["navitem-container"]}>
+        <div className={styles["navitem-wrapper"]}>
+          {icon}
+          <p className={collapsed ? styles.hidden : ""}>{label}</p>
+        </div>
+      </Link>
+    </li>
+  );
+};
+
+const NavDropdown = ({ collapsed }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <li
+        className={styles["navitem-dropdown-container"]}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className={styles["navitem-dropdown-wrapper"]}>
+          <div className={styles["navitem-dropdown-label"]}>
+            <FaRegPenToSquare />
+            <p className={collapsed ? styles.hidden : "navlabel"}>Content</p>
+          </div>
+          <div
+            className={
+              collapsed ? styles.hidden : styles["navitem-dropdown-button"]
+            }
+          >
+            {!isOpen ? <FaAngleDown /> : <FaAngleUp />}
+          </div>
+        </div>
+      </li>
+      <div
+        className={`${!isOpen ? styles.hidden : ""} ${
+          styles["dropdown-items"]
+        }`}
+      >
+        <NavItem
+          href="/admin/day-tour-activities"
+          label="Day Tour Activities"
+          collapsed={false}
+        />
+        <NavItem href="/admin/cabins" label="Cabins" collapsed={false} />
+      </div>
+    </>
+  );
+};
+
+const NavList = ({ collapsed }: NavListProps) => {
+  return (
+    <ul className={styles["navlist"]}>
+      <NavItem
+        href="/admin"
+        label="Dashboard"
+        icon={<FaHome />}
+        collapsed={collapsed}
+      />
+      <NavItem
+        href="/admin/bookings"
+        label="Booking & Transactions"
+        collapsed={collapsed}
+        icon={<LuCalendarDays />}
+      />
+      <NavDropdown collapsed={collapsed} />
+      <NavItem
+        href="/admin/accounts"
+        label="Admin Accounts"
+        collapsed={collapsed}
+        icon={<FaRegUser />}
+      />
+    </ul>
+  );
+};
+
+const Sidebar: React.FC = () => {
+  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
 
   return (
     <div
-      className={`${styles.sidebarContainer} ${
-        isOpen ? styles.open : styles.closed
+      className={`${styles["sidebar-container"]} ${
+        isSideBarOpen ? styles.open : styles.closed
       }`}
     >
-      <aside className={styles.sidebar}>
+      <aside className={styles["sidebar-wrapper"]}>
         {/* Logo */}
-        <div className={styles.logoContainer}>
+        <div
+          className={isSideBarOpen ? styles["logo-container"] : styles.hidden}
+        >
           <Image
-            src="/assets/logo_admin2.png"
-            alt="Admin Logo 2"
-            width={75}
-            height={75}
+            src={twinCJLogo}
+            alt="Twin CJ Logo"
             className={styles.logo}
-            quality={100}
-          />
-          <Image
-            src="/assets/logo_admin.png"
-            alt="Admin Logo"
-            width={75}
+            width={175}
             height={75}
-            className={styles.logo}
           />
         </div>
 
         {/* Navigation Links */}
         <nav className={styles.nav}>
-          <ul>
-            <li className={styles.navItem}>
-              <Link href="/dashboard" className={styles.link}>
-                <i className="fas fa-tachometer-alt"></i>
-                Dashboard
-              </Link>
-            </li>
-
-            <li className={styles.navItem}>
-              <Link href="/booking-transactions" className={styles.link}>
-                <i className="fas fa-calendar-alt"></i>
-                Booking & Transactions
-              </Link>
-            </li>
-
-            <li className={`${styles.navItem} ${styles.dropdown}`}>
-              <button
-                className={styles.link}
-                onClick={toggleContentDropdown}
-                aria-expanded={isContentDropdownOpen}
-              >
-                <div className={styles.linkText}>
-                  <i className="fas fa-edit"></i>
-                  Content
-                </div>
-                <i
-                  className={`fas ${
-                    isContentDropdownOpen ? "fa-chevron-up" : "fa-chevron-down"
-                  } chevron`}
-                ></i>
-              </button>
-
-              {isContentDropdownOpen && (
-                <ul className={styles.dropdownMenu}>
-                  <li>
-                    <Link href="/content/day-tour" className={styles.dropdownLink}>
-                      <FaMapMarkedAlt />
-                      Day Tour Activities
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/content/cabins" className={styles.dropdownLink}>
-                      <FaHome />
-                      Cabins
-                    </Link>
-                  </li>
-                </ul>
-              )}
-            </li>
-
-            <li className={styles.navItem}>
-              <Link href="/admin-accounts" className={styles.link}>
-                <i className="fas fa-user"></i>
-                Admin Accounts
-              </Link>
-            </li>
-          </ul>
+          <NavList collapsed={!isSideBarOpen} />
         </nav>
       </aside>
+      <div className={styles["sidebar-footer"]}>
+        <button onClick={() => setIsSideBarOpen(!isSideBarOpen)}>
+          {isSideBarOpen ? <TbArrowBarToLeft /> : <TbArrowBarToRight />}
+        </button>
+      </div>
     </div>
   );
 };
