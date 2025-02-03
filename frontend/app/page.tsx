@@ -1,4 +1,6 @@
 import MainLayout from "./layouts/main.layout";
+
+const page = () => {
   return (
     <MainLayout>
       <main></main>
@@ -6,4 +8,4 @@ import MainLayout from "./layouts/main.layout";
   );
 };
 
-export default App;
+export default page;
