@@ -1,5 +1,5 @@
 import "../../globals.scss";
-import styles from "./login.module.scss";
+import styles from "./login/login.module.scss";
 export default function LoginLayout({
   children,
 }: Readonly<{
