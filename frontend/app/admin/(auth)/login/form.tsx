@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { useState } from "react";
 import { Loading } from "@/app/components/loading";
 import Image from "next/image";
-import twinCJLogo from "../../../public/assets/twin-cj-logo.png";
+import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import Link from "next/link";
 
 export function LoginForm() {
