@@ -1,0 +1,91 @@
+.pricingContainer {
+  display: inline-flex;
+  padding: 27px 20px 18px 25px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: #fff;
+  margin: 10px 0 10px 50px;
+}
+
+.banner {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  padding: 20px;
+  border-bottom: 1px solid var(--color-neutral-500);
+}
+
+.pricingImg {
+  display: flex;
+  flex-direction: row;
+}
+
+.pricingHeader {
+  display: flex;
+  flex-direction: column;
+  margin: 0 20px;
+}
+
+.text {
+  color: var(--color-neutral-400);
+  font-size: var(--text-size-lg);
+  line-height: var(--text-line-height-base);
+}
+
+.title {
+  font-size: var(--text-size-xl);
+  line-height: var(--text-line-height-base);
+  font-weight: bold;
+}
+
+.detailsContainer {
+  width: 100%;
+  display: flex;
+}
+
+.leftContainer {
+  flex: 1;
+}
+
+.rightContainer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.totalAmountContainer {
+  width: 100%;
+  display: flex;
+}
+
+@media screen and (max-width: 768px) {
+  .banner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-neutral-500);
+  }
+
+  .pricingImg {
+    width: 110px;
+  }
+
+  .text {
+    color: var(--color-neutral-400);
+    font-size: var(--text-size-base);
+    line-height: var(--text-line-height-base);
+  }
+
+  .title {
+    font-size: var(--text-size-lg);
+    line-height: var(--text-line-height-base);
+    font-weight: bold;
+  }
+}

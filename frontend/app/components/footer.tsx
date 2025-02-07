@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./footer.module.scss";
-import "@fortawesome/fontawesome-free/css/all.min.css";
+//import "@fortawesome/fontawesome-free/css/all.min.css";
 import twinCJLogo from "../../public/assets/twincjLogo.png";
 import Image from "next/image";
 import Link from "next/link";

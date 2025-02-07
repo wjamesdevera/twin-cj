@@ -30,3 +30,15 @@
 .lessThan {
   line-height: var(--text-line-height-5xl);
 }
+
+@media (max-width: 768px) {
+  .backBtnContainer {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .backBtn {
+    margin-left: -70px;
+    font-size: var(--text-size-base);
+  }
+}

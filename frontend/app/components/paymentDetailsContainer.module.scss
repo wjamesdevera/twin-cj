@@ -1,0 +1,30 @@
+.container {
+  display: inline-flex;
+  padding: 27px 20px 18px 25px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: #fff;
+  width: auto;
+  height: auto;
+  margin: 10px 0 10px 50px;
+}
+
+.heading {
+  color: var(--text, #555);
+  font-family: "Open Sans";
+  font-size: 1.5625rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 2.1875rem; /* 140% */
+}
+
+.subheading {
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.5625rem;
+}

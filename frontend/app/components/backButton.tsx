@@ -1,12 +1,15 @@
 import React from "react";
 import styles from "./backButton.module.scss";
 
-export default function backButton() {
+interface BackButtonProps {
+  className?: string;
+}
+
+export default function BackButton({ className }: BackButtonProps) {
   return (
-    <div>
+    <div className={`${styles.backBtnContainer} ${className}`}>
       <button className={styles.backBtn}>
-        {" "}
-        <span className={styles.lessThan}>&lt;</span> Booking Details{" "}
+        <span className={styles.lessThan}>&lt;</span> Booking Details
       </button>
     </div>
   );
