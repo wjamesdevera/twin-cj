@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
-import { createCabin, deleteAllCabins, deleteCabin, getAllCabins, getCabin } from "../services/service.service";
+import { createCabin, deleteAllCabins, deleteCabin, getAllCabins, getCabin, updateCabin } from "../services/service.service";
 import { CREATED, OK } from "../constants/http";
 
 export const getCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
   const cabin = await getCabin(Number(id));
-  
+
   if (!cabin) {
     return res.status(404).json({
       status: "error",
@@ -52,5 +52,22 @@ export const deleteCabinHandler = catchErrors(async (req: Request, res: Response
   res.status(OK).json({
     status: "success",
     message: `Cabin with ID ${id} deleted successfully`,
+  });
+});
+
+export const updateCabinHandler = catchErrors(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const updatedCabin = await updateCabin(Number(id), req.body);
+
+  if (!updatedCabin) {
+    return res.status(404).json({
+      status: "error",
+      message: `Cabin with ID ${id} not found`,
+    });
+  }
+
+  res.status(OK).json({
+    status: "success",
+    data: { cabin: updatedCabin },
   });
 });

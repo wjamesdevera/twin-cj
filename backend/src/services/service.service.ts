@@ -39,3 +39,15 @@ export const deleteCabin = async (id: number) => {
     where: { id },
   });
 };
+
+export const updateCabin = async (id: number, data: { 
+  serviceId?: number;
+  minCapacity?: number;
+  maxCapacity?: number;
+  additionalFeeId?: number;
+}) => {
+  return await prisma.cabin.update({
+    where: { id },
+    data,
+  });
+};
