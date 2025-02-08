@@ -1,0 +1,17 @@
+model Cabin {
+  id              Int           @id @default(autoincrement()) @map("cabin_id")
+  minCapacity     Int           @map("min_capacity")
+  maxCapacity     Int           @map("max_capacity")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  // Nullable fields
+  serviceId       Int          @unique @map("service_id")    // Make nullable with `Int?`
+  additionalFeeId Int          @unique @map("additional_fee_id") // Make nullable with `Int?`
+
+  // Relations
+  service         Service?      @relation(fields: [serviceId], references: [id])
+  additionalFee   AdditionalFee? @relation(fields: [additionalFeeId], references: [id])
+
+  @@map("cabin")
+}
