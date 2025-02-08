@@ -1,0 +1,57 @@
+import { Request, Response } from "express";
+import {
+  createDayTour,
+  getAllDayTours,
+  getDayTourById,
+  deleteDayTour,
+} from "../services/service.serivce";
+import { CREATED, OK } from "../constants/http";
+import catchErrors from "../utils/catchErrors";
+
+export const createDayTourHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const newDayTour = await createDayTour(req.body);
+    res.status(CREATED).json({
+      status: "success",
+      data: { DayTour: newDayTour },
+    });
+  }
+);
+
+export const getAllDayToursHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const dayTours = await getAllDayTours();
+    res.status(OK).json({
+      status: "success",
+      data: { dayTours },
+    });
+  }
+);
+
+export const getDayTourByIdHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const dayTour = await getDayTourById(Number(id));
+    if (!dayTour) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Day Tour not found",
+      });
+    }
+    res.status(OK).json({
+      status: "success",
+      data: { dayTour },
+    });
+  }
+);
+
+export const deleteDayTourHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    await deleteDayTour(Number(id));
+    res.status(OK).json({
+      status: "success",
+      message: `Day Tour Activity with ID ${id} deleted successfully`,
+    });
+  }
+);
