@@ -1,22 +1,9 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 import { Loading } from "./loading";
 import { useRouter } from "next/navigation";
 
-// const AuthGuard: React.FC = ({ children }: { children: React.ReactNode }) => {
-//   const { user, isLoading } = useAuth();
-//   const router = useRouter();
-//   return isLoading ? (
-//     <>
-//       <Loading />
-//     </>
-//   ) : user ? (
-//     <>{children}</>
-//   ) : (
-//     router.push("/admin/login")
-//   );
-// };
 export default function AuthGuard({
   children,
 }: Readonly<{
@@ -24,13 +11,15 @@ export default function AuthGuard({
 }>) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  return isLoading ? (
-    <>
-      <Loading />
-    </>
-  ) : user ? (
-    <>{children}</>
-  ) : (
-    router.push("/admin/login")
-  );
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/admin/login");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) return <Loading />;
+  if (!user) return null; // Prevent rendering while redirecting
+
+  return <>{children}</>;
 }
