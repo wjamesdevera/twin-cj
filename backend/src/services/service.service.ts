@@ -8,3 +8,14 @@ export const getAllCabins = async () => {
     },
   });
 };
+
+export const createCabin = async (data: {
+  serviceId: number;
+  minCapacity: number;
+  maxCapacity: number;
+  additionalFeeId: number;
+}) => {
+  return await prisma.cabin.create({
+    data,
+  });
+};
