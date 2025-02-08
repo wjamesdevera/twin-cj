@@ -2,10 +2,28 @@
 import React from "react";
 import useAuth from "../hooks/useAuth";
 import { Loading } from "./loading";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
+// const AuthGuard: React.FC = ({ children }: { children: React.ReactNode }) => {
+//   const { user, isLoading } = useAuth();
+//   const router = useRouter();
+//   return isLoading ? (
+//     <>
+//       <Loading />
+//     </>
+//   ) : user ? (
+//     <>{children}</>
+//   ) : (
+//     router.push("/admin/login")
+//   );
+// };
+export default function AuthGuard({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const { user, isLoading } = useAuth();
+  const router = useRouter();
   return isLoading ? (
     <>
       <Loading />
@@ -13,6 +31,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   ) : user ? (
     <>{children}</>
   ) : (
-    redirect("/admin/login")
+    router.push("/admin/login")
   );
 }
