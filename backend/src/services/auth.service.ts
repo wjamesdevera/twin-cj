@@ -44,7 +44,7 @@ type LoginAccountParams = {
 export const createAccount = async (data: CreateAccountParams) => {
   let existingUser = await prisma.personalDetail.findUnique({
     where: {
-      email: data.email,
+      email: data.email.toLowerCase(),
     },
   });
 
