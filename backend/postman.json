@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "a666e73e-908d-48b9-bd46-75c48ec9d243",
+		"_postman_id": "cc8c4703-e792-4513-ae31-2191f638d12e",
 		"name": "Twin CJ API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "37721218"
+		"_exporter_id": "41180003"
 	},
 	"item": [
 		{
@@ -220,6 +220,163 @@
 		{
 			"name": "transactions",
 			"item": []
+		},
+		{
+			"name": "services",
+			"item": [
+				{
+					"name": "cabins",
+					"item": [
+						{
+							"name": "get cabin",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/services/cabins/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"services",
+										"cabins",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get all cabins",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/services/cabins",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"services",
+										"cabins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create cabin",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"serviceId\": 1,\r\n    \"minCapacity\": 2,\r\n    \"maxCapacity\": 6,\r\n    \"additionalFeeId\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/services/cabins",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"services",
+										"cabins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete cabin",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/services/cabins/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"services",
+										"cabins",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete all cabins",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/services/cabins",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"services",
+										"cabins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update cabin",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"minCapacity\": 0,\r\n    \"maxCapacity\": 0\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/services/cabins/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"services",
+										"cabins",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		},
 		{
 			"name": "GET /health",
