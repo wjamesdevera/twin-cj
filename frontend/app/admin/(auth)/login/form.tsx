@@ -64,7 +64,10 @@ export function LoginForm() {
                 </small>
               )}
               <div>
-                <Link className={styles["forgot-password"]} href="#">
+                <Link
+                  className={styles["forgot-password"]}
+                  href="/admin/password_reset"
+                >
                   Forgot Password?
                 </Link>
                 <button
