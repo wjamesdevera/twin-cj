@@ -1,5 +1,5 @@
 import "../../globals.scss";
-import styles from "./login/login.module.scss";
+import styles from "./auth-layout.module.scss";
 import loginBackgroundImage from "@/public/assets/login-left-bg.png";
 import Image from "next/image";
 export default function LoginLayout({
