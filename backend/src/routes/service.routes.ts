@@ -3,7 +3,7 @@ import { createCabinHandler, deleteAllCabinsHandler, deleteCabinHandler, getAllC
 
 const router = Router();
 
-// Content Endpoint
+// Cabin Endpoint
 router.get("/cabins/:id", getCabinHandler);
 router.get("/cabins", getAllCabinsHandler);
 router.post("/cabins", createCabinHandler);
