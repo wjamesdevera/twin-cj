@@ -29,7 +29,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
         type="radio"
         className={styles.radio}
         checked={isSelected}
-        readOnly
+        onChange={onSelect}
       />
       <div className={styles.cardContent}>
         <div className={styles.textContent}>

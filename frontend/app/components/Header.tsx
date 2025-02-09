@@ -1,12 +1,129 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./header.module.scss";
 import headerImage from "../../public/assets/header.png";
 
+type GuestType = "adults" | "children";
+type Action = "increment" | "decrement";
+
+const GuestsDropdown: React.FC<{
+  guestCounts: { adults: number; children: number };
+  onApply: (counts: { adults: number; children: number }) => void;
+}> = ({ guestCounts, onApply }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [tempGuestCounts, setTempGuestCounts] = useState(guestCounts);
+
+  const toggleDropdown = () => setIsOpen(!isOpen);
+
+  const handleGuestChange = (type: GuestType, action: Action) => {
+    setTempGuestCounts((prev) => {
+      const updatedCount =
+        action === "increment" ? prev[type] + 1 : Math.max(prev[type] - 1, 0);
+      return { ...prev, [type]: updatedCount };
+    });
+  };
+
+  const handleCancel = () => {
+    setTempGuestCounts(guestCounts);
+    setIsOpen(false);
+  };
+
+  const handleApply = () => {
+    onApply(tempGuestCounts);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className={styles["guests-dropdown"]}>
+      <div className={styles["dropdown-summary"]} onClick={toggleDropdown}>
+        {guestCounts.adults} Adult{guestCounts.adults > 1 ? "s" : ""},{" "}
+        {guestCounts.children} Child
+        {guestCounts.children > 1 ? "ren" : ""}
+        <span className={styles["chevron-down"]}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="33"
+            height="33"
+            viewBox="0 0 33 33"
+            fill="none"
+          >
+            <g opacity="0.5">
+              <path
+                d="M8.03643 11.6458C8.43916 11.2431 9.0921 11.2431 9.49483 11.6458L15.9844 18.1353L22.4738 11.6458C22.8766 11.2431 23.5296 11.2431 23.9324 11.6458C24.335 12.0485 24.335 12.7015 23.9324 13.1042L16.7136 20.3229C16.3109 20.7257 15.6579 20.7257 15.2552 20.3229L8.03643 13.1042C7.63369 12.7015 7.63369 12.0485 8.03643 11.6458Z"
+                fill="#FFF2F2"
+              />
+            </g>
+          </svg>
+        </span>
+      </div>
+
+      {isOpen && (
+        <div className={styles["dropdown-content"]}>
+          <div className={styles["dropdown-header"]}>
+            <span className={styles["select-guests-label"]}>Select Guests</span>
+          </div>
+
+          <div
+            className={styles["guest-row"]}
+            style={{
+              border: "1px solid #E0E0E0",
+            }}
+          >
+            <span>Adults</span>
+            <div className={styles["counter"]}>
+              <button onClick={() => handleGuestChange("adults", "decrement")}>
+                -
+              </button>
+              <span>{tempGuestCounts.adults}</span>
+              <button onClick={() => handleGuestChange("adults", "increment")}>
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className={styles["guest-row"]}>
+            <span>Children</span>
+            <div className={styles["counter"]}>
+              <button
+                onClick={() => handleGuestChange("children", "decrement")}
+              >
+                -
+              </button>
+              <span>{tempGuestCounts.children}</span>
+              <button
+                onClick={() => handleGuestChange("children", "increment")}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className={styles["dropdown-actions"]}>
+            <button className={styles["cancel-btn"]} onClick={handleCancel}>
+              Cancel
+            </button>
+            <button className={styles["apply-btn"]} onClick={handleApply}>
+              Apply
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Header: React.FC = () => {
+  const [guestCounts, setGuestCounts] = useState({
+    adults: 1,
+    children: 0,
+  });
+
+  const handleApplyGuests = (counts: { adults: number; children: number }) => {
+    setGuestCounts(counts);
+  };
+
   return (
     <header className={styles["header-container"]}>
-      {/* Fullscreen Header Image */}
       <Image
         src={headerImage}
         alt="Header Image"
@@ -18,35 +135,26 @@ const Header: React.FC = () => {
         <h1 className={styles["header-title"]}>BOOK YOUR STAY</h1>
         <p className={styles["header-subtitle"]}>
           We are delighted to host you a memorable stay experience at Twin CJ
-          Riverside Glamping Resort. We look forward to creating an
-          unforgettable experience for you.
+          Riverside Glamping Resort.
+          <br />
+          We look forward to creating an unforgettable experience for you.
         </p>
 
-        {/* Booking Form */}
         <div className={styles["booking-form"]}>
           <div className={styles["form-field"]}>
             <label htmlFor="checkin">Check in</label>
-            <input
-              type="date"
-              id="checkin"
-              className={`${styles["date-input"]}`}
-            />
+            <input type="date" id="checkin" className={styles["date-input"]} />
           </div>
           <div className={styles["form-field"]}>
             <label htmlFor="checkout">Check out</label>
-            <input
-              type="date"
-              id="checkout"
-              className={`${styles["date-input"]}`}
-            />
+            <input type="date" id="checkout" className={styles["date-input"]} />
           </div>
           <div className={styles["form-field"]}>
-            <label htmlFor="guests">No. of Guests</label>
-            <select id="guests" className={`${styles["guests-select"]}`}>
-              <option>1 Adult, 0 Children</option>
-              <option>2 Adults, 0 Children</option>
-              <option>2 Adults, 1 Child</option>
-            </select>
+            <label>No. of Guests</label>
+            <GuestsDropdown
+              guestCounts={guestCounts}
+              onApply={handleApplyGuests}
+            />
           </div>
           <button className={styles["check-availability-btn"]}>
             CHECK AVAILABILITY
