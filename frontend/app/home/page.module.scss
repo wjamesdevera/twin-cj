@@ -80,12 +80,13 @@
     }
 
     .bookingStatus {
-      margin-top: 10px;
-      font-size: clamp(0.75rem, 1vw, 0.875rem);
+      margin-top: 15px;
+      font-size: clamp(1rem, 1vw, 0.875rem);
 
       a {
         text-decoration: underline;
         color: white;
+        font-weight: bold;
       }
     }
   }
@@ -109,6 +110,16 @@
         width: 220px;
         font-size: 0.875rem;
       }
+      .bookingStatus {
+        margin-top: 15px;
+        font-size: clamp(0.85rem, 1vw, 0.875rem);
+  
+        a {
+          text-decoration: underline;
+          color: white;
+          font-weight: bold;
+        }
+      }
     }
   }
 
@@ -129,6 +140,16 @@
       .bookNow {
         width: 180px;
         font-size: 0.75rem;
+      }
+      .bookingStatus {
+        margin-top: 15px;
+        font-size: clamp(0.70rem, 1vw, 0.875rem);
+  
+        a {
+          text-decoration: underline;
+          color: white;
+          font-weight: bold;
+        }
       }
     }
   }
