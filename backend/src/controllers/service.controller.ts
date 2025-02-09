@@ -4,6 +4,7 @@ import {
   getAllDayTours,
   getDayTourById,
   deleteDayTour,
+  updateDayTour,
 } from "../services/service.serivce";
 import { CREATED, OK } from "../constants/http";
 import catchErrors from "../utils/catchErrors";
@@ -41,6 +42,17 @@ export const getDayTourByIdHandler = catchErrors(
     res.status(OK).json({
       status: "success",
       data: { dayTour },
+    });
+  }
+);
+
+export const updateDayTourHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const updatedDayTour = await updateDayTour(Number(id), req.body);
+    res.status(OK).json({
+      status: "success",
+      data: { DayTour: updatedDayTour },
     });
   }
 );

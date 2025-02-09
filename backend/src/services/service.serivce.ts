@@ -47,6 +47,36 @@ export const getDayTourById = async (id: number) => {
   });
 };
 
+// Update
+export const updateDayTour = async (
+  id: number,
+  data: {
+    name: string;
+    description: string;
+    imageUrl: string;
+    rate: number;
+    quantity: number;
+  }
+) => {
+  return await prisma.dayTourActivities.update({
+    where: { id },
+    data: {
+      service: {
+        update: {
+          name: data.name,
+          description: data.description,
+          imageUrl: data.imageUrl,
+          price: data.rate,
+          quantity: data.quantity,
+        },
+      },
+    },
+    include: {
+      service: true,
+    },
+  });
+};
+
 // Delete
 export const deleteDayTour = async (id: number) => {
   return await prisma.dayTourActivities.delete({
