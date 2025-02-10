@@ -1,0 +1,53 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  flex: 1;
+}
+
+.left-container {
+  display: none;
+}
+
+.right-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.right-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (min-width: 748px) {
+  .two-column {
+    grid-template-columns: 1fr 1fr;
+    height: inherit;
+  }
+
+  .login-background-img {
+    width: 100%;
+  }
+
+  .left-container {
+    display: block;
+    position: relative;
+  }
+
+  .right-wrapper {
+    max-width: 60%;
+  }
+}

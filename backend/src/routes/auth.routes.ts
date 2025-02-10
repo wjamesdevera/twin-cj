@@ -3,6 +3,7 @@ import {
   forgotPasswordHandler,
   loginHandler,
   logoutHandler,
+  passwordResetHandler,
   refreshHandler,
   registerHandler,
 } from "../controllers/auth.controller";
@@ -15,5 +16,6 @@ router.post("/login", loginHandler);
 router.get("/refresh", refreshHandler);
 router.get("/logout", logoutHandler);
 router.post("/password/forgot", forgotPasswordHandler);
+router.post("/password/reset", passwordResetHandler);
 
 export default router;
