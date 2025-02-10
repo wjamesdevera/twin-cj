@@ -254,7 +254,7 @@ export const sendPasswordResetEmail = async (email: string) => {
       },
     });
 
-    const url = `${config.appOrigin}/password/reset?code=${
+    const url = `${config.appOrigin}/admin/password/change?code=${
       passwordResetToken.id
     }&exp=${expiresAt.getTime()}`;
 
