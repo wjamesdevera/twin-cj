@@ -10,13 +10,14 @@ import { Loading } from "@/app/components/loading";
 
 export function PasswordResetForm() {
   const [email, setEmail] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  const { trigger, isMutating } = useSWRMutation(
+  const { trigger, isMutating, error } = useSWRMutation(
     "forgot-password",
     (key, { arg }) => forgotPasword(arg),
     {
       onSuccess: () => {
-        redirect(`/admin`);
+        setIsSuccess(true);
       },
     }
   );
@@ -39,29 +40,47 @@ export function PasswordResetForm() {
                 className={styles["login-logo"]}
                 objectFit="contain"
               />
-              <p className={styles["welcome-text"]}>
-                Enter the email, phone number, or username associated with your
-                account to change your password.
-              </p>
+              {!isSuccess ? (
+                <p className={styles["welcome-text"]}>
+                  Enter the email, phone number, or username associated with
+                  your account to change your password.
+                </p>
+              ) : (
+                <div className={styles["success-container"]}>
+                  <p className={styles["success-message"]}>
+                    We&apos;ve sent a reset link to your email. Please check
+                    your inbox to proceed.
+                  </p>
+                </div>
+              )}
             </div>
-            <div className={styles["form-control"]}>
-              <input
-                type="text"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <div>
-                <button
-                  disabled={isMutating}
-                  className={styles["login-button"]}
-                  type="submit"
-                  onClick={handleForgotPassword}
-                >
-                  Send Verification
-                </button>
+            {!isSuccess && (
+              <div className={styles["form-control"]}>
+                <input
+                  type="text"
+                  placeholder="Email Address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                {error && (
+                  <small className={styles["error-message"]}>
+                    We couldn&apos;t find an account with that email address.
+                    Please check the email you entered or sign up for a new
+                    account.
+                  </small>
+                )}
+                <div>
+                  <button
+                    disabled={isMutating}
+                    className={styles["login-button"]}
+                    type="submit"
+                    onClick={handleForgotPassword}
+                  >
+                    Send Verification
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
