@@ -168,7 +168,7 @@
   text-align: center;
 
   .welcomeText {
-    font-family: "Open Sans", sans-serif;
+    font-family: var(--font-primary);
     color: #d9ad7c;
     font-size: clamp(1rem, 2vw, 1.25rem); 
     font-weight: 400;
