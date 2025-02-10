@@ -2,10 +2,15 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Navbar from "../components/navbar"; 
-import Footer from "../components/footer"; 
+import Navbar from "../components/navbar";
+import Footer from "../components/footer";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { EffectCoverflow, Pagination, Navigation, Autoplay } from "swiper/modules";
+import {
+  EffectCoverflow,
+  Pagination,
+  Navigation,
+  Autoplay,
+} from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -14,12 +19,40 @@ import "swiper/css/navigation";
 
 import styles from "./page.module.scss";
 
+const carouselData = [
+  {
+    src: "/assets/home_kayak.jpg",
+    title: "CRYSTAL KAYAK",
+    price: "100 PHP per ride",
+  },
+  {
+    src: "/assets/home_bonfire.jpg",
+    title: "BONFIRE NIGHT",
+    price: "150 PHP per night",
+  },
+  {
+    src: "/assets/home_4x4.jpg",
+    title: "4X4 RIDE",
+    price: "200 PHP per ride",
+  },
+  {
+    src: "/assets/home_sample1.jpg",
+    title: "SAMPLE 1",
+    price: "120 PHP per activity",
+  },
+  {
+    src: "/assets/home_sample2.jpg",
+    title: "SAMPLE 2",
+    price: "180 PHP per activity",
+  },
+];
+
 export default function Page() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
     <div className="w-full h-screen overflow-y-auto snap-y snap-mandatory">
-       <Navbar />
+      <Navbar />
       {/* Hero Section */}
       <section className={styles.heroSection}>
         <div className={styles.backgroundImage}>
@@ -89,8 +122,8 @@ export default function Page() {
             </div>
             <div className={styles.cabinTitle}>MINI</div>
             <div className={styles.cabinDescription}>
-              For 3 to 4 guests<br />
-              3 mini cabins available
+              For 3 to 4 guests
+              <br />3 mini cabins available
             </div>
           </div>
 
@@ -106,8 +139,8 @@ export default function Page() {
             </div>
             <div className={styles.cabinTitle}>MAXI</div>
             <div className={styles.cabinDescription}>
-              For 6 to 8 guests<br />
-              3 maxi cabins available
+              For 6 to 8 guests
+              <br />3 maxi cabins available
             </div>
           </div>
 
@@ -123,146 +156,149 @@ export default function Page() {
             </div>
             <div className={styles.cabinTitle}>VENTI</div>
             <div className={styles.cabinDescription}>
-              For 15 to 20 guests<br />
-              1 venti cabin available
+              For 15 to 20 guests
+              <br />1 venti cabin available
             </div>
           </div>
         </div>
       </section>
 
-    {/* All-Round Experience Section */}
-    <section className={styles.allRoundExperienceSection}>
+      {/* All-Round Experience Section */}
+      <section className={styles.allRoundExperienceSection}>
         <div className={styles.allRoundContent}>
-        <h2>AN ALL-ROUND EXPERIENCE</h2>
-        <div className={styles.divider}></div>
-        <p className={styles.experienceDescription}>
-             At Twin CJ Glamping Resort, we offer a diverse range of activities,
+          <h2>AN ALL-ROUND EXPERIENCE</h2>
+          <div className={styles.divider}></div>
+          <p className={styles.experienceDescription}>
+            At Twin CJ Glamping Resort, we offer a diverse range of activities,
             ensuring there is something for everyone. Book in advance for all
             activities and enjoy swimming, camping, kayaking, fishing, riding an
             ATV, renting a karaoke, and enjoying the night with a bonfire.
-         </p>
-    </div>
+          </p>
+        </div>
 
-    {/* Swiper Carousel */}
-    <div className={styles.carouselSection}>
-        <Swiper
+        {/* Swiper Carousel */}
+        <div className={styles.carouselSection}>
+          <Swiper
             modules={[EffectCoverflow, Pagination, Navigation, Autoplay]}
             effect="coverflow"
             grabCursor={true}
             centeredSlides={true}
-            slidesPerView={1} 
+            slidesPerView={1}
             initialSlide={1}
             loop={true}
             navigation={true}
             autoplay={{
-            delay: 3000, 
-            disableOnInteraction: false, 
+              delay: 3000,
+              disableOnInteraction: false,
             }}
             coverflowEffect={{
-            rotate: 0,
-            stretch: 0,
-            depth: 100,
-            modifier: 2.5,
-            slideShadows: false,
+              rotate: 0,
+              stretch: 0,
+              depth: 100,
+              modifier: 2.5,
+              slideShadows: false,
             }}
             pagination={{ clickable: true }}
             onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
             className={styles.carouselContainer}
             breakpoints={{
-            1400: { slidesPerView: 2.5 },
-            1024: { slidesPerView: 2 },
-            776: { slidesPerView: 1.5 },
-            480: { slidesPerView: 1 },
-            320: { slidesPerView: 1 }, 
+              1400: { slidesPerView: 2.5 },
+              1024: { slidesPerView: 2 },
+              776: { slidesPerView: 1.5 },
+              480: { slidesPerView: 1 },
+              320: { slidesPerView: 1 },
             }}
-        >
-            {[
-            { src: "/assets/home_kayak.jpg", title: "CRYSTAL KAYAK", price: "100 PHP per ride" },
-            { src: "/assets/home_bonfire.jpg", title: "BONFIRE NIGHT", price: "150 PHP per night" },
-            { src: "/assets/home_4x4.jpg", title: "4X4 RIDE", price: "200 PHP per ride" },
-            { src: "/assets/home_sample1.jpg", title: "SAMPLE 1", price: "120 PHP per activity" },
-            { src: "/assets/home_sample2.jpg", title: "SAMPLE 2", price: "180 PHP per activity" },
-            ].map((item, index) => (
-            <SwiperSlide key={index} className={styles.carouselItem}>
+          >
+            {carouselData.map((item, index) => (
+              <SwiperSlide key={index} className={styles.carouselItem}>
                 <div className={styles.imageContainer}>
-                <Image
+                  <Image
                     src={item.src}
                     alt={item.title}
                     layout="fill"
                     objectFit="cover"
-                    className={`${styles.carouselImage} ${index !== activeIndex ? styles.inactiveImage : ""}`}
-                />
-                {index !== activeIndex && <div className={styles.whiteOverlay}></div>}
+                    className={`${styles.carouselImage} ${
+                      index !== activeIndex ? styles.inactiveImage : ""
+                    }`}
+                  />
+                  {index !== activeIndex && (
+                    <div className={styles.whiteOverlay}></div>
+                  )}
                 </div>
                 {index === activeIndex && (
-                <div className={styles.textOverlay}>
+                  <div className={styles.textOverlay}>
                     <h3 className={styles.carouselTitle}>{item.title}</h3>
                     <p className={styles.carouselPrice}>{item.price}</p>
-                </div>
+                  </div>
                 )}
-            </SwiperSlide>
+              </SwiperSlide>
             ))}
-        </Swiper>
+          </Swiper>
         </div>
-    </section>
+      </section>
 
+      {/* WHY CHOOSE US Section */}
+      <section className={styles.whyChooseUsSection}>
+        <h2 className={styles.sectionHeader}>WHY CHOOSE US?</h2>
+        <div className={styles.divider}></div>
 
-    {/* WHY CHOOSE US Section */}
-    <section className={styles.whyChooseUsSection}>
-    <h2 className={styles.sectionHeader}>WHY CHOOSE US?</h2>
-    <div className={styles.divider}></div>
-
-    <p className={styles.descriptionText}>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at neque egestas turpis varius pellentesque vitae sed est. Duis cursus nisi vitae enim pellentesque fringilla.
-    </p>
-
-    <div className={styles.cardsContainer}>
-    {/* First Card - Image on Right, Text on Left */}
-    <div className={styles.card}>
-    <div className={styles.imageContent}>
-        <Image
-        src="/assets/home_gazebo.jpg"
-        alt="Gazebo"
-        width={500}
-        height={300}
-        objectFit="cover"
-        priority
-        />
-    </div>
-    <div className={styles.textContent}>
-        <div className={styles.title}>GAZEBO</div>
-        <div className={styles.line}></div>
-        <p className={styles.description}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at neque egestas turpis varius pellentesque vitae sed est. Duis cursus nisi vitae enim pellentesque fringilla.
+        <p className={styles.descriptionText}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at
+          neque egestas turpis varius pellentesque vitae sed est. Duis cursus
+          nisi vitae enim pellentesque fringilla.
         </p>
-        <button className={styles.bookNow}>Book Now</button>
-    </div>
-    </div>
 
-    {/* Second Card - Image on Left, Text on Right */}
-    <div className={styles.cardReversed}>
-    <div className={styles.imageContent}>
-        <Image
-        src="/assets/home_photoshoot.jpg"
-        alt="Photoshoot"
-        width={500}
-        height={300}
-        objectFit="cover"
-        priority
-        />
-    </div>
-    <div className={styles.textContent1}>
-        <div className={styles.title}>PHOTOSHOOT</div>
-        <div className={styles.line1}></div>
-        <p className={styles.description}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at neque egestas turpis varius pellentesque vitae sed est. Duis cursus nisi vitae enim pellentesque fringilla.
-        </p>
-        <button className={styles.bookNow1}>Book Now</button>
-    </div>
-    </div>
-    </div>
-    </section>
-<Footer />
+        <div className={styles.cardsContainer}>
+          {/* First Card - Image on Right, Text on Left */}
+          <div className={styles.card}>
+            <div className={styles.imageContent}>
+              <Image
+                src="/assets/home_gazebo.jpg"
+                alt="Gazebo"
+                width={500}
+                height={300}
+                objectFit="cover"
+                priority
+              />
+            </div>
+            <div className={styles.textContent}>
+              <div className={styles.title}>GAZEBO</div>
+              <div className={styles.line}></div>
+              <p className={styles.description}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi
+                at neque egestas turpis varius pellentesque vitae sed est. Duis
+                cursus nisi vitae enim pellentesque fringilla.
+              </p>
+              <button className={styles.bookNow}>Book Now</button>
+            </div>
+          </div>
+
+          {/* Second Card - Image on Left, Text on Right */}
+          <div className={styles.cardReversed}>
+            <div className={styles.imageContent}>
+              <Image
+                src="/assets/home_photoshoot.jpg"
+                alt="Photoshoot"
+                width={500}
+                height={300}
+                objectFit="cover"
+                priority
+              />
+            </div>
+            <div className={styles.textContent1}>
+              <div className={styles.title}>PHOTOSHOOT</div>
+              <div className={styles.line1}></div>
+              <p className={styles.description}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi
+                at neque egestas turpis varius pellentesque vitae sed est. Duis
+                cursus nisi vitae enim pellentesque fringilla.
+              </p>
+              <button className={styles.bookNow1}>Book Now</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <Footer />
     </div>
   );
 }
