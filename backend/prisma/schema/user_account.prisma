@@ -13,7 +13,7 @@ model UserAccount {
     AuthRole          AuthRole?          @relation(fields: [authRoleId], references: [id])
     authRoleId        Int?
 
-    passwordResetToken PasswordResetToken?
+    passwordResetToken PasswordResetToken[]
     session            Session[]
 
     verificationCode VerificationCode[]

@@ -44,7 +44,7 @@ type LoginAccountParams = {
 export const createAccount = async (data: CreateAccountParams) => {
   let existingUser = await prisma.personalDetail.findUnique({
     where: {
-      email: data.email,
+      email: data.email.toLowerCase(),
     },
   });
 
@@ -254,7 +254,7 @@ export const sendPasswordResetEmail = async (email: string) => {
       },
     });
 
-    const url = `${config.appOrigin}/password/reset?code=${
+    const url = `${config.appOrigin}/admin/password/change?code=${
       passwordResetToken.id
     }&exp=${expiresAt.getTime()}`;
 
