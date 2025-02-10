@@ -2,12 +2,14 @@ import {
   emailSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
 } from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
 import {
   createAccount,
   loginAccount,
   refreshUserAccessToken,
+  resetPassword,
   sendPasswordResetEmail,
 } from "../services/auth.service";
 import { Request, response, Response } from "express";
@@ -132,5 +134,22 @@ export const forgotPasswordHandler = catchErrors(
         message: "Password reset email sent",
       },
     });
+  }
+);
+
+export const passwordResetHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const requestBody = resetPasswordSchema.parse(request.body);
+
+    await resetPassword(requestBody);
+
+    return clearAuthCookies(response)
+      .status(OK)
+      .json({
+        status: "success",
+        data: {
+          message: "Password was reset successfully",
+        },
+      });
   }
 );
