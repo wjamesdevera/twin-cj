@@ -1,21 +1,28 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import {
   createDayTour,
   getAllDayTours,
   getDayTourById,
   deleteDayTour,
   updateDayTour,
-} from "../services/service.serivce";
-import { CREATED, OK } from "../constants/http";
-import catchErrors from "../utils/catchErrors";
+} from '../services/service.serivce';
+import { CREATED, OK } from '../constants/http';
+import catchErrors from '../utils/catchErrors';
+import path from 'path';
 
 export const createDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
-    const newDayTour = await createDayTour(req.body);
-    res.status(CREATED).json({
-      status: "success",
-      data: { DayTour: newDayTour },
+    const { name, description, rate } = req.body;
+    const imageUrl = req.file
+      ? `${req.file.filename}${path.extname(req.file.originalname)}`
+      : '';
+    const dayTour = await createDayTour({
+      name,
+      description,
+      imageUrl,
+      rate: parseFloat(rate),
     });
+    res.status(201).json(dayTour);
   }
 );
 
@@ -23,7 +30,7 @@ export const getAllDayToursHandler = catchErrors(
   async (req: Request, res: Response) => {
     const dayTours = await getAllDayTours();
     res.status(OK).json({
-      status: "success",
+      status: 'success',
       data: { dayTours },
     });
   }
@@ -35,12 +42,12 @@ export const getDayTourByIdHandler = catchErrors(
     const dayTour = await getDayTourById(Number(id));
     if (!dayTour) {
       return res.status(404).json({
-        status: "fail",
-        message: "Day Tour not found",
+        status: 'fail',
+        message: 'Day Tour not found',
       });
     }
     res.status(OK).json({
-      status: "success",
+      status: 'success',
       data: { dayTour },
     });
   }
@@ -51,7 +58,7 @@ export const updateDayTourHandler = catchErrors(
     const { id } = req.params;
     const updatedDayTour = await updateDayTour(Number(id), req.body);
     res.status(OK).json({
-      status: "success",
+      status: 'success',
       data: { DayTour: updatedDayTour },
     });
   }
@@ -62,7 +69,7 @@ export const deleteDayTourHandler = catchErrors(
     const { id } = req.params;
     await deleteDayTour(Number(id));
     res.status(OK).json({
-      status: "success",
+      status: 'success',
       message: `Day Tour Activity with ID ${id} deleted successfully`,
     });
   }

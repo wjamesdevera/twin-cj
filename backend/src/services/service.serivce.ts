@@ -1,22 +1,24 @@
-import { prisma } from "../config/db";
+import { prisma } from '../config/db';
 
-// Create
-export const createDayTour = async (data: {
+interface CreateDayTourInput {
   name: string;
   description: string;
   imageUrl: string;
   rate: number;
-  quantity: number;
-}) => {
+  quantity?: number;
+}
+
+// Create
+export const createDayTour = async (input: CreateDayTourInput) => {
   return await prisma.dayTourActivities.create({
     data: {
       service: {
         create: {
-          name: data.name,
-          description: data.description,
-          imageUrl: data.imageUrl,
-          price: data.rate,
-          quantity: data.quantity,
+          name: input.name,
+          description: input.description,
+          imageUrl: input.imageUrl,
+          price: input.rate,
+          quantity: input.quantity ?? 0,
         },
       },
     },
