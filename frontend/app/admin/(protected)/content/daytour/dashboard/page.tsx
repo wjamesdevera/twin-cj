@@ -23,7 +23,7 @@ const DayTourView = () => {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache', // Ensures fresh data
+              'Cache-Control': 'no-cache',
             },
           }
         );
@@ -32,7 +32,6 @@ const DayTourView = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
 
         const data = await response.json();
-        console.log('Fetched raw data:', data); // Debugging
 
         if (Array.isArray(data?.data?.dayTours)) {
           const mappedDayTours = data.data.dayTours.map((tour: any) => ({
@@ -41,12 +40,11 @@ const DayTourView = () => {
             description:
               tour.service?.description || 'No description available',
             imageUrl: tour.service?.imageUrl || '',
-            rate: tour.service?.price || 0, // Use price instead of rate
+            rate: tour.service?.price || 0,
           }));
 
-          console.log('Mapped day tours:', mappedDayTours); // Debugging
+          console.log('Mapped day tours:', mappedDayTours);
 
-          // ✅ Prevent unnecessary re-renders
           setDayTours((prevTours) => {
             const isSameData =
               JSON.stringify(prevTours) === JSON.stringify(mappedDayTours);
@@ -65,7 +63,7 @@ const DayTourView = () => {
     };
 
     fetchDayTours();
-  }, []); // ✅ Runs once on component mount
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>;
