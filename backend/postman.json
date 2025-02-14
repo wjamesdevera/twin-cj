@@ -277,7 +277,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"serviceId\": 1,\r\n    \"minCapacity\": 2,\r\n    \"maxCapacity\": 6,\r\n    \"additionalFeeId\": 1\r\n}",
+									"raw": "{\r\n  \"service\": {\r\n    \"name\": \"Mini Cabin - Day Tour\",\r\n    \"description\": \"For 2-4 guests\",\r\n    \"imageUrl\": \"https://example.com/image.jpg\",\r\n    \"quantity\": 1,\r\n    \"price\": 2000\r\n  },\r\n  \"cabin\": {\r\n    \"minCapacity\": 2,\r\n    \"maxCapacity\": 4,\r\n    \"additionalFeeId\": null\r\n  }\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -350,7 +350,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"minCapacity\": 0,\r\n    \"maxCapacity\": 0\r\n}",
+									"raw": "{\r\n  \"service\": {\r\n    \"name\": \"Updated Mini Cabin - Day Tour\",\r\n    \"description\": \"Updated for 2-4 guests\",\r\n    \"imageUrl\": \"https://example.com/updated_image.jpg\",\r\n    \"quantity\": 2,\r\n    \"price\": 2500\r\n  },\r\n  \"cabin\": {\r\n    \"minCapacity\": 3,\r\n    \"maxCapacity\": 4\r\n  }\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
