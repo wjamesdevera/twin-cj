@@ -61,14 +61,47 @@ export const deleteCabin = async (id: number) => {
   });
 };
 
-export const updateCabin = async (id: number, data: { 
-  serviceId?: number;
-  minCapacity?: number;
-  maxCapacity?: number;
-  additionalFeeId?: number;
-}) => {
-  return await prisma.cabin.update({
-    where: { id },
-    data,
+export const updateCabin = async (
+  id: number,
+  data: {
+    service?: {
+      name?: string;
+      description?: string;
+      imageUrl?: string;
+      quantity?: number;
+      price?: number;
+    };
+    cabin?: {
+      minCapacity?: number;
+      maxCapacity?: number;
+      additionalFeeId?: number | null;
+    };
+  }
+) => {
+  return await prisma.$transaction(async (tx) => {
+    const existingCabin = await tx.cabin.findUnique({
+      where: { id },
+      include: { service: true },
+    });
+
+    if (!existingCabin) return null;
+
+    const { serviceId } = existingCabin;
+
+    const updatedService = data.service
+      ? await tx.service.update({
+          where: { id: serviceId },
+          data: data.service,
+        })
+      : existingCabin.service;
+    
+    const updatedCabin = data.cabin
+      ? await tx.cabin.update({
+          where: { id },
+          data: data.cabin,
+        })
+      : existingCabin;
+
+    return { service: updatedService, cabin: updatedCabin };
   });
 };

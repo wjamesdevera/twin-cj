@@ -67,9 +67,11 @@ export const deleteCabinHandler = catchErrors(async (req: Request, res: Response
 
 export const updateCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const updatedCabin = await updateCabin(Number(id), req.body);
+  const { service, cabin } = req.body;
+  
+  const updatedData = await updateCabin(Number(id), { service, cabin });
 
-  if (!updatedCabin) {
+  if (!updatedData) {
     return res.status(404).json({
       status: "error",
       message: `Cabin with ID ${id} not found`,
@@ -78,6 +80,6 @@ export const updateCabinHandler = catchErrors(async (req: Request, res: Response
 
   res.status(OK).json({
     status: "success",
-    data: { cabin: updatedCabin },
+    data: updatedData,
   });
 });
