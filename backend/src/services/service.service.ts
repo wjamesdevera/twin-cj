@@ -52,12 +52,41 @@ export const createCabin = async (data: {
 };
 
 export const deleteAllCabins = async () => {
-  return await prisma.cabin.deleteMany();
+  return await prisma.$transaction(async (tx) => {
+    const cabins = await tx.cabin.findMany({
+      select: { serviceId: true },
+    });
+
+    const serviceIds = cabins.map(cabin => cabin.serviceId);
+
+    await tx.cabin.deleteMany();
+
+    await tx.service.deleteMany({
+      where: {
+        id: { in: serviceIds },
+      },
+    });
+
+    return { deletedCabins: cabins.length, deletedServices: serviceIds.length };
+  });
 };
 
 export const deleteCabin = async (id: number) => {
-  return await prisma.cabin.delete({
-    where: { id },
+  return await prisma.$transaction(async (tx) => {
+    const existingCabin = await tx.cabin.findUnique({
+      where: { id },
+      include: { service: true },
+    });
+
+    if (!existingCabin) return null;
+
+    const { serviceId } = existingCabin;
+
+    await tx.cabin.delete({ where: { id } });
+
+    const deletedService = await tx.service.delete({ where: { id: serviceId } });
+
+    return { deletedCabin: existingCabin, deletedService };
   });
 };
 

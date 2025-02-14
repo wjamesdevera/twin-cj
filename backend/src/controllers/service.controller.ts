@@ -10,7 +10,7 @@ export const getCabinHandler = catchErrors(async (req: Request, res: Response) =
   if (!cabin) {
     return res.status(404).json({
       status: "error",
-      message: `Cabin with ID ${id} not found`,
+      message: `Cabin with ID ${id} not found.`,
     });
   }
 
@@ -36,7 +36,7 @@ export const createCabinHandler = catchErrors(async (req: Request, res: Response
   if (!service || !cabin) {
     return res.status(400).json({
       status: "error",
-      message: "Both service and cabin data are required",
+      message: "Both service and cabin data are required.",
     });
   }
 
@@ -49,32 +49,44 @@ export const createCabinHandler = catchErrors(async (req: Request, res: Response
 });
 
 export const deleteAllCabinsHandler = catchErrors(async (req: Request, res: Response) => {
-  await deleteAllCabins();
+  const deletedData = await deleteAllCabins();
+
   res.status(OK).json({
     status: "success",
-    message: "All cabins have been deleted successfully",
+    message: "All cabins and their corresponding services have been deleted successfully.",
+    data: deletedData,
   });
 });
 
 export const deleteCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
-  await deleteCabin(Number(id));
+
+  const deletedData = await deleteCabin(Number(id));
+
+  if (!deletedData) {
+    return res.status(404).json({
+      status: "error",
+      message: `Cabin with ID ${id} not found.`,
+    });
+  }
+
   res.status(OK).json({
     status: "success",
-    message: `Cabin with ID ${id} deleted successfully`,
+    message: `Cabin and Service with ID ${id} deleted successfully.`,
+    data: deletedData,
   });
 });
 
 export const updateCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { service, cabin } = req.body;
-  
+
   const updatedData = await updateCabin(Number(id), { service, cabin });
 
   if (!updatedData) {
     return res.status(404).json({
       status: "error",
-      message: `Cabin with ID ${id} not found`,
+      message: `Cabin with ID ${id} not found.`,
     });
   }
 
