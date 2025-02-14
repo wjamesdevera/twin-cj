@@ -49,6 +49,10 @@ export const createCabinHandler = catchErrors(async (req: Request, res: Response
       message: "Both service and cabin data are required.",
     });
   }
+  
+  if (typeof service.quantity !== "number") {
+    service.quantity = parseInt(service.quantity, 10);
+  }
 
   if (!service.name || !service.description || !service.imageUrl || service.price == null) {
     return res.status(400).json({
