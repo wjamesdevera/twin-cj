@@ -9,6 +9,7 @@ import {
 import { CREATED, OK } from '../constants/http';
 import catchErrors from '../utils/catchErrors';
 import path from 'path';
+import fs from 'fs';
 
 export const createDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -65,6 +66,27 @@ export const updateDayTourHandler = catchErrors(
 export const deleteDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+    const dayTour = await getDayTourById(Number(id));
+    if (!dayTour) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Day Tour not found',
+      });
+    }
+
+    if (dayTour.service && dayTour.service.imageUrl) {
+      const imagePath = path.join(
+        __dirname,
+        '../../uploads',
+        dayTour.service.imageUrl
+      );
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error('Failed to delete image file:', err);
+        }
+      });
+    }
+
     await deleteDayTour(Number(id));
     res.status(OK).json({
       status: 'success',

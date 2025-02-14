@@ -84,7 +84,6 @@ const DayTourView = () => {
       if (!response.ok) {
         throw new Error(`Failed to delete day tour with id: ${id}`);
       }
-      // Remove the deleted day tour from the state
       setDayTours((prevTours) => prevTours.filter((tour) => tour.id !== id));
     } catch (err) {
       console.error(err);
@@ -148,28 +147,6 @@ const DayTourView = () => {
           ))}
         </tbody>
       </table>
-      {/* {dayTours.length === 0 ? <p>No tours available.</p> : null}
-      <ul>
-        {dayTours.map((dayTour, index) => (
-          <li key={index}>
-            <h2>Name: {dayTour.name || 'No Name'}</h2>
-            <p>Description: {dayTour.description || 'No Description'}</p>
-            {dayTour.imageUrl ? (
-              <img
-                src={
-                  dayTour.imageUrl.startsWith('http')
-                    ? dayTour.imageUrl
-                    : `http://localhost:8080/uploads/${dayTour.imageUrl}`
-                }
-                alt={dayTour.name}
-              />
-            ) : (
-              <p>No image available</p>
-            )}
-            <p>Rate: PHP {dayTour.rate || 'N/A'}</p>
-          </li>
-        ))}
-      </ul> */}
     </div>
   );
 };
