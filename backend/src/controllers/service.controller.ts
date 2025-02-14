@@ -50,6 +50,48 @@ export const createCabinHandler = catchErrors(async (req: Request, res: Response
     });
   }
 
+  if (!service.name || !service.description || !service.imageUrl || service.price == null) {
+    return res.status(400).json({
+      status: "error",
+      message: "Missing required service fields (name, description, imageUrl, quantity, price).",
+    });
+  }
+
+  if (service.quantity < 1) {
+    return res.status(400).json({
+      status: "error",
+      message: "Service quantity must be at least 1.",
+    });
+  }
+
+  if (service.price < 0) {
+    return res.status(400).json({
+      status: "error",
+      message: "Service price cannot be negative.",
+    });
+  }
+
+  if (cabin.minCapacity == null || cabin.maxCapacity == null) {
+    return res.status(400).json({
+      status: "error",
+      message: "Cabin minimum capacity and maximum capacity are required.",
+    });
+  }
+
+  if (cabin.minCapacity < 1) {
+    return res.status(400).json({
+      status: "error",
+      message: "Cabin minimum capacity must be at least 1.",
+    });
+  }
+
+  if (cabin.maxCapacity < cabin.minCapacity) {
+    return res.status(400).json({
+      status: "error",
+      message: "Cabin maximum capacity cannot be smaller than minimum capacity.",
+    });
+  }
+
   const result = await createCabin({ service, cabin });
 
   res.status(CREATED).json({
