@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import multer from 'multer';
+import upload from '../middlewares/service.middlewares';
 import {
   createDayTourHandler,
   getAllDayToursHandler,
@@ -9,7 +9,6 @@ import {
 } from '../controllers/service.controller';
 
 const router = Router();
-const upload = multer({ dest: 'uploads/' });
 
 router.post('/day-tour', upload.single('image'), createDayTourHandler);
 router.get('/day-tours', getAllDayToursHandler);

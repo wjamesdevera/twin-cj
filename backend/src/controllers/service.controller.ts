@@ -13,9 +13,7 @@ import path from 'path';
 export const createDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { name, description, rate } = req.body;
-    const imageUrl = req.file
-      ? `${req.file.filename}${path.extname(req.file.originalname)}`
-      : '';
+    const imageUrl = req.file ? req.file.filename : '';
     const dayTour = await createDayTour({
       name,
       description,

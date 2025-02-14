@@ -8,7 +8,6 @@ interface CreateDayTourInput {
   quantity?: number;
 }
 
-// Create
 export const createDayTour = async (input: CreateDayTourInput) => {
   return await prisma.dayTourActivities.create({
     data: {
