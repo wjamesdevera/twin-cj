@@ -3,18 +3,47 @@ import { prisma } from "../config/db";
 export const getCabin = async (id: number) => {
   return await prisma.cabin.findUnique({
     where: { id },
-    include: {
-      service: true,
-      additionalFee: true,
+    select: {
+      id: true,
+      minCapacity: true,
+      maxCapacity: true,
+      createdAt: true,
+      updatedAt: true,
+      service: {
+        select: {
+          name: true,
+          description: true,
+          price: true,
+          imageUrl: true,
+        },
+      },
+      additionalFee: {
+        select: { id: true },
+      },
     },
   });
 };
 
 export const getAllCabins = async () => {
   return await prisma.cabin.findMany({
-    include: {
-      service: true,
-      additionalFee: true,
+    select: {
+      id: true,
+      minCapacity: true,
+      maxCapacity: true,
+      createdAt: true,
+      updatedAt: true,
+      service: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          imageUrl: true,
+        },
+      },
+      additionalFee: {
+        select: { id: true },
+      },
     },
   });
 };
@@ -53,21 +82,10 @@ export const createCabin = async (data: {
 
 export const deleteAllCabins = async () => {
   return await prisma.$transaction(async (tx) => {
-    const cabins = await tx.cabin.findMany({
-      select: { serviceId: true },
-    });
+    const deletedCabins = await tx.cabin.deleteMany();
+    const deletedServices = await tx.service.deleteMany();
 
-    const serviceIds = cabins.map(cabin => cabin.serviceId);
-
-    await tx.cabin.deleteMany();
-
-    await tx.service.deleteMany({
-      where: {
-        id: { in: serviceIds },
-      },
-    });
-
-    return { deletedCabins: cabins.length, deletedServices: serviceIds.length };
+    return { deletedCabins: deletedCabins.count, deletedServices: deletedServices.count };
   });
 };
 
@@ -84,27 +102,29 @@ export const deleteCabin = async (id: number) => {
 
     await tx.cabin.delete({ where: { id } });
 
-    const deletedService = await tx.service.delete({ where: { id: serviceId } });
+    if (serviceId) {
+      await tx.service.delete({ where: { id: serviceId } });
+    }
 
-    return { deletedCabin: existingCabin, deletedService };
+    return { deletedCabin: existingCabin, deletedService: serviceId ? existingCabin.service : null };
   });
 };
 
 export const updateCabin = async (
   id: number,
   data: {
-    service?: {
-      name?: string;
-      description?: string;
-      imageUrl?: string;
-      quantity?: number;
-      price?: number;
-    };
-    cabin?: {
-      minCapacity?: number;
-      maxCapacity?: number;
-      additionalFeeId?: number | null;
-    };
+    service?: Partial<{
+      name: string;
+      description: string;
+      imageUrl: string;
+      quantity: number;
+      price: number;
+    }>;
+    cabin?: Partial<{
+      minCapacity: number;
+      maxCapacity: number;
+      additionalFeeId: number | null;
+    }>;
   }
 ) => {
   return await prisma.$transaction(async (tx) => {
@@ -117,19 +137,20 @@ export const updateCabin = async (
 
     const { serviceId } = existingCabin;
 
-    const updatedService = data.service
-      ? await tx.service.update({
-          where: { id: serviceId },
-          data: data.service,
-        })
-      : existingCabin.service;
-    
-    const updatedCabin = data.cabin
-      ? await tx.cabin.update({
-          where: { id },
-          data: data.cabin,
-        })
-      : existingCabin;
+    const [updatedService, updatedCabin] = await Promise.all([
+      data.service
+        ? tx.service.update({
+            where: { id: serviceId },
+            data: data.service,
+          })
+        : existingCabin.service,
+      data.cabin
+        ? tx.cabin.update({
+            where: { id },
+            data: data.cabin,
+          })
+        : existingCabin,
+    ]);
 
     return { service: updatedService, cabin: updatedCabin };
   });

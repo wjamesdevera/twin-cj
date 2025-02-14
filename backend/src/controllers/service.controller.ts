@@ -4,8 +4,11 @@ import { createCabin, deleteAllCabins, deleteCabin, getAllCabins, getCabin, upda
 import { CREATED, OK } from "../constants/http";
 
 export const getCabinHandler = catchErrors(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const cabin = await getCabin(Number(id));
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    return res.status(400).json({ status: "error", message: "Invalid cabin ID." });
+  }
+  const cabin = await getCabin(id);
 
   if (!cabin) {
     return res.status(404).json({
@@ -22,11 +25,18 @@ export const getCabinHandler = catchErrors(async (req: Request, res: Response) =
 
 export const getAllCabinsHandler = catchErrors(async (req: Request, res: Response) => {
   const cabins = await getAllCabins();
+  
+  if (cabins.length === 0) {
+    return res.status(OK).json({
+      status: "success",
+      message: "No cabins found.",
+      data: { cabins: [] }
+    });
+  }
+
   res.status(OK).json({
     status: "success",
-    data: {
-      "cabins": cabins
-    }
+    data: { cabins }
   });
 });
 
@@ -60,30 +70,57 @@ export const deleteAllCabinsHandler = catchErrors(async (req: Request, res: Resp
 
 export const deleteCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
+  const cabinId = Number(id);
 
-  const deletedData = await deleteCabin(Number(id));
-
-  if (!deletedData) {
-    return res.status(404).json({
+  if (isNaN(cabinId)) {
+    return res.status(400).json({
       status: "error",
-      message: `Cabin with ID ${id} not found.`,
+      message: "Invalid cabin ID.",
     });
   }
 
-  res.status(OK).json({
-    status: "success",
-    message: `Cabin and Service with ID ${id} deleted successfully.`,
-    data: deletedData,
-  });
+  try {
+    const deletedData = await deleteCabin(cabinId);
+
+    if (!deletedData) {
+      return res.status(404).json({
+        status: "error",
+        message: `Cabin with ID ${cabinId} not found.`,
+      });
+    }
+
+    const { deletedCabin, deletedService } = deletedData;
+
+    res.status(OK).json({
+      status: "success",
+      message: `Cabin with ID ${deletedCabin.id} deleted successfully.` + 
+               (deletedService ? ` Service ID ${deletedService.id} was also deleted.` : ""),
+      data: deletedData,
+    });
+  } catch (error) {
+    console.error(`Error deleting cabin ID ${cabinId}:`, error);
+    return res.status(500).json({
+      status: "error",
+      message: "An error occurred while deleting the cabin.",
+    });
+  }
 });
 
 export const updateCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { service, cabin } = req.body;
 
+  if (!service && !cabin) {
+    return res.status(400).json({
+      status: "error",
+      message: "At least one field (service or cabin) must be provided for an update.",
+    });
+  }
+
   const updatedData = await updateCabin(Number(id), { service, cabin });
 
   if (!updatedData) {
+    console.error(`❌ Update failed: Cabin ID ${id} not found.`);
     return res.status(404).json({
       status: "error",
       message: `Cabin with ID ${id} not found.`,

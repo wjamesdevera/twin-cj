@@ -1,6 +1,6 @@
 model Cabin {
   id              Int           @id @default(autoincrement()) @map("cabin_id")
-  serviceId       Int          @unique @map("service_id")    // Make nullable with `Int?`
+  serviceId       Int          @unique @map("service_id")
   minCapacity     Int           @map("min_capacity")
   maxCapacity     Int           @map("max_capacity")
   additionalFeeId Int?          @unique @map("additional_fee_id") // Make nullable with `Int?`
@@ -8,8 +8,8 @@ model Cabin {
   updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at")
   
   // Relations
-  service         Service      @relation(fields: [serviceId], references: [id])
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   additionalFee   AdditionalFee? @relation(fields: [additionalFeeId], references: [id])
-
-  @@map("cabin")
+  
+  @@map("cabins")
 }
