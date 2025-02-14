@@ -4,6 +4,7 @@ import authRoutes from "./auth.routes";
 import userRoutes from "./user.routes";
 import serviceRoutes from "./service.routes";
 import { authenticate } from "../middlewares/auth.middleware";
+import uploadRoutes from "./upload";
 
 const router = Router();
 
@@ -25,5 +26,7 @@ router.get("/auth-test", authenticate, (req, res) => {
     message: "authenticated",
   });
 });
+
+router.use("/upload", uploadRoutes)
 
 export default router;

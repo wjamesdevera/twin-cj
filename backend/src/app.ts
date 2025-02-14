@@ -7,6 +7,7 @@ import router from "./routes/routes";
 import { NOT_FOUND } from "./constants/http";
 import cookieParser from "cookie-parser";
 import { config } from "dotenv";
+import path from "path";
 const app = express();
 
 // middleware
@@ -21,6 +22,7 @@ app.use(
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(helmet());
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Routes
 app.use("/api", router);
