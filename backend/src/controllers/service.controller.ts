@@ -31,10 +31,20 @@ export const getAllCabinsHandler = catchErrors(async (req: Request, res: Respons
 });
 
 export const createCabinHandler = catchErrors(async (req: Request, res: Response) => {
-  const newCabin = await createCabin(req.body);
+  const { service, cabin } = req.body;
+
+  if (!service || !cabin) {
+    return res.status(400).json({
+      status: "error",
+      message: "Both service and cabin data are required",
+    });
+  }
+
+  const result = await createCabin({ service, cabin });
+
   res.status(CREATED).json({
     status: "success",
-    data: { cabin: newCabin },
+    data: result,
   });
 });
 

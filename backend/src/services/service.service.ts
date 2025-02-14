@@ -20,13 +20,34 @@ export const getAllCabins = async () => {
 };
 
 export const createCabin = async (data: {
-  serviceId: number;
-  minCapacity: number;
-  maxCapacity: number;
-  additionalFeeId: number;
+  service: {
+    name: string;
+    description: string;
+    imageUrl: string;
+    quantity: number;
+    price: number;
+  };
+  cabin: {
+    minCapacity: number;
+    maxCapacity: number;
+    additionalFeeId?: number | null;
+  };
 }) => {
-  return await prisma.cabin.create({
-    data,
+  return await prisma.$transaction(async (tx) => {
+    const newService = await tx.service.create({
+      data: data.service,
+    });
+
+    const newCabin = await tx.cabin.create({
+      data: {
+        serviceId: newService.id,
+        minCapacity: data.cabin.minCapacity,
+        maxCapacity: data.cabin.maxCapacity,
+        additionalFeeId: data.cabin.additionalFeeId || null,
+      },
+    });
+
+    return { service: newService, cabin: newCabin };
   });
 };
 
