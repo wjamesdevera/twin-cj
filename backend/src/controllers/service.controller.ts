@@ -162,7 +162,7 @@ export const updateCabinHandler = catchErrors(async (req: Request, res: Response
   const updatedData = await updateCabin(Number(id), { service, cabin });
 
   if (!updatedData) {
-    console.error(`❌ Update failed: Cabin ID ${id} not found.`);
+    console.error(`Update failed: Cabin ID ${id} not found.`);
     return res.status(404).json({
       status: "error",
       message: `Cabin with ID ${id} not found.`,
