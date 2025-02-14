@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import styles from './dashboard.module.scss';
 
 interface DayTour {
   id: number;
@@ -65,6 +66,34 @@ const DayTourView = () => {
     fetchDayTours();
   }, []);
 
+  const handleEdit = (id: number) => {
+    console.log('Edit day tour with id:', id);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/services/day-tour/${id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to delete day tour with id: ${id}`);
+      }
+      // Remove the deleted day tour from the state
+      setDayTours((prevTours) => prevTours.filter((tour) => tour.id !== id));
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error ? err.message : 'An unknown error occurred'
+      );
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -76,7 +105,50 @@ const DayTourView = () => {
   return (
     <div>
       <h1>Day Tours</h1>
-      {dayTours.length === 0 ? <p>No tours available.</p> : null}
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Image</th>
+            <th>Rate</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {dayTours.map((dayTour) => (
+            <tr key={dayTour.id}>
+              <td>{dayTour.name}</td>
+              <td>{dayTour.description}</td>
+              <td>
+                {dayTour.imageUrl ? (
+                  <img
+                    src={`http://localhost:8080/uploads/${dayTour.imageUrl}`}
+                    alt={dayTour.name}
+                    width="100"
+                    height="100"
+                  />
+                ) : (
+                  'No image available'
+                )}
+              </td>
+              <td>PHP {dayTour.rate}</td>
+              <td className={styles.actions}>
+                <button className="edit" onClick={() => handleEdit(dayTour.id)}>
+                  Edit
+                </button>
+                <button
+                  className="delete"
+                  onClick={() => handleDelete(dayTour.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {/* {dayTours.length === 0 ? <p>No tours available.</p> : null}
       <ul>
         {dayTours.map((dayTour, index) => (
           <li key={index}>
@@ -97,7 +169,7 @@ const DayTourView = () => {
             <p>Rate: PHP {dayTour.rate || 'N/A'}</p>
           </li>
         ))}
-      </ul>
+      </ul> */}
     </div>
   );
 };
