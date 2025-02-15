@@ -1,15 +1,29 @@
 "use client";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import styles from "./change-password.module.scss";
 import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import { Eye, EyeOff } from "lucide-react";
 import Button from "@/app/components/button";
+import useSWRMutation from "swr/mutation";
+import { resetPassword } from "@/app/lib/api";
+import { Loading } from "@/app/components/loading";
 
 const Form = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const code = searchParams.get("code");
+  const verificationCode = searchParams.get("code");
+  const exp = Number(searchParams.get("exp"));
+  const { trigger, isMutating } = useSWRMutation(
+    "resetpassword",
+    (key, { arg }) => resetPassword(arg),
+    {
+      onSuccess: () => {
+        router.push("/admin/login");
+      },
+    }
+  );
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -56,7 +70,16 @@ const Form = () => {
     setConfirmPassword(e.target.value);
   };
 
-  return (
+  const handleResetPassword = async () => {
+    const password = confirmPassword;
+    await trigger({ verificationCode, password });
+  };
+
+  return isMutating ? (
+    <>
+      <Loading />
+    </>
+  ) : (
     <div className={styles["change-password-container"]}>
       <div className={styles["change-password-wrapper"]}>
         <div className={styles["form-title"]}>
@@ -175,7 +198,7 @@ const Form = () => {
           )}
 
           <div>
-            <Button>Change Password</Button>
+            <Button onClick={handleResetPassword}>Change Password</Button>
           </div>
         </div>
       </div>
