@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import {
+  changePasswordHandler,
   forgotPasswordHandler,
   loginHandler,
   logoutHandler,
