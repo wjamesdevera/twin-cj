@@ -41,6 +41,11 @@ type LoginAccountParams = {
   userAgent?: string;
 };
 
+type ChangePasswordParams = {
+  userId: string;
+  password: string;
+};
+
 export const createAccount = async (data: CreateAccountParams) => {
   let existingUser = await prisma.personalDetail.findUnique({
     where: {
@@ -335,7 +340,10 @@ export const resetPassword = async ({
   };
 };
 
-export const changePassword = async ({ userId, password }) => {
+export const changePassword = async ({
+  userId,
+  password,
+}: ChangePasswordParams) => {
   try {
     const user = await prisma.userAccount.update({
       where: {
