@@ -43,6 +43,7 @@ function DayTourForm({ onSubmit, initialData }: DayTourFormProps) {
       data.append('image', formData.image);
     }
     data.append('rate', formData.rate);
+    data.append('capacity', formData.capacity);
     onSubmit(data);
   };
 

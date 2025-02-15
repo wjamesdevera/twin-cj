@@ -5,7 +5,7 @@ interface CreateDayTourInput {
   description: string;
   imageUrl: string;
   rate: number;
-  capacity?: number;
+  capacity: number;
 }
 
 export const createDayTour = async (input: CreateDayTourInput) => {
@@ -17,7 +17,7 @@ export const createDayTour = async (input: CreateDayTourInput) => {
           description: input.description,
           imageUrl: input.imageUrl,
           price: input.rate,
-          capacity: input.capacity ?? 0,
+          capacity: input.capacity,
         },
       },
     },

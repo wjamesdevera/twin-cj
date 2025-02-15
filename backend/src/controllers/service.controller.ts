@@ -8,7 +8,7 @@ import {
 } from '../services/service.serivce';
 import { CREATED, OK } from '../constants/http';
 import catchErrors from '../utils/catchErrors';
-import path, { parse } from 'path';
+import path from 'path';
 import fs from 'fs';
 
 export const createDayTourHandler = catchErrors(
@@ -22,7 +22,7 @@ export const createDayTourHandler = catchErrors(
       rate: parseFloat(rate),
       capacity: parseInt(capacity),
     });
-    res.status(201).json(dayTour);
+    res.status(CREATED).json(dayTour);
   }
 );
 

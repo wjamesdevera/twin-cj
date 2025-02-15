@@ -2,8 +2,11 @@
 import DayTourForm from '@/app/components/DayTourForm';
 import React from 'react';
 import assert from 'assert';
+import { useRouter } from 'next/navigation';
 
 function Page() {
+  const router = useRouter();
+
   const handleCreateDayTour = async (formData: FormData) => {
     try {
       const response = await fetch(
@@ -15,8 +18,7 @@ function Page() {
       );
 
       assert(response.ok, 'Failed to create day tour');
-
-      console.log('Day tour created successfully');
+      router.push('/admin/content/daytour/dashboard');
     } catch (error) {
       console.error('Error creating day tour:', error);
     }
