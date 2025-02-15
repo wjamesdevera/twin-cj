@@ -17,6 +17,11 @@ type ForgotPasswordData = {
   email: string;
 };
 
+type ResetPasswordData = {
+  verificationCode: string;
+  password: string;
+};
+
 export const login = async (data: LoginData) =>
   API.post("/api/auth/login", data);
 export const logout = async () => API.get("/api/auth/logout");
@@ -25,3 +30,5 @@ export const register = async (data: RegisterData) =>
 export const forgotPasword = async (data: ForgotPasswordData) =>
   API.post("/api/auth/password/forgot", data);
 export const getUser = async () => API.get("/api/users");
+export const resetPassword = async (data: ResetPasswordData) =>
+  API.post("/api/auth/password/reset", data);
