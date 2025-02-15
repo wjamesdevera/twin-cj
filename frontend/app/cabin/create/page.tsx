@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function CabinForm() {
+export default function CreateCabin() {
   const [formData, setFormData] = useState({
     service: {
       name: "",
