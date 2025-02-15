@@ -55,7 +55,38 @@ export const getDayTourByIdHandler = catchErrors(
 export const updateDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const updatedDayTour = await updateDayTour(Number(id), req.body);
+    const { name, description, rate, quantity } = req.body;
+    let imageUrl = req.body.imageUrl;
+
+    if (req.file) {
+      imageUrl = req.file.filename;
+      const existingDayTour = await getDayTourById(Number(id));
+      if (
+        existingDayTour &&
+        existingDayTour.service &&
+        existingDayTour.service.imageUrl
+      ) {
+        const oldImagePath = path.join(
+          __dirname,
+          '../../uploads',
+          existingDayTour.service.imageUrl
+        );
+        fs.unlink(oldImagePath, (err) => {
+          if (err) {
+            console.error('Failed to delete old image file:', err);
+          }
+        });
+      }
+    }
+
+    const updatedDayTour = await updateDayTour(Number(id), {
+      name,
+      description,
+      imageUrl,
+      rate: parseFloat(rate),
+      quantity: quantity ? parseInt(quantity) : 0,
+    });
+
     res.status(OK).json({
       status: 'success',
       data: { DayTour: updatedDayTour },

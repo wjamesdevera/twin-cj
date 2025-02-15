@@ -67,7 +67,7 @@ export const updateDayTour = async (
           name: data.name,
           description: data.description,
           imageUrl: data.imageUrl,
-          price: data.rate,
+          price: parseFloat(data.rate.toString()),
           quantity: data.quantity,
         },
       },

@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import styles from './dashboard.module.scss';
+import { useRouter } from 'next/navigation';
 
 interface DayTour {
   id: number;
@@ -14,6 +15,7 @@ const DayTourView = () => {
   const [dayTours, setDayTours] = useState<DayTour[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchDayTours = async () => {
@@ -44,8 +46,6 @@ const DayTourView = () => {
             rate: tour.service?.price || 0,
           }));
 
-          console.log('Mapped day tours:', mappedDayTours);
-
           setDayTours((prevTours) => {
             const isSameData =
               JSON.stringify(prevTours) === JSON.stringify(mappedDayTours);
@@ -66,8 +66,12 @@ const DayTourView = () => {
     fetchDayTours();
   }, []);
 
+  const handleAdd = () => {
+    router.push('/admin/content/daytour/create');
+  };
+
   const handleEdit = (id: number) => {
-    console.log('Edit day tour with id:', id);
+    router.push(`/admin/content/daytour/edit/${id}`);
   };
 
   const handleDelete = async (id: number) => {
@@ -84,6 +88,7 @@ const DayTourView = () => {
       if (!response.ok) {
         throw new Error(`Failed to delete day tour with id: ${id}`);
       }
+
       setDayTours((prevTours) => prevTours.filter((tour) => tour.id !== id));
     } catch (err) {
       console.error(err);
@@ -104,6 +109,9 @@ const DayTourView = () => {
   return (
     <div>
       <h1>Day Tours</h1>
+      <button className="add" onClick={handleAdd}>
+        Add Day Tour
+      </button>
       <table className={styles.table}>
         <thead>
           <tr>
