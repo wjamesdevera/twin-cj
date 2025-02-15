@@ -8,18 +8,19 @@ import {
 } from '../services/service.serivce';
 import { CREATED, OK } from '../constants/http';
 import catchErrors from '../utils/catchErrors';
-import path from 'path';
+import path, { parse } from 'path';
 import fs from 'fs';
 
 export const createDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
-    const { name, description, rate } = req.body;
+    const { name, description, rate, capacity } = req.body;
     const imageUrl = req.file ? req.file.filename : '';
     const dayTour = await createDayTour({
       name,
       description,
       imageUrl,
       rate: parseFloat(rate),
+      capacity: parseInt(capacity),
     });
     res.status(201).json(dayTour);
   }
@@ -55,7 +56,7 @@ export const getDayTourByIdHandler = catchErrors(
 export const updateDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, description, rate, quantity } = req.body;
+    const { name, description, rate, capacity } = req.body;
     let imageUrl = req.body.imageUrl;
 
     if (req.file) {
@@ -84,7 +85,7 @@ export const updateDayTourHandler = catchErrors(
       description,
       imageUrl,
       rate: parseFloat(rate),
-      quantity: quantity ? parseInt(quantity) : 0,
+      capacity: capacity ? parseInt(capacity) : 0,
     });
 
     res.status(OK).json({

@@ -9,6 +9,9 @@ interface DayTour {
   description: string;
   imageUrl: string;
   rate: number;
+  capacity: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const DayTourView = () => {
@@ -44,6 +47,9 @@ const DayTourView = () => {
               tour.service?.description || 'No description available',
             imageUrl: tour.service?.imageUrl || '',
             rate: tour.service?.price || 0,
+            capacity: tour.service?.capacity || 0,
+            createdAt: new Date(tour.createdAt).toLocaleString(),
+            updatedAt: new Date(tour.updatedAt).toLocaleString(),
           }));
 
           setDayTours((prevTours) => {
@@ -119,6 +125,9 @@ const DayTourView = () => {
             <th>Description</th>
             <th>Image</th>
             <th>Rate</th>
+            <th>Capacity</th>
+            <th>Created At</th>
+            <th>Updated At</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -140,6 +149,9 @@ const DayTourView = () => {
                 )}
               </td>
               <td>PHP {dayTour.rate}</td>
+              <td>{dayTour.capacity}</td>
+              <td>{dayTour.createdAt}</td>
+              <td>{dayTour.updatedAt}</td>
               <td className={styles.actions}>
                 <button className="edit" onClick={() => handleEdit(dayTour.id)}>
                   Edit

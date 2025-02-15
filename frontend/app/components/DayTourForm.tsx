@@ -10,6 +10,7 @@ interface DayTourFormData {
   description: string;
   image: File | null;
   rate: string;
+  capacity: string;
 }
 
 function DayTourForm({ onSubmit, initialData }: DayTourFormProps) {
@@ -19,6 +20,7 @@ function DayTourForm({ onSubmit, initialData }: DayTourFormProps) {
       description: '',
       image: null,
       rate: '',
+      capacity: '',
     }
   );
 
@@ -80,6 +82,15 @@ function DayTourForm({ onSubmit, initialData }: DayTourFormProps) {
           type="number"
           name="rate"
           value={formData.rate}
+          onChange={handleChange}
+        />
+      </div>
+      <div>
+        <label>Capacity:</label>
+        <input
+          type="number"
+          name="capacity"
+          value={formData.capacity}
           onChange={handleChange}
         />
       </div>
