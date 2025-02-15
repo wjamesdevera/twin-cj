@@ -153,3 +153,14 @@ export const passwordResetHandler = catchErrors(
       });
   }
 );
+
+export const changePasswordHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    return response.status(OK).json({
+      status: "success",
+      data: {
+        message: "Change Password Endpoint In Pogres",
+      },
+    });
+  }
+);
