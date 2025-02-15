@@ -93,7 +93,7 @@ export default function CabinForm() {
   };    
 
   return (
-    <form onSubmit={handleSubmit} style={{ padding: 20 }}>
+    <form onSubmit={handleSubmit}>
       Title
       <br />
       <input type="text" name="name" data-section="service" onChange={handleChange} />
@@ -133,7 +133,7 @@ export default function CabinForm() {
       <br />
       <input type="text" name="additionalFeeId" data-section="cabin" onChange={handleChange} />
       <br />
-      
+
       <button type="submit">Add New Cabin</button>
     </form>
   );
