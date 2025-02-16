@@ -78,7 +78,7 @@ export default function CreateCabin() {
         additionalFeeId: formData.cabin.additionalFeeId ? Number(formData.cabin.additionalFeeId) : null,
       },
     };
-  
+    
     try {
       const response = await fetch("http://localhost:8080/api/services/cabins", {
         method: "POST",
@@ -134,11 +134,6 @@ export default function CreateCabin() {
       Rate
       <br />
       <input type="number" name="price" placeholder="₱" data-section="service" min="0" onChange={handleChange} />
-      <br />
-
-      Additional Fee ID (Optional)
-      <br />
-      <input type="text" name="additionalFeeId" data-section="cabin" onChange={handleChange} />
       <br />
 
       <button type="submit">Add New Cabin</button>
