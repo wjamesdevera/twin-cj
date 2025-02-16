@@ -137,6 +137,12 @@ function Page() {
           />
         </div>
         <button type="submit">Submit</button>
+        <button
+          type="button"
+          onClick={() => router.push('/admin/content/daytour/dashboard')}
+        >
+          Cancel
+        </button>
       </form>
     </div>
   );

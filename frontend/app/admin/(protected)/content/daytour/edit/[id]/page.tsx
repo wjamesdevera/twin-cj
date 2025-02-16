@@ -13,15 +13,17 @@ interface DayTour {
 }
 
 const EditDayTour: React.FC = () => {
-  const [dayTour, setDayTour] = useState<DayTour | null>(null);
+  const [formData, setFormData] = useState<DayTour>({
+    id: 0,
+    name: '',
+    description: '',
+    imageUrl: '',
+    rate: 0,
+    quantity: 0,
+  });
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [name, setName] = useState<string | undefined>(undefined);
-  const [description, setDescription] = useState<string | undefined>(undefined);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
-  const [rate, setRate] = useState<number | undefined>(undefined);
-  const [quantity, setQuantity] = useState<number | undefined>(undefined);
   const router = useRouter();
   const params = useParams();
   const id = params.id;
@@ -42,16 +44,26 @@ const EditDayTour: React.FC = () => {
             headers: { 'Content-Type': 'application/json' },
           }
         );
+
         if (!response.ok) {
           throw new Error(`Failed to fetch day tour with id: ${id}`);
         }
+
         const data = await response.json();
-        setDayTour(data.data.dayTour);
-        setName(data.data.dayTour.name);
-        setDescription(data.data.dayTour.description);
-        setRate(data.data.dayTour.rate);
-        setQuantity(data.data.dayTour.quantity);
-        setImageUrl(data.data.dayTour.imageUrl);
+
+        if (data?.data?.dayTour?.service) {
+          const service = data.data.dayTour.service;
+          setFormData({
+            id: data.data.dayTour.id,
+            name: service.name || '',
+            description: service.description || '',
+            imageUrl: service.imageUrl || '',
+            rate: service.price || 0,
+            quantity: service.quantity || 0,
+          });
+        } else {
+          setError('Invalid data structure received');
+        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'An unknown error occurred'
@@ -64,57 +76,44 @@ const EditDayTour: React.FC = () => {
     fetchDayTour();
   }, [id]);
 
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === 'number' ? Number(value) || 0 : value,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData) return;
 
-    // Basic Validation
-    if (!name || name.trim() === '') {
-      console.error('Validation Error: Name is required.');
-      return;
-    }
-    if (!description || description.trim() === '') {
-      console.error('Validation Error: Description is required.');
-      return;
-    }
-    if (!rate || isNaN(rate) || rate <= 0) {
-      console.error('Validation Error: Rate must be a positive number.');
-      return;
-    }
-    if (!quantity || isNaN(quantity) || quantity <= 0) {
-      console.error('Validation Error: Quantity must be a positive integer.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('name', name ?? '');
-    formData.append('description', description ?? '');
+    const updatedFormData = new FormData();
+    updatedFormData.append('name', formData.name);
+    updatedFormData.append('description', formData.description);
     if (imageFile) {
-      formData.append('image', imageFile);
-      formData.append('replaceImage', 'true');
+      updatedFormData.append('image', imageFile);
+      updatedFormData.append('replaceImage', 'true');
     }
-    formData.append('rate', rate?.toString() ?? '0');
-    formData.append('quantity', quantity?.toString() ?? '0');
+    updatedFormData.append('rate', formData.rate.toString());
+    updatedFormData.append('quantity', formData.quantity.toString());
 
     try {
       const response = await fetch(
         `http://localhost:8080/api/services/day-tour/${id}`,
         {
           method: 'PATCH',
-          body: formData,
+          body: updatedFormData,
         }
       );
-
-      const contentType = response.headers.get('content-type');
-      let responseBody;
-      if (contentType && contentType.includes('application/json')) {
-        responseBody = await response.json();
-      } else {
-        responseBody = await response.text();
-      }
 
       if (!response.ok) {
         throw new Error(`Failed to update day tour with id: ${id}`);
       }
+
       alert('Day tour updated successfully!');
       router.push('/admin/content/daytour/dashboard');
     } catch (err) {
@@ -126,6 +125,7 @@ const EditDayTour: React.FC = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
+  if (!formData) return <div>No data found</div>;
 
   return (
     <div className={styles.container}>
@@ -136,8 +136,9 @@ const EditDayTour: React.FC = () => {
           <input
             type="text"
             id="name"
-            value={name ?? ''}
-            onChange={(e) => setName(e.target.value)}
+            name="name"
+            value={formData.name || ''}
+            onChange={handleChange}
             required
           />
         </div>
@@ -146,8 +147,9 @@ const EditDayTour: React.FC = () => {
           <input
             type="text"
             id="description"
-            value={description ?? ''}
-            onChange={(e) => setDescription(e.target.value)}
+            name="description"
+            value={formData.description || ''}
+            onChange={handleChange}
             required
           />
         </div>
@@ -167,8 +169,9 @@ const EditDayTour: React.FC = () => {
           <input
             type="number"
             id="rate"
-            value={rate ?? ''}
-            onChange={(e) => setRate(Number(e.target.value))}
+            name="rate"
+            value={formData.rate || ''}
+            onChange={handleChange}
             required
           />
         </div>
@@ -177,13 +180,20 @@ const EditDayTour: React.FC = () => {
           <input
             type="number"
             id="quantity"
-            value={quantity ?? ''}
-            onChange={(e) => setQuantity(Number(e.target.value))}
+            name="quantity"
+            value={formData?.quantity || ''}
+            onChange={handleChange}
             required
           />
         </div>
         <button type="submit" className={styles.submitButton}>
           Save Changes
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push('/admin/content/daytour/dashboard')}
+        >
+          Cancel
         </button>
       </form>
     </div>
