@@ -1,0 +1,135 @@
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 4rem;
+}
+
+.inquiry-form {
+  width: 50%;
+  background: transparent;
+  padding: 2rem;
+  @media (max-width: 768px) {
+    // Tablets
+    width: 80%;
+  }
+
+  @media (max-width: 480px) {
+    // Mobile
+    width: 100%;
+    padding: 1.5rem;
+  }
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    // Tablets & Mobile
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+.form-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-field label {
+  color: #747474;
+  font-family: "Open Sans";
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 35px;
+}
+
+.form-field input,
+.form-field textarea {
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  background: white;
+  width: 100%;
+  appearance: none;
+}
+
+.form-field select {
+  padding: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  background: white;
+  color: #646060;
+  width: 100%;
+  appearance: none;
+  cursor: pointer;
+}
+
+.form-field textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+
+  @media (max-width: 480px) {
+    // Mobile
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.cancel-btn {
+  color: #9d9d9d;
+  font-family: "Open Sans";
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+
+  @media (max-width: 480px) {
+    order: 2;
+  }
+}
+
+.submit-btn {
+  display: inline-flex;
+  padding: 11px 44px;
+  justify-content: center;
+  align-items: center;
+  background: var(--Light-Sand---Accent, #d9ad7c);
+  color: white;
+  border: none;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  height: 3rem;
+  cursor: pointer;
+
+  @media (max-width: 480px) {
+    order: 1;
+  }
+
+  &:hover {
+    background: #c9955a;
+  }
+}
