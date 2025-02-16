@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import assert from 'assert';
 import { useRouter } from 'next/navigation';
 
 function Page() {
@@ -79,13 +78,10 @@ function Page() {
       );
 
       const responseData = await response.json();
-      if (!response.ok) {
-        console.error('Request failed:', responseData);
-        throw new Error(responseData.message || 'Failed to create day tour');
+      if (response.ok) {
+        // Redirects to admin dashboard
+        router.push('/admin/content/daytour/dashboard');
       }
-
-      // Redirects to admin dashboard
-      router.push('/admin/content/daytour/dashboard');
     } catch (error) {
       console.error('Error creating day tour:', error);
     }

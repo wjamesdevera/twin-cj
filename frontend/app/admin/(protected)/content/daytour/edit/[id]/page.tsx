@@ -66,6 +66,25 @@ const EditDayTour: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Basic Validation
+    if (!name || name.trim() === '') {
+      console.error('Validation Error: Name is required.');
+      return;
+    }
+    if (!description || description.trim() === '') {
+      console.error('Validation Error: Description is required.');
+      return;
+    }
+    if (!rate || isNaN(rate) || rate <= 0) {
+      console.error('Validation Error: Rate must be a positive number.');
+      return;
+    }
+    if (!capacity || isNaN(capacity) || capacity <= 0) {
+      console.error('Validation Error: Capacity must be a positive integer.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('name', name ?? '');
     formData.append('description', description ?? '');

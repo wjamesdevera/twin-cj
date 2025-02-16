@@ -81,6 +81,32 @@ export const updateDayTourHandler = catchErrors(
     const { name, description, rate, capacity } = req.body;
     let imageUrl = req.body.imageUrl;
 
+    // Validation
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ status: 'error', message: 'Invalid ID' });
+    }
+    if (!name || name.trim() === '') {
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Name is required' });
+    }
+    if (!description || description.trim() === '') {
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Description is required' });
+    }
+    if (!rate || isNaN(parseFloat(rate)) || parseFloat(rate) <= 0) {
+      return res
+        .status(400)
+        .json({ status: 'error', message: 'Rate must be a positive number' });
+    }
+    if (!capacity || isNaN(parseInt(capacity)) || parseInt(capacity) <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Capacity must be a positive integer',
+      });
+    }
+
     if (req.file) {
       imageUrl = req.file.filename;
       const existingDayTour = await getDayTourById(Number(id));
