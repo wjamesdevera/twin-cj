@@ -45,7 +45,6 @@ export default function CreateCabin() {
 
     let imageUrl = "";
 
-    // Upload Image First
     if (formData.service.image) {
       const imageFormData = new FormData();
       imageFormData.append("image", formData.service.image);
@@ -67,7 +66,6 @@ export default function CreateCabin() {
       }
     }
 
-    // Construct the request payload
     const requestBody = {
       service: {
         name: formData.service.name,
@@ -82,7 +80,7 @@ export default function CreateCabin() {
       },
       additionalFee: formData.additionalFee.type && formData.additionalFee.amount > 0
         ? { ...formData.additionalFee }
-        : undefined, // Only include additionalFee if valid
+        : undefined,
     };
 
     try {

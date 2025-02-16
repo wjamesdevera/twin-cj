@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 
 export default function UpdateCabin() {
   const router = useRouter();
-  const { id } = useParams(); // Get cabin ID from URL params
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
     service: {
@@ -30,7 +30,6 @@ export default function UpdateCabin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch existing cabin data
   useEffect(() => {
     const fetchCabin = async () => {
       try {
@@ -64,7 +63,7 @@ export default function UpdateCabin() {
                   description: cabin.additionalFee.description || "",
                   amount: cabin.additionalFee.amount || 0,
                 }
-              : { type: "", description: "", amount: 0 }, // Default if no additional fee
+              : { type: "", description: "", amount: 0 },
           });
         } else {
           throw new Error(data.message || "Failed to fetch cabin details.");
@@ -80,7 +79,6 @@ export default function UpdateCabin() {
     fetchCabin();
   }, [id]);  
 
-  // Handle form changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
@@ -96,13 +94,11 @@ export default function UpdateCabin() {
     }));
   };  
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let imageUrl = formData.service.imageUrl;
 
-    // Upload new image if selected
     if (formData.service.image) {
       const imageFormData = new FormData();
       imageFormData.append("image", formData.service.image);
@@ -117,14 +113,13 @@ export default function UpdateCabin() {
         if (!uploadResponse.ok) {
           throw new Error(uploadData.message || "Image upload failed");
         }
-        imageUrl = uploadData.imageUrl; // Store new image URL
+        imageUrl = uploadData.imageUrl;
       } catch (error) {
         console.error("Error uploading image:", error);
         return;
       }
     }
-    
-    // Prepare the updated request body
+
     const requestBody = {
       service: {
         name: formData.service.name,
@@ -140,7 +135,7 @@ export default function UpdateCabin() {
       additionalFee:
         formData.additionalFee.type || formData.additionalFee.description || formData.additionalFee.amount > 0
           ? { ...formData.additionalFee }
-          : null, // Only set to null if ALL fields are empty
+          : null,
     };        
 
     try {
@@ -153,7 +148,7 @@ export default function UpdateCabin() {
       });
 
       if (response.ok) {
-        router.push("/cabin"); // Redirect to cabin list after update
+        router.push("/cabin");
       } else {
         throw new Error("Failed to update cabin.");
       }

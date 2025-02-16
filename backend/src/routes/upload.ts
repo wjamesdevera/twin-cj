@@ -5,25 +5,22 @@ import fs from "fs";
 
 const router = express.Router();
 
-// Ensure the "uploads" directory exists
 const uploadDir = path.join(__dirname, "../../uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Multer storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir); // Store in "uploads" folder
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // Unique file name
+    cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
 const upload = multer({ storage });
 
-// Upload route with explicit type annotations
 router.post("/", upload.single("image"), (req: Request, res: Response): void => {
   if (!req.file) {
     res.status(400).json({ status: "error", message: "No file uploaded" });

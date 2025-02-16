@@ -115,7 +115,7 @@ export const deleteCabinHandler = catchErrors(async (req: Request, res: Response
 
 export const updateCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { service, cabin, additionalFee } = req.body; // Include additionalFee
+  const { service, cabin, additionalFee } = req.body;
 
   if (!service && !cabin && additionalFee === undefined) {
     return res.status(400).json({
@@ -138,4 +138,3 @@ export const updateCabinHandler = catchErrors(async (req: Request, res: Response
     data: updatedData,
   });
 });
-
