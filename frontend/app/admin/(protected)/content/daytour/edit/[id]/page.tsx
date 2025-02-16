@@ -81,7 +81,7 @@ const EditDayTour: React.FC = () => {
       return;
     }
     if (!quantity || isNaN(quantity) || quantity <= 0) {
-      console.error('Validation Error: quantity must be a positive integer.');
+      console.error('Validation Error: Quantity must be a positive integer.');
       return;
     }
 
@@ -115,7 +115,7 @@ const EditDayTour: React.FC = () => {
       if (!response.ok) {
         throw new Error(`Failed to update day tour with id: ${id}`);
       }
-      alert('Day Tour updated successfully!');
+      alert('Day tour updated successfully!');
       router.push('/admin/content/daytour/dashboard');
     } catch (err) {
       setError(
