@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CreateCabin() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     service: {
       name: "",
@@ -84,9 +87,13 @@ export default function CreateCabin() {
         },
         body: JSON.stringify(requestBody),
       });
-  
-      const data = await response.json();
-      console.log("Success:", data);
+
+      if (!response.ok) {
+        throw new Error("Failed to create cabin");
+      }
+
+      console.log("Cabin added successfully!");
+      router.push("/cabin");
     } catch (error) {
       console.error("Error:", error);
     }
@@ -135,6 +142,7 @@ export default function CreateCabin() {
       <br />
 
       <button type="submit">Add New Cabin</button>
+      <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
     </form>
   );
 }

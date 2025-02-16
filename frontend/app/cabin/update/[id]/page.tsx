@@ -226,6 +226,7 @@ export default function UpdateCabin() {
       <br />
 
       <button type="submit">Update Cabin</button>
+      <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
     </form>
   );
 }

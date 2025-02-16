@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface Service {
   id: number;
@@ -21,7 +22,26 @@ interface Cabin {
   updatedAt?: string;
 }
 
-const CabinsPage = () => {
+const formatPrice = (price: number) => {
+  return price.toLocaleString("en-US");
+};
+
+const formatDate = (isoString?: string) => {
+  if (!isoString) return "N/A";
+  return new Date(isoString).toLocaleString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+};
+
+const CabinDashboard = () => {
+  const router = useRouter();
+
   const [cabins, setCabins] = useState<Cabin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,51 +65,55 @@ const CabinsPage = () => {
     fetchCabins();
   }, []);
 
-  if (loading) return <p className="text-center text-gray-500">Loading cabins...</p>;
-  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
+  if (loading) return <p>Loading cabins...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div>
-      <button>Add Cabin</button>
+      <button onClick={() => router.push("/cabin/create")}>Add Cabin</button>
       <div>
-        <table>
+        <table style={{ width: "100%", textAlign: "center" }}>
           <thead>
             <tr>
-              <th>Action</th>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Image</th>
-              <th>Description</th>
-              <th>Rate</th>
-              <th>Capacity</th>
-              <th>Quantity</th>
-              <th>Date Created</th>
-              <th>Last Updated</th>
+              <th style={{ border: "1px solid" }}>Action</th>
+              <th style={{ border: "1px solid" }}>ID</th>
+              <th style={{ border: "1px solid" }}>Name</th>
+              <th style={{ border: "1px solid" }}>Image</th>
+              <th style={{ border: "1px solid" }}>Description</th>
+              <th style={{ border: "1px solid" }}>Rate</th>
+              <th style={{ border: "1px solid" }}>Minimum Capacity</th>
+              <th style={{ border: "1px solid" }}>Maximum Capacity</th>
+              <th style={{ border: "1px solid" }}>Quantity</th>
+              <th style={{ border: "1px solid" }}>Date Created</th>
+              <th style={{ border: "1px solid" }}>Last Updated</th>
             </tr>
           </thead>
           <tbody>
             {cabins.map((cabin) => (
-              <tr key={cabin.id} className="border-b">
-                <td>
-                  <button>Edit</button>
+              <tr key={cabin.id}>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  <button onClick={() => router.push(`/cabin/update/${cabin.id}`)}>Edit</button>
                   <button>Delete</button>
                 </td>
-                <td>{cabin.id}</td>
-                <td>{cabin.service.name}</td>
-                <td>
-                  <Image
-                    src={cabin.service.imageUrl}
-                    alt={cabin.service.name}
-                    width={135}
-                    height={90}
-                  />
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.id}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.service.name}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <Image
+                      src={cabin.service.imageUrl}
+                      alt={cabin.service.name}
+                      width={135}
+                      height={90}
+                    />
+                  </div>
                 </td>
-                <td>{cabin.service.description}</td>
-                <td>₱{cabin.service.price}</td>
-                <td>{cabin.minCapacity} - {cabin.maxCapacity} people</td>
-                <td>{cabin.service.quantity}</td>
-                <td>{cabin.createdAt}</td>
-                <td>{cabin.updatedAt}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.service.description}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>₱{formatPrice(cabin.service.price)}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.minCapacity}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.maxCapacity}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.service.quantity}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{formatDate(cabin.createdAt)}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{formatDate(cabin.updatedAt)}</td>
               </tr>
             ))}
           </tbody>
@@ -99,4 +123,4 @@ const CabinsPage = () => {
   );
 };
 
-export default CabinsPage;
+export default CabinDashboard;
