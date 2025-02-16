@@ -13,11 +13,11 @@ import fs from 'fs';
 
 export const createDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
-    const { name, description, rate, capacity } = req.body;
+    const { name, description, rate, quantity } = req.body;
     const imageUrl = req.file ? req.file.filename : '';
 
     // Validation
-    if (!name || !description || !rate || !capacity || !imageUrl) {
+    if (!name || !description || !rate || !quantity || !imageUrl) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -31,10 +31,10 @@ export const createDayTourHandler = catchErrors(
       return res.status(400).json({ error: 'Rate must be a positive number' });
     }
 
-    if (isNaN(parseInt(capacity)) || parseInt(capacity) <= 0) {
+    if (isNaN(parseInt(quantity)) || parseInt(quantity) <= 0) {
       return res
         .status(400)
-        .json({ error: 'Capacity should be a positive number' });
+        .json({ error: 'quantity should be a positive number' });
     }
 
     const dayTour = await createDayTour({
@@ -42,7 +42,7 @@ export const createDayTourHandler = catchErrors(
       description,
       imageUrl,
       rate: parseFloat(rate),
-      capacity: parseInt(capacity),
+      quantity: parseInt(quantity),
     });
     res.status(CREATED).json(dayTour);
   }
@@ -78,7 +78,7 @@ export const getDayTourByIdHandler = catchErrors(
 export const updateDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, description, rate, capacity } = req.body;
+    const { name, description, rate, quantity } = req.body;
     let imageUrl = req.body.imageUrl;
 
     // Validation
@@ -100,10 +100,10 @@ export const updateDayTourHandler = catchErrors(
         .status(400)
         .json({ status: 'error', message: 'Rate must be a positive number' });
     }
-    if (!capacity || isNaN(parseInt(capacity)) || parseInt(capacity) <= 0) {
+    if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) <= 0) {
       return res.status(400).json({
         status: 'error',
-        message: 'Capacity must be a positive integer',
+        message: 'quantity must be a positive integer',
       });
     }
 
@@ -133,7 +133,7 @@ export const updateDayTourHandler = catchErrors(
       description,
       imageUrl,
       rate: parseFloat(rate),
-      capacity: capacity ? parseInt(capacity) : 0,
+      quantity: quantity ? parseInt(quantity) : 0,
     });
 
     res.status(OK).json({

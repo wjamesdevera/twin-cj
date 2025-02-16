@@ -11,7 +11,7 @@ function Page() {
     description: string;
     image: File | null;
     rate: string;
-    capacity: string;
+    quantity: string;
   }
 
   const [formData, setFormData] = useState<DayTourFormData>({
@@ -19,7 +19,7 @@ function Page() {
     description: '',
     image: null,
     rate: '',
-    capacity: '',
+    quantity: '',
   });
 
   const handleChange = (
@@ -40,7 +40,7 @@ function Page() {
       !formData.name ||
       !formData.description ||
       !formData.rate ||
-      !formData.capacity
+      !formData.quantity
     ) {
       console.error('Validation Error: All fields are required.');
       return;
@@ -52,10 +52,10 @@ function Page() {
     }
 
     if (
-      isNaN(parseInt(formData.capacity)) ||
-      parseInt(formData.capacity) <= 0
+      isNaN(parseInt(formData.quantity)) ||
+      parseInt(formData.quantity) <= 0
     ) {
-      console.error('Validation Error: Capacity must be a positive integer.');
+      console.error('Validation Error: quantity must be a positive integer.');
       return;
     }
 
@@ -66,7 +66,7 @@ function Page() {
       data.append('image', formData.image);
     }
     data.append('rate', formData.rate);
-    data.append('capacity', formData.capacity);
+    data.append('quantity', formData.quantity);
 
     try {
       const response = await fetch(
@@ -77,8 +77,8 @@ function Page() {
         }
       );
 
-      const responseData = await response.json();
       if (response.ok) {
+        alert('Day tour created successfully!');
         // Redirects to admin dashboard
         router.push('/admin/content/daytour/dashboard');
       }
@@ -128,11 +128,11 @@ function Page() {
           />
         </div>
         <div>
-          <label>Capacity:</label>
+          <label>Quantity:</label>
           <input
             type="number"
-            name="capacity"
-            value={formData.capacity}
+            name="quantity"
+            value={formData.quantity}
             onChange={handleChange}
           />
         </div>

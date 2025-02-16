@@ -9,7 +9,7 @@ interface DayTour {
   description: string;
   imageUrl: string;
   rate: number;
-  capacity: number;
+  quantity: number;
 }
 
 const EditDayTour: React.FC = () => {
@@ -21,7 +21,7 @@ const EditDayTour: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [rate, setRate] = useState<number | undefined>(undefined);
-  const [capacity, setCapacity] = useState<number | undefined>(undefined);
+  const [quantity, setQuantity] = useState<number | undefined>(undefined);
   const router = useRouter();
   const params = useParams();
   const id = params.id;
@@ -50,7 +50,7 @@ const EditDayTour: React.FC = () => {
         setName(data.data.dayTour.name);
         setDescription(data.data.dayTour.description);
         setRate(data.data.dayTour.rate);
-        setCapacity(data.data.dayTour.capacity);
+        setQuantity(data.data.dayTour.quantity);
         setImageUrl(data.data.dayTour.imageUrl);
       } catch (err) {
         setError(
@@ -80,8 +80,8 @@ const EditDayTour: React.FC = () => {
       console.error('Validation Error: Rate must be a positive number.');
       return;
     }
-    if (!capacity || isNaN(capacity) || capacity <= 0) {
-      console.error('Validation Error: Capacity must be a positive integer.');
+    if (!quantity || isNaN(quantity) || quantity <= 0) {
+      console.error('Validation Error: quantity must be a positive integer.');
       return;
     }
 
@@ -93,7 +93,7 @@ const EditDayTour: React.FC = () => {
       formData.append('replaceImage', 'true');
     }
     formData.append('rate', rate?.toString() ?? '0');
-    formData.append('capacity', capacity?.toString() ?? '0');
+    formData.append('quantity', quantity?.toString() ?? '0');
 
     try {
       const response = await fetch(
@@ -115,6 +115,7 @@ const EditDayTour: React.FC = () => {
       if (!response.ok) {
         throw new Error(`Failed to update day tour with id: ${id}`);
       }
+      alert('Day Tour updated successfully!');
       router.push('/admin/content/daytour/dashboard');
     } catch (err) {
       setError(
@@ -172,12 +173,12 @@ const EditDayTour: React.FC = () => {
           />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="capacity">Capacity</label>
+          <label htmlFor="quantity">Quantity</label>
           <input
             type="number"
-            id="capacity"
-            value={capacity ?? ''}
-            onChange={(e) => setCapacity(Number(e.target.value))}
+            id="quantity"
+            value={quantity ?? ''}
+            onChange={(e) => setQuantity(Number(e.target.value))}
             required
           />
         </div>

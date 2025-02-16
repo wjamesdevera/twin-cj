@@ -5,7 +5,7 @@ interface CreateDayTourInput {
   description: string;
   imageUrl: string;
   rate: number;
-  capacity: number;
+  quantity: number;
 }
 
 export const createDayTour = async (input: CreateDayTourInput) => {
@@ -17,12 +17,13 @@ export const createDayTour = async (input: CreateDayTourInput) => {
           description: input.description,
           imageUrl: input.imageUrl,
           price: input.rate,
-          capacity: input.capacity,
+          quantity: input.quantity,
         },
       },
     },
     include: {
       service: true,
+      additionalFee: true,
     },
   });
 };
@@ -56,7 +57,7 @@ export const updateDayTour = async (
     description: string;
     imageUrl: string;
     rate: number;
-    capacity: number;
+    quantity: number;
   }
 ) => {
   return await prisma.dayTourActivities.update({
@@ -69,12 +70,13 @@ export const updateDayTour = async (
           description: data.description,
           imageUrl: data.imageUrl,
           price: parseFloat(data.rate.toString()),
-          capacity: data.capacity,
+          quantity: data.quantity,
         },
       },
     },
     include: {
       service: true,
+      additionalFee: true,
     },
   });
 };

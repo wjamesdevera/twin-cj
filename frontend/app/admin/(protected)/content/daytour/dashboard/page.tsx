@@ -9,7 +9,7 @@ interface DayTour {
   description: string;
   imageUrl: string;
   rate: number;
-  capacity: number;
+  quantity: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -47,7 +47,7 @@ const DayTourView = () => {
               tour.service?.description || 'No description available',
             imageUrl: tour.service?.imageUrl || '',
             rate: tour.service?.price || 0,
-            capacity: tour.service?.capacity || 0,
+            quantity: tour.service?.quantity || 0,
             createdAt: new Date(tour.createdAt).toLocaleString(),
             updatedAt: new Date(tour.updatedAt).toLocaleString(),
           }));
@@ -81,6 +81,13 @@ const DayTourView = () => {
   };
 
   const handleDelete = async (id: number) => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this day tour?'
+    );
+    if (!confirmed) {
+      return;
+    }
+
     try {
       const response = await fetch(
         `http://localhost:8080/api/services/day-tour/${id}`,
@@ -121,21 +128,33 @@ const DayTourView = () => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Image</th>
-            <th>Rate</th>
-            <th>Capacity</th>
-            <th>Created At</th>
-            <th>Updated At</th>
             <th>Actions</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Image</th>
+            <th>Description</th>
+            <th>Rate</th>
+            <th>Quantity</th>
+            <th>Date Created</th>
+            <th>Last Updated</th>
           </tr>
         </thead>
         <tbody>
           {dayTours.map((dayTour) => (
             <tr key={dayTour.id}>
+              <td className={styles.actions}>
+                <button className="edit" onClick={() => handleEdit(dayTour.id)}>
+                  Edit
+                </button>
+                <button
+                  className="delete"
+                  onClick={() => handleDelete(dayTour.id)}
+                >
+                  Delete
+                </button>
+              </td>
+              <td>{dayTour.id}</td>
               <td>{dayTour.name}</td>
-              <td>{dayTour.description}</td>
               <td>
                 {dayTour.imageUrl ? (
                   <img
@@ -148,21 +167,11 @@ const DayTourView = () => {
                   'No image available'
                 )}
               </td>
-              <td>PHP {dayTour.rate}</td>
-              <td>{dayTour.capacity}</td>
+              <td>{dayTour.description}</td>
+              <td>₱{dayTour.rate}</td>
+              <td>{dayTour.quantity}</td>
               <td>{dayTour.createdAt}</td>
               <td>{dayTour.updatedAt}</td>
-              <td className={styles.actions}>
-                <button className="edit" onClick={() => handleEdit(dayTour.id)}>
-                  Edit
-                </button>
-                <button
-                  className="delete"
-                  onClick={() => handleDelete(dayTour.id)}
-                >
-                  Delete
-                </button>
-              </td>
             </tr>
           ))}
         </tbody>
