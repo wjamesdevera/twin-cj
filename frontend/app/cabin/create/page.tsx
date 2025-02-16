@@ -10,75 +10,81 @@ export default function CreateCabin() {
     service: {
       name: "",
       description: "",
-      image: null,
+      image: null as File | null,
       quantity: 1,
       price: 0,
     },
     cabin: {
       minCapacity: 1,
       maxCapacity: 1,
-      additionalFeeId: null,
+    },
+    additionalFee: {
+      type: "",
+      description: "",
+      amount: 0,
     },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, dataset, files } = e.target as HTMLInputElement; // Type assertion to support both elements
-    const section = dataset.section as "service" | "cabin";
-  
+    const { name, value, dataset, files } = e.target as HTMLInputElement;
+    const section = dataset.section as "service" | "cabin" | "additionalFee";
+
     setFormData((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [name]: files ? files[0] : name === "quantity" || name === "price" || name.includes("Capacity")
+        [name]: files ? files[0] : name === "quantity" || name === "price" || name.includes("Capacity") || name === "amount"
           ? Number(value)
           : value,
       },
     }));
-  };   
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     let imageUrl = "";
-  
-    // If an image is selected, upload it first
+
+    // Upload Image First
     if (formData.service.image) {
       const imageFormData = new FormData();
       imageFormData.append("image", formData.service.image);
-  
+
       try {
         const uploadResponse = await fetch("http://localhost:8080/api/upload", {
           method: "POST",
           body: imageFormData,
         });
-  
+
         const uploadData = await uploadResponse.json();
         if (!uploadResponse.ok) {
           throw new Error(uploadData.message || "Image upload failed");
         }
-        imageUrl = uploadData.imageUrl; // Store uploaded image URL
+        imageUrl = uploadData.imageUrl;
       } catch (error) {
         console.error("Error uploading image:", error);
         return;
       }
     }
-  
-    // Now send the form data with the image URL
+
+    // Construct the request payload
     const requestBody = {
       service: {
         name: formData.service.name,
         description: formData.service.description,
-        imageUrl: imageUrl, // Use uploaded image URL
+        imageUrl: imageUrl,
         quantity: formData.service.quantity,
         price: formData.service.price,
       },
       cabin: {
         minCapacity: formData.cabin.minCapacity,
         maxCapacity: formData.cabin.maxCapacity,
-        additionalFeeId: formData.cabin.additionalFeeId ? Number(formData.cabin.additionalFeeId) : null,
       },
+      additionalFee: formData.additionalFee.type && formData.additionalFee.amount > 0
+        ? { ...formData.additionalFee }
+        : undefined, // Only include additionalFee if valid
     };
-    
+
     try {
       const response = await fetch("http://localhost:8080/api/services/cabins", {
         method: "POST",
@@ -97,8 +103,8 @@ export default function CreateCabin() {
     } catch (error) {
       console.error("Error:", error);
     }
-  };    
-
+  };
+  
   return (
     <form onSubmit={handleSubmit}>
       Title
@@ -134,6 +140,21 @@ export default function CreateCabin() {
       Rate
       <br />
       <input type="number" name="price" placeholder="₱" data-section="service" min="0" onChange={handleChange} />
+      <br />
+
+      Additional Fee Type
+      <br />
+      <input type="text" name="type" data-section="additionalFee" onChange={handleChange} placeholder="e.g., Cleaning Fee" />
+      <br />
+
+      Additional Fee Description
+      <br />
+      <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={2} cols={50} style={{ resize: "vertical" }} placeholder="Brief description (optional)" />
+      <br />
+
+      Additional Fee Amount
+      <br />
+      <input type="number" name="amount" data-section="additionalFee" min="0" onChange={handleChange} />
       <br />
 
       <button type="submit">Add New Cabin</button>
