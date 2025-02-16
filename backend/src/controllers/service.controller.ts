@@ -41,62 +41,23 @@ export const getAllCabinsHandler = catchErrors(async (req: Request, res: Respons
 });
 
 export const createCabinHandler = catchErrors(async (req: Request, res: Response) => {
-  const { service, cabin } = req.body;
+  const { service, cabin, additionalFee } = req.body;
 
   if (!service || !cabin) {
     return res.status(400).json({
       status: "error",
-      message: "Both service and cabin data are required.",
+      message: "Service and cabin data are required.",
     });
   }
-  
-  if (typeof service.quantity !== "number") {
-    service.quantity = parseInt(service.quantity, 10);
-  }
 
-  if (!service.name || !service.description || !service.imageUrl || service.price == null) {
+  if (additionalFee && (additionalFee.amount == null || additionalFee.amount < 0)) {
     return res.status(400).json({
       status: "error",
-      message: "Missing required service fields (name, description, imageUrl, quantity, price).",
+      message: "Additional fee must have a valid amount.",
     });
   }
 
-  if (service.quantity < 1) {
-    return res.status(400).json({
-      status: "error",
-      message: "Service quantity must be at least 1.",
-    });
-  }
-
-  if (service.price < 0) {
-    return res.status(400).json({
-      status: "error",
-      message: "Service price cannot be negative.",
-    });
-  }
-
-  if (cabin.minCapacity == null || cabin.maxCapacity == null) {
-    return res.status(400).json({
-      status: "error",
-      message: "Cabin minimum capacity and maximum capacity are required.",
-    });
-  }
-
-  if (cabin.minCapacity < 1) {
-    return res.status(400).json({
-      status: "error",
-      message: "Cabin minimum capacity must be at least 1.",
-    });
-  }
-
-  if (cabin.maxCapacity < cabin.minCapacity) {
-    return res.status(400).json({
-      status: "error",
-      message: "Cabin maximum capacity cannot be smaller than minimum capacity.",
-    });
-  }
-
-  const result = await createCabin({ service, cabin });
+  const result = await createCabin({ service, cabin, additionalFee });
 
   res.status(CREATED).json({
     status: "success",
@@ -154,19 +115,18 @@ export const deleteCabinHandler = catchErrors(async (req: Request, res: Response
 
 export const updateCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { service, cabin } = req.body;
+  const { service, cabin, additionalFee } = req.body; // Include additionalFee
 
-  if (!service && !cabin) {
+  if (!service && !cabin && additionalFee === undefined) {
     return res.status(400).json({
       status: "error",
-      message: "At least one field (service or cabin) must be provided for an update.",
+      message: "At least one field (service, cabin, or additionalFee) must be provided for an update.",
     });
   }
 
-  const updatedData = await updateCabin(Number(id), { service, cabin });
+  const updatedData = await updateCabin(Number(id), { service, cabin, additionalFee });
 
   if (!updatedData) {
-    console.error(`Update failed: Cabin ID ${id} not found.`);
     return res.status(404).json({
       status: "error",
       message: `Cabin with ID ${id} not found.`,
@@ -178,3 +138,4 @@ export const updateCabinHandler = catchErrors(async (req: Request, res: Response
     data: updatedData,
   });
 });
+

@@ -11,6 +11,7 @@ export const getCabin = async (id: number) => {
       updatedAt: true,
       service: {
         select: {
+          id: true,
           name: true,
           description: true,
           price: true,
@@ -19,7 +20,12 @@ export const getCabin = async (id: number) => {
         },
       },
       additionalFee: {
-        select: { id: true },
+        select: {
+          id: true,
+          type: true,
+          description: true,
+          amount: true,
+        },
       },
     },
   });
@@ -44,7 +50,12 @@ export const getAllCabins = async () => {
         },
       },
       additionalFee: {
-        select: { id: true },
+        select: {
+          id: true,
+          type: true,
+          description: true,
+          amount: true,
+        },
       },
     },
   });
@@ -61,7 +72,11 @@ export const createCabin = async (data: {
   cabin: {
     minCapacity: number;
     maxCapacity: number;
-    additionalFeeId?: number | null;
+  };
+  additionalFee?: {
+    type: string;
+    description?: string;
+    amount: number;
   };
 }) => {
   return await prisma.$transaction(async (tx) => {
@@ -69,16 +84,27 @@ export const createCabin = async (data: {
       data: data.service,
     });
 
+    let newAdditionalFee = null;
+    if (data.additionalFee) {
+      newAdditionalFee = await tx.additionalFee.create({
+        data: {
+          type: data.additionalFee.type,
+          description: data.additionalFee.description || null,
+          amount: data.additionalFee.amount,
+        },
+      });
+    }
+
     const newCabin = await tx.cabin.create({
       data: {
         serviceId: newService.id,
         minCapacity: data.cabin.minCapacity,
         maxCapacity: data.cabin.maxCapacity,
-        additionalFeeId: data.cabin.additionalFeeId || null,
+        additionalFeeId: newAdditionalFee ? newAdditionalFee.id : null,
       },
     });
 
-    return { service: newService, cabin: newCabin };
+    return { service: newService, cabin: newCabin, additionalFee: newAdditionalFee };
   });
 };
 
@@ -127,33 +153,70 @@ export const updateCabin = async (
       maxCapacity: number;
       additionalFeeId: number | null;
     }>;
+    additionalFee?: {
+      type: string;
+      description?: string;
+      amount: number;
+    } | null;
   }
 ) => {
   return await prisma.$transaction(async (tx) => {
     const existingCabin = await tx.cabin.findUnique({
       where: { id },
-      include: { service: true },
+      include: { service: true, additionalFee: true },
     });
 
     if (!existingCabin) return null;
 
-    const { serviceId } = existingCabin;
+    const { serviceId, additionalFeeId } = existingCabin;
 
-    const [updatedService, updatedCabin] = await Promise.all([
-      data.service
-        ? tx.service.update({
-            where: { id: serviceId },
-            data: data.service,
-          })
-        : existingCabin.service,
-      data.cabin
-        ? tx.cabin.update({
+    const updatedService = data.service
+      ? await tx.service.update({
+          where: { id: serviceId },
+          data: data.service,
+        })
+      : existingCabin.service;
+
+    const updatedCabin = data.cabin
+      ? await tx.cabin.update({
+          where: { id },
+          data: data.cabin,
+        })
+      : existingCabin;
+
+    let updatedAdditionalFee = existingCabin.additionalFee;
+
+    if (data.additionalFee !== undefined) {
+      if (data.additionalFee === null && additionalFeeId) {
+        await tx.additionalFee.delete({ where: { id: additionalFeeId } });
+        updatedAdditionalFee = null;
+      } else if (data.additionalFee) {
+        if (additionalFeeId) {
+          updatedAdditionalFee = await tx.additionalFee.update({
+            where: { id: additionalFeeId },
+            data: {
+              type: data.additionalFee.type ?? existingCabin.additionalFee?.type,
+              description: data.additionalFee.description ?? existingCabin.additionalFee?.description,
+              amount: data.additionalFee.amount ?? existingCabin.additionalFee?.amount,
+            },
+          });
+        } else {
+          updatedAdditionalFee = await tx.additionalFee.create({
+            data: {
+              type: data.additionalFee.type,
+              description: data.additionalFee.description ?? null,
+              amount: data.additionalFee.amount,
+            },
+          });
+
+          await tx.cabin.update({
             where: { id },
-            data: data.cabin,
-          })
-        : existingCabin,
-    ]);
+            data: { additionalFeeId: updatedAdditionalFee.id },
+          });
+        }
+      }
+    }
 
-    return { service: updatedService, cabin: updatedCabin };
+    return { service: updatedService, cabin: updatedCabin, additionalFee: updatedAdditionalFee };
   });
 };
