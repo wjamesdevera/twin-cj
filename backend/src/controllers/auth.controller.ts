@@ -1,4 +1,5 @@
 import {
+  changePasswordSchema,
   emailSchema,
   loginSchema,
   registerSchema,
@@ -6,6 +7,7 @@ import {
 } from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
 import {
+  changePassword,
   createAccount,
   loginAccount,
   refreshUserAccessToken,
@@ -156,10 +158,14 @@ export const passwordResetHandler = catchErrors(
 
 export const changePasswordHandler = catchErrors(
   async (request: Request, response: Response) => {
+    const { password } = changePasswordSchema.parse(request.body);
+    const userId = request.userId;
+
+    await changePassword({ userId, password });
     return response.status(OK).json({
       status: "success",
       data: {
-        message: "Change Password Endpoint In Pogres",
+        message: "Password changed successfully",
       },
     });
   }
