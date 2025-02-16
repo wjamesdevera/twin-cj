@@ -65,9 +65,30 @@ const CabinDashboard = () => {
     fetchCabins();
   }, []);
 
+  const deleteCabin = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this cabin?")) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete cabin");
+      }
+
+      setCabins((prevCabins) => prevCabins.filter((cabin) => cabin.id !== id));
+      
+      alert("Cabin deleted successfully!");
+    } catch (err) {
+      console.error("Error deleting cabin:", err);
+      alert("Error deleting cabin.");
+    }
+  };
+
   if (loading) return <p>Loading cabins...</p>;
   if (error) return <p>Error: {error}</p>;
-
+  
   return (
     <div>
       <button onClick={() => router.push("/cabin/create")}>Add Cabin</button>
@@ -93,7 +114,7 @@ const CabinDashboard = () => {
               <tr key={cabin.id}>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
                   <button onClick={() => router.push(`/cabin/update/${cabin.id}`)}>Edit</button>
-                  <button>Delete</button>
+                  <button onClick={() => deleteCabin(cabin.id)}>Delete</button>
                 </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.id}</td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.service.name}</td>
