@@ -62,6 +62,7 @@ export const updateDayTour = async (
   return await prisma.dayTourActivities.update({
     where: { id },
     data: {
+      updatedAt: new Date(),
       service: {
         update: {
           name: data.name,
