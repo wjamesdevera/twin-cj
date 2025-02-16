@@ -15,6 +15,28 @@ export const createDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { name, description, rate, capacity } = req.body;
     const imageUrl = req.file ? req.file.filename : '';
+
+    // Validation
+    if (!name || !description || !rate || !capacity || !imageUrl) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    if (typeof name !== 'string' || typeof description !== 'string') {
+      return res
+        .status(400)
+        .json({ error: 'Name and description must be strings' });
+    }
+
+    if (isNaN(parseFloat(rate)) || parseFloat(rate) <= 0) {
+      return res.status(400).json({ error: 'Rate must be a positive number' });
+    }
+
+    if (isNaN(parseInt(capacity)) || parseInt(capacity) <= 0) {
+      return res
+        .status(400)
+        .json({ error: 'Capacity should be a positive number' });
+    }
+
     const dayTour = await createDayTour({
       name,
       description,

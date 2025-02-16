@@ -35,6 +35,31 @@ function Page() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    // Validate input fields
+    if (
+      !formData.name ||
+      !formData.description ||
+      !formData.rate ||
+      !formData.capacity
+    ) {
+      console.error('Validation Error: All fields are required.');
+      return;
+    }
+
+    if (isNaN(parseFloat(formData.rate)) || parseFloat(formData.rate) <= 0) {
+      console.error('Validation Error: Rate must be a positive number.');
+      return;
+    }
+
+    if (
+      isNaN(parseInt(formData.capacity)) ||
+      parseInt(formData.capacity) <= 0
+    ) {
+      console.error('Validation Error: Capacity must be a positive integer.');
+      return;
+    }
+
     const data = new FormData();
     data.append('name', formData.name);
     data.append('description', formData.description);
@@ -53,7 +78,13 @@ function Page() {
         }
       );
 
-      assert(response.ok, 'Failed to create day tour');
+      const responseData = await response.json();
+      if (!response.ok) {
+        console.error('Request failed:', responseData);
+        throw new Error(responseData.message || 'Failed to create day tour');
+      }
+
+      // Redirects to admin dashboard
       router.push('/admin/content/daytour/dashboard');
     } catch (error) {
       console.error('Error creating day tour:', error);
