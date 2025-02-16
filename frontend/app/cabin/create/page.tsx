@@ -104,55 +104,57 @@ export default function CreateCabin() {
       console.error("Error:", error);
     }
   };
-  
+
   return (
     <form onSubmit={handleSubmit}>
       Title
       <br />
-      <input type="text" name="name" data-section="service" onChange={handleChange} />
+      <input type="text" name="name" data-section="service" onChange={handleChange} required />
       <br />
 
       Description
       <br />
-      <textarea name="description" data-section="service" onChange={handleChange} rows={4} cols={50} style={{ resize: "vertical" }} />
+      <textarea name="description" data-section="service" onChange={handleChange} rows={4} cols={50} required />
       <br />
 
       Minimum Capacity
       <br />
-      <input type="number" name="minCapacity" data-section="cabin" min="1" onChange={handleChange} />
+      <input type="number" name="minCapacity" data-section="cabin" min="1" onChange={handleChange} required />
       <br />
 
       Maximum Capacity
       <br />
-      <input type="number" name="maxCapacity" data-section="cabin" min={formData.cabin.minCapacity} onChange={handleChange} />
+      <input type="number" name="maxCapacity" data-section="cabin" min={formData.cabin.minCapacity} onChange={handleChange} required />
       <br />
 
       Image
       <br />
-      <input type="file" name="image" data-section="service" accept="image/*" onChange={handleChange} />
+      <input type="file" name="image" data-section="service" accept="image/*" onChange={handleChange} required />
       <br />
 
       Quantity
       <br />
-      <input type="number" name="quantity" data-section="service" min="1" onChange={handleChange} />
+      <input type="number" name="quantity" data-section="service" min="1" onChange={handleChange} required />
       <br />
       
       Rate
       <br />
-      <input type="number" name="price" placeholder="₱" data-section="service" min="0" onChange={handleChange} />
+      <input type="number" name="price" placeholder="₱" data-section="service" min="0" onChange={handleChange} required />
       <br />
 
-      Additional Fee Type
+      <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
+
+      Type
       <br />
       <input type="text" name="type" data-section="additionalFee" onChange={handleChange} placeholder="e.g., Cleaning Fee" />
       <br />
 
-      Additional Fee Description
+      Description
       <br />
-      <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={2} cols={50} style={{ resize: "vertical" }} placeholder="Brief description (optional)" />
+      <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={2} cols={50} />
       <br />
 
-      Additional Fee Amount
+      Amount
       <br />
       <input type="number" name="amount" data-section="additionalFee" min="0" onChange={handleChange} />
       <br />

@@ -11,17 +11,21 @@ export default function UpdateCabin() {
     service: {
       name: "",
       description: "",
-      imageUrl: "", // Existing image URL
-      image: null, // New uploaded image
+      imageUrl: "",
+      image: null,
       quantity: 1,
       price: 0,
     },
     cabin: {
       minCapacity: 1,
       maxCapacity: 1,
-      additionalFeeId: null,
     },
-  });
+    additionalFee: {
+      type: "",
+      description: "",
+      amount: 0,
+    },
+  });  
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,29 +36,35 @@ export default function UpdateCabin() {
       try {
         const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`);
         const responseText = await response.text();
-        console.log("Raw Response:", responseText); // ✅ Debugging raw response
+        console.log("Raw Response:", responseText);
   
-        const data = JSON.parse(responseText); // Convert text response to JSON
-        console.log("Parsed Data:", data); // ✅ Debugging parsed response
+        const data = JSON.parse(responseText);
+        console.log("Parsed Data:", data);
   
         if (response.ok && data.data?.cabin) {
           const cabin = data.data.cabin;
-          console.log("Extracted Cabin:", cabin); // ✅ Debugging extracted cabin object
+          console.log("Extracted Cabin:", cabin);
   
           setFormData({
             service: {
               name: cabin.service.name || "",
               description: cabin.service.description || "",
               imageUrl: cabin.service.imageUrl || "",
-              image: null, // No file initially
-              quantity: 1, // API does not return quantity, defaulting to 1
-              price: cabin.service.price || 0
+              image: null,
+              quantity: cabin.service.quantity || 1,
+              price: cabin.service.price || 0,
             },
             cabin: {
               minCapacity: cabin.minCapacity || 1,
               maxCapacity: cabin.maxCapacity || 1,
-              additionalFeeId: cabin.additionalFee ? cabin.additionalFee.id : null
-            }
+            },
+            additionalFee: cabin.additionalFee
+              ? {
+                  type: cabin.additionalFee.type || "",
+                  description: cabin.additionalFee.description || "",
+                  amount: cabin.additionalFee.amount || 0,
+                }
+              : { type: "", description: "", amount: 0 }, // Default if no additional fee
           });
         } else {
           throw new Error(data.message || "Failed to fetch cabin details.");
@@ -73,18 +83,18 @@ export default function UpdateCabin() {
   // Handle form changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
-    const section = dataset.section as "service" | "cabin";
-
+    const section = dataset.section as "service" | "cabin" | "additionalFee";
+  
     setFormData((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [name]: files ? files[0] : name === "quantity" || name === "price" || name.includes("Capacity")
+        [name]: files ? files[0] : name === "quantity" || name === "price" || name.includes("Capacity") || name === "amount"
           ? Number(value)
           : value,
       },
     }));
-  };
+  };  
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,7 +123,7 @@ export default function UpdateCabin() {
         return;
       }
     }
-
+    
     // Prepare the updated request body
     const requestBody = {
       service: {
@@ -126,9 +136,12 @@ export default function UpdateCabin() {
       cabin: {
         minCapacity: formData.cabin.minCapacity,
         maxCapacity: formData.cabin.maxCapacity,
-        additionalFeeId: formData.cabin.additionalFeeId ? Number(formData.cabin.additionalFeeId) : null,
       },
-    };
+      additionalFee:
+        formData.additionalFee.type || formData.additionalFee.description || formData.additionalFee.amount > 0
+          ? { ...formData.additionalFee }
+          : null, // Only set to null if ALL fields are empty
+    };        
 
     try {
       const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`, {
@@ -154,11 +167,9 @@ export default function UpdateCabin() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1 className="text-xl font-bold mb-4">Update Cabin</h1>
-
       <label>Title</label>
       <br />
-      <input type="text" name="name" data-section="service" value={formData.service.name} onChange={handleChange} />
+      <input type="text" name="name" data-section="service" value={formData.service.name} onChange={handleChange} required />
       <br />
 
       <label>Description</label>
@@ -171,6 +182,7 @@ export default function UpdateCabin() {
         rows={4}
         cols={50}
         style={{ resize: "vertical" }}
+        required
       />
       <br />
 
@@ -183,6 +195,7 @@ export default function UpdateCabin() {
         value={formData.cabin.minCapacity}
         min="1"
         onChange={handleChange}
+        required
       />
       <br />
 
@@ -195,14 +208,8 @@ export default function UpdateCabin() {
         value={formData.cabin.maxCapacity}
         min={formData.cabin.minCapacity}
         onChange={handleChange}
+        required
       />
-      <br />
-
-      <label>Current Image</label>
-      <br />
-      {formData.service.imageUrl && (
-        <img src={`http://localhost:8080/uploads/${formData.service.imageUrl}`} alt="Cabin Image" width="100" />
-      )}
       <br />
 
       <label>New Image (Optional)</label>
@@ -212,17 +219,29 @@ export default function UpdateCabin() {
 
       <label>Quantity</label>
       <br />
-      <input type="number" name="quantity" data-section="service" value={formData.service.quantity} min="1" onChange={handleChange} />
+      <input type="number" name="quantity" data-section="service" value={formData.service.quantity} min="1" onChange={handleChange} required />
       <br />
 
       <label>Rate</label>
       <br />
-      <input type="number" name="price" placeholder="₱" data-section="service" value={formData.service.price} min="0" onChange={handleChange} />
+      <input type="number" name="price" placeholder="₱" data-section="service" value={formData.service.price} min="0" onChange={handleChange} required />
       <br />
 
-      <label>Additional Fee ID (Optional)</label>
+      <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
+
+      Type
       <br />
-      <input type="text" name="additionalFeeId" data-section="cabin" value={formData.cabin.additionalFeeId || ""} onChange={handleChange} />
+      <input type="text" name="type" data-section="additionalFee" value={formData.additionalFee.type} onChange={handleChange} placeholder="e.g., Cleaning Fee" />
+      <br />
+
+      Description
+      <br />
+      <textarea name="description" data-section="additionalFee" value={formData.additionalFee.description} onChange={handleChange} rows={2} cols={50} />
+      <br />
+
+      Amount
+      <br />
+      <input type="number" name="amount" data-section="additionalFee" value={formData.additionalFee.amount} min="0" onChange={handleChange} />
       <br />
 
       <button type="submit">Update Cabin</button>
