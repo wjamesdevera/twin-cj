@@ -65,18 +65,45 @@
   background: white;
   width: 100%;
   appearance: none;
+  outline: none;
+  box-shadow: none;
 }
 
-.form-field select {
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select-wrapper select {
   padding: 0.9rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
-  background: white;
-  color: #646060;
+  background: rgb(255, 255, 255);
+  color: #6460608f;
   width: 100%;
   appearance: none;
+  outline: none;
   cursor: pointer;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.select-wrapper select:focus {
+  outline: none;
+  border: 1px solid var(--color-amber-400, #de954a);
+  box-shadow: none;
+}
+
+.chevron-down {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  font-size: 1rem;
+  margin-top: 0.3rem;
+  margin-left: 5.2rem;
+  color: #ff0a0a;
 }
 
 .form-field textarea {
