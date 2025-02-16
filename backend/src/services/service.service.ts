@@ -15,6 +15,7 @@ export const getCabin = async (id: number) => {
           description: true,
           price: true,
           imageUrl: true,
+          quantity: true,
         },
       },
       additionalFee: {
@@ -39,6 +40,7 @@ export const getAllCabins = async () => {
           description: true,
           price: true,
           imageUrl: true,
+          quantity: true,
         },
       },
       additionalFee: {
