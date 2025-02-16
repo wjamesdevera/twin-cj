@@ -158,10 +158,12 @@ export const passwordResetHandler = catchErrors(
 
 export const changePasswordHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const { password } = changePasswordSchema.parse(request.body);
+    const { oldPassword, newPassword } = changePasswordSchema.parse(
+      request.body
+    );
     const userId = request.userId;
 
-    await changePassword({ userId, password });
+    await changePassword({ userId, oldPassword, newPassword });
     return response.status(OK).json({
       status: "success",
       data: {
