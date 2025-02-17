@@ -1,10 +1,11 @@
 import MainLayout from "./layouts/main.layout";
 
-export default function Home() {
+const page = () => {
   return (
     <MainLayout>
       <main></main>
     </MainLayout>
-
   );
-}
+};
+
+export default page;
