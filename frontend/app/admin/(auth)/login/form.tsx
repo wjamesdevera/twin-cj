@@ -2,23 +2,24 @@
 import useSWRMutation from "swr/mutation";
 import styles from "./login.module.scss";
 import { login } from "@/app/lib/api";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loading } from "@/app/components/loading";
 import Image from "next/image";
-import twinCJLogo from "../../../public/assets/twin-cj-logo.png";
+import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import Link from "next/link";
 
 export function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const { trigger, error, isMutating } = useSWRMutation(
     "login",
-    (key, { arg }) => login(arg),
+    (key, { arg }: { arg: { email: string; password: string } }) => login(arg),
     {
       onSuccess: () => {
-        redirect("/admin");
+        router.push("/admin");
       },
     }
   );
@@ -64,7 +65,10 @@ export function LoginForm() {
                 </small>
               )}
               <div>
-                <Link className={styles["forgot-password"]} href="#">
+                <Link
+                  className={styles["forgot-password"]}
+                  href="/admin/password_reset"
+                >
                   Forgot Password?
                 </Link>
                 <button

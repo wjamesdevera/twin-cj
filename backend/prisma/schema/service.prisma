@@ -9,7 +9,7 @@ model Service {
     updatedAt   DateTime @updatedAt @map("updated_at")
 
     // Relation
-    // TODO: service status
+    dayTourActivity DayTourActivities?
 
     @@map("services")
 }

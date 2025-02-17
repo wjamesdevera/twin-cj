@@ -322,6 +322,16 @@ table {
   --color-red-800: #b91c1c;
   --color-red-900: #991b1b;
   --color-red-1000: #7f1d1d;
+  --color-green-100: #ecfdf5;
+  --color-green-200: #d1fae5;
+  --color-green-300: #a7f3d0;
+  --color-green-400: #6ee7b7;
+  --color-green-500: #34d399;
+  --color-green-600: #10b981;
+  --color-green-700: #059669;
+  --color-green-800: #047857;
+  --color-green-900: #065f46;
+  --color-green-1000: #064e3b;
 
   /* number */
   --text-line-height-xs: 1.0416rem;
@@ -420,4 +430,19 @@ a {
 }
 a:hover {
   text-decoration: underline;
+}
+.fade-in {
+  animation: fadeInAnimation ease 2s;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
