@@ -43,7 +43,8 @@ type LoginAccountParams = {
 
 type ChangePasswordParams = {
   userId: string;
-  password: string;
+  oldPassword: string;
+  newPassword: string;
 };
 
 export const createAccount = async (data: CreateAccountParams) => {
@@ -342,23 +343,32 @@ export const resetPassword = async ({
 
 export const changePassword = async ({
   userId,
-  password,
+  oldPassword,
+  newPassword,
 }: ChangePasswordParams) => {
   try {
-    const user = await prisma.userAccount.update({
+    const user = await prisma.userAccount.findFirst({
       where: {
         id: userId,
       },
-      include: {
-        personalDetail: true,
+    });
+
+    appAssert(user, UNAUTHORIZED, "User not found");
+
+    const isOldPasswordValid = verifyPassword(oldPassword, user.password);
+
+    appAssert(isOldPasswordValid, UNAUTHORIZED, "Invalid password");
+
+    const updatedUser = await prisma.userAccount.update({
+      where: {
+        id: userId,
       },
       data: {
-        password: await hashPassword(password),
+        password: await hashPassword(newPassword),
       },
     });
-    return {
-      userId: user.id,
-    };
+
+    return updatedUser;
   } catch (error: Error | any) {
     console.error(error.message);
   }
