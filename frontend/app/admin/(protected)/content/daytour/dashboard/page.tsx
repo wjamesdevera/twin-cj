@@ -16,6 +16,7 @@ interface DayTour {
 
 const DayTourView = () => {
   const [dayTours, setDayTours] = useState<DayTour[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -80,35 +81,69 @@ const DayTourView = () => {
     router.push(`/admin/content/daytour/edit/${id}`);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id?: number) => {
     const confirmed = window.confirm(
-      'Are you sure you want to delete this day tour?'
+      'Are you sure you want to delete the selected day tours?'
     );
     if (!confirmed) {
       return;
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/services/day-tour/${id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      if (id) {
+        // Single delete
+        const response = await fetch(
+          `http://localhost:8080/api/services/day-tour/${id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to delete day tour with id: ${id}`);
         }
-      );
-      if (!response.ok) {
-        throw new Error(`Failed to delete day tour with id: ${id}`);
-      }
+        setDayTours((prevTours) => prevTours.filter((tour) => tour.id !== id));
+      } else {
+        // Multiple delete
+        await Promise.all(
+          selectedIds.map(async (id) => {
+            const response = await fetch(
+              `http://localhost:8080/api/services/day-tour/${id}`,
+              {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            if (!response.ok) {
+              throw new Error(`Failed to delete day tour with id: ${id}`);
+            }
+          })
+        );
 
-      setDayTours((prevTours) => prevTours.filter((tour) => tour.id !== id));
+        setDayTours((prevTours) =>
+          prevTours.filter((tour) => !selectedIds.includes(tour.id))
+        );
+        setSelectedIds([]);
+        alert('Selected day tours deleted successfully!');
+      }
     } catch (err) {
       console.error(err);
       setError(
         err instanceof Error ? err.message : 'An unknown error occurred'
       );
     }
+  };
+
+  const handleCheckboxChange = (id: number) => {
+    setSelectedIds((prevSelectedIds) =>
+      prevSelectedIds.includes(id)
+        ? prevSelectedIds.filter((selectedId) => selectedId !== id)
+        : [...prevSelectedIds, id]
+    );
   };
 
   if (loading) {
@@ -125,9 +160,17 @@ const DayTourView = () => {
       <button className="add" onClick={handleAdd}>
         Add Day Tour
       </button>
+      <button
+        className="delete"
+        onClick={() => handleDelete()}
+        disabled={!selectedIds.length}
+      >
+        Delete Selected
+      </button>
       <table className={styles.table}>
         <thead>
           <tr>
+            <th>Select</th>
             <th>Actions</th>
             <th>ID</th>
             <th>Name</th>
@@ -142,6 +185,13 @@ const DayTourView = () => {
         <tbody>
           {dayTours.map((dayTour) => (
             <tr key={dayTour.id}>
+              <td>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(dayTour.id)}
+                  onChange={() => handleCheckboxChange(dayTour.id)}
+                />
+              </td>
               <td className={styles.actions}>
                 <button className="edit" onClick={() => handleEdit(dayTour.id)}>
                   Edit
