@@ -6,9 +6,24 @@ import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import Button from "@/app/components/button";
+import useSWRMutation from "swr/mutation";
+import { changePassword } from "@/app/lib/api";
+import { Loading } from "@/app/components/loading";
 
 export function ChangePasswordForm() {
   const router = useRouter();
+
+  const { trigger, isMutating, error } = useSWRMutation(
+    "change-password",
+    (key, { arg }: { arg: { oldPassword: string; newPassword: string } }) =>
+      changePassword(arg),
+    {
+      onSuccess: () => {
+        router.push("/admin");
+      },
+    }
+  );
+
   const [oldPassword, setOldPassword] = useState("");
   const [isOldPasswordCorrect, setIsOldPasswordCorrect] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -61,7 +76,13 @@ export function ChangePasswordForm() {
   const isAllValidationsPassed =
     Object.values(passwordValidations).every(Boolean);
 
-  return (
+  const handleChangePassword = async () => {
+    await trigger({ oldPassword, newPassword });
+  };
+
+  return isMutating ? (
+    <Loading />
+  ) : (
     <div className={styles["change-password-container"]}>
       <div className={styles["change-password-wrapper"]}>
         <div className={styles["form-title"]}>
@@ -103,11 +124,11 @@ export function ChangePasswordForm() {
           </div>
 
           {/* TODO: update to validate with backend */}
-          {!isOldPasswordCorrect && oldPassword.length > 0 && (
+          {error ? (
             <small className={styles["error-message"]}>
               Incorrect password.
             </small>
-          )}
+          ) : null}
 
           {/* New Password */}
           <div className={styles["password-input-container"]}>
@@ -214,7 +235,9 @@ export function ChangePasswordForm() {
           )}
 
           <div>
-            <Button fullWidth={true}>Change Password</Button>
+            <Button fullWidth={true} onClick={handleChangePassword}>
+              Change Password
+            </Button>
             <Button
               className={styles["cancel-button"]}
               variant="primary"
