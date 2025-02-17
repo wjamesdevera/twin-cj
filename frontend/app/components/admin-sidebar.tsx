@@ -1,18 +1,14 @@
 "use client";
 
 import React, { JSX, useState } from "react";
-import styles from "./sidebar.module.scss";
+import styles from "./admin-sidebar.module.scss";
 import Image from "next/image";
 import Link from "next/link";
 import { FaHome, FaRegUser } from "react-icons/fa";
 import { FaAngleDown, FaAngleUp, FaRegPenToSquare } from "react-icons/fa6";
 import { LuCalendarDays } from "react-icons/lu";
 import { TbArrowBarToLeft, TbArrowBarToRight } from "react-icons/tb";
-import twinCJLogo from "@/public/assets/logo_admin.png";
-
-interface SidebarProps {
-  isOpen: boolean;
-}
+import twinCJLogo from "@/public/assets/admin-logo.svg";
 
 interface NavItemProps {
   href: string;
@@ -22,6 +18,10 @@ interface NavItemProps {
 }
 
 interface NavListProps {
+  collapsed: boolean;
+}
+
+interface NavDropdownProps {
   collapsed: boolean;
 }
 
@@ -38,7 +38,7 @@ const NavItem = ({ label, href, icon, collapsed }: NavItemProps) => {
   );
 };
 
-const NavDropdown = ({ collapsed }) => {
+const NavDropdown = ({ collapsed }: NavDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -121,8 +121,9 @@ const Sidebar: React.FC = () => {
             src={twinCJLogo}
             alt="Twin CJ Logo"
             className={styles.logo}
-            width={175}
-            height={75}
+            width={150}
+            height={125}
+            objectFit="contain"
           />
         </div>
 
