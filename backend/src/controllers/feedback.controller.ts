@@ -2,12 +2,16 @@ import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
 import { OK } from "../constants/http";
 
-export const sendFeedback = catchErrors(
+export const sendFeedbackHandler = catchErrors(
   async (request: Request, response: Response) => {
+    const data = sendFeedbackSchema.parse(request.body);
+
+    await sendFeedback(data);
+
     response.status(OK).json({
       status: "success",
       data: {
-        message: "Feedback route successfully installed",
+        message: "Feedback sent successfully",
       },
     });
   }
