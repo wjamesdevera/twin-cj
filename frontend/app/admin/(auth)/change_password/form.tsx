@@ -239,8 +239,8 @@ export function ChangePasswordForm() {
               Change Password
             </Button>
             <Button
+              variant="outline-black"
               className={styles["cancel-button"]}
-              variant="primary"
               onClick={() => router.push("/admin")}
             >
               Cancel
