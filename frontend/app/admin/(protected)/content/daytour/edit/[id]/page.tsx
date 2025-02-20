@@ -89,45 +89,18 @@ const EditDayTour: React.FC = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === 'number' ? Number(value) || 0 : value,
-    }));
-    if (name === 'name') {
-      if (value.length >= 49) {
-        setShowNameHelperText(true);
-      } else {
-        setShowNameHelperText(false);
-      }
-    }
-
-    if (name === 'description') {
-      if (value.length >= 99) {
-        setShowDescriptionHelperText(true);
-      } else {
-        setShowDescriptionHelperText(false);
-      }
-    }
-
-    if (name === 'rate') {
-      const rateRegex = /^\d+(\.\d+)?$/;
-      if (!rateRegex.test(value) || parseFloat(value) <= 0) {
-        setShowRateHelperText(true);
-      } else {
-        setShowRateHelperText(false);
-      }
-    }
-
-    if (name === 'quantity') {
-      const quantityRegex = /^\d+$/;
-      if (!quantityRegex.test(value) || parseInt(value) <= 0) {
-        setShowQuantityHelperText(true);
-      } else {
-        setShowQuantityHelperText(false);
-      }
-    }
+  const hasChanges = () => {
+    if (!originalData) return true;
+    const { imageUrl, ...originalDataWithoutImage } = originalData;
+    const { imageUrl: currentImage, ...currentDataWithoutImage } = formData;
+    return (
+      JSON.stringify(originalDataWithoutImage) !==
+        JSON.stringify(currentDataWithoutImage) || !!imageFile
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,8 +117,7 @@ const EditDayTour: React.FC = () => {
     }
 
     if (
-      !/^\d+(\.\d+)?$/.test(formData.rate) ||
-      isNaN(parseFloat(formData.rate)) ||
+      !/^[0-9]+(\.[0-9]+)?$/.test(formData.rate) ||
       parseFloat(formData.rate) <= 0
     ) {
       alert('Rate must be a valid positive number.');
@@ -153,24 +125,14 @@ const EditDayTour: React.FC = () => {
     }
 
     if (
-      !/^\d+$/.test(formData.quantity) ||
-      isNaN(parseInt(formData.quantity)) ||
+      !/^[0-9]+$/.test(formData.quantity) ||
       parseInt(formData.quantity) <= 0
     ) {
       alert('Quantity must be a positive integer.');
       return;
     }
 
-    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (imageFile && !validImageTypes.includes(imageFile.type)) {
-      alert('Invalid image type. Only JPG, JPEG, and PNG are allowed.');
-      return;
-    }
-
-    if (
-      originalData &&
-      JSON.stringify(originalData) === JSON.stringify(formData)
-    ) {
+    if (!hasChanges()) {
       alert(
         'No changes detected. Please modify at least one field before submitting.'
       );
@@ -180,12 +142,9 @@ const EditDayTour: React.FC = () => {
     const updatedFormData = new FormData();
     updatedFormData.append('name', formData.name);
     updatedFormData.append('description', formData.description);
-    if (imageFile) {
-      updatedFormData.append('image', imageFile);
-      updatedFormData.append('replaceImage', 'true');
-    }
-    updatedFormData.append('rate', formData.rate.toString());
-    updatedFormData.append('quantity', formData.quantity.toString());
+    updatedFormData.append('rate', formData.rate);
+    updatedFormData.append('quantity', formData.quantity);
+    if (imageFile) updatedFormData.append('image', imageFile);
 
     try {
       const response = await fetch(
@@ -196,10 +155,7 @@ const EditDayTour: React.FC = () => {
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to update day tour with id: ${id}`);
-      }
+      if (!response.ok) throw new Error('Failed to update day tour');
 
       alert('Day tour updated successfully!');
       router.push('/admin/content/daytour/dashboard');
@@ -207,7 +163,6 @@ const EditDayTour: React.FC = () => {
       setError(
         err instanceof Error ? err.message : 'An unknown error occurred'
       );
-      return;
     }
   };
 

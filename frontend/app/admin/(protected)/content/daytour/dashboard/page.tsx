@@ -49,8 +49,8 @@ const DayTourView = () => {
             imageUrl: tour.service?.imageUrl || '',
             rate: tour.service?.price || 0,
             quantity: tour.service?.quantity || 0,
-            createdAt: new Date(tour.createdAt).toLocaleString(),
-            updatedAt: new Date(tour.updatedAt).toLocaleString(),
+            createdAt: new Date(tour.createdAt).toLocaleDateString(),
+            updatedAt: new Date(tour.updatedAt).toLocaleDateString(),
           }));
 
           setDayTours((prevTours) => {
@@ -83,7 +83,7 @@ const DayTourView = () => {
 
   const handleDelete = async (id?: number) => {
     const confirmed = window.confirm(
-      'Are you sure you want to delete the selected day tours?'
+      'Are you sure you want to delete the selected day tour/s?'
     );
     if (!confirmed) {
       return;
