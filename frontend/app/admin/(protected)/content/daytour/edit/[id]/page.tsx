@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from '../edit.module.scss';
+import { Loading } from '@/app/components/loading';
 
 interface DayTour {
   id: number;
@@ -23,6 +24,7 @@ const EditDayTour: React.FC = () => {
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isMutating, setIsMutating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showNameHelperText, setShowNameHelperText] = useState<boolean>(false);
   const [showDescriptionHelperText, setShowDescriptionHelperText] =
@@ -105,6 +107,7 @@ const EditDayTour: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsMutating(true);
 
     if (
       !formData.name ||
@@ -113,6 +116,7 @@ const EditDayTour: React.FC = () => {
       !formData.quantity
     ) {
       alert('All fields are required.');
+      setIsMutating(false);
       return;
     }
 
@@ -121,6 +125,7 @@ const EditDayTour: React.FC = () => {
       parseFloat(formData.rate) <= 0
     ) {
       alert('Rate must be a valid positive number.');
+      setIsMutating(false);
       return;
     }
 
@@ -129,11 +134,13 @@ const EditDayTour: React.FC = () => {
       parseInt(formData.quantity) <= 0
     ) {
       alert('Quantity must be a positive integer.');
+      setIsMutating(false);
       return;
     }
 
     if (imageFile && imageFile.size > 1024 * 1024) {
       alert('Image size must not exceed 1MB.');
+      setIsMutating(false);
       return;
     }
 
@@ -141,6 +148,7 @@ const EditDayTour: React.FC = () => {
       alert(
         'No changes detected. Please modify at least one field before submitting.'
       );
+      setIsMutating(false);
       return;
     }
 
@@ -168,104 +176,111 @@ const EditDayTour: React.FC = () => {
       setError(
         err instanceof Error ? err.message : 'An unknown error occurred'
       );
+    } finally {
+      setIsMutating(false);
     }
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
+    if (!formData) return <div>No data found</div>;
   };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!formData) return <div>No data found</div>;
-
   return (
     <div className={styles.container}>
-      <h1>Edit Day Tour</h1>
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGroup}>
-          <label htmlFor="name">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name || ''}
-            onChange={handleChange}
-            maxLength={50}
-            required
-          />
-          {showNameHelperText && (
-            <small className={styles.helperText}>
-              Name must not exceed 50 characters
-            </small>
-          )}
+      {isMutating ? (
+        <Loading />
+      ) : (
+        <div>
+          <h1>Edit Day Tour</h1>
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label htmlFor="name">Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name || ''}
+                onChange={handleChange}
+                maxLength={50}
+                required
+              />
+              {showNameHelperText && (
+                <small className={styles.helperText}>
+                  Name must not exceed 50 characters
+                </small>
+              )}
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="description">Description</label>
+              <input
+                type="text"
+                id="description"
+                name="description"
+                value={formData.description || ''}
+                onChange={handleChange}
+                maxLength={100}
+                required
+              />
+              {showDescriptionHelperText && (
+                <small className={styles.helperText}>
+                  Description must not exceed 100 characters
+                </small>
+              )}
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="imageUrl">Image</label>
+              <input
+                type="file"
+                accept=".jpg,.png,.jpeg"
+                id="imageUrl"
+                onChange={(e) =>
+                  setImageFile(e.target.files ? e.target.files[0] : null)
+                }
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="rate">Rate</label>
+              <input
+                type="text"
+                id="rate"
+                name="rate"
+                value={formData.rate || ''}
+                onChange={handleChange}
+                required
+              />
+              {showRateHelperText && (
+                <small className={styles.helperText}>
+                  Rate must be a positive number only
+                </small>
+              )}
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="quantity">Quantity</label>
+              <input
+                type="text"
+                id="quantity"
+                name="quantity"
+                value={formData?.quantity || ''}
+                onChange={handleChange}
+                required
+              />
+              {showQuantityHelperText && (
+                <small className={styles.helperText}>
+                  Quantity must be a positive integer
+                </small>
+              )}
+            </div>
+            <button type="submit" className={styles.submitButton}>
+              Save Changes
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/admin/content/daytour/dashboard')}
+            >
+              Cancel
+            </button>
+          </form>
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="description">Description</label>
-          <input
-            type="text"
-            id="description"
-            name="description"
-            value={formData.description || ''}
-            onChange={handleChange}
-            maxLength={100}
-            required
-          />
-          {showDescriptionHelperText && (
-            <small className={styles.helperText}>
-              Description must not exceed 100 characters
-            </small>
-          )}
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="imageUrl">Image</label>
-          <input
-            type="file"
-            accept=".jpg,.png,.jpeg"
-            id="imageUrl"
-            onChange={(e) =>
-              setImageFile(e.target.files ? e.target.files[0] : null)
-            }
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="rate">Rate</label>
-          <input
-            type="text"
-            id="rate"
-            name="rate"
-            value={formData.rate || ''}
-            onChange={handleChange}
-            required
-          />
-          {showRateHelperText && (
-            <small className={styles.helperText}>
-              Rate must be a positive number only
-            </small>
-          )}
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="quantity">Quantity</label>
-          <input
-            type="text"
-            id="quantity"
-            name="quantity"
-            value={formData?.quantity || ''}
-            onChange={handleChange}
-            required
-          />
-          {showQuantityHelperText && (
-            <small className={styles.helperText}>
-              Quantity must be a positive integer
-            </small>
-          )}
-        </div>
-        <button type="submit" className={styles.submitButton}>
-          Save Changes
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push('/admin/content/daytour/dashboard')}
-        >
-          Cancel
-        </button>
-      </form>
+      )}
     </div>
   );
 };
