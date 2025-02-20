@@ -8,8 +8,8 @@ interface DayTour {
   name: string;
   description: string;
   imageUrl: string;
-  rate: number;
-  quantity: number;
+  rate: string;
+  quantity: string;
 }
 
 const EditDayTour: React.FC = () => {
@@ -18,12 +18,20 @@ const EditDayTour: React.FC = () => {
     name: '',
     description: '',
     imageUrl: '',
-    rate: 0,
-    quantity: 0,
+    rate: '',
+    quantity: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNameHelperText, setShowNameHelperText] = useState<boolean>(false);
+  const [showDescriptionHelperText, setShowDescriptionHelperText] =
+    useState<boolean>(false);
+  const [showRateHelperText, setShowRateHelperText] = useState<boolean>(false);
+  const [showQuantityHelperText, setShowQuantityHelperText] =
+    useState<boolean>(false);
+  const [originalData, setOriginalData] = useState<DayTour | null>(null);
+
   const router = useRouter();
   const params = useParams();
   const id = params.id;
@@ -53,14 +61,16 @@ const EditDayTour: React.FC = () => {
 
         if (data?.data?.dayTour?.service) {
           const service = data.data.dayTour.service;
-          setFormData({
+          const fetchedData = {
             id: data.data.dayTour.id,
             name: service.name || '',
             description: service.description || '',
             imageUrl: service.imageUrl || '',
             rate: service.price || 0,
             quantity: service.quantity || 0,
-          });
+          };
+          setFormData(fetchedData);
+          setOriginalData(fetchedData);
         } else {
           setError('Invalid data structure received');
         }
@@ -85,11 +95,87 @@ const EditDayTour: React.FC = () => {
       ...prevData,
       [name]: type === 'number' ? Number(value) || 0 : value,
     }));
+    if (name === 'name') {
+      if (value.length >= 49) {
+        setShowNameHelperText(true);
+      } else {
+        setShowNameHelperText(false);
+      }
+    }
+
+    if (name === 'description') {
+      if (value.length >= 99) {
+        setShowDescriptionHelperText(true);
+      } else {
+        setShowDescriptionHelperText(false);
+      }
+    }
+
+    if (name === 'rate') {
+      const rateRegex = /^\d+(\.\d+)?$/;
+      if (!rateRegex.test(value) || parseFloat(value) <= 0) {
+        setShowRateHelperText(true);
+      } else {
+        setShowRateHelperText(false);
+      }
+    }
+
+    if (name === 'quantity') {
+      const quantityRegex = /^\d+$/;
+      if (!quantityRegex.test(value) || parseInt(value) <= 0) {
+        setShowQuantityHelperText(true);
+      } else {
+        setShowQuantityHelperText(false);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData) return;
+
+    if (
+      !formData.name ||
+      !formData.description ||
+      !formData.rate ||
+      !formData.quantity
+    ) {
+      alert('All fields are required.');
+      return;
+    }
+
+    if (
+      !/^\d+(\.\d+)?$/.test(formData.rate) ||
+      isNaN(parseFloat(formData.rate)) ||
+      parseFloat(formData.rate) <= 0
+    ) {
+      alert('Rate must be a valid positive number.');
+      return;
+    }
+
+    if (
+      !/^\d+$/.test(formData.quantity) ||
+      isNaN(parseInt(formData.quantity)) ||
+      parseInt(formData.quantity) <= 0
+    ) {
+      alert('Quantity must be a positive integer.');
+      return;
+    }
+
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (imageFile && !validImageTypes.includes(imageFile.type)) {
+      alert('Invalid image type. Only JPG, JPEG, and PNG are allowed.');
+      return;
+    }
+
+    if (
+      originalData &&
+      JSON.stringify(originalData) === JSON.stringify(formData)
+    ) {
+      alert(
+        'No changes detected. Please modify at least one field before submitting.'
+      );
+      return;
+    }
 
     const updatedFormData = new FormData();
     updatedFormData.append('name', formData.name);
@@ -111,6 +197,7 @@ const EditDayTour: React.FC = () => {
       );
 
       if (!response.ok) {
+        const errorData = await response.json();
         throw new Error(`Failed to update day tour with id: ${id}`);
       }
 
@@ -120,6 +207,7 @@ const EditDayTour: React.FC = () => {
       setError(
         err instanceof Error ? err.message : 'An unknown error occurred'
       );
+      return;
     }
   };
 
@@ -139,8 +227,14 @@ const EditDayTour: React.FC = () => {
             name="name"
             value={formData.name || ''}
             onChange={handleChange}
+            maxLength={50}
             required
           />
+          {showNameHelperText && (
+            <small className={styles.helperText}>
+              Name must not exceed 50 characters
+            </small>
+          )}
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="description">Description</label>
@@ -150,8 +244,14 @@ const EditDayTour: React.FC = () => {
             name="description"
             value={formData.description || ''}
             onChange={handleChange}
+            maxLength={100}
             required
           />
+          {showDescriptionHelperText && (
+            <small className={styles.helperText}>
+              Description must not exceed 100 characters
+            </small>
+          )}
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="imageUrl">Image</label>
@@ -167,24 +267,34 @@ const EditDayTour: React.FC = () => {
         <div className={styles.formGroup}>
           <label htmlFor="rate">Rate</label>
           <input
-            type="number"
+            type="text"
             id="rate"
             name="rate"
             value={formData.rate || ''}
             onChange={handleChange}
             required
           />
+          {showRateHelperText && (
+            <small className={styles.helperText}>
+              Rate must be a positive number only
+            </small>
+          )}
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="quantity">Quantity</label>
           <input
-            type="number"
+            type="text"
             id="quantity"
             name="quantity"
             value={formData?.quantity || ''}
             onChange={handleChange}
             required
           />
+          {showQuantityHelperText && (
+            <small className={styles.helperText}>
+              Quantity must be a positive integer
+            </small>
+          )}
         </div>
         <button type="submit" className={styles.submitButton}>
           Save Changes
