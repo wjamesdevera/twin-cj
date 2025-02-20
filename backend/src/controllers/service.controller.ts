@@ -27,6 +27,18 @@ export const createDayTourHandler = catchErrors(
         .json({ error: 'Name and description must be strings' });
     }
 
+    if (name.length > 50) {
+      return res
+        .status(400)
+        .json({ error: 'Name must not be more than 50 characters' });
+    }
+
+    if (description.length > 100) {
+      return res
+        .status(400)
+        .json({ error: 'Description must not be more than 100 characters' });
+    }
+
     if (isNaN(parseFloat(rate)) || parseFloat(rate) <= 0) {
       return res.status(400).json({ error: 'Rate must be a positive number' });
     }

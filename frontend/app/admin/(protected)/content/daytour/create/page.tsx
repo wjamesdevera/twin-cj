@@ -22,6 +22,13 @@ function Page() {
     quantity: '',
   });
 
+  const [showNameHelperText, setShowNameHelperText] = useState<boolean>(false);
+  const [showDescriptionHelperText, setshowDescriptionHelperText] =
+    useState<boolean>(false);
+  const [showRateHelperText, setShowRateHelperText] = useState<boolean>(false);
+  const [showQuantityHelperText, setShowQuantityHelperText] =
+    useState<boolean>(false);
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -30,6 +37,36 @@ function Page() {
       ...formData,
       [name]: files ? files[0] : value,
     });
+
+    if (name === 'name' && value.length >= 50) {
+      setShowNameHelperText(true);
+    } else if (name === 'name' && value.length <= 49) {
+      setShowNameHelperText(false);
+    }
+
+    if (name === 'description' && value.length >= 100) {
+      setshowDescriptionHelperText(true);
+    } else if (name === 'description' && value.length <= 99) {
+      setshowDescriptionHelperText(false);
+    }
+
+    if (name === 'rate') {
+      const rateRegex = /^\d+(\.\d+)?$/;
+      if (!rateRegex.test(value) || parseFloat(value) <= 0) {
+        setShowRateHelperText(true);
+      } else {
+        setShowRateHelperText(false);
+      }
+    }
+
+    if (name === 'quantity') {
+      const quantityRegex = /^\d+$/;
+      if (!quantityRegex.test(value) || parseInt(value) <= 0) {
+        setShowQuantityHelperText(true);
+      } else {
+        setShowQuantityHelperText(false);
+      }
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -42,12 +79,12 @@ function Page() {
       !formData.rate ||
       !formData.quantity
     ) {
-      console.error('Validation Error: All fields are required.');
+      alert('All fields are required.');
       return;
     }
 
     if (isNaN(parseFloat(formData.rate)) || parseFloat(formData.rate) <= 0) {
-      console.error('Validation Error: Rate must be a positive number.');
+      alert('Rate must be a positive number.');
       return;
     }
 
@@ -55,7 +92,13 @@ function Page() {
       isNaN(parseInt(formData.quantity)) ||
       parseInt(formData.quantity) <= 0
     ) {
-      console.error('Validation Error: quantity must be a positive integer.');
+      alert('Quantity must be a positive integer.');
+      return;
+    }
+
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (formData.image && !validImageTypes.includes(formData.image.type)) {
+      alert('Invalid image type. Only JPG, JPEG, and PNG are allowed.');
       return;
     }
 
@@ -98,7 +141,11 @@ function Page() {
             name="name"
             value={formData.name}
             onChange={handleChange}
+            maxLength={50}
           />
+          {showNameHelperText && (
+            <small>Title must not exceed 50 characters</small>
+          )}
         </div>
         <div>
           <label>Description:</label>
@@ -107,7 +154,11 @@ function Page() {
             name="description"
             value={formData.description}
             onChange={handleChange}
+            maxLength={100}
           />
+          {showDescriptionHelperText && (
+            <small>Description must not exceed 100 characters</small>
+          )}
         </div>
         <div>
           <label>Upload Image:</label>
@@ -121,20 +172,26 @@ function Page() {
         <div>
           <label>Rate:</label>
           <input
-            type="number"
+            type="text"
             name="rate"
             value={formData.rate}
             onChange={handleChange}
           />
+          {showRateHelperText && (
+            <small>Rate must be a positive number only</small>
+          )}
         </div>
         <div>
           <label>Quantity:</label>
           <input
-            type="number"
+            type="text"
             name="quantity"
             value={formData.quantity}
             onChange={handleChange}
           />
+          {showQuantityHelperText && (
+            <small>Quantity must be a positive integer</small>
+          )}
         </div>
         <button type="submit">Submit</button>
         <button
