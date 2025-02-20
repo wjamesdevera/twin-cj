@@ -132,6 +132,11 @@ const EditDayTour: React.FC = () => {
       return;
     }
 
+    if (imageFile && imageFile.size > 1024 * 1024) {
+      alert('Image size must not exceed 1MB.');
+      return;
+    }
+
     if (!hasChanges()) {
       alert(
         'No changes detected. Please modify at least one field before submitting.'

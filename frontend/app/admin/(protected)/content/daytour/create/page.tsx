@@ -72,7 +72,6 @@ function Page() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Validate input fields
     if (
       !formData.name ||
       !formData.description ||
@@ -116,6 +115,11 @@ function Page() {
       return;
     }
 
+    if (formData.image && formData.image.size > 1024 * 1024) {
+      alert('Image size must not exceed 1MB.');
+      return;
+    }
+
     const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (formData.image && !validImageTypes.includes(formData.image.type)) {
       alert('Invalid image type. Only JPG, JPEG, and PNG are allowed.');
@@ -142,7 +146,6 @@ function Page() {
 
       if (response.ok) {
         alert('Day tour created successfully!');
-        // Redirects to admin dashboard
         router.push('/admin/content/daytour/dashboard');
       }
     } catch (error) {
