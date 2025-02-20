@@ -2,6 +2,7 @@
 
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { Loading } from '@/app/components/loading';
 
 function Page() {
   const router = useRouter();
@@ -28,6 +29,7 @@ function Page() {
   const [showRateHelperText, setShowRateHelperText] = useState<boolean>(false);
   const [showQuantityHelperText, setShowQuantityHelperText] =
     useState<boolean>(false);
+  const [isMutating, setIsMutating] = useState<boolean>(false);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -71,6 +73,7 @@ function Page() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setIsMutating(true);
 
     if (
       !formData.name ||
@@ -79,16 +82,19 @@ function Page() {
       !formData.quantity
     ) {
       alert('All fields are required.');
+      setIsMutating(false);
       return;
     }
 
     if (formData.name.length > 50) {
       alert('Name must not exceed 50 characters.');
+      setIsMutating(false);
       return;
     }
 
     if (formData.description.length > 100) {
       alert('Description must not exceed 100 characters.');
+      setIsMutating(false);
       return;
     }
 
@@ -98,6 +104,7 @@ function Page() {
       parseFloat(formData.rate) <= 0
     ) {
       alert('Rate must be a valid positive number.');
+      setIsMutating(false);
       return;
     }
 
@@ -107,22 +114,26 @@ function Page() {
       parseInt(formData.quantity) <= 0
     ) {
       alert('Quantity must be a positive integer.');
+      setIsMutating(false);
       return;
     }
 
     if (!formData.image) {
       alert('Please upload an image.');
+      setIsMutating(false);
       return;
     }
 
     if (formData.image && formData.image.size > 1024 * 1024) {
       alert('Image size must not exceed 1MB.');
+      setIsMutating(false);
       return;
     }
 
     const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (formData.image && !validImageTypes.includes(formData.image.type)) {
       alert('Invalid image type. Only JPG, JPEG, and PNG are allowed.');
+      setIsMutating(false);
       return;
     }
 
@@ -150,80 +161,89 @@ function Page() {
       }
     } catch (error) {
       console.error('Error creating day tour:', error);
+    } finally {
+      setIsMutating(false);
     }
   };
 
   return (
     <div>
-      <h1>Create Day Tour</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title:</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            maxLength={50}
-          />
-          {showNameHelperText && (
-            <small>Title must not exceed 50 characters</small>
-          )}
-        </div>
-        <div>
-          <label>Description:</label>
-          <input
-            type="text"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            maxLength={100}
-          />
-          {showDescriptionHelperText && (
-            <small>Description must not exceed 100 characters</small>
-          )}
-        </div>
-        <div>
-          <label>Upload Image:</label>
-          <input
-            type="file"
-            accept=".jpg,.png,.jpeg"
-            name="image"
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Rate:</label>
-          <input
-            type="text"
-            name="rate"
-            value={formData.rate}
-            onChange={handleChange}
-          />
-          {showRateHelperText && (
-            <small>Rate must be a positive number only</small>
-          )}
-        </div>
-        <div>
-          <label>Quantity:</label>
-          <input
-            type="text"
-            name="quantity"
-            value={formData.quantity}
-            onChange={handleChange}
-          />
-          {showQuantityHelperText && (
-            <small>Quantity must be a positive integer</small>
-          )}
-        </div>
-        <button type="submit">Submit</button>
-        <button
-          type="button"
-          onClick={() => router.push('/admin/content/daytour/dashboard')}
-        >
-          Cancel
-        </button>
-      </form>
+      {isMutating ? (
+        <Loading />
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div>
+            <div>
+              <h1>Create Day Tour</h1>
+
+              <label>Title:</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                maxLength={50}
+              />
+              {showNameHelperText && (
+                <small>Title must not exceed 50 characters</small>
+              )}
+            </div>
+            <div>
+              <label>Description:</label>
+              <input
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                maxLength={100}
+              />
+              {showDescriptionHelperText && (
+                <small>Description must not exceed 100 characters</small>
+              )}
+            </div>
+            <div>
+              <label>Upload Image:</label>
+              <input
+                type="file"
+                accept=".jpg,.png,.jpeg"
+                name="image"
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label>Rate:</label>
+              <input
+                type="text"
+                name="rate"
+                value={formData.rate}
+                onChange={handleChange}
+              />
+              {showRateHelperText && (
+                <small>Rate must be a positive number only</small>
+              )}
+            </div>
+            <div>
+              <label>Quantity:</label>
+              <input
+                type="text"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+              />
+              {showQuantityHelperText && (
+                <small>Quantity must be a positive integer</small>
+              )}
+            </div>
+            <button type="submit">Submit</button>
+            <button
+              type="button"
+              onClick={() => router.push('/admin/content/daytour/dashboard')}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }
