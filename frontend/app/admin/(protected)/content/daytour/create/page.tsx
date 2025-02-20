@@ -83,16 +83,36 @@ function Page() {
       return;
     }
 
-    if (isNaN(parseFloat(formData.rate)) || parseFloat(formData.rate) <= 0) {
-      alert('Rate must be a positive number.');
+    if (formData.name.length > 50) {
+      alert('Name must not exceed 50 characters.');
+      return;
+    }
+
+    if (formData.description.length > 100) {
+      alert('Description must not exceed 100 characters.');
       return;
     }
 
     if (
+      !/^\d+(\.\d+)?$/.test(formData.rate) ||
+      isNaN(parseFloat(formData.rate)) ||
+      parseFloat(formData.rate) <= 0
+    ) {
+      alert('Rate must be a valid positive number.');
+      return;
+    }
+
+    if (
+      !/^\d+$/.test(formData.quantity) ||
       isNaN(parseInt(formData.quantity)) ||
       parseInt(formData.quantity) <= 0
     ) {
       alert('Quantity must be a positive integer.');
+      return;
+    }
+
+    if (!formData.image) {
+      alert('Please upload an image.');
       return;
     }
 
