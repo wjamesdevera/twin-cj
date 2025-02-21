@@ -12,7 +12,7 @@ export default function CreateCabin() {
       description: "",
       image: null as File | null,
       quantity: 1,
-      price: 0,
+      price: 1,
     },
     cabin: {
       minCapacity: 1,
@@ -25,41 +25,115 @@ export default function CreateCabin() {
     },
   });
 
+  const [errors, setErrors] = useState({
+    name: "",
+    description: "",
+    minCapacity: "",
+    maxCapacity: "",
+    image: "",
+    quantity: "",
+    price: "",
+  });
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
   
     if (files && files[0]) {
       const file = files[0];
-
-      if (file.size > 1048576) {
-        alert("File size must be less than 1MB.");
-        e.target.value = "";
+      const validFormats = ["image/jpeg", "image/jpg", "image/png", "image/gif"]; // Allowed formats
+  
+      // Check for valid format
+      if (!validFormats.includes(file.type)) {
+        setErrors((prev) => ({ ...prev, image: "Invalid image format. Only JPG, PNG, or GIF allowed." }));
+        e.target.value = ""; // Clear the file input
+        setFormData((prev) => ({
+          ...prev,
+          service: { ...prev.service, image: null }, // Clear previously uploaded image
+        }));
         return;
       }
-      
+  
+      // Check for file size
+      if (file.size > 1048576) {
+        setErrors((prev) => ({ ...prev, image: "File size must be less than 1MB." }));
+        e.target.value = "";
+        setFormData((prev) => ({
+          ...prev,
+          service: { ...prev.service, image: null }, // Clear previously uploaded image
+        }));
+        return;
+      }
+  
+      // If file is valid, clear errors and store the new image
+      setErrors((prev) => ({ ...prev, image: "" }));
       setFormData((prev) => ({
         ...prev,
         [section]: { ...prev[section], [name]: file },
       }));
     } else {
+      const numericFields = ["quantity", "price", "minCapacity", "maxCapacity", "amount"];
+      const newValue = numericFields.includes(name) ? Number(value) : value;
+  
       setFormData((prev) => ({
         ...prev,
-        [section]: {
-          ...prev[section],
-          [name]: name === "quantity" || name === "price" || name.includes("Capacity") || name === "amount"
-            ? Number(value)
-            : value,
-        },
+        [section]: { ...prev[section], [name]: newValue },
+      }));
+  
+      setErrors((prev) => ({
+        ...prev,
+        [name]: validateField(name, newValue),
       }));
     }
-  };   
+  };  
+
+  const validateField = (name: string, value: any) => {
+    // Check for empty values first
+    if (value === "" || value === null || value === undefined) {
+      if (["name", "description", "quantity", "price", "minCapacity", "maxCapacity"].includes(name)) {
+        return "This field is required.";
+      }
+    }
+  
+    // Custom validation rules
+    if (name === "price" && value < 0) {
+      return "Rate must be greater than 0.";
+    }
+    if (name === "quantity" && (isNaN(value) || value < 1)) {
+      return "Quantity must be at least 1.";
+    }
+    if (name === "minCapacity" && (isNaN(value) || value < 1)) {
+      return "Minimum capacity must be at least 1.";
+    }
+    if (name === "maxCapacity" && (isNaN(value) || value < formData.cabin.minCapacity)) {
+      return "Maximum capacity cannot be less than minimum capacity.";
+    }
+  
+    return "";
+  };  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    let imageUrl = "";
+    // Validate all fields before submission
+    const newErrors = {
+      name: validateField("name", formData.service.name),
+      description: validateField("description", formData.service.description),
+      minCapacity: validateField("minCapacity", formData.cabin.minCapacity),
+      maxCapacity: validateField("maxCapacity", formData.cabin.maxCapacity),
+      quantity: validateField("quantity", formData.service.quantity),
+      price: validateField("price", formData.service.price),
+      image: formData.service.image ? "" : "Image is required.",
+    };
 
+    setErrors(newErrors);
+
+    // Check if there are any errors before proceeding
+    if (Object.values(newErrors).some((error) => error !== "")) {
+      return;
+    }
+
+    let imageUrl = "";
     if (formData.service.image) {
       const imageFormData = new FormData();
       imageFormData.append("image", formData.service.image);
@@ -112,7 +186,6 @@ export default function CreateCabin() {
       }
 
       alert("Cabin created successfully!");
-
       router.push("/cabin");
     } catch (error) {
       console.error("Error:", error);
@@ -121,57 +194,65 @@ export default function CreateCabin() {
 
   return (
     <form onSubmit={handleSubmit}>
-      Title
+      <label>Title</label>
       <br />
-      <input type="text" name="name" data-section="service" onChange={handleChange} required />
-      <br />
-
-      Description
-      <br />
-      <textarea name="description" data-section="service" onChange={handleChange} rows={4} cols={50} required />
+      <input type="text" name="name" data-section="service" onChange={handleChange} />
+      <p className="error" style={{ color: "red" }}>{errors.name}</p>
       <br />
 
-      Minimum Capacity
+      <label>Description</label>
       <br />
-      <input type="number" name="minCapacity" data-section="cabin" min="1" onChange={handleChange} required />
-      <br />
-
-      Maximum Capacity
-      <br />
-      <input type="number" name="maxCapacity" data-section="cabin" min={formData.cabin.minCapacity} onChange={handleChange} required />
+      <textarea name="description" data-section="service" onChange={handleChange} rows={4} cols={50} />
+      <p className="error" style={{ color: "red" }}>{errors.description}</p>
       <br />
 
-      Image
+      <label>Minimum Capacity</label>
       <br />
-      <input type="file" name="image" data-section="service" accept="image/*" onChange={handleChange} required />
+      <input type="number" name="minCapacity" data-section="cabin" min="1" value={formData.cabin.minCapacity || ""} onChange={handleChange} />
+      <p className="error" style={{ color: "red" }}>{errors.minCapacity}</p>
       <br />
 
-      Quantity
+      <label>Maximum Capacity</label>
       <br />
-      <input type="number" name="quantity" data-section="service" min="1" onChange={handleChange} required />
+      <input type="number" name="maxCapacity" data-section="cabin" min={formData.cabin.minCapacity} value={formData.cabin.maxCapacity || ""} onChange={handleChange} />
+      <p className="error" style={{ color: "red" }}>{errors.maxCapacity}</p>
       <br />
-      
-      Rate
+
+      <label>Image</label>
       <br />
-      <input type="number" name="price" placeholder="₱" data-section="service" min="0" onChange={handleChange} required />
+      <input type="file" name="image" data-section="service" accept="image/jpeg, image/jpg, image/png, image/gif" onChange={handleChange} />
+      <p className="error" style={{ color: "red" }}>{errors.image}</p>
+      <br />
+
+      <label>Quantity</label>
+      <br />
+      <input type="number" name="quantity" data-section="service" min="1" value={formData.service.quantity || ""} onChange={handleChange} />
+      <p className="error" style={{ color: "red" }}>{errors.quantity}</p>
+      <br />
+
+      <label>Rate</label>
+      <br />
+      <input type="number" name="price" placeholder="₱" data-section="service" min="1" value={formData.service.price || ""} onChange={handleChange} />
+      <p className="error" style={{ color: "red" }}>{errors.price}</p>
       <br />
 
       <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
+      <br />
 
-      Type
+      <label>Type</label>
       <br />
       <input type="text" name="type" data-section="additionalFee" onChange={handleChange} />
-      <br />
+      <br /><br />
 
-      Description
+      <label>Description</label>
       <br />
       <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={2} cols={50} />
-      <br />
+      <br /><br />
 
-      Amount
+      <label>Amount</label>
       <br />
       <input type="number" name="amount" placeholder="₱" data-section="additionalFee" min="0" onChange={handleChange} />
-      <br />
+      <br /><br />
 
       <button type="submit">Add New Cabin</button>
       <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
