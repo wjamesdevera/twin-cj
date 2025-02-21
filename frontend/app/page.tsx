@@ -5,6 +5,7 @@ import twinCJLogo from "@/public/assets/admin-logo.svg";
 import HomePageCarousel from "./components/home-page-carousel";
 import Button from "./components/button";
 
+
 const cabins = [
   {
     imageSrc: "/assets/home_mini.jpg",
@@ -218,4 +219,6 @@ export default function Home() {
       </section>
     </main>
   );
-}
+};
+
+export default page;

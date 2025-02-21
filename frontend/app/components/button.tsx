@@ -4,7 +4,7 @@ import { Loading } from "./loading";
 import clsx from "clsx";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "danger" | "outline-white";
+  variant?: "primary" | "secondary" | "outline" | "danger" | "outline-white" | "outline-black";
   fullWidth?: boolean;
   isLoading?: boolean;
   className?: string;

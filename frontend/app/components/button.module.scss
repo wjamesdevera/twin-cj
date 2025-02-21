@@ -26,6 +26,33 @@
   }
 }
 
+.outline-black {
+  cursor: pointer;
+  outline: 0;
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  background-color: transparent;
+  border: 2px solid transparent;
+  font-family: var(--font-primary);
+  font-size: var(--text-size-primary);
+  line-height: var(--text-line-height-base);
+  font-weight: 400;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  color: var(--color-neutral-500);
+  border-color: var(--color-neutral-500);
+
+  &:hover {
+    color: var(--color-neutral-200);
+    background-color: var(--color-sunset-orange-600);
+    border-color: var(--color-sunset-orange-600);
+  }
+}
+
 .outline {
   background-color: transparent;
   border: 1px solid transparent;

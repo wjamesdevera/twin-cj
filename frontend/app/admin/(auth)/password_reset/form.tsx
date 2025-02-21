@@ -5,7 +5,6 @@ import Image from "next/image";
 import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import useSWRMutation from "swr/mutation";
 import { forgotPasword } from "@/app/lib/api";
-import { redirect } from "next/navigation";
 import { Loading } from "@/app/components/loading";
 
 export function PasswordResetForm() {
@@ -14,7 +13,7 @@ export function PasswordResetForm() {
 
   const { trigger, isMutating, error } = useSWRMutation(
     "forgot-password",
-    (key, { arg }) => forgotPasword(arg),
+    (key, { arg }: { arg: { email: string } }) => forgotPasword(arg),
     {
       onSuccess: () => {
         setIsSuccess(true);

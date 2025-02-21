@@ -33,3 +33,8 @@ export const resetPasswordSchema = z.object({
   password: passwordSchema,
   verificationCode: verificationCodeSchema,
 });
+
+export const changePasswordSchema = z.object({
+  oldPassword: passwordSchema,
+  newPassword: passwordSchema,
+});
