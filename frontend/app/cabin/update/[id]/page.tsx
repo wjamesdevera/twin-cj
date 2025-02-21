@@ -12,7 +12,7 @@ export default function UpdateCabin() {
       name: "",
       description: "",
       imageUrl: "",
-      image: null,
+      image: null as File | null,
       quantity: 1,
       price: 1,
     },
@@ -103,15 +103,39 @@ export default function UpdateCabin() {
     maxCapacity: "",
     quantity: "",
     price: "",
+    image: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
-
+  
     if (files && files[0]) {
       const file = files[0];
       const validFormats = ["image/jpeg", "image/jpg", "image/png", "image/gif"]; // Allowed formats
+  
+      // Check for valid format
+      if (!validFormats.includes(file.type)) {
+        setErrors((prev) => ({ ...prev, image: "Invalid image format. Only JPG, PNG, or GIF allowed." }));
+        e.target.value = ""; // Reset file input
+        setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } })); // Reset image state
+        return;
+      }
+  
+      // Check for file size
+      if (file.size > 1048576) {
+        setErrors((prev) => ({ ...prev, image: "File size must be less than 1MB." }));
+        e.target.value = ""; // Reset file input
+        setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } })); // Reset image state
+        return;
+      }
+  
+      // If file is valid, store the new image and reset errors
+      setErrors((prev) => ({ ...prev, image: "" }));
+      setFormData((prev) => ({
+        ...prev,
+        service: { ...prev.service, image: file },
+      }));
     } else {
       const numericFields = ["quantity", "price", "minCapacity", "maxCapacity", "amount"];
       const newValue = numericFields.includes(name) ? Number(value) : value;
@@ -127,7 +151,7 @@ export default function UpdateCabin() {
       }));
     }
   };
-
+  
   const validateField = (name: string, value: any) => {
     // Check for empty values first
     if (value === "" || value === null || value === undefined) {
@@ -163,6 +187,7 @@ export default function UpdateCabin() {
       maxCapacity: validateField("maxCapacity", formData.cabin.maxCapacity),
       quantity: validateField("quantity", formData.service.quantity),
       price: validateField("price", formData.service.price),
+      image: "",
     };
 
     setErrors(newErrors);
@@ -292,8 +317,9 @@ export default function UpdateCabin() {
 
       <label>New Image (Optional)</label>
       <br />
-      <input type="file" name="image" data-section="service" accept="image/*" onChange={handleChange} />
-      <br /><br />
+      <input type="file" name="image" data-section="service" accept="image/jpeg, image/jpg, image/png, image/gif" onChange={handleChange} />
+      <p className="error" style={{ color: "red" }}>{errors.image}</p>
+      <br />
 
       <label>Quantity</label>
       <br />
