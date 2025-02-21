@@ -7,12 +7,14 @@
 }
 
 .inquiry-form {
-  width: 50%;
+  width: 100%;
+  max-width: 900px;
   background: transparent;
   padding: 2rem;
-  @media (max-width: 768px) {
+
+  @media (max-width: 820px) {
     // Tablets
-    width: 80%;
+    width: 100%;
   }
 
   @media (max-width: 480px) {
@@ -21,7 +23,6 @@
     padding: 1.5rem;
   }
 }
-
 .form-title {
   font-size: 1.5rem;
   font-weight: bold;
