@@ -73,13 +73,13 @@ export default function CreateCabin() {
       }));
     } else {
       const numericFields = ["quantity", "price", "minCapacity", "maxCapacity", "amount"];
-      const newValue = numericFields.includes(name) && value === "" ? "" : Number(value);
+      const newValue = numericFields.includes(name) ? (value === "" ? "" : Number(value)) : value; // Ensure numeric conversion
       
       setFormData((prev) => ({
         ...prev,
-        [section]: { ...prev[section], [name]: newValue },
+        [section]: { ...prev[section], [name]: newValue }, // Use `newValue` instead of `value`
       }));
-    
+  
       setErrors((prev) => ({
         ...prev,
         [name]: validateField(name, newValue),
@@ -207,7 +207,7 @@ export default function CreateCabin() {
 
       <label>Description</label>
       <br />
-      <textarea name="description" data-section="service" onChange={handleChange} rows={2} cols={30} />
+      <textarea name="description" data-section="service" onChange={handleChange} rows={3} cols={30} />
       <p className="error" style={{ color: "red" }}>{errors.description}</p>
       <br />
 

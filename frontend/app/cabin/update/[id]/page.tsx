@@ -289,7 +289,7 @@ export default function UpdateCabin() {
         data-section="service"
         value={formData.service.description}
         onChange={handleChange}
-        rows={2}
+        rows={3}
         cols={30}
         style={{ resize: "vertical" }}
       />
