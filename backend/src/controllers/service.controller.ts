@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
-import { createCabin, deleteAllCabins, deleteCabin, getAllCabins, getCabin, updateCabin } from "../services/service.service";
+import { createCabin, deleteAdditionalFee, deleteAllCabins, deleteCabin, getAllAdditionalFees, getAllCabins, getCabin, updateCabin } from "../services/service.service";
 import { CREATED, OK } from "../constants/http";
 
 export const getCabinHandler = catchErrors(async (req: Request, res: Response) => {
@@ -152,4 +152,44 @@ export const updateCabinHandler = catchErrors(async (req: Request, res: Response
     status: "success",
     data: updatedData,
   });
+});
+
+/* ADDITIONAL FEES */
+
+export const getAllAdditionalFeesHandler = catchErrors(async (req: Request, res: Response) => {
+  const additionalFees = await getAllAdditionalFees();
+
+  if (!additionalFees.length) {
+    return res.status(200).json({
+      status: "success",
+      message: "No additional fees found.",
+      data: [],
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: additionalFees,
+  });
+});
+
+export const deleteAdditionalFeeHandler = catchErrors(async (req: Request, res: Response) => {
+  const { type } = req.params;
+
+  if (!type) {
+    return res.status(400).json({ status: "error", message: "Fee type is required for deletion." });
+  }
+
+  try {
+    const deletedFee = await deleteAdditionalFee(type);
+    res.status(200).json({
+      status: "success",
+      message: `Additional fee '${type}' deleted successfully.`,
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "error",
+      message: `Additional fee '${type}' not found.`,
+    });
+  }
 });

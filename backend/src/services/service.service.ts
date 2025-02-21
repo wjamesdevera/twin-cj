@@ -240,3 +240,40 @@ export const updateCabin = async (
     return { service: updatedService, cabin: updatedCabin, additionalFee: updatedAdditionalFee };
   });
 };
+
+/* ADDITIONAL FEES */
+
+export const getAllAdditionalFees = async () => {
+  const fees = await prisma.additionalFee.findMany({
+    select: {
+      id: true,
+      type: true,
+      description: true,
+      amount: true,
+    },
+  });
+
+  // Ensure unique fee types
+  const uniqueFees = fees.filter((fee, index, self) =>
+    index === self.findIndex((f) => f.type === fee.type)
+  );
+
+  return uniqueFees;
+};
+
+export const deleteAdditionalFee = async (type: string) => {
+  // First, find the additional fee by type
+  const additionalFee = await prisma.additionalFee.findFirst({
+    where: { type },
+  });
+
+  if (!additionalFee) {
+    throw new Error(`Additional fee with type '${type}' not found.`);
+  }
+
+  // Delete using the unique ID
+  return await prisma.additionalFee.delete({
+    where: { id: additionalFee.id },
+  });
+};
+
