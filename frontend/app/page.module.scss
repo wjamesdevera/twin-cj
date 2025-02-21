@@ -207,6 +207,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-top: 3rem;
   gap: 3rem;
 }
 
@@ -247,6 +248,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
+    margin-top: 4rem;
     padding: 0 3rem;
   }
 
