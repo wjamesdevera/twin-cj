@@ -61,7 +61,7 @@ const CabinCard: React.FC<CabinCardProps> = ({
     <div className={styles["cabin-card"]}>
       <div className={styles["wrapper"]}>
         <div className={styles["img-wrapper"]}>
-          <Image src={imageSrc} alt={imgAltText} objectFit="cover" fill />
+          <Image src={imageSrc} alt={imgAltText} fill />
         </div>
         <div className={styles["title"]}>{title}</div>
         <div className={styles["description"]}>
@@ -79,13 +79,7 @@ export default function Home() {
     <main>
       <section className={styles.heroSection}>
         <div className={styles.backgroundImage}>
-          <Image
-            src="/assets/home_cover.jpg"
-            alt="Home Cover"
-            layout="fill"
-            objectFit="cover"
-            priority
-          />
+          <Image src="/assets/home_cover.jpg" alt="Home Cover" fill priority />
         </div>
         <div className={`${styles["hero-wrapper"]} container`}>
           <div className={styles["hero-content-container"]}>
@@ -96,7 +90,6 @@ export default function Home() {
                   alt="Twin CJ Glamping Resort Logo"
                   className={styles["hero-logo"]}
                   width={250}
-                  objectFit="contain"
                 />
               </div>
               <p className={styles["subtext"]}>
@@ -133,8 +126,7 @@ export default function Home() {
           <Image
             src="/assets/home_river.jpg"
             alt="River Footsteps"
-            layout="fill"
-            objectFit="cover"
+            fill
             priority
           />
         </div>
@@ -160,6 +152,58 @@ export default function Home() {
       <section className={styles["all-around-experience-section"]}>
         <SectionHeader title="AN ALL-AROUND EXPERIENCE" />
         <HomePageCarousel />
+      </section>
+      <section className={styles["why-choose-us-section"]}>
+        <div className={`${styles["wrapper"]} container`}>
+          <SectionHeader title="WHY CHOOSE US?" />
+          <p className={styles["header-description"]}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at
+            neque egestas turpis varius pellentesque vitae sed est. Duis cursus
+            nisi vitae enim pellentesque fringilla.
+          </p>
+          <div className={`${styles["two-column"]} ${styles["img-right"]}`}>
+            <div className={styles["text-area"]}>
+              <h3 className={styles.title}>GAZEBO</h3>
+              <p className={styles.description}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras at
+                urna euismod, sodales ipsum nec, pretium justo. Aenean volutpat
+                est at nibh imperdiet faucibus. Fusce pellentesque, elit sed
+                suscipit pretium, sapien dui tincidunt risus, eu malesuada nunc
+                arcu eget neque. Aenean in velit arcu. Donec non mattis sem.
+                Vivamus sed volutpat augue, eget ullamcorper arcu. Morbi
+                fermentum eu lacus nec commodo. Proin vestibulum rhoncus mi sed
+                interdum. Vivamus et eros varius, dapibus velit in, pellentesque
+                dolor. Donec sit amet massa elementum, venenatis orci et,
+                venenatis nulla. Nam efficitur a ante id viverra.
+              </p>
+              <button className={styles["outline"]}>Book Now</button>
+            </div>
+            <div className={styles["img-area"]}>
+              <Image src="/assets/home_gazebo.jpg" alt="Gazebo" fill />
+            </div>
+          </div>
+          <div className={`${styles["two-column"]} ${styles["img-left"]}`}>
+            <div className={styles["img-area"]}>
+              <Image src="/assets/home_photoshoot.jpg" alt="Photoshoot" fill />
+            </div>
+            <div className={styles["text-area"]}>
+              <h3 className={styles.title}>PHOTOSHOOT</h3>
+              <p className={styles.description}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras at
+                urna euismod, sodales ipsum nec, pretium justo. Aenean volutpat
+                est at nibh imperdiet faucibus. Fusce pellentesque, elit sed
+                suscipit pretium, sapien dui tincidunt risus, eu malesuada nunc
+                arcu eget neque. Aenean in velit arcu. Donec non mattis sem.
+                Vivamus sed volutpat augue, eget ullamcorper arcu. Morbi
+                fermentum eu lacus nec commodo. Proin vestibulum rhoncus mi sed
+                interdum. Vivamus et eros varius, dapibus velit in, pellentesque
+                dolor. Donec sit amet massa elementum, venenatis orci et,
+                venenatis nulla. Nam efficitur a ante id viverra.
+              </p>
+              <button className={styles["outline"]}>Book Now</button>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );
