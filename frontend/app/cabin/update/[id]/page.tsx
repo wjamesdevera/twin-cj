@@ -336,7 +336,7 @@ export default function UpdateCabin() {
 
       <label>Rate</label>
       <br />
-      <input type="number" name="price" placeholder="₱" data-section="service" value={formData.service.price || ""} min="1" onChange={handleChange} />
+      <input type="number" name="price" placeholder="₱" data-section="service" step="0.01" value={formData.service.price || ""} min="1" onChange={handleChange} />
       <p className="error" style={{ color: "red" }}>{errors.price}</p>
       <br />
 
@@ -355,7 +355,7 @@ export default function UpdateCabin() {
 
       Amount
       <br />
-      <input type="number" name="amount" data-section="additionalFee" value={formData.additionalFee.amount} min="0" onChange={handleChange} />
+      <input type="number" name="amount" data-section="additionalFee" value={formData.additionalFee.amount} min="0" step="0.01" onChange={handleChange} />
       <br /><br />
 
       <button type="submit">Update Cabin</button>

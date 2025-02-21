@@ -237,7 +237,7 @@ export default function CreateCabin() {
 
       <label>Rate</label>
       <br />
-      <input type="number" name="price" placeholder="₱" data-section="service" min="1" value={formData.service.price || ""} onChange={handleChange} />
+      <input type="number" name="price" placeholder="₱" data-section="service" min="1" step="0.01" value={formData.service.price || ""} onChange={handleChange} />
       <p className="error" style={{ color: "red" }}>{errors.price}</p>
       <br />
 
@@ -256,7 +256,7 @@ export default function CreateCabin() {
 
       <label>Amount</label>
       <br />
-      <input type="number" name="amount" placeholder="₱" data-section="additionalFee" min="0" onChange={handleChange} />
+      <input type="number" name="amount" placeholder="₱" data-section="additionalFee" min="0" step="0.01" onChange={handleChange} />
       <br /><br />
 
       <button type="submit">Add New Cabin</button>
