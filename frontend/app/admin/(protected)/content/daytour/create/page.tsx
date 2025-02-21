@@ -73,6 +73,7 @@ function Page() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
     setIsMutating(true);
 
     if (
@@ -133,6 +134,11 @@ function Page() {
     const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (formData.image && !validImageTypes.includes(formData.image.type)) {
       alert('Invalid image type. Only JPG, JPEG, and PNG are allowed.');
+      setIsMutating(false);
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to add this Day tour?')) {
       setIsMutating(false);
       return;
     }

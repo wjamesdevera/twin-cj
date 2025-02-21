@@ -93,6 +93,26 @@ const EditDayTour: React.FC = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === 'name') {
+      setShowNameHelperText(value.length >= 50);
+    }
+
+    if (name === 'description') {
+      setShowDescriptionHelperText(value.length >= 100);
+    }
+
+    if (name === 'rate') {
+      const rateRegex = /^\d+(\.\d+)?$/;
+      setShowRateHelperText(!rateRegex.test(value) || parseFloat(value) <= 0);
+    }
+
+    if (name === 'quantity') {
+      const quantityRegex = /^\d+$/;
+      setShowQuantityHelperText(
+        !quantityRegex.test(value) || parseInt(value) <= 0
+      );
+    }
   };
 
   const hasChanges = () => {
@@ -107,6 +127,7 @@ const EditDayTour: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setIsMutating(true);
 
     if (
@@ -148,6 +169,11 @@ const EditDayTour: React.FC = () => {
       alert(
         'No changes detected. Please modify at least one field before submitting.'
       );
+      setIsMutating(false);
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to save changes?')) {
       setIsMutating(false);
       return;
     }
