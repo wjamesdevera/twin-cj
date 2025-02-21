@@ -21,12 +21,9 @@ const Additionals: React.FC<AdditionalsProps> = ({
       className={`${styles.additionals} ${isSelected ? styles.selected : ""}`}
       onClick={onSelect}
     >
-      <input
-        type="checkbox"
-        className={styles.checkbox}
-        checked={isSelected}
-        readOnly
-      />
+      <div className={`${styles.checkbox} ${isSelected ? styles.checked : ""}`}>
+        {isSelected && <span className={styles.checkmark}>✔</span>}
+      </div>
       <div className={styles.cardContent}>
         <div className={styles.textContent}>
           <div className={styles.title}>{title}</div>

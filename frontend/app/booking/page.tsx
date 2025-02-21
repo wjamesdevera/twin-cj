@@ -10,6 +10,17 @@ import GuestInformation from "../components/GuestInformation";
 
 const Booking: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
+  const [selectedAdditionals, setSelectedAdditionals] = useState<string[]>([]);
+
+  const handleAdditionalSelect = (title: string) => {
+    setSelectedAdditionals((prevSelected) => {
+      if (prevSelected.includes(title)) {
+        return prevSelected.filter((item) => item !== title);
+      } else {
+        return [...prevSelected, title];
+      }
+    });
+  };
 
   const accordionItems = [
     {
@@ -45,8 +56,8 @@ const Booking: React.FC = () => {
             price="₱500"
             additionalPrice="+ ₱ 200 per head"
             imageSrc="./assets/mini-cabin.png"
-            isSelected={selectedOption === "river-day-tour"}
-            onSelect={() => setSelectedOption("river-day-tour")}
+            isSelected={selectedOption === "swimming-pool-day-tour"}
+            onSelect={() => setSelectedOption("swimming-pool-day-tour")}
           />
           <BookingCard
             title="Gazebo Day Tour"
@@ -54,8 +65,8 @@ const Booking: React.FC = () => {
             price="₱3,000"
             additionalPrice="+ ₱ 20 per head"
             imageSrc="./assets/mini-cabin.png"
-            isSelected={selectedOption === "river-day-tour"}
-            onSelect={() => setSelectedOption("river-day-tour")}
+            isSelected={selectedOption === "gazebo-day-tour"}
+            onSelect={() => setSelectedOption("gazebo-day-tour")}
           />
           <BookingCard
             title="Mini Cabin"
@@ -90,8 +101,8 @@ const Booking: React.FC = () => {
             price="₱500"
             additionalPrice=""
             imageSrc="./assets/mini-cabin.png"
-            isSelected={selectedOption === "river-day-tour"}
-            onSelect={() => setSelectedOption("river-day-tour")}
+            isSelected={selectedOption === "camping-tent-rental"}
+            onSelect={() => setSelectedOption("camping-tent-rental")}
           />
         </div>
       ),
@@ -158,15 +169,32 @@ const Booking: React.FC = () => {
         </div>
       ),
       content: (
-        <Additionals
-          title="Cabana"
-          price="₱500 - 10 pax"
-          imageSrc="./assets/venti-cabin.png"
-          isSelected={selectedOption === "venti-cabin"}
-          onSelect={() => setSelectedOption("venti-cabin")}
-        />
+        <>
+          <Additionals
+            title="Cabana"
+            price="₱500 - 10 pax"
+            imageSrc="./assets/venti-cabin.png"
+            isSelected={selectedAdditionals.includes("Cabana")}
+            onSelect={() => handleAdditionalSelect("Cabana")}
+          />
+          <Additionals
+            title="Lorem Ipsum"
+            price="Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing Elit"
+            imageSrc="./assets/venti-cabin.png"
+            isSelected={selectedAdditionals.includes("option2")}
+            onSelect={() => handleAdditionalSelect("option2")}
+          />
+          <Additionals
+            title="Lorem Ipsum"
+            price="Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing Elit"
+            imageSrc="./assets/venti-cabin.png"
+            isSelected={selectedAdditionals.includes("option3")}
+            onSelect={() => handleAdditionalSelect("option3")}
+          />
+        </>
       ),
     },
+
     {
       title: "Booking Details",
       content: <GuestInformation />,

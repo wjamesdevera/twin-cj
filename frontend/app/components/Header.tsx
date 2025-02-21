@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./header.module.scss";
 import headerImage from "../../public/assets/header.png";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 type GuestType = "adults" | "children";
 type Action = "increment" | "decrement";
@@ -118,6 +120,9 @@ const Header: React.FC = () => {
     children: 0,
   });
 
+  const [checkInDate, setCheckInDate] = useState<Date | null>(null);
+  const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
+
   const handleApplyGuests = (counts: { adults: number; children: number }) => {
     setGuestCounts(counts);
   };
@@ -143,11 +148,25 @@ const Header: React.FC = () => {
         <div className={styles["booking-form"]}>
           <div className={styles["form-field"]}>
             <label htmlFor="checkin">Check in</label>
-            <input type="date" id="checkin" className={styles["date-input"]} />
+            <DatePicker
+              selected={checkInDate}
+              onChange={(date: Date | null) => setCheckInDate(date)}
+              placeholderText="Select check-in date"
+              className={styles["date-input"]}
+              dateFormat="MMMM d, yyyy"
+              minDate={new Date()}
+            />
           </div>
           <div className={styles["form-field"]}>
             <label htmlFor="checkout">Check out</label>
-            <input type="date" id="checkout" className={styles["date-input"]} />
+            <DatePicker
+              selected={checkOutDate}
+              onChange={(date: Date | null) => setCheckOutDate(date)}
+              placeholderText="Select check-out date"
+              className={styles["date-input"]}
+              dateFormat="MMMM d, yyyy"
+              minDate={checkInDate || new Date()} // Disable dates before check-in
+            />
           </div>
           <div className={styles["form-field"]}>
             <label>No. of Guests</label>

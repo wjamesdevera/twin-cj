@@ -7,29 +7,40 @@
   border-radius: 8px;
   padding: 0 0.8rem 0 1.5rem;
   gap: 1rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.3s ease;
   cursor: pointer;
   height: 4.5rem;
   flex-wrap: wrap;
-  margin-top: 2rem;
-
-  &:hover {
-    border-color: #aaa;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
+  margin-top: 1rem;
 
   &.selected {
     border-color: #007bff;
     background-color: #f9f9ff;
   }
 
+  &:hover {
+    border-color: #aaa;
+  }
+
   .checkbox {
-    flex-shrink: 0;
-    accent-color: #007bff;
-    margin-right: 1rem;
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+  }
+
+  .checked {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+
+  .checkmark {
+    color: white;
+    font-size: 0.8rem;
   }
 
   .cardContent {
