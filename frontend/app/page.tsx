@@ -96,7 +96,13 @@ export default function Home() {
               <p className={styles["subtext"]}>
                 Enjoy the scenic view by the river
               </p>
-              <button className={styles["book-now-button"]}>Book Now</button>
+              <Button
+                variant="outline-white"
+                fullWidth={true}
+                className={styles["book-now-button"]}
+              >
+                Book Now
+              </Button>
               <p className={styles["subtext"]}>
                 Check your booking status{" "}
                 <Link href="/booking-status">here</Link>!
