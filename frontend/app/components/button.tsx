@@ -4,7 +4,7 @@ import { Loading } from "./loading";
 import clsx from "clsx";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "danger";
+  variant?: "primary" | "secondary" | "outline" | "danger" | "outline-white";
   fullWidth?: boolean;
   isLoading?: boolean;
   className?: string;
@@ -23,9 +23,10 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       className={clsx(
+        styles.btn,
         styles[variant],
-        className,
-        fullWidth && styles["full-width"]
+        fullWidth && styles["full-width"],
+        className
       )}
       onClick={onClick}
     >
