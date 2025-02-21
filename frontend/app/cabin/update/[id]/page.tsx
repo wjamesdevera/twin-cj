@@ -187,6 +187,9 @@ export default function UpdateCabin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const isConfirmed = window.confirm("Are you sure you want to update this cabin?");
+    if (!isConfirmed) return;
+
     const newErrors = {
       name: validateField("name", formData.service.name),
       description: validateField("description", formData.service.description),
