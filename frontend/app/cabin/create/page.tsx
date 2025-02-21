@@ -96,7 +96,7 @@ export default function CreateCabin() {
     }
   
     // Custom validation rules
-    if (name === "price" && value < 0) {
+    if (name === "price" && (isNaN(value) || value < 1)) {
       return "Rate must be greater than 0.";
     }
     if (name === "quantity" && (isNaN(value) || value < 1)) {

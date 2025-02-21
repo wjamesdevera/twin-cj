@@ -138,7 +138,9 @@ export default function UpdateCabin() {
       }));
     } else {
       const numericFields = ["quantity", "price", "minCapacity", "maxCapacity", "amount"];
-      const newValue = numericFields.includes(name) ? Number(value) : value;
+      const newValue = numericFields.includes(name) 
+        ? value === "" ? "" : Number(value)  // Convert empty string to null
+        : value;
   
       setFormData((prev) => ({
         ...prev,
@@ -161,7 +163,7 @@ export default function UpdateCabin() {
     }
     
     // Custom validation rules
-    if (name === "price" && value < 0) {
+    if (name === "price" && (isNaN(value) || value < 1)) {
       return "Rate must be greater than 0.";
     }
     if (name === "quantity" && (isNaN(value) || value < 1)) {
@@ -170,8 +172,13 @@ export default function UpdateCabin() {
     if (name === "minCapacity" && (isNaN(value) || value < 1)) {
       return "Minimum capacity must be at least 1.";
     }
-    if (name === "maxCapacity" && (isNaN(value) || value < formData.cabin.minCapacity)) {
-      return "Maximum capacity cannot be less than minimum capacity.";
+    if (name === "maxCapacity") {
+      if (isNaN(value) || value < 1) {
+        return "Maximum capacity must be at least 1.";
+      }
+      if (value < formData.cabin.minCapacity) {
+        return "Maximum capacity cannot be less than minimum capacity.";
+      }
     }
   
     return "";
