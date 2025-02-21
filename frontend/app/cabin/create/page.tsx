@@ -202,7 +202,7 @@ export default function CreateCabin() {
 
       <label>Description</label>
       <br />
-      <textarea name="description" data-section="service" onChange={handleChange} rows={4} cols={50} />
+      <textarea name="description" data-section="service" onChange={handleChange} rows={2} cols={30} />
       <p className="error" style={{ color: "red" }}>{errors.description}</p>
       <br />
 
@@ -246,7 +246,7 @@ export default function CreateCabin() {
 
       <label>Description</label>
       <br />
-      <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={2} cols={50} />
+      <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={3} cols={30} />
       <br /><br />
 
       <label>Amount</label>
