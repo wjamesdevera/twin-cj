@@ -157,7 +157,10 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <HomePageCarousel />
+      <section className={styles["all-around-experience-section"]}>
+        <SectionHeader title="AN ALL-AROUND EXPERIENCE" />
+        <HomePageCarousel />
+      </section>
     </main>
   );
 }
