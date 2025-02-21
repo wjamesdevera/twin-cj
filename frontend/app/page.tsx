@@ -3,6 +3,7 @@ import styles from "./page.module.scss";
 import Image from "next/image";
 import twinCJLogo from "@/public/assets/admin-logo.svg";
 import HomePageCarousel from "./components/home-page-carousel";
+import Button from "./components/button";
 
 const cabins = [
   {
@@ -176,7 +177,9 @@ export default function Home() {
                 dolor. Donec sit amet massa elementum, venenatis orci et,
                 venenatis nulla. Nam efficitur a ante id viverra.
               </p>
-              <button className={styles["outline"]}>Book Now</button>
+              <Button variant="outline" className={styles["outline"]}>
+                Book Now
+              </Button>
             </div>
             <div className={styles["img-area"]}>
               <Image src="/assets/home_gazebo.jpg" alt="Gazebo" fill />
@@ -200,7 +203,9 @@ export default function Home() {
                 dolor. Donec sit amet massa elementum, venenatis orci et,
                 venenatis nulla. Nam efficitur a ante id viverra.
               </p>
-              <button className={styles["outline"]}>Book Now</button>
+              <Button variant="outline" className={styles["outline"]}>
+                Book Now
+              </Button>
             </div>
           </div>
         </div>
