@@ -28,17 +28,32 @@ export default function CreateCabin() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
+  
+    if (files && files[0]) {
+      const file = files[0];
 
-    setFormData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [name]: files ? files[0] : name === "quantity" || name === "price" || name.includes("Capacity") || name === "amount"
-          ? Number(value)
-          : value,
-      },
-    }));
-  };
+      if (file.size > 1048576) {
+        alert("File size must be less than 1MB.");
+        e.target.value = "";
+        return;
+      }
+      
+      setFormData((prev) => ({
+        ...prev,
+        [section]: { ...prev[section], [name]: file },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [name]: name === "quantity" || name === "price" || name.includes("Capacity") || name === "amount"
+            ? Number(value)
+            : value,
+        },
+      }));
+    }
+  };   
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +111,8 @@ export default function CreateCabin() {
         throw new Error("Failed to create cabin");
       }
 
-      console.log("Cabin added successfully!");
+      alert("Cabin created successfully!");
+
       router.push("/cabin");
     } catch (error) {
       console.error("Error:", error);
@@ -144,7 +160,7 @@ export default function CreateCabin() {
 
       Type
       <br />
-      <input type="text" name="type" data-section="additionalFee" onChange={handleChange} placeholder="e.g., Cleaning Fee" />
+      <input type="text" name="type" data-section="additionalFee" onChange={handleChange} />
       <br />
 
       Description
@@ -154,7 +170,7 @@ export default function CreateCabin() {
 
       Amount
       <br />
-      <input type="number" name="amount" data-section="additionalFee" min="0" onChange={handleChange} />
+      <input type="number" name="amount" placeholder="₱" data-section="additionalFee" min="0" onChange={handleChange} />
       <br />
 
       <button type="submit">Add New Cabin</button>

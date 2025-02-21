@@ -29,22 +29,36 @@ export default function UpdateCabin() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [initialData, setInitialData] = useState<{
+    service: {
+      name: string;
+      description: string;
+      imageUrl: string;
+      image: File | null;
+      quantity: number;
+      price: number;
+    };
+    cabin: {
+      minCapacity: number;
+      maxCapacity: number;
+    };
+    additionalFee: {
+      type: string;
+      description: string;
+      amount: number;
+    };
+  } | null>(null);  
 
   useEffect(() => {
     const fetchCabin = async () => {
       try {
         const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`);
-        const responseText = await response.text();
-        console.log("Raw Response:", responseText);
-  
-        const data = JSON.parse(responseText);
-        console.log("Parsed Data:", data);
+        const data = await response.json();
   
         if (response.ok && data.data?.cabin) {
           const cabin = data.data.cabin;
-          console.log("Extracted Cabin:", cabin);
   
-          setFormData({
+          const formattedData = {
             service: {
               name: cabin.service.name || "",
               description: cabin.service.description || "",
@@ -64,7 +78,10 @@ export default function UpdateCabin() {
                   amount: cabin.additionalFee.amount || 0,
                 }
               : { type: "", description: "", amount: 0 },
-          });
+          };
+  
+          setFormData(formattedData);
+          setInitialData(formattedData); // Store initial data for comparison
         } else {
           throw new Error(data.message || "Failed to fetch cabin details.");
         }
@@ -77,38 +94,60 @@ export default function UpdateCabin() {
     };
   
     fetchCabin();
-  }, [id]);  
+  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
   
-    setFormData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [name]: files ? files[0] : name === "quantity" || name === "price" || name.includes("Capacity") || name === "amount"
-          ? Number(value)
-          : value,
-      },
-    }));
+    if (files && files[0]) {
+      const file = files[0];
+
+      if (file.size > 1048576) {
+        alert("Image size must not exceed 1MB.");
+        e.target.value = "";
+        return;
+      }
+  
+      setFormData((prev) => ({
+        ...prev,
+        [section]: { ...prev[section], [name]: file },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [name]: name === "quantity" || name === "price" || name.includes("Capacity") || name === "amount"
+            ? Number(value)
+            : value,
+        },
+      }));
+    }
   };  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
+    // Check if any field has changed
+    const isChanged = JSON.stringify(formData) !== JSON.stringify(initialData);
+    if (!isChanged) {
+      alert("No changes detected. Please modify at least one field before submitting.");
+      return;
+    }
+  
     let imageUrl = formData.service.imageUrl;
-
+  
     if (formData.service.image) {
       const imageFormData = new FormData();
       imageFormData.append("image", formData.service.image);
-
+  
       try {
         const uploadResponse = await fetch("http://localhost:8080/api/upload", {
           method: "POST",
           body: imageFormData,
         });
-
+  
         const uploadData = await uploadResponse.json();
         if (!uploadResponse.ok) {
           throw new Error(uploadData.message || "Image upload failed");
@@ -119,7 +158,7 @@ export default function UpdateCabin() {
         return;
       }
     }
-
+  
     const requestBody = {
       service: {
         name: formData.service.name,
@@ -136,8 +175,8 @@ export default function UpdateCabin() {
         formData.additionalFee.type || formData.additionalFee.description || formData.additionalFee.amount > 0
           ? { ...formData.additionalFee }
           : null,
-    };        
-
+    };
+  
     try {
       const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`, {
         method: "PUT",
@@ -146,8 +185,9 @@ export default function UpdateCabin() {
         },
         body: JSON.stringify(requestBody),
       });
-
+  
       if (response.ok) {
+        alert("Cabin updated successfully!");
         router.push("/cabin");
       } else {
         throw new Error("Failed to update cabin.");
@@ -226,7 +266,7 @@ export default function UpdateCabin() {
 
       Type
       <br />
-      <input type="text" name="type" data-section="additionalFee" value={formData.additionalFee.type} onChange={handleChange} placeholder="e.g., Cleaning Fee" />
+      <input type="text" name="type" data-section="additionalFee" value={formData.additionalFee.type} onChange={handleChange} />
       <br />
 
       Description

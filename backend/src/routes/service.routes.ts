@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCabinHandler, deleteAllCabinsHandler, deleteCabinHandler, getAllCabinsHandler, getCabinHandler, updateCabinHandler } from "../controllers/service.controller";
+import { createCabinHandler, deleteAllCabinsHandler, deleteCabinHandler, deleteSelectedCabinsHandler, getAllCabinsHandler, getCabinHandler, updateCabinHandler } from "../controllers/service.controller";
 
 const router = Router();
 
@@ -9,6 +9,7 @@ router.get("/cabins", getAllCabinsHandler);
 router.post("/cabins", createCabinHandler);
 router.delete("/cabins/:id", deleteCabinHandler);
 router.delete("/cabins", deleteAllCabinsHandler);
+router.post("/cabins/bulk-delete", deleteSelectedCabinsHandler);
 router.put("/cabins/:id", updateCabinHandler);
 
 export default router;

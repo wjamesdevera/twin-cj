@@ -113,6 +113,21 @@ export const deleteCabinHandler = catchErrors(async (req: Request, res: Response
   }
 });
 
+export const deleteSelectedCabinsHandler = catchErrors(async (req: Request, res: Response) => {
+  const { ids } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ status: "error", message: "Invalid request. Provide cabin IDs." });
+  }
+
+  await Promise.all(ids.map((id) => deleteCabin(id)));
+
+  res.status(OK).json({
+    status: "success",
+    message: `${ids.length} cabins deleted successfully.`,
+  });
+});
+
 export const updateCabinHandler = catchErrors(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { service, cabin, additionalFee } = req.body;
