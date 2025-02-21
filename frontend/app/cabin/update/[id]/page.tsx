@@ -112,11 +112,11 @@ export default function UpdateCabin() {
   
     if (files && files[0]) {
       const file = files[0];
-      const validFormats = ["image/jpeg", "image/jpg", "image/png", "image/gif"]; // Allowed formats
+      const validFormats = ["image/jpeg", "image/jpg", "image/png"]; // Allowed formats
   
       // Check for valid format
       if (!validFormats.includes(file.type)) {
-        setErrors((prev) => ({ ...prev, image: "Invalid image format. Only JPG, PNG, or GIF allowed." }));
+        setErrors((prev) => ({ ...prev, image: "Invalid image format. Only JPG or PNG allowed." }));
         e.target.value = ""; // Reset file input
         setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } })); // Reset image state
         return;
