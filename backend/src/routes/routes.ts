@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { OK } from "../constants/http";
 import authRoutes from "./auth.routes";
 import userRoutes from "./user.routes";
+import feedbackRoutes from "./feedback.routes";
 import { authenticate } from "../middlewares/auth.middleware";
 
 const router = Router();
@@ -17,6 +18,7 @@ router.get("/health", (request: Request, response: Response) => {
 
 router.use("/auth", authRoutes);
 router.use("/users", authenticate, userRoutes);
+router.use("/feedbacks", feedbackRoutes);
 
 router.get("/auth-test", authenticate, (req, res) => {
   res.json({

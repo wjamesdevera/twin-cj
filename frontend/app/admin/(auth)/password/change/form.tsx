@@ -14,10 +14,10 @@ const Form = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const verificationCode = searchParams.get("code");
-  const exp = Number(searchParams.get("exp"));
   const { trigger, isMutating } = useSWRMutation(
     "resetpassword",
-    (key, { arg }) => resetPassword(arg),
+    (key, { arg }: { arg: { verificationCode: string; password: string } }) =>
+      resetPassword(arg),
     {
       onSuccess: () => {
         router.push("/admin/login");
@@ -72,7 +72,9 @@ const Form = () => {
 
   const handleResetPassword = async () => {
     const password = confirmPassword;
-    await trigger({ verificationCode, password });
+    return verificationCode
+      ? await trigger({ verificationCode, password })
+      : null;
   };
 
   return isMutating ? (

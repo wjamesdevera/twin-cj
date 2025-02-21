@@ -1,4 +1,3 @@
-import app from "../app";
 import config from "../config/config";
 import { prisma } from "../config/db";
 import {
@@ -40,6 +39,12 @@ type LoginAccountParams = {
   email: string;
   password: string;
   userAgent?: string;
+};
+
+type ChangePasswordParams = {
+  userId: string;
+  oldPassword: string;
+  newPassword: string;
 };
 
 export const createAccount = async (data: CreateAccountParams) => {
@@ -334,4 +339,37 @@ export const resetPassword = async ({
       email: updateUser.personalDetail.email,
     },
   };
+};
+
+export const changePassword = async ({
+  userId,
+  oldPassword,
+  newPassword,
+}: ChangePasswordParams) => {
+  try {
+    const user = await prisma.userAccount.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    appAssert(user, UNAUTHORIZED, "User not found");
+
+    const isOldPasswordValid = verifyPassword(oldPassword, user.password);
+
+    appAssert(isOldPasswordValid, UNAUTHORIZED, "Invalid password");
+
+    const updatedUser = await prisma.userAccount.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: await hashPassword(newPassword),
+      },
+    });
+
+    return updatedUser;
+  } catch (error: Error | any) {
+    console.error(error.message);
+  }
 };

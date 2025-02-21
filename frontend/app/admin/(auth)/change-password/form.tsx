@@ -5,9 +5,25 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import twinCJLogo from "@/public/assets/twin-cj-logo.png";
+import Button from "@/app/components/button";
+import useSWRMutation from "swr/mutation";
+import { changePassword } from "@/app/lib/api";
+import { Loading } from "@/app/components/loading";
 
 export function ChangePasswordForm() {
   const router = useRouter();
+
+  const { trigger, isMutating, error } = useSWRMutation(
+    "change-password",
+    (key, { arg }: { arg: { oldPassword: string; newPassword: string } }) =>
+      changePassword(arg),
+    {
+      onSuccess: () => {
+        router.push("/admin");
+      },
+    }
+  );
+
   const [oldPassword, setOldPassword] = useState("");
   const [isOldPasswordCorrect, setIsOldPasswordCorrect] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -30,7 +46,7 @@ export function ChangePasswordForm() {
 
   // Simulated check for old password (Replace with actual authentication logic)
   const handleOldPasswordBlur = () => {
-    const correctOldPassword = "admin123"; // Replace 
+    const correctOldPassword = "admin123"; // Replace
     setIsOldPasswordCorrect(oldPassword === correctOldPassword);
   };
 
@@ -50,14 +66,23 @@ export function ChangePasswordForm() {
     validatePassword(password);
   };
 
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleConfirmPasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setConfirmPassword(e.target.value);
     setPasswordMatch(e.target.value === newPassword);
   };
 
-  const isAllValidationsPassed = Object.values(passwordValidations).every(Boolean);
+  const isAllValidationsPassed =
+    Object.values(passwordValidations).every(Boolean);
 
-  return (
+  const handleChangePassword = async () => {
+    await trigger({ oldPassword, newPassword });
+  };
+
+  return isMutating ? (
+    <Loading />
+  ) : (
     <div className={styles["change-password-container"]}>
       <div className={styles["change-password-wrapper"]}>
         <div className={styles["form-title"]}>
@@ -85,16 +110,25 @@ export function ChangePasswordForm() {
               <button
                 type="button"
                 className={styles["eye-icon"]}
-                onClick={() => setPasswordVisible({ ...passwordVisible, old: !passwordVisible.old })}
+                onClick={() =>
+                  setPasswordVisible({
+                    ...passwordVisible,
+                    old: !passwordVisible.old,
+                  })
+                }
                 disabled={!oldPassword}
               >
                 {passwordVisible.old ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             )}
           </div>
-          {!isOldPasswordCorrect && oldPassword.length > 0 && (
-            <small className={styles["error-message"]}>Incorrect password.</small>
-          )}
+
+          {/* TODO: update to validate with backend */}
+          {error ? (
+            <small className={styles["error-message"]}>
+              Incorrect password.
+            </small>
+          ) : null}
 
           {/* New Password */}
           <div className={styles["password-input-container"]}>
@@ -103,13 +137,17 @@ export function ChangePasswordForm() {
               placeholder="New Password"
               value={newPassword}
               onChange={handleNewPasswordChange}
-              disabled={!isOldPasswordCorrect}
             />
             {!isOldPasswordCorrect ? null : (
               <button
                 type="button"
                 className={styles["eye-icon"]}
-                onClick={() => setPasswordVisible({ ...passwordVisible, new: !passwordVisible.new })}
+                onClick={() =>
+                  setPasswordVisible({
+                    ...passwordVisible,
+                    new: !passwordVisible.new,
+                  })
+                }
                 disabled={!isOldPasswordCorrect}
               >
                 {passwordVisible.new ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -121,20 +159,43 @@ export function ChangePasswordForm() {
           <div className={styles["password-requirements"]}>
             <p>Your password must contain:</p>
             <ul>
-              <li className={passwordValidations.length ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.length ? styles.valid : styles.invalid
+                }
+              >
                 {passwordValidations.length ? "✔" : "✖"} At least 8 characters
               </li>
-              <li className={passwordValidations.lowercase ? styles.valid : styles.invalid}>
-                {passwordValidations.lowercase ? "✔" : "✖"} Lower case letters (a-z)
+              <li
+                className={
+                  passwordValidations.lowercase ? styles.valid : styles.invalid
+                }
+              >
+                {passwordValidations.lowercase ? "✔" : "✖"} Lower case letters
+                (a-z)
               </li>
-              <li className={passwordValidations.uppercase ? styles.valid : styles.invalid}>
-                {passwordValidations.uppercase ? "✔" : "✖"} Upper case letters (A-Z)
+              <li
+                className={
+                  passwordValidations.uppercase ? styles.valid : styles.invalid
+                }
+              >
+                {passwordValidations.uppercase ? "✔" : "✖"} Upper case letters
+                (A-Z)
               </li>
-              <li className={passwordValidations.number ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.number ? styles.valid : styles.invalid
+                }
+              >
                 {passwordValidations.number ? "✔" : "✖"} Numbers (0-9)
               </li>
-              <li className={passwordValidations.special ? styles.valid : styles.invalid}>
-                {passwordValidations.special ? "✔" : "✖"} Special characters (ex. !@#$%^&*)
+              <li
+                className={
+                  passwordValidations.special ? styles.valid : styles.invalid
+                }
+              >
+                {passwordValidations.special ? "✔" : "✖"} Special characters
+                (ex. !@#$%^&*)
               </li>
             </ul>
           </div>
@@ -146,38 +207,44 @@ export function ChangePasswordForm() {
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
-              disabled={!isAllValidationsPassed}
             />
-            {!isAllValidationsPassed ? null : (
+            {!confirmPassword ? null : (
               <button
                 type="button"
                 className={styles["eye-icon"]}
-                onClick={() => setPasswordVisible({ ...passwordVisible, confirm: !passwordVisible.confirm })}
+                onClick={() =>
+                  setPasswordVisible({
+                    ...passwordVisible,
+                    confirm: !passwordVisible.confirm,
+                  })
+                }
                 disabled={!isAllValidationsPassed}
               >
-                {passwordVisible.confirm ? <EyeOff size={20} /> : <Eye size={20} />}
+                {passwordVisible.confirm ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
               </button>
             )}
           </div>
           {!passwordMatch && confirmPassword.length > 0 && (
-            <small className={styles["error-message"]}>Passwords do not match</small>
+            <small className={styles["error-message"]}>
+              Passwords do not match
+            </small>
           )}
 
           <div>
-            <button
-              className={styles["change-password-button"]}
-              type="submit"
-              disabled={!passwordMatch || !isAllValidationsPassed || !isOldPasswordCorrect}
-            >
+            <Button fullWidth={true} onClick={handleChangePassword}>
               Change Password
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline-black"
               className={styles["cancel-button"]}
-              type="button"
               onClick={() => router.push("/admin")}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>

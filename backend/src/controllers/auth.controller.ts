@@ -1,4 +1,5 @@
 import {
+  changePasswordSchema,
   emailSchema,
   loginSchema,
   registerSchema,
@@ -6,6 +7,7 @@ import {
 } from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
 import {
+  changePassword,
   createAccount,
   loginAccount,
   refreshUserAccessToken,
@@ -151,5 +153,22 @@ export const passwordResetHandler = catchErrors(
           message: "Password was reset successfully",
         },
       });
+  }
+);
+
+export const changePasswordHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { oldPassword, newPassword } = changePasswordSchema.parse(
+      request.body
+    );
+    const userId = request.userId;
+
+    await changePassword({ userId, oldPassword, newPassword });
+    return response.status(OK).json({
+      status: "success",
+      data: {
+        message: "Password changed successfully",
+      },
+    });
   }
 );

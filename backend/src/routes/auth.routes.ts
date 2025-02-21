@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import {
+  changePasswordHandler,
   forgotPasswordHandler,
   loginHandler,
   logoutHandler,
@@ -7,6 +8,7 @@ import {
   refreshHandler,
   registerHandler,
 } from "../controllers/auth.controller";
+import { authenticate } from "../middlewares/auth.middleware";
 
 const router = Router();
 
@@ -17,5 +19,6 @@ router.get("/refresh", refreshHandler);
 router.get("/logout", logoutHandler);
 router.post("/password/forgot", forgotPasswordHandler);
 router.post("/password/reset", passwordResetHandler);
+router.post("/password/change", authenticate, changePasswordHandler);
 
 export default router;
