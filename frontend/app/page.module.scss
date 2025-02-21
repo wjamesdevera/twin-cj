@@ -95,17 +95,6 @@
   }
 }
 
-@media (width >= 48rem) {
-  .subtext {
-    font-size: var(--text-size-base);
-    line-height: var(--text-line-height-base);
-  }
-
-  .book-now-button {
-    font-size: var(--text-size-base);
-  }
-}
-
 .welcome-section {
   width: 100%;
   display: flex;
@@ -155,29 +144,6 @@
   }
 }
 
-@media (width >= 48rem) {
-  .welcome-section {
-    padding-top: 8rem;
-    padding-bottom: 8rem;
-  }
-
-  .section-header {
-    .title {
-      font-size: var(--text-size-2xl);
-      line-height: var(--text-line-height-2xl);
-    }
-  }
-}
-
-@media (width >= 64rem) {
-  .section-header {
-    .title {
-      font-size: var(--text-size-3xl);
-      line-height: var(--text-line-height-3xl);
-    }
-  }
-}
-
 .footstepsSection {
   position: relative;
   height: 50vh;
@@ -210,15 +176,6 @@
       font-weight: bold;
       letter-spacing: 4px;
       text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    }
-  }
-}
-
-@media (width >= 48rem) {
-  .footstepsContent {
-    h2 {
-      font-size: var(--text-size-xl);
-      line-height: var(--text-line-height-xl);
     }
   }
 }
@@ -271,19 +228,6 @@
     font-size: var(--text-size-base);
     line-height: var(--text-line-height-base);
     font-style: italic;
-  }
-}
-
-@media (width >= 48rem) {
-  .cabin-cards-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    padding: 0 3rem;
-  }
-
-  .cabin-card {
-    width: 100%;
   }
 }
 
@@ -393,6 +337,45 @@
 }
 
 @media (width >= 48rem) {
+  .subtext {
+    font-size: var(--text-size-base);
+    line-height: var(--text-line-height-base);
+  }
+
+  .book-now-button {
+    font-size: var(--text-size-base);
+  }
+
+  .welcome-section {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+
+  .section-header {
+    .title {
+      font-size: var(--text-size-2xl);
+      line-height: var(--text-line-height-2xl);
+    }
+  }
+
+  .footstepsContent {
+    h2 {
+      font-size: var(--text-size-xl);
+      line-height: var(--text-line-height-xl);
+    }
+  }
+
+  .cabin-cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: 0 3rem;
+  }
+
+  .cabin-card {
+    width: 100%;
+  }
+
   .why-choose-us-section {
     .header-description {
       max-width: 80%;
