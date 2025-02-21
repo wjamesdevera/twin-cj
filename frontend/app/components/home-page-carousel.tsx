@@ -99,8 +99,7 @@ const HomePageCarousel = () => {
               <Image
                 src={item.src}
                 alt={item.title}
-                layout="fill"
-                objectFit="cover"
+                fill
                 className={`${styles.carouselImage} ${
                   index !== activeIndex ? styles.inactiveImage : ""
                 }`}

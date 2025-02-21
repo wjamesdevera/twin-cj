@@ -15,6 +15,9 @@
   position: relative;
   aspect-ratio: 16/9;
   object-fit: cover;
+  img {
+    object-fit: cover;
+  }
 }
 
 .whiteOverlay {
