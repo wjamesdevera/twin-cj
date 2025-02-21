@@ -30,22 +30,22 @@
   line-height: 1.5;
   text-align: center;
   background-color: transparent;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   font-family: var(--font-primary);
   font-size: var(--text-size-primary);
   line-height: var(--text-line-height-base);
-  font-weight: 400;
-  padding: 0.5rem 1rem;
+  font-weight: 500;
+  padding: 0.5rem 3rem;
   border-radius: 0.25rem;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  color: var(--color-neutral-100);
-  border-color: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+  border-color: var(--color-neutral-700);
 
   &:hover {
     color: var(--color-neutral-200);
-    background-color: var(--color-sunset-orange-600);
-    border-color: var(--color-sunset-orange-600);
+    background-color: var(--color-sunset-orange-500);
+    border-color: var(--color-sunset-orange-500);
   }
 }
 
