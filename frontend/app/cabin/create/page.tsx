@@ -120,9 +120,6 @@ export default function CreateCabin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isConfirmed = window.confirm("Are you sure you want to add this cabin?");
-    if (!isConfirmed) return;
-
     // Validate all fields before submission
     const newErrors = {
       name: validateField("name", formData.service.name),
@@ -262,7 +259,7 @@ export default function CreateCabin() {
       <input type="number" name="amount" placeholder="₱" data-section="additionalFee" min="0" step="0.01" onChange={handleChange} />
       <br /><br />
 
-      <button type="submit">Add New Cabin</button>
+      <button type="submit">Add Cabin</button>
       <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
     </form>
   );
