@@ -194,6 +194,15 @@
   }
 }
 
+@media (width >= 48rem) {
+  .footstepsContent {
+    h2 {
+      font-size: var(--text-size-xl);
+      line-height: var(--text-line-height-xl);
+    }
+  }
+}
+
 .ourCabinsSection {
   display: flex;
   justify-content: center;
