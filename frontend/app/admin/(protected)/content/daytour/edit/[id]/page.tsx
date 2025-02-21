@@ -9,7 +9,7 @@ interface DayTour {
   name: string;
   description: string;
   imageUrl: string;
-  rate: string;
+  rate: number;
   quantity: string;
 }
 
@@ -166,9 +166,7 @@ const EditDayTour: React.FC = () => {
     }
 
     if (!hasChanges()) {
-      alert(
-        'No changes detected. Please modify at least one field before submitting.'
-      );
+      alert('Please make changes before saving.');
       setIsMutating(false);
       return;
     }

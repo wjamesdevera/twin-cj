@@ -11,16 +11,16 @@ function Page() {
     name: string;
     description: string;
     image: File | null;
-    rate: string;
-    quantity: string;
+    rate: number;
+    quantity: number;
   }
 
   const [formData, setFormData] = useState<DayTourFormData>({
     name: '',
     description: '',
     image: null,
-    rate: '',
-    quantity: '',
+    rate: 0.0,
+    quantity: 1,
   });
 
   const [showNameHelperText, setShowNameHelperText] = useState<boolean>(false);
@@ -104,7 +104,7 @@ function Page() {
       isNaN(parseFloat(formData.rate)) ||
       parseFloat(formData.rate) <= 0
     ) {
-      alert('Rate must be a valid positive number.');
+      alert('Rate must be a positive number.');
       setIsMutating(false);
       return;
     }

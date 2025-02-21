@@ -47,7 +47,7 @@ const DayTourView = () => {
             description:
               tour.service?.description || 'No description available',
             imageUrl: tour.service?.imageUrl || '',
-            rate: tour.service?.price || 0,
+            rate: parseFloat(tour.service?.price || 0).toFixed(2),
             quantity: tour.service?.quantity || 0,
             createdAt: new Date(tour.createdAt).toLocaleDateString(),
             updatedAt: new Date(tour.updatedAt).toLocaleDateString(),
