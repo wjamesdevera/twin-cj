@@ -1,14 +1,15 @@
 "use client";
 
 import { logout } from "@/app/lib/api";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import useSWRMutation from "swr/mutation";
 
 export default function LogoutButton() {
+  const router = useRouter();
   const { trigger } = useSWRMutation("logout", async () => await logout(), {
     revalidate: true,
     onSuccess: () => {
-      redirect("/admin/login");
+      router.push("/admin/login");
     },
   });
   const handleLogout = async () => {
