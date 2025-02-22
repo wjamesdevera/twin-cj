@@ -1,13 +1,17 @@
 import {
+  changePasswordSchema,
   emailSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
 } from "../schemas/auth.schems";
 import catchErrors from "../utils/catchErrors";
 import {
+  changePassword,
   createAccount,
   loginAccount,
   refreshUserAccessToken,
+  resetPassword,
   sendPasswordResetEmail,
 } from "../services/auth.service";
 import { Request, response, Response } from "express";
@@ -130,6 +134,40 @@ export const forgotPasswordHandler = catchErrors(
       status: "success",
       data: {
         message: "Password reset email sent",
+      },
+    });
+  }
+);
+
+export const passwordResetHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const requestBody = resetPasswordSchema.parse(request.body);
+
+    await resetPassword(requestBody);
+
+    return clearAuthCookies(response)
+      .status(OK)
+      .json({
+        status: "success",
+        data: {
+          message: "Password was reset successfully",
+        },
+      });
+  }
+);
+
+export const changePasswordHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { oldPassword, newPassword } = changePasswordSchema.parse(
+      request.body
+    );
+    const userId = request.userId;
+
+    await changePassword({ userId, oldPassword, newPassword });
+    return response.status(OK).json({
+      status: "success",
+      data: {
+        message: "Password changed successfully",
       },
     });
   }

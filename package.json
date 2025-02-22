@@ -1,0 +1,23 @@
+{
+  "name": "twin-cj",
+  "version": "1.0.0",
+  "description": "Booking system for Twin CJ Riverside Glamping Resort",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ICS26010-group-3/twin-cj.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ICS26010-group-3/twin-cj/issues"
+  },
+  "homepage": "https://github.com/ICS26010-group-3/twin-cj#readme",
+  "dependencies": {
+    "next": "^15.1.6"
+  }
+}

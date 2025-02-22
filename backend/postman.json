@@ -10,13 +10,13 @@
 			"name": "auth",
 			"item": [
 				{
-					"name": "register",
+					"name": "login",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstName\": \"sampleName\",\r\n    \"lastName\": \"sampleName\",\r\n    \"email\": \"sampleEmail@email.com\",\r\n    \"phoneNumber\": \"+63 9777777777\",\r\n    \"password\": \"samplePassword\",\r\n    \"confirmPassword\": \"samplePassword\"\r\n}",
+							"raw": "{\r\n    \"email\": \"sampleEmail@email.com\",\r\n    \"password\": \"samplePassword\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -24,14 +24,43 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/auth/register",
+							"raw": "{{base_url}}/api/auth/login",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"auth",
-								"register"
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"sampleFirstName\",\r\n    \"lastName\": \"sampleLastName\",\r\n    \"email\": \"sampleEmail@email.com\",\r\n    \"phoneNumber\": \"+63 9123456789\",\r\n    \"password\": \"samplePassword\",\r\n    \"confirmPassword\": \"samplePassword\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								""
 							]
 						}
 					},
@@ -92,7 +121,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"verificationCode\": \"662c76881161a09656b81a8c\",\r\n    \"password\": \"111111\"\r\n}",
+							"raw": "{\r\n    \"verificationCode\": \"5b1f3c61-192c-4340-a334-8b7d85de7803\",\r\n    \"password\": \"simplePa$$w0rd\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -142,34 +171,6 @@
 					"response": []
 				},
 				{
-					"name": "login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"sampleEmail@email.com\",\r\n    \"password\": \"samplePassword\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "refresh",
 					"request": {
 						"method": "GET",
@@ -185,6 +186,14 @@
 								"refresh"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}
@@ -222,6 +231,39 @@
 			"item": []
 		},
 		{
+			"name": "feedbacks",
+			"item": [
+				{
+					"name": "feedbacks",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fullName\": \"exampleName\",\r\n    \"email\": \"example@email.com\",\r\n    \"inquiryType\": \"General\",\r\n    \"contactNumber\": \"09 658108388\",\r\n    \"message\": \"Hello World\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/feedbacks/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"feedbacks",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "GET /health",
 			"request": {
 				"method": "GET",
@@ -234,6 +276,24 @@
 					"path": [
 						"api",
 						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/authTest",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"authTest"
 					]
 				}
 			},

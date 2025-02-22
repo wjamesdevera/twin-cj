@@ -41,10 +41,16 @@ type LoginAccountParams = {
   userAgent?: string;
 };
 
+type ChangePasswordParams = {
+  userId: string;
+  oldPassword: string;
+  newPassword: string;
+};
+
 export const createAccount = async (data: CreateAccountParams) => {
   let existingUser = await prisma.personalDetail.findUnique({
     where: {
-      email: data.email,
+      email: data.email.toLowerCase(),
     },
   });
 
@@ -254,7 +260,7 @@ export const sendPasswordResetEmail = async (email: string) => {
       },
     });
 
-    const url = `${config.appOrigin}/password/reset?code=${
+    const url = `${config.appOrigin}/admin/password/change?code=${
       passwordResetToken.id
     }&exp=${expiresAt.getTime()}`;
 
@@ -276,5 +282,94 @@ export const sendPasswordResetEmail = async (email: string) => {
   } catch (error: any) {
     console.log("SendPasswordResetError:", error.message);
     return {};
+  }
+};
+
+type ResetPasswordParams = {
+  password: string;
+  verificationCode: string;
+};
+
+export const resetPassword = async ({
+  verificationCode,
+  password,
+}: ResetPasswordParams) => {
+  const validCode = await prisma.passwordResetToken.findFirst({
+    where: {
+      id: verificationCode,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
+  });
+
+  appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
+
+  const updateUser = await prisma.userAccount.update({
+    where: {
+      id: validCode.userAccountId,
+    },
+    data: {
+      password: await hashPassword(password),
+    },
+    include: {
+      personalDetail: true,
+    },
+  });
+
+  appAssert(updateUser, INTERNAL_SERVER_ERROR, "Failed to reset password");
+
+  await prisma.passwordResetToken.delete({
+    where: {
+      id: validCode.id,
+    },
+  });
+
+  await prisma.session.deleteMany({
+    where: {
+      userAccountId: validCode.userAccountId,
+    },
+  });
+
+  return {
+    user: {
+      firstName: updateUser.personalDetail.firstName,
+      lastName: updateUser.personalDetail.lastName,
+      phoneNumber: updateUser.personalDetail.phoneNumber,
+      email: updateUser.personalDetail.email,
+    },
+  };
+};
+
+export const changePassword = async ({
+  userId,
+  oldPassword,
+  newPassword,
+}: ChangePasswordParams) => {
+  try {
+    const user = await prisma.userAccount.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    appAssert(user, UNAUTHORIZED, "User not found");
+
+    const isOldPasswordValid = verifyPassword(oldPassword, user.password);
+
+    appAssert(isOldPasswordValid, UNAUTHORIZED, "Invalid password");
+
+    const updatedUser = await prisma.userAccount.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: await hashPassword(newPassword),
+      },
+    });
+
+    return updatedUser;
+  } catch (error: Error | any) {
+    console.error(error.message);
   }
 };
