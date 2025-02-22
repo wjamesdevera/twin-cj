@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import styles from "./../components/inquiryform.module.scss";
+import styles from "./inquiryform.module.scss";
+import Button from "../components/button";
+
+const options = [
+  "Feedback",
+  "General Inquiry",
+  "Reservations",
+  "Activities",
+  "Others",
+];
 
 const InquiryForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -78,13 +87,18 @@ const InquiryForm: React.FC = () => {
                 id="inquiryType"
                 name="inquiryType"
                 value={formData.inquiryType}
+                className={styles["select-field"]}
                 onChange={handleChange}
               >
-                <option value="Feedback">Feedback</option>
-                <option value="General Inquiry">General Inquiry</option>
-                <option value="Reservations">Reservations</option>
-                <option value="Activities">Activities</option>
-                <option value="Others">Others</option>
+                {options.map((option, index) => (
+                  <option
+                    className={styles["option"]}
+                    value={option}
+                    key={index}
+                  >
+                    {option}
+                  </option>
+                ))}
               </select>
               <span className={styles["chevron-down"]}>
                 <svg
@@ -116,12 +130,16 @@ const InquiryForm: React.FC = () => {
         </div>
         <div className={styles["button-group"]}>
           <div className={styles.buttons}>
-            <button type="button" className={styles["cancel-btn"]}>
+            <button
+              onClick={handleCancel}
+              type="button"
+              className={styles["cancel-btn"]}
+            >
               CANCEL
             </button>
-            <button type="submit" className={styles["submit-btn"]}>
+            <Button type="submit" className={styles["submit-btn"]}>
               SUBMIT
-            </button>
+            </Button>
           </div>
         </div>
       </form>
