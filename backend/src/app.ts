@@ -6,7 +6,6 @@ import helmet from "helmet";
 import router from "./routes/routes";
 import { NOT_FOUND } from "./constants/http";
 import cookieParser from "cookie-parser";
-import { config } from "dotenv";
 import path from "path";
 const app = express();
 
