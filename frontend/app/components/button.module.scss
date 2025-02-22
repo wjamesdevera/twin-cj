@@ -13,16 +13,16 @@
 }
 
 .primary {
-  color: var(--color-neutral-200);
-  background-color: var(--color-sunset-orange-500);
-  border-color: var(--color-sunset-orange-500);
+  color: var(--color-neutral-100);
+  background-color: var(--color-sand-500);
+  border-color: var(--color-sand-500);
   border: 1px solid transparent;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   &:hover {
     color: var(--color-neutral-200);
-    background-color: var(--color-sunset-orange-600);
-    border-color: var(--color-sunset-orange-600);
+    background-color: var(--color-sand-600);
+    border-color: var(--color-sand-600);
   }
 }
 
