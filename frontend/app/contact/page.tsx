@@ -1,6 +1,6 @@
 import React from "react";
 import ContactInfo from "./contactinfo";
-import InquiryForm from "./InquiryForm";
+import InquiryForm from "./inquiry-form";
 import styles from "./page.module.scss";
 import SectionHeader from "../components/SectionHeader";
 import Image from "next/image";

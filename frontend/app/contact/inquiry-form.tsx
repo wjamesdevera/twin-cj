@@ -3,6 +3,9 @@
 import React, { useState } from "react";
 import styles from "./inquiryform.module.scss";
 import Button from "../components/button";
+import useSWRMutation from "swr/mutation";
+import { sendFeedback } from "../lib/api";
+import { Loading } from "../components/loading";
 
 const options = [
   "Feedback",
@@ -12,7 +15,19 @@ const options = [
   "Others",
 ];
 
+interface SendFeedbackParams {
+  fullName: string;
+  email: string;
+  inquiryType: string;
+  contactNumber: string;
+  message: string;
+}
+
 const InquiryForm: React.FC = () => {
+  const { trigger, isMutating } = useSWRMutation(
+    "sendFeedback",
+    (key, { arg }: { arg: SendFeedbackParams }) => sendFeedback(arg)
+  );
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -41,6 +56,7 @@ const InquiryForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    trigger(formData);
     console.log("Form Submitted:", formData);
   };
 
@@ -137,8 +153,12 @@ const InquiryForm: React.FC = () => {
             >
               CANCEL
             </button>
-            <Button type="submit" className={styles["submit-btn"]}>
-              SUBMIT
+            <Button
+              type="submit"
+              className={styles["submit-btn"]}
+              disabled={isMutating}
+            >
+              {isMutating ? <Loading /> : "SUBMIT"}
             </Button>
           </div>
         </div>
