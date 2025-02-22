@@ -274,81 +274,6 @@ export default function UpdateCabin() {
     }
   };
 
-  /* ADDITIONAL FEES */
-
-  const [additionalFees, setAdditionalFees] = useState<{ type: string; description: string; amount: number }[]>([]);
-  const [selectedFee, setSelectedFee] = useState<string>("");
-
-  useEffect(() => {
-    const fetchAdditionalFees = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/api/services/additional-fees");
-  
-        if (!response.ok) {
-          throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-        }
-  
-        const data = await response.json();
-  
-        // Ensure `data.data` is an array before setting state
-        setAdditionalFees(Array.isArray(data.data) ? data.data : []);
-      } catch (error) {
-        console.error("Error fetching additional fees:", error);
-        setAdditionalFees([]); // Ensure an empty array in case of error
-      }
-    };
-  
-    fetchAdditionalFees();
-  }, []);  
-
-  const handleSelectFee = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedType = e.target.value;
-    setSelectedFee(selectedType);
-
-    if (selectedType) {
-      const selectedFeeData = additionalFees.find((fee) => fee.type === selectedType);
-      if (selectedFeeData) {
-        setFormData((prev) => ({
-          ...prev,
-          additionalFee: { ...selectedFeeData },
-        }));
-      }
-    } else {
-      // Reset additional fee fields
-      setFormData((prev) => ({
-        ...prev,
-        additionalFee: { type: "", description: "", amount: 0 },
-      }));
-    }
-  };
-
-  const handleDeleteFee = async () => {
-    if (!selectedFee) return;
-
-    const confirmDelete = window.confirm(`Are you sure you want to delete the fee: ${selectedFee}?`);
-    if (!confirmDelete) return;
-
-    try {
-      const response = await fetch(`http://localhost:8080/api/services/additional-fees/${selectedFee}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) throw new Error("Failed to delete fee");
-
-      // Update the additional fees state
-      setAdditionalFees((prev) => prev.filter((fee) => fee.type !== selectedFee));
-      setSelectedFee("");
-      setFormData((prev) => ({
-        ...prev,
-        additionalFee: { type: "", description: "", amount: 0 },
-      }));
-      
-      alert("Additional fee deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting additional fee:", error);
-    }
-  };
-
   if (loading) return <p>Loading cabin details...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -420,77 +345,23 @@ export default function UpdateCabin() {
 
       <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
       <br />
-      
-      {/* Dropdown to Select Existing Fees */}
-      <label>Select Existing Fee</label>
+
+      Type
       <br />
-      <select value={selectedFee} onChange={handleSelectFee}>
-        <option value="">Create New</option>
-        {additionalFees.map((fee) => (
-          <option key={fee.type} value={fee.type}>
-            {fee.type} - ₱{fee.amount}
-          </option>
-        ))}
-      </select>
+      <input type="text" name="type" data-section="additionalFee" value={formData.additionalFee.type} onChange={handleChange} />
       <br /><br />
 
-      {/* Manual Input for New or Selected Fee */}
-      <label>Type</label>
+      Description
       <br />
-      <input
-        type="text"
-        name="type"
-        data-section="additionalFee"
-        value={formData.additionalFee.type}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            additionalFee: { ...prev.additionalFee, type: e.target.value },
-          }))
-        }
-      />
+      <textarea name="description" data-section="additionalFee" value={formData.additionalFee.description} onChange={handleChange} rows={3} cols={30} />
       <br /><br />
 
-      <label>Description</label>
+      Amount
       <br />
-      <textarea
-        name="description"
-        data-section="additionalFee"
-        rows={3}
-        cols={30}
-        value={formData.additionalFee.description}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            additionalFee: { ...prev.additionalFee, description: e.target.value },
-          }))
-        }
-      />
-      <br /><br />
-
-      <label>Amount</label>
-      <br />
-      <input
-        type="number"
-        name="amount"
-        placeholder="₱"
-        data-section="additionalFee"
-        min="0"
-        step="0.01"
-        value={formData.additionalFee.amount}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            additionalFee: { ...prev.additionalFee, amount: Number(e.target.value) },
-          }))
-        }
-      />
+      <input type="number" name="amount" data-section="additionalFee" value={formData.additionalFee.amount} min="0" step="0.01" onChange={handleChange} />
       <br /><br />
 
       <button type="submit">Update Cabin</button>
-      {selectedFee && (
-        <button type="button" onClick={handleDeleteFee}>Delete Selected Fee</button>
-      )}
       <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
     </form>
   );
