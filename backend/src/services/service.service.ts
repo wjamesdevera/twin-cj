@@ -123,12 +123,12 @@ export const deleteCabin = async (id: number) => {
   return await prisma.$transaction(async (tx) => {
     const existingCabin = await tx.cabin.findUnique({
       where: { id },
-      include: { service: true },
+      include: { service: true, additionalFee: true },
     });
 
     if (!existingCabin) return null;
 
-    const { serviceId } = existingCabin;
+    const { serviceId, additionalFee } = existingCabin;
     const imageUrl = existingCabin.service?.imageUrl;
 
     if (imageUrl) {
@@ -148,7 +148,11 @@ export const deleteCabin = async (id: number) => {
       await tx.service.delete({ where: { id: serviceId } });
     }
 
-    return { deletedCabin: existingCabin, deletedService: serviceId ? existingCabin.service : null };
+    if (additionalFee) {
+      await tx.additionalFee.delete({ where: { id: additionalFee.id } });
+    }
+
+    return { deletedCabin: existingCabin, deletedService: serviceId ? existingCabin.service : null, deletedAdditionalFee: additionalFee ? additionalFee : null };
   });
 };
 

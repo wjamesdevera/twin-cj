@@ -106,6 +106,8 @@ export default function UpdateCabin() {
     image: "",
   });
 
+  const [additionalFeeWarning, setAdditionalFeeWarning] = useState("");
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
@@ -151,6 +153,22 @@ export default function UpdateCabin() {
         ...prev,
         [name]: validateField(name, newValue),
       }));
+
+      // Ensure correct handling of additional fee fields
+      if (section === "additionalFee") {
+        const updatedAdditionalFee = {
+          ...formData.additionalFee,
+          [name]: newValue, // Ensure type safety
+        };
+      
+        const { type, description, amount } = updatedAdditionalFee;
+
+        if ((type || description || amount) && (!type || !description || amount <= 0)) {
+          setAdditionalFeeWarning("Please complete all additional fee fields or leave them empty.");
+        } else {
+          setAdditionalFeeWarning("");
+        }
+      }
     }
   };
   
@@ -349,17 +367,20 @@ export default function UpdateCabin() {
       Type
       <br />
       <input type="text" name="type" data-section="additionalFee" value={formData.additionalFee.type} onChange={handleChange} />
-      <br /><br />
+      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+      <br />
 
       Description
       <br />
       <textarea name="description" data-section="additionalFee" value={formData.additionalFee.description} onChange={handleChange} rows={3} cols={30} />
-      <br /><br />
+      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+      <br />
 
       Amount
       <br />
       <input type="number" name="amount" data-section="additionalFee" value={formData.additionalFee.amount} min="0" step="0.01" onChange={handleChange} />
-      <br /><br />
+      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+      <br />
 
       <button type="submit">Update Cabin</button>
       <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>

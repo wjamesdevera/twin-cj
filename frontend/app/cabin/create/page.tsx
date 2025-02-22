@@ -138,6 +138,9 @@ export default function CreateCabin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const isConfirmed = window.confirm("Are you sure you want to add this cabin?");
+    if (!isConfirmed) return;
+
     // Validate all fields before submission
     const newErrors = {
       name: validateField("name", formData.service.name),
