@@ -27,6 +27,14 @@ type ChangePasswordData = {
   newPassword: string;
 };
 
+type SendFeedbackData = {
+  fullName: string;
+  email: string;
+  inquiryType: string;
+  contactNumber: string;
+  message: string;
+};
+
 export const login = async (data: LoginData) =>
   API.post("/api/auth/login", data);
 export const logout = async () => API.get("/api/auth/logout");
@@ -39,3 +47,6 @@ export const resetPassword = async (data: ResetPasswordData) =>
   API.post("/api/auth/password/reset", data);
 export const changePassword = async (data: ChangePasswordData) =>
   API.post("/api/auth/password/change", data);
+export const sendFeedback = async (data: SendFeedbackData) => {
+  API.post("/api/feedbacks");
+};
