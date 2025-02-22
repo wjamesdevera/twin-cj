@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCabinHandler, deleteAdditionalFeeHandler, deleteAllCabinsHandler, deleteCabinHandler, deleteSelectedCabinsHandler, getAllAdditionalFeesHandler, getAllCabinsHandler, getCabinHandler, updateCabinHandler } from "../controllers/service.controller";
+import { createCabinHandler, deleteAllCabinsHandler, deleteCabinHandler, deleteSelectedCabinsHandler, getAllCabinsHandler, getCabinHandler, updateCabinHandler } from "../controllers/service.controller";
 
 const router = Router();
 
@@ -11,9 +11,5 @@ router.delete("/cabins/:id", deleteCabinHandler);
 router.delete("/cabins", deleteAllCabinsHandler);
 router.post("/cabins/bulk-delete", deleteSelectedCabinsHandler);
 router.put("/cabins/:id", updateCabinHandler);
-
-// Additional Fee Endpoint
-router.get("/additional-fees", getAllAdditionalFeesHandler);
-router.delete("/additional-fees/:type", deleteAdditionalFeeHandler);
 
 export default router;
