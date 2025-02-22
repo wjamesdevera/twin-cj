@@ -48,5 +48,5 @@ export const resetPassword = async (data: ResetPasswordData) =>
 export const changePassword = async (data: ChangePasswordData) =>
   API.post("/api/auth/password/change", data);
 export const sendFeedback = async (data: SendFeedbackData) => {
-  API.post("/api/feedbacks");
+  API.post("/api/feedbacks", data);
 };
