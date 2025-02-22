@@ -19,4 +19,5 @@ const fileFilter = (
 export const upload = multer({
   dest: path.join(__dirname, "../uploads"),
   limits: { fileSize: 100000000 },
+  fileFilter,
 });
