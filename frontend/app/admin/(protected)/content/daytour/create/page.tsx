@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loading } from '@/app/components/loading';
 
@@ -30,6 +30,27 @@ function Page() {
   const [showQuantityHelperText, setShowQuantityHelperText] =
     useState<boolean>(false);
   const [isMutating, setIsMutating] = useState<boolean>(false);
+  const [isFormValid, setIsFormValid] = useState<boolean>(false);
+
+  useEffect(() => {
+    const isValid =
+      !!formData.name &&
+      !!formData.description &&
+      !!formData.price &&
+      !!formData.quantity &&
+      !!formData.image &&
+      formData.name.length <= 50 &&
+      formData.description.length <= 100 &&
+      /^\d+(\.\d+)?$/.test(formData.price) &&
+      parseFloat(formData.price) > 0 &&
+      /^\d+$/.test(formData.quantity) &&
+      parseInt(formData.quantity) > 0 &&
+      formData.image !== null &&
+      formData.image.size <= 1024 * 1024 &&
+      ['image/jpeg', 'image/png', 'image/jpg'].includes(formData.image.type);
+
+    setIsFormValid(isValid);
+  }, [formData]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -40,34 +61,25 @@ function Page() {
       [name]: files ? files[0] : value,
     });
 
-    if (name === 'name' && value.length >= 50) {
-      setShowNameHelperText(true);
-    } else if (name === 'name' && value.length <= 49) {
-      setShowNameHelperText(false);
-    }
-
-    if (name === 'description' && value.length >= 100) {
-      setshowDescriptionHelperText(true);
-    } else if (name === 'description' && value.length <= 99) {
-      setshowDescriptionHelperText(false);
-    }
-
-    if (name === 'price') {
-      const priceRegex = /^\d+(\.\d+)?$/;
-      if (!priceRegex.test(value) || parseFloat(value) <= 0) {
-        setShowRateHelperText(true);
-      } else {
-        setShowRateHelperText(false);
-      }
-    }
-
-    if (name === 'quantity') {
-      const quantityRegex = /^\d+$/;
-      if (!quantityRegex.test(value) || parseInt(value) <= 0) {
-        setShowQuantityHelperText(true);
-      } else {
-        setShowQuantityHelperText(false);
-      }
+    switch (name) {
+      case 'name':
+        setShowNameHelperText(value.length >= 50);
+        break;
+      case 'description':
+        setshowDescriptionHelperText(value.length >= 100);
+        break;
+      case 'price':
+        const priceRegex = /^\d+(\.\d+)?$/;
+        setShowRateHelperText(
+          !priceRegex.test(value) || parseFloat(value) <= 0
+        );
+        break;
+      case 'quantity':
+        const quantityRegex = /^\d+$/;
+        setShowQuantityHelperText(
+          !quantityRegex.test(value) || parseInt(value) <= 0
+        );
+        break;
     }
   };
 
@@ -75,67 +87,6 @@ function Page() {
     e.preventDefault();
 
     setIsMutating(true);
-
-    if (
-      !formData.name ||
-      !formData.description ||
-      !formData.price ||
-      !formData.quantity
-    ) {
-      alert('All fields are required.');
-      setIsMutating(false);
-      return;
-    }
-
-    if (formData.name.length > 50) {
-      alert('Name must not exceed 50 characters.');
-      setIsMutating(false);
-      return;
-    }
-
-    if (formData.description.length > 100) {
-      alert('Description must not exceed 100 characters.');
-      setIsMutating(false);
-      return;
-    }
-    if (
-      !/^\d+(\.\d+)?$/.test(formData.price) ||
-      isNaN(parseFloat(formData.price)) ||
-      parseFloat(formData.price) <= 0
-    ) {
-      alert('Rate must be a positive number.');
-      setIsMutating(false);
-      return;
-    }
-
-    if (
-      !/^\d+$/.test(formData.quantity) ||
-      isNaN(parseInt(formData.quantity)) ||
-      parseInt(formData.quantity) <= 0
-    ) {
-      alert('Quantity must be a positive integer.');
-      setIsMutating(false);
-      return;
-    }
-
-    if (!formData.image) {
-      alert('Please upload an image.');
-      setIsMutating(false);
-      return;
-    }
-
-    if (formData.image && formData.image.size > 1024 * 1024) {
-      alert('Image size must not exceed 1MB.');
-      setIsMutating(false);
-      return;
-    }
-
-    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (formData.image && !validImageTypes.includes(formData.image.type)) {
-      alert('Invalid image type. Only JPG, JPEG, and PNG are allowed.');
-      setIsMutating(false);
-      return;
-    }
 
     if (!window.confirm('Are you sure you want to add this Day tour?')) {
       setIsMutating(false);
@@ -243,7 +194,9 @@ function Page() {
                 <small>Quantity must be a positive integer</small>
               )}
             </div>
-            <button type="submit">Submit</button>
+            <button type="submit" disabled={!isFormValid}>
+              Submit
+            </button>
             <button
               type="button"
               onClick={() => router.push('/admin/content/daytour/dashboard')}

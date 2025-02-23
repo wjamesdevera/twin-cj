@@ -34,6 +34,7 @@ const EditDayTour: React.FC = () => {
   const [showQuantityHelperText, setShowQuantityHelperText] =
     useState<boolean>(false);
   const [originalData, setOriginalData] = useState<DayTour | null>(null);
+  const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
   const router = useRouter();
   const params = useParams();
@@ -91,11 +92,41 @@ const EditDayTour: React.FC = () => {
     fetchDayTour();
   }, [id]);
 
+  useEffect(() => {
+    const priceStr = String(formData.price).trim();
+    const quantityStr = String(formData.quantity).trim();
+
+    const isValid =
+      !!formData.name &&
+      !!formData.description &&
+      !!priceStr &&
+      !!quantityStr &&
+      formData.name.length <= 50 &&
+      formData.description.length <= 100 &&
+      /^\d+(\.\d{1,2})?$/.test(priceStr) &&
+      parseFloat(priceStr) > 0 &&
+      /^\d+$/.test(quantityStr) &&
+      parseInt(quantityStr) > 0 &&
+      (!imageFile || imageFile.size <= 1024 * 1024);
+
+    setIsFormValid(isValid && hasChanges());
+  }, [formData, imageFile]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    let updatedValue = value.trim();
+
+    if (name === 'price') {
+      if (!/^\d*\.?\d{0,2}$/.test(updatedValue)) return;
+    }
+
+    if (name === 'quantity') {
+      if (!/^\d*$/.test(updatedValue) && updatedValue !== '') return;
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: updatedValue }));
 
     switch (name) {
       case 'name':
@@ -116,12 +147,20 @@ const EditDayTour: React.FC = () => {
   };
 
   const hasChanges = () => {
-    if (!originalData) return true;
-    const { imageUrl, ...originalDataWithoutImage } = originalData;
-    const { imageUrl: currentImage, ...currentDataWithoutImage } = formData;
+    if (!originalData) return false;
+
+    const compareWithoutWhitespace = (a: string, b: string) =>
+      a.trim() === b.trim();
+
     return (
-      JSON.stringify(originalDataWithoutImage) !==
-        JSON.stringify(currentDataWithoutImage) || !!imageFile
+      !compareWithoutWhitespace(formData.name, originalData.name) ||
+      !compareWithoutWhitespace(
+        formData.description,
+        originalData.description
+      ) ||
+      parseFloat(formData.price) !== parseFloat(originalData.price) ||
+      parseInt(formData.quantity) !== parseInt(originalData.quantity) ||
+      !!imageFile
     );
   };
 
@@ -129,41 +168,6 @@ const EditDayTour: React.FC = () => {
     e.preventDefault();
 
     setIsMutating(true);
-
-    if (
-      !formData.name ||
-      !formData.description ||
-      !formData.price ||
-      !formData.quantity
-    ) {
-      alert('All fields are required.');
-      setIsMutating(false);
-      return;
-    }
-
-    if (
-      !/^[0-9]+(\.[0-9]+)?$/.test(formData.price) ||
-      parseFloat(formData.price) <= 0
-    ) {
-      alert('Rate must be a valid positive number.');
-      setIsMutating(false);
-      return;
-    }
-
-    if (
-      !/^[0-9]+$/.test(formData.quantity) ||
-      parseInt(formData.quantity) <= 0
-    ) {
-      alert('Quantity must be a positive integer.');
-      setIsMutating(false);
-      return;
-    }
-
-    if (imageFile && imageFile.size > 1024 * 1024) {
-      alert('Image size must not exceed 1MB.');
-      setIsMutating(false);
-      return;
-    }
 
     if (!hasChanges()) {
       alert('Please make changes before saving.');
@@ -299,7 +303,11 @@ const EditDayTour: React.FC = () => {
                 </small>
               )}
             </div>
-            <button type="submit" className={styles.submitButton}>
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={!isFormValid}
+            >
               Save Changes
             </button>
             <button
