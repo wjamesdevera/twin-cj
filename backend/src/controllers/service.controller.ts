@@ -31,8 +31,8 @@ export const createDayTourHandler = catchErrors(
     }
 
     try {
-      const dayTour = serviceSchema.parse(jsonData);
-      const requestBody = { ...dayTour, imageUrl };
+      const validatedData = serviceSchema.parse(jsonData);
+      const requestBody = { ...validatedData, imageUrl };
 
       const createdDayTour = await createDayTour(requestBody);
 
@@ -48,12 +48,6 @@ export const createDayTourHandler = catchErrors(
     }
   }
 );
-
-// NOTE: You may remove this after accomplishing the task
-
-// TODO: ADD Validations (some validation are already done by zod)
-
-// TODO: Implement adding the data to the database
 
 export const getAllDayToursHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -71,7 +65,7 @@ export const getDayTourByIdHandler = catchErrors(
     const dayTour = await getDayTourById(Number(id));
     if (!dayTour) {
       return res.status(BAD_REQUEST).json({
-        status: 'fail',
+        status: BAD_REQUEST,
         message: 'Day Tour not found',
       });
     }
@@ -87,17 +81,12 @@ export const updateDayTourHandler = catchErrors(
     const { id } = req.params;
     let imageUrl = req.body.imageUrl;
 
-    if (!id || isNaN(Number(id))) {
-      return res
-        .status(BAD_REQUEST)
-        .json({ status: 'error', message: 'Invalid ID' });
-    }
+    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, 'Invalid ID');
 
     let jsonData;
     try {
       jsonData = JSON.parse(req.body.data);
     } catch (error) {
-      console.error('JSON Parsing Error:', error);
       return res
         .status(BAD_REQUEST)
         .json({ status: 'error', message: 'Invalid JSON input' });
@@ -150,7 +139,7 @@ export const deleteDayTourHandler = catchErrors(
     const dayTour = await getDayTourById(Number(id));
     if (!dayTour) {
       return res.status(404).json({
-        status: 'fail',
+        status: BAD_REQUEST,
         message: 'Day Tour not found',
       });
     }

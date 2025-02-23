@@ -11,16 +11,16 @@ function Page() {
     name: string;
     description: string;
     image: File | null;
-    price: number;
-    quantity: number;
+    price: string;
+    quantity: string;
   }
 
   const [formData, setFormData] = useState<DayTourFormData>({
     name: '',
     description: '',
     image: null,
-    price: 0,
-    quantity: 1,
+    price: '',
+    quantity: '',
   });
 
   const [showNameHelperText, setShowNameHelperText] = useState<boolean>(false);
@@ -98,26 +98,25 @@ function Page() {
       setIsMutating(false);
       return;
     }
+    if (
+      !/^\d+(\.\d+)?$/.test(formData.price) ||
+      isNaN(parseFloat(formData.price)) ||
+      parseFloat(formData.price) <= 0
+    ) {
+      alert('Rate must be a positive number.');
+      setIsMutating(false);
+      return;
+    }
 
-    // if (
-    //   !/^\d+(\.\d+)?$/.test(formData.price) ||
-    //   isNaN(parseFloat(formData.price)) ||
-    //   parseFloat(formData.price) <= 0
-    // ) {
-    //   alert('Rate must be a positive number.');
-    //   setIsMutating(false);
-    //   return;
-    // }
-
-    // if (
-    //   !/^\d+$/.test(formData.quantity) ||
-    //   isNaN(parseInt(formData.quantity)) ||
-    //   parseInt(formData.quantity) <= 0
-    // ) {
-    //   alert('Quantity must be a positive integer.');
-    //   setIsMutating(false);
-    //   return;
-    // }
+    if (
+      !/^\d+$/.test(formData.quantity) ||
+      isNaN(parseInt(formData.quantity)) ||
+      parseInt(formData.quantity) <= 0
+    ) {
+      alert('Quantity must be a positive integer.');
+      setIsMutating(false);
+      return;
+    }
 
     if (!formData.image) {
       alert('Please upload an image.');
