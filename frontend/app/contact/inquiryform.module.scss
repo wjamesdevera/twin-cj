@@ -159,3 +159,14 @@
   border-left: 8px solid var(--color-green-600);
   width: 80%;
 }
+
+.error-input {
+  border: 1px solid red !important;
+}
+
+.error-text {
+  color: red;
+  font-style: italic;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
