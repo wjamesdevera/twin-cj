@@ -4,7 +4,7 @@ interface CreateDayTourInput {
   name: string;
   description: string;
   imageUrl: string;
-  rate: number;
+  price: number;
   quantity: number;
 }
 
@@ -16,7 +16,7 @@ export const createDayTour = async (input: CreateDayTourInput) => {
           name: input.name,
           description: input.description,
           imageUrl: input.imageUrl,
-          price: input.rate,
+          price: input.price,
           quantity: input.quantity,
         },
       },

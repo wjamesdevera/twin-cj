@@ -9,7 +9,7 @@ interface DayTour {
   name: string;
   description: string;
   imageUrl: string;
-  rate: number;
+  price: string;
   quantity: string;
 }
 
@@ -19,9 +19,10 @@ const EditDayTour: React.FC = () => {
     name: '',
     description: '',
     imageUrl: '',
-    rate: '',
+    price: '',
     quantity: '',
   });
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isMutating, setIsMutating] = useState<boolean>(false);
@@ -67,8 +68,10 @@ const EditDayTour: React.FC = () => {
             id: data.data.dayTour.id,
             name: service.name || '',
             description: service.description || '',
-            imageUrl: service.imageUrl || '',
-            rate: service.price || 0,
+            imageUrl: service?.imageUrl
+              ? `http://localhost:8080/uploads/${service.imageUrl}`
+              : '',
+            price: service.price || 0,
             quantity: service.quantity || 0,
           };
           setFormData(fetchedData);
@@ -94,24 +97,21 @@ const EditDayTour: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (name === 'name') {
-      setShowNameHelperText(value.length >= 50);
-    }
-
-    if (name === 'description') {
-      setShowDescriptionHelperText(value.length >= 100);
-    }
-
-    if (name === 'rate') {
-      const rateRegex = /^\d+(\.\d+)?$/;
-      setShowRateHelperText(!rateRegex.test(value) || parseFloat(value) <= 0);
-    }
-
-    if (name === 'quantity') {
-      const quantityRegex = /^\d+$/;
-      setShowQuantityHelperText(
-        !quantityRegex.test(value) || parseInt(value) <= 0
-      );
+    switch (name) {
+      case 'name':
+        setShowNameHelperText(value.length >= 50);
+        break;
+      case 'description':
+        setShowDescriptionHelperText(value.length >= 100);
+        break;
+      case 'price':
+        setShowRateHelperText(
+          !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
+        );
+        break;
+      case 'quantity':
+        setShowQuantityHelperText(!/^\d+$/.test(value) || parseInt(value) <= 0);
+        break;
     }
   };
 
@@ -133,7 +133,7 @@ const EditDayTour: React.FC = () => {
     if (
       !formData.name ||
       !formData.description ||
-      !formData.rate ||
+      !formData.price ||
       !formData.quantity
     ) {
       alert('All fields are required.');
@@ -142,8 +142,8 @@ const EditDayTour: React.FC = () => {
     }
 
     if (
-      !/^[0-9]+(\.[0-9]+)?$/.test(formData.rate) ||
-      parseFloat(formData.rate) <= 0
+      !/^[0-9]+(\.[0-9]+)?$/.test(formData.price) ||
+      parseFloat(formData.price) <= 0
     ) {
       alert('Rate must be a valid positive number.');
       setIsMutating(false);
@@ -176,19 +176,24 @@ const EditDayTour: React.FC = () => {
       return;
     }
 
-    const updatedFormData = new FormData();
-    updatedFormData.append('name', formData.name);
-    updatedFormData.append('description', formData.description);
-    updatedFormData.append('rate', formData.rate);
-    updatedFormData.append('quantity', formData.quantity);
-    if (imageFile) updatedFormData.append('image', imageFile);
+    const data = new FormData();
+    const jsonData = {
+      name: formData.name,
+      description: formData.description,
+      price: Number(formData.price),
+      quantity: Number(formData.quantity),
+    };
+    data.append('data', JSON.stringify(jsonData));
+    if (imageFile) {
+      data.append('image', imageFile);
+    }
 
     try {
       const response = await fetch(
         `http://localhost:8080/api/services/day-tour/${id}`,
         {
           method: 'PATCH',
-          body: updatedFormData,
+          body: data,
         }
       );
 
@@ -204,10 +209,11 @@ const EditDayTour: React.FC = () => {
       setIsMutating(false);
     }
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <Loading />;
     if (error) return <div>Error: {error}</div>;
     if (!formData) return <div>No data found</div>;
   };
+
   return (
     <div className={styles.container}>
       {isMutating ? (
@@ -262,12 +268,12 @@ const EditDayTour: React.FC = () => {
               />
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor="rate">Rate</label>
+              <label htmlFor="price">Rate</label>
               <input
                 type="text"
-                id="rate"
-                name="rate"
-                value={formData.rate || ''}
+                id="price"
+                name="price"
+                value={formData.price || ''}
                 onChange={handleChange}
                 required
               />

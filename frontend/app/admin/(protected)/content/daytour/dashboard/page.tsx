@@ -41,17 +41,20 @@ const DayTourView = () => {
         const data = await response.json();
 
         if (Array.isArray(data?.data?.dayTours)) {
-          const mappedDayTours = data.data.dayTours.map((tour: any) => ({
-            id: tour.id,
-            name: tour.service?.name || 'Unnamed Tour',
-            description:
-              tour.service?.description || 'No description available',
-            imageUrl: tour.service?.imageUrl || '',
-            rate: parseFloat(tour.service?.price || 0).toFixed(2),
-            quantity: tour.service?.quantity || 0,
-            createdAt: new Date(tour.createdAt).toLocaleDateString(),
-            updatedAt: new Date(tour.updatedAt).toLocaleDateString(),
-          }));
+          const mappedDayTours = data.data.dayTours.map((tour: any) => {
+            console.log('Image URL:', tour.service.imageUrl);
+            return {
+              id: tour.id,
+              name: tour.service?.name || 'Unnamed Tour',
+              description:
+                tour.service?.description || 'No description available',
+              imageUrl: tour.service?.imageUrl || '',
+              rate: parseFloat(tour.service?.price || 0).toFixed(2),
+              quantity: tour.service?.quantity || 0,
+              createdAt: new Date(tour.createdAt).toLocaleDateString(),
+              updatedAt: new Date(tour.updatedAt).toLocaleDateString(),
+            };
+          });
 
           setDayTours((prevTours) => {
             const isSameData =
@@ -155,7 +158,7 @@ const DayTourView = () => {
   }
 
   return (
-    <div>
+    <div className={styles.container}>
       <h1>Day Tours</h1>
       <button className="add" onClick={handleAdd}>
         Add Day Tour
@@ -208,7 +211,11 @@ const DayTourView = () => {
               <td>
                 {dayTour.imageUrl ? (
                   <img
-                    src={`http://localhost:8080/uploads/${dayTour.imageUrl}`}
+                    src={
+                      dayTour.imageUrl.startsWith('http')
+                        ? dayTour.imageUrl
+                        : `http://localhost:8080/${dayTour.imageUrl}`
+                    }
                     alt={dayTour.name}
                     width="100"
                     height="100"

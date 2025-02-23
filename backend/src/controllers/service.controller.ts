@@ -1,87 +1,65 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import {
   createDayTour,
   getAllDayTours,
   getDayTourById,
   deleteDayTour,
   updateDayTour,
-} from "../services/service.service";
-import { CREATED, OK } from "../constants/http";
-import catchErrors from "../utils/catchErrors";
-import path from "path";
-import fs from "fs";
-import appAssert from "../utils/appAssert";
-import { ROOT_STATIC_URL } from "../constants/url";
-import { serviceSchema } from "../schemas/service.schemas";
+} from '../services/service.service';
+import { BAD_REQUEST, CREATED, OK } from '../constants/http';
+import catchErrors from '../utils/catchErrors';
+import path from 'path';
+import fs from 'fs';
+import appAssert from '../utils/appAssert';
+import { ROOT_STATIC_URL } from '../constants/url';
+import { serviceSchema } from '../schemas/service.schemas';
+import { ZodError } from 'zod';
 
 export const createDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
-    appAssert(req.file, 400, "Image is required");
+    appAssert(req.file, BAD_REQUEST, 'Image is required');
     const imageUrl = `${ROOT_STATIC_URL}/${req.file.filename}`;
-    const data = JSON.parse(req.body.data);
-    const dayTour = serviceSchema.parse(data);
-    const dayTourData = { ...dayTour, imageUrl };
 
-    res.json({
-      dayTour: dayTourData,
-    });
+    let jsonData;
+    try {
+      jsonData = JSON.parse(req.body.data);
+    } catch (error) {
+      console.error('JSON Parsing Error:', error);
+      return res
+        .status(BAD_REQUEST)
+        .json({ status: 'error', message: 'Invalid JSON input' });
+    }
 
-    // NOTE: You may remove this after accomplishing the task
-    // Apply the given structure above to request that requires files and text data
+    try {
+      const dayTour = serviceSchema.parse(jsonData);
+      const requestBody = { ...dayTour, imageUrl };
 
-    // TODO: ADD Validations (some validation are already done by zod)
+      const createdDayTour = await createDayTour(requestBody);
 
-    // TODO: Implement adding the data to the database
-
-    // Validation
-    // if (!name || !description || !rate || !quantity || !imageUrl) {
-    //   return res.status(400).json({ error: "All fields are required" });
-    // }
-
-    // if (typeof name !== "string" || typeof description !== "string") {
-    //   return res
-    //     .status(400)
-    //     .json({ error: "Name and description must be strings" });
-    // }
-
-    // if (name.length > 50) {
-    //   return res
-    //     .status(400)
-    //     .json({ error: "Name must not be more than 50 characters" });
-    // }
-
-    // if (description.length > 100) {
-    //   return res
-    //     .status(400)
-    //     .json({ error: "Description must not be more than 100 characters" });
-    // }
-
-    // if (isNaN(parseFloat(rate)) || parseFloat(rate) <= 0) {
-    //   return res.status(400).json({ error: "Rate must be a positive number" });
-    // }
-
-    // if (isNaN(parseInt(quantity)) || parseInt(quantity) <= 0) {
-    //   return res
-    //     .status(400)
-    //     .json({ error: "quantity should be a positive number" });
-    // }
-
-    // const dayTour = await createDayTour({
-    //   name,
-    //   description,
-    //   imageUrl,
-    //   rate: parseFloat(rate),
-    //   quantity: parseInt(quantity),
-    // });
-    // res.status(CREATED).json(dayTour);
+      res.status(CREATED).json({
+        status: 'success',
+        data: { dayTour: createdDayTour },
+      });
+    } catch (validationError) {
+      console.error('Validation Error:', validationError);
+      return res
+        .status(BAD_REQUEST)
+        .json({ status: 'error', message: 'Invalid data format' });
+    }
   }
 );
+
+// NOTE: You may remove this after accomplishing the task
+
+// TODO: ADD Validations (some validation are already done by zod)
+
+// TODO: Implement adding the data to the database
 
 export const getAllDayToursHandler = catchErrors(
   async (req: Request, res: Response) => {
     const dayTours = await getAllDayTours();
     res.status(OK).json({
-      status: "success",
+      status: 'success',
       data: { dayTours },
     });
   }
@@ -92,13 +70,13 @@ export const getDayTourByIdHandler = catchErrors(
     const { id } = req.params;
     const dayTour = await getDayTourById(Number(id));
     if (!dayTour) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Day Tour not found",
+      return res.status(BAD_REQUEST).json({
+        status: 'fail',
+        message: 'Day Tour not found',
       });
     }
     res.status(OK).json({
-      status: "success",
+      status: 'success',
       data: { dayTour },
     });
   }
@@ -107,68 +85,62 @@ export const getDayTourByIdHandler = catchErrors(
 export const updateDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, description, rate, quantity } = req.body;
     let imageUrl = req.body.imageUrl;
 
-    // Validation
     if (!id || isNaN(Number(id))) {
-      return res.status(400).json({ status: "error", message: "Invalid ID" });
-    }
-    if (!name || name.trim() === "") {
       return res
-        .status(400)
-        .json({ status: "error", message: "Name is required" });
-    }
-    if (!description || description.trim() === "") {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Description is required" });
-    }
-    if (!rate || isNaN(parseFloat(rate)) || parseFloat(rate) <= 0) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Rate must be a positive number" });
-    }
-    if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) <= 0) {
-      return res.status(400).json({
-        status: "error",
-        message: "quantity must be a positive integer",
-      });
+        .status(BAD_REQUEST)
+        .json({ status: 'error', message: 'Invalid ID' });
     }
 
-    if (req.file) {
-      imageUrl = req.file.filename;
-      const existingDayTour = await getDayTourById(Number(id));
-      if (
-        existingDayTour &&
-        existingDayTour.service &&
-        existingDayTour.service.imageUrl
-      ) {
-        const oldImagePath = path.join(
-          __dirname,
-          "../../uploads",
-          existingDayTour.service.imageUrl
-        );
-        fs.unlink(oldImagePath, (err) => {
-          if (err) {
-            console.error("Failed to delete old image file:", err);
-          }
+    let jsonData;
+    try {
+      jsonData = JSON.parse(req.body.data);
+    } catch (error) {
+      console.error('JSON Parsing Error:', error);
+      return res
+        .status(BAD_REQUEST)
+        .json({ status: 'error', message: 'Invalid JSON input' });
+    }
+
+    try {
+      const validatedData = serviceSchema.parse(jsonData);
+
+      if (req.file) {
+        imageUrl = `uploads/${req.file.filename}`;
+        const existingDayTour = await getDayTourById(Number(id));
+        if (existingDayTour?.service?.imageUrl) {
+          const oldImagePath = path.join(
+            __dirname,
+            '../../uploads',
+            existingDayTour.service.imageUrl.replace(/^.*[\\\/]/, '')
+          );
+          fs.unlink(oldImagePath, (err) => {
+            if (err) console.error('Failed to delete old image file:', err);
+          });
+        }
+      }
+
+      const updatedDayTour = await updateDayTour(Number(id), {
+        ...validatedData,
+        imageUrl,
+        rate: validatedData.price,
+      });
+
+      res.status(OK).json({
+        status: 'success',
+        data: { DayTour: updatedDayTour },
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.error('Validation Error:', error);
+        return res.status(BAD_REQUEST).json({
+          status: 'error',
+          message: error.errors || 'Invalid data format',
         });
       }
+      throw error;
     }
-
-    const updatedDayTour = await updateDayTour(Number(id), {
-      name,
-      description,
-      imageUrl,
-      rate: parseFloat(rate),
-      quantity: quantity ? parseInt(quantity) : 0,
-    });
-
-    res.status(OK).json({
-      status: "success",
-      data: { DayTour: updatedDayTour },
-    });
   }
 );
 
@@ -178,27 +150,27 @@ export const deleteDayTourHandler = catchErrors(
     const dayTour = await getDayTourById(Number(id));
     if (!dayTour) {
       return res.status(404).json({
-        status: "fail",
-        message: "Day Tour not found",
+        status: 'fail',
+        message: 'Day Tour not found',
       });
     }
 
     if (dayTour.service && dayTour.service.imageUrl) {
       const imagePath = path.join(
         __dirname,
-        "../../uploads",
-        dayTour.service.imageUrl
+        '../../uploads',
+        dayTour.service.imageUrl.replace(/^.*[\\\/]/, '')
       );
       fs.unlink(imagePath, (err) => {
         if (err) {
-          console.error("Failed to delete image file:", err);
+          console.error('Failed to delete image file:', err);
         }
       });
     }
 
     await deleteDayTour(Number(id));
     res.status(OK).json({
-      status: "success",
+      status: 'success',
       message: `Day Tour Activity with ID ${id} deleted successfully`,
     });
   }
