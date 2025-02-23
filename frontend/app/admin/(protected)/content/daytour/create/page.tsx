@@ -11,7 +11,7 @@ function Page() {
     name: string;
     description: string;
     image: File | null;
-    rate: number;
+    price: number;
     quantity: number;
   }
 
@@ -19,7 +19,7 @@ function Page() {
     name: '',
     description: '',
     image: null,
-    rate: 0.0,
+    price: 0,
     quantity: 1,
   });
 
@@ -52,9 +52,9 @@ function Page() {
       setshowDescriptionHelperText(false);
     }
 
-    if (name === 'rate') {
-      const rateRegex = /^\d+(\.\d+)?$/;
-      if (!rateRegex.test(value) || parseFloat(value) <= 0) {
+    if (name === 'price') {
+      const priceRegex = /^\d+(\.\d+)?$/;
+      if (!priceRegex.test(value) || parseFloat(value) <= 0) {
         setShowRateHelperText(true);
       } else {
         setShowRateHelperText(false);
@@ -79,7 +79,7 @@ function Page() {
     if (
       !formData.name ||
       !formData.description ||
-      !formData.rate ||
+      !formData.price ||
       !formData.quantity
     ) {
       alert('All fields are required.');
@@ -99,25 +99,25 @@ function Page() {
       return;
     }
 
-    if (
-      !/^\d+(\.\d+)?$/.test(formData.rate) ||
-      isNaN(parseFloat(formData.rate)) ||
-      parseFloat(formData.rate) <= 0
-    ) {
-      alert('Rate must be a positive number.');
-      setIsMutating(false);
-      return;
-    }
+    // if (
+    //   !/^\d+(\.\d+)?$/.test(formData.price) ||
+    //   isNaN(parseFloat(formData.price)) ||
+    //   parseFloat(formData.price) <= 0
+    // ) {
+    //   alert('Rate must be a positive number.');
+    //   setIsMutating(false);
+    //   return;
+    // }
 
-    if (
-      !/^\d+$/.test(formData.quantity) ||
-      isNaN(parseInt(formData.quantity)) ||
-      parseInt(formData.quantity) <= 0
-    ) {
-      alert('Quantity must be a positive integer.');
-      setIsMutating(false);
-      return;
-    }
+    // if (
+    //   !/^\d+$/.test(formData.quantity) ||
+    //   isNaN(parseInt(formData.quantity)) ||
+    //   parseInt(formData.quantity) <= 0
+    // ) {
+    //   alert('Quantity must be a positive integer.');
+    //   setIsMutating(false);
+    //   return;
+    // }
 
     if (!formData.image) {
       alert('Please upload an image.');
@@ -144,13 +144,17 @@ function Page() {
     }
 
     const data = new FormData();
-    data.append('name', formData.name);
-    data.append('description', formData.description);
+    const jsonData = {
+      name: formData.name,
+      description: formData.description,
+      price: Number(formData.price),
+      quantity: Number(formData.quantity),
+    };
+    data.append('data', JSON.stringify(jsonData));
+
     if (formData.image) {
       data.append('image', formData.image);
     }
-    data.append('rate', formData.rate);
-    data.append('quantity', formData.quantity);
 
     try {
       const response = await fetch(
@@ -220,8 +224,8 @@ function Page() {
               <label>Rate:</label>
               <input
                 type="text"
-                name="rate"
-                value={formData.rate}
+                name="price"
+                value={formData.price}
                 onChange={handleChange}
               />
               {showRateHelperText && (
