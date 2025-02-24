@@ -5,7 +5,7 @@ import {
   registerSchema,
   resetPasswordSchema,
   verificationCodeSchema,
-} from "../schemas/auth.schems";
+} from "../schemas/auth.schema";
 import catchErrors from "../utils/catchErrors";
 import {
   changePassword,
