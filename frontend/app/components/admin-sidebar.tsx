@@ -1,6 +1,7 @@
 "use client";
 
 import React, { JSX, useState } from "react";
+import { usePathname } from "next/navigation";
 import styles from "./admin-sidebar.module.scss";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,10 +26,21 @@ interface NavDropdownProps {
   collapsed: boolean;
 }
 
+interface SidebarProps {
+  isSideBarOpen: boolean;
+  toggleSidebar: () => void;
+}
+
 const NavItem = ({ label, href, icon, collapsed }: NavItemProps) => {
+  const pathname = usePathname();
+  const isActive = href === "/admin" ? pathname === href : pathname.startsWith(href);
+
   return (
     <li>
-      <Link href={href} className={styles["navitem-container"]}>
+      <Link
+        href={href}
+        className={`${styles["navitem-container"]} ${isActive ? styles.active : ""}`}
+      >
         <div className={styles["navitem-wrapper"]}>
           {icon}
           <p className={collapsed ? styles.hidden : ""}>{label}</p>
@@ -40,12 +52,20 @@ const NavItem = ({ label, href, icon, collapsed }: NavItemProps) => {
 
 const NavDropdown = ({ collapsed }: NavDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  
+  const isDropdownActive = pathname.startsWith("/admin/day-tour-activities") ||
+                           pathname.startsWith("/admin/cabins");
+
+  const handleToggle = () => {
+    if (!collapsed) setIsOpen((prev) => !prev);
+  };
 
   return (
     <>
       <li
-        className={styles["navitem-dropdown-container"]}
-        onClick={() => setIsOpen(!isOpen)}
+        className={`${styles["navitem-dropdown-container"]} ${isDropdownActive ? styles.active : ""}`}
+        onClick={handleToggle}
       >
         <div className={styles["navitem-dropdown-wrapper"]}>
           <div className={styles["navitem-dropdown-label"]}>
@@ -62,16 +82,16 @@ const NavDropdown = ({ collapsed }: NavDropdownProps) => {
         </div>
       </li>
       <div
-        className={`${!isOpen ? styles.hidden : ""} ${
+        className={`${!isOpen || collapsed ? styles.hidden : ""} ${
           styles["dropdown-items"]
         }`}
       >
         <NavItem
           href="/admin/day-tour-activities"
           label="Day Tour Activities"
-          collapsed={false}
+          collapsed={collapsed}
         />
-        <NavItem href="/admin/cabins" label="Cabins" collapsed={false} />
+        <NavItem href="/admin/cabins" label="Cabins" collapsed={collapsed} />
       </div>
     </>
   );
@@ -94,7 +114,7 @@ const NavList = ({ collapsed }: NavListProps) => {
       />
       <NavDropdown collapsed={collapsed} />
       <NavItem
-        href="/admin/accounts"
+        href="/admin/admin_accounts"
         label="Admin Accounts"
         collapsed={collapsed}
         icon={<FaRegUser />}
@@ -103,9 +123,7 @@ const NavList = ({ collapsed }: NavListProps) => {
   );
 };
 
-const Sidebar: React.FC = () => {
-  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
-
+const Sidebar: React.FC<SidebarProps> = ({ isSideBarOpen, toggleSidebar }) => {
   return (
     <div
       className={`${styles["sidebar-container"]} ${
@@ -133,7 +151,7 @@ const Sidebar: React.FC = () => {
         </nav>
       </aside>
       <div className={styles["sidebar-footer"]}>
-        <button onClick={() => setIsSideBarOpen(!isSideBarOpen)}>
+        <button onClick={toggleSidebar}>
           {isSideBarOpen ? <TbArrowBarToLeft /> : <TbArrowBarToRight />}
         </button>
       </div>
