@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailSchema } from "./auth.schems";
+import { emailSchema } from "./auth.schema";
 
 export const fullNameSchema = z.string().max(255);
 export const contactNumberSchema = z.string().min(11).max(15);

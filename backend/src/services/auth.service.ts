@@ -373,3 +373,45 @@ export const changePassword = async ({
     console.error(error.message);
   }
 };
+
+export const verifyEmail = async (code: string) => {
+  const validCode = await prisma.verificationCode.findFirst({
+    where: {
+      id: code,
+    },
+    include: {
+      userAccount: true,
+    },
+  });
+  appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
+
+  const updatedUser = await prisma.userAccount.update({
+    where: {
+      id: validCode.userAccountId,
+    },
+    data: {
+      isVerified: true,
+    },
+    include: {
+      personalDetail: true,
+    },
+  });
+
+  appAssert(updatedUser, INTERNAL_SERVER_ERROR, "Failed to verify email");
+
+  await prisma.verificationCode.delete({
+    where: {
+      id: validCode.id,
+    },
+  });
+
+  return {
+    user: {
+      firstName: updatedUser.personalDetail.firstName,
+      lastName: updatedUser.personalDetail.lastName,
+      phoneNumber: updatedUser.personalDetail.phoneNumber,
+      email: updatedUser.personalDetail.email,
+      isVerified: updatedUser.isVerified,
+    },
+  };
+};
