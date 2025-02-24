@@ -49,6 +49,7 @@ const InquiryForm: React.FC = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isFormValid, setIsFormValid] = useState(false);
+
   const [isTouched, setIsTouched] = useState<Record<string, boolean>>({
     fullName: false,
     email: false,
