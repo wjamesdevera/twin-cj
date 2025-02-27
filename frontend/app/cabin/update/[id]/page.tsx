@@ -297,6 +297,8 @@ export default function UpdateCabin() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <div style={{ marginTop: "80px" }}></div>
+
       <label>Title</label>
       <br />
       <input type="text" name="name" data-section="service" value={formData.service.name} onChange={handleChange} />
@@ -384,6 +386,8 @@ export default function UpdateCabin() {
 
       <button type="submit">Update Cabin</button>
       <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
+
+      <div style={{ marginBottom: "80px" }}></div>
     </form>
   );
 }

@@ -124,6 +124,8 @@ const CabinDashboard = () => {
 
   return (
     <div>
+      <div style={{ marginTop: "80px" }}></div>
+
       <button onClick={() => router.push("/cabin/create")}>Add Cabin</button>
       <button onClick={deleteSelectedCabins} disabled={selectedCabins.length === 0}>Delete Selected</button>
 
