@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./form.module.scss";
-import CustomButton from "../../../components/custom_button";
+import CustomButton from "../../../../components/custom_button";
 
 const Form: React.FC = () => {
   const router = useRouter();
@@ -35,7 +35,8 @@ const Form: React.FC = () => {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
 
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validatePassword = (password: string) => {
     setPasswordValidations({
@@ -75,7 +76,7 @@ const Form: React.FC = () => {
       }
 
       if (name === "email") {
-        setIsEmailValid(value === "" || validateEmail(value)); 
+        setIsEmailValid(value === "" || validateEmail(value));
       }
 
       return updatedFormData;
@@ -84,15 +85,25 @@ const Form: React.FC = () => {
     setErrors((prev) => ({
       ...prev,
       email: name === "email" && value !== "" && !validateEmail(value),
-      phoneNumber: name === "phoneNumber" && value !== "" && value.length !== 10,
-      password: name === "password" && value !== "" && !Object.values(passwordValidations).every(Boolean),
-      confirmPassword: name === "confirmPassword" && value !== "" && value !== formData.password,
+      phoneNumber:
+        name === "phoneNumber" && value !== "" && value.length !== 10,
+      password:
+        name === "password" &&
+        value !== "" &&
+        !Object.values(passwordValidations).every(Boolean),
+      confirmPassword:
+        name === "confirmPassword" &&
+        value !== "" &&
+        value !== formData.password,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Submitted", { ...formData, phoneNumber: formData.phoneNumber ? `+63${formData.phoneNumber}` : "" });
+    console.log("Form Submitted", {
+      ...formData,
+      phoneNumber: formData.phoneNumber ? `+63${formData.phoneNumber}` : "",
+    });
   };
 
   return (
@@ -129,7 +140,9 @@ const Form: React.FC = () => {
           onChange={handleChange}
           className={errors.email ? styles.invalid_input : ""}
         />
-        {errors.email && <span className={styles.error}>Invalid email address</span>}
+        {errors.email && (
+          <span className={styles.error}>Invalid email address</span>
+        )}
       </div>
 
       {/* Phone Number */}
@@ -145,7 +158,9 @@ const Form: React.FC = () => {
             className={errors.phoneNumber ? styles.invalid_input : ""}
           />
         </div>
-        {errors.phoneNumber && <span className={styles.error}>Must be 10 digits only.</span>}
+        {errors.phoneNumber && (
+          <span className={styles.error}>Must be 10 digits only.</span>
+        )}
       </div>
 
       {/* Password */}
@@ -161,21 +176,43 @@ const Form: React.FC = () => {
         />
         {isPasswordFocused && formData.password && (
           <div className={styles.password_requirements}>
-            <p><strong>Your password must contain:</strong></p>
+            <p>
+              <strong>Your password must contain:</strong>
+            </p>
             <ul>
-              <li className={passwordValidations.length ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.length ? styles.valid : styles.invalid
+                }
+              >
                 ✔ At least 8 characters
               </li>
-              <li className={passwordValidations.lowercase ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.lowercase ? styles.valid : styles.invalid
+                }
+              >
                 ✔ Lowercase letter (a-z)
               </li>
-              <li className={passwordValidations.uppercase ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.uppercase ? styles.valid : styles.invalid
+                }
+              >
                 ✔ Uppercase letter (A-Z)
               </li>
-              <li className={passwordValidations.number ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.number ? styles.valid : styles.invalid
+                }
+              >
                 ✔ Number (0-9)
               </li>
-              <li className={passwordValidations.special ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.special ? styles.valid : styles.invalid
+                }
+              >
                 ✔ Special character (!@#$%^&*)
               </li>
             </ul>
@@ -193,26 +230,23 @@ const Form: React.FC = () => {
           onChange={handleChange}
           disabled={!formData.password}
         />
-        {!passwordMatch && formData.confirmPassword && <span className={styles.error}>Passwords do not match.</span>}
+        {!passwordMatch && formData.confirmPassword && (
+          <span className={styles.error}>Passwords do not match.</span>
+        )}
       </div>
 
       {/* Buttons */}
-        <div className={`${styles.form_group} ${styles.full_width}`}>
+      <div className={`${styles.form_group} ${styles.full_width}`}>
         <div className={styles.button_container}>
-            <CustomButton
-            label="Save Changes"
-            variant="primary"
-            size="small"
-            />
-            <CustomButton
+          <CustomButton label="Save Changes" variant="primary" size="small" />
+          <CustomButton
             label="Cancel"
             variant="secondary"
             size="small"
             onClick={() => router.push("/admin/admin_accounts")}
-            />
+          />
         </div>
-        </div>
-
+      </div>
     </form>
   );
 };

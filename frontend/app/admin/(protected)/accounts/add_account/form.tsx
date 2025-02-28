@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import styles from "./form.module.scss";
-import CustomButton from "../../../components/custom_button";
+import CustomButton from "../../../../components/custom_button";
 
 const Form: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -35,10 +35,10 @@ const Form: React.FC = () => {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isConfirmPasswordActive, setIsConfirmPasswordActive] = useState(false);
-    const [hasTypedConfirmPassword, setHasTypedConfirmPassword] = useState(false);
+  const [hasTypedConfirmPassword, setHasTypedConfirmPassword] = useState(false);
 
-
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validatePassword = (password: string) => {
     const validations = {
@@ -48,36 +48,35 @@ const Form: React.FC = () => {
       number: /[0-9]/.test(password),
       special: /[!@#$%^&*]/.test(password),
     };
-  
+
     setPasswordValidations(validations);
-    
+
     // Enable confirm password field only if all password requirements are met
     setIsConfirmPasswordActive(Object.values(validations).every(Boolean));
   };
-  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let updatedValue = value;
-  
+
     if (name === "phoneNumber") {
       updatedValue = value.replace(/\D/g, "").slice(0, 10);
     }
-  
+
     if (name === "firstName" || name === "lastName") {
       updatedValue = value.replace(/[^a-zA-Z]/g, "").slice(0, 50);
     }
-  
+
     setFormData((prev) => {
       const updatedFormData = {
         ...prev,
         [name]: updatedValue,
       };
-  
+
       if (name === "password") {
         validatePassword(value);
         setPasswordMatch(value === updatedFormData.confirmPassword);
-  
+
         // If password is cleared, reset confirmPassword and disable it
         if (value === "") {
           updatedFormData.confirmPassword = "";
@@ -85,30 +84,32 @@ const Form: React.FC = () => {
           setHasTypedConfirmPassword(false);
         }
       }
-  
+
       if (name === "confirmPassword") {
         setPasswordMatch(value === updatedFormData.password);
         setHasTypedConfirmPassword(value.length > 0);
       }
-  
+
       if (name === "email") {
         setIsEmailValid(validateEmail(value));
       }
-  
+
       return updatedFormData;
     });
-  
+
     setErrors((prev) => ({
       ...prev,
       firstName: name === "firstName" && !/^[A-Za-z]{2,}$/.test(value),
       lastName: name === "lastName" && !/^[A-Za-z]{2,}$/.test(value),
       email: name === "email" && !validateEmail(value),
       phoneNumber: name === "phoneNumber" && value.length !== 10,
-      password: name === "password" && !Object.values(passwordValidations).every(Boolean),
-      confirmPassword: name === "confirmPassword" && value !== formData.password,
+      password:
+        name === "password" &&
+        !Object.values(passwordValidations).every(Boolean),
+      confirmPassword:
+        name === "confirmPassword" && value !== formData.password,
     }));
   };
-  
 
   const isFormValid = () => {
     return (
@@ -131,14 +132,19 @@ const Form: React.FC = () => {
       return;
     }
 
-    console.log("Form Submitted", { ...formData, phoneNumber: `+63${formData.phoneNumber}` });
+    console.log("Form Submitted", {
+      ...formData,
+      phoneNumber: `+63${formData.phoneNumber}`,
+    });
   };
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       {/* First Name */}
       <div className={styles.form_group}>
-        <label>First Name <span className={styles.required}>*</span></label>
+        <label>
+          First Name <span className={styles.required}>*</span>
+        </label>
         <input
           type="text"
           name="firstName"
@@ -147,12 +153,16 @@ const Form: React.FC = () => {
           required
           className={errors.firstName ? styles.invalid_input : ""}
         />
-        {errors.firstName && <span className={styles.error}>Must be at least 2 letters.</span>}
+        {errors.firstName && (
+          <span className={styles.error}>Must be at least 2 letters.</span>
+        )}
       </div>
 
       {/* Last Name */}
       <div className={styles.form_group}>
-        <label>Last Name <span className={styles.required}>*</span></label>
+        <label>
+          Last Name <span className={styles.required}>*</span>
+        </label>
         <input
           type="text"
           name="lastName"
@@ -161,12 +171,16 @@ const Form: React.FC = () => {
           required
           className={errors.lastName ? styles.invalid_input : ""}
         />
-        {errors.lastName && <span className={styles.error}>Must be at least 2 letters.</span>}
+        {errors.lastName && (
+          <span className={styles.error}>Must be at least 2 letters.</span>
+        )}
       </div>
 
       {/* Email */}
       <div className={styles.form_group}>
-        <label>Email <span className={styles.required}>*</span></label>
+        <label>
+          Email <span className={styles.required}>*</span>
+        </label>
         <input
           type="email"
           name="email"
@@ -175,12 +189,16 @@ const Form: React.FC = () => {
           required
           className={errors.email ? styles.invalid_input : ""}
         />
-        {!isEmailValid && <span className={styles.error}>Invalid email address</span>}
+        {!isEmailValid && (
+          <span className={styles.error}>Invalid email address</span>
+        )}
       </div>
 
       {/* Phone Number */}
       <div className={styles.form_group}>
-        <label>Phone Number <span className={styles.required}>*</span></label>
+        <label>
+          Phone Number <span className={styles.required}>*</span>
+        </label>
         <div className={styles.phone_input_container}>
           <span className={styles.phone_prefix}>+63</span>
           <input
@@ -192,12 +210,16 @@ const Form: React.FC = () => {
             className={errors.phoneNumber ? styles.invalid_input : ""}
           />
         </div>
-        {errors.phoneNumber && <span className={styles.error}>Must be 10 digits only.</span>}
+        {errors.phoneNumber && (
+          <span className={styles.error}>Must be 10 digits only.</span>
+        )}
       </div>
 
       {/* Password */}
       <div className={styles.form_group}>
-        <label>Password <span className={styles.required}>*</span></label>
+        <label>
+          Password <span className={styles.required}>*</span>
+        </label>
         <input
           type="password"
           name="password"
@@ -209,21 +231,43 @@ const Form: React.FC = () => {
         />
         {isPasswordFocused && (
           <div className={styles.password_requirements}>
-            <p><strong>Your password must contain:</strong></p>
+            <p>
+              <strong>Your password must contain:</strong>
+            </p>
             <ul>
-              <li className={passwordValidations.length ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.length ? styles.valid : styles.invalid
+                }
+              >
                 ✔ At least 8 characters
               </li>
-              <li className={passwordValidations.lowercase ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.lowercase ? styles.valid : styles.invalid
+                }
+              >
                 ✔ Lowercase letter (a-z)
               </li>
-              <li className={passwordValidations.uppercase ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.uppercase ? styles.valid : styles.invalid
+                }
+              >
                 ✔ Uppercase letter (A-Z)
               </li>
-              <li className={passwordValidations.number ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.number ? styles.valid : styles.invalid
+                }
+              >
                 ✔ Number (0-9)
               </li>
-              <li className={passwordValidations.special ? styles.valid : styles.invalid}>
+              <li
+                className={
+                  passwordValidations.special ? styles.valid : styles.invalid
+                }
+              >
                 ✔ Special character (!@#$%^&*)
               </li>
             </ul>
@@ -233,68 +277,70 @@ const Form: React.FC = () => {
 
       {/* Confirm Password */}
       <div className={styles.form_group}>
-        <label>Confirm Password <span className={styles.required}>*</span></label>
+        <label>
+          Confirm Password <span className={styles.required}>*</span>
+        </label>
         <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            disabled={!isConfirmPasswordActive} 
+          type="password"
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          required
+          disabled={!isConfirmPasswordActive}
         />
         {hasTypedConfirmPassword && !passwordMatch && (
-        <span className={styles.error}>Passwords do not match.</span>
+          <span className={styles.error}>Passwords do not match.</span>
         )}
       </div>
 
-       {/* Buttons */}
-        <div className={`${styles.form_group} ${styles.full_width}`}>
+      {/* Buttons */}
+      <div className={`${styles.form_group} ${styles.full_width}`}>
         <div className={styles.button_container}>
-        <CustomButton
+          <CustomButton
             label="Add Admin"
             variant="primary"
             size="small"
-            disabled={!isFormValid()} 
-            />
-            <CustomButton
+            disabled={!isFormValid()}
+          />
+          <CustomButton
             label="Clear"
             variant="secondary"
             size="small"
             onClick={() => {
-                setFormData(() => ({
+              setFormData(() => ({
                 firstName: "",
                 lastName: "",
                 email: "",
                 phoneNumber: "",
                 password: "",
                 confirmPassword: "",
-                }));
-            
-                setErrors(() => ({
+              }));
+
+              setErrors(() => ({
                 firstName: false,
                 lastName: false,
                 email: false,
                 phoneNumber: false,
                 password: false,
                 confirmPassword: false,
-                }));
-            
-                setPasswordValidations(() => ({
+              }));
+
+              setPasswordValidations(() => ({
                 length: false,
                 lowercase: false,
                 uppercase: false,
                 number: false,
                 special: false,
-                }));
-            
-                setPasswordMatch(true);
-                setIsEmailValid(true);
-                setIsConfirmPasswordActive(false); 
-                setHasTypedConfirmPassword(false); 
+              }));
+
+              setPasswordMatch(true);
+              setIsEmailValid(true);
+              setIsConfirmPasswordActive(false);
+              setHasTypedConfirmPassword(false);
             }}
-            />
+          />
         </div>
-        </div>
+      </div>
     </form>
   );
 };
