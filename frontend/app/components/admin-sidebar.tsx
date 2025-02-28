@@ -1,7 +1,6 @@
 "use client";
 
 import React, { JSX, useState } from "react";
-import { usePathname } from "next/navigation";
 import styles from "./admin-sidebar.module.scss";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,12 +9,14 @@ import { FaAngleDown, FaAngleUp, FaRegPenToSquare } from "react-icons/fa6";
 import { LuCalendarDays } from "react-icons/lu";
 import { TbArrowBarToLeft, TbArrowBarToRight } from "react-icons/tb";
 import twinCJLogo from "@/public/assets/admin-logo.svg";
+import { usePathname } from "next/navigation";
 
 interface NavItemProps {
   href: string;
   icon?: JSX.Element;
   label: string;
   collapsed: boolean;
+  isActive?: boolean;
 }
 
 interface NavListProps {
@@ -26,20 +27,20 @@ interface NavDropdownProps {
   collapsed: boolean;
 }
 
-interface SidebarProps {
-  isSideBarOpen: boolean;
-  toggleSidebar: () => void;
-}
-
-const NavItem = ({ label, href, icon, collapsed }: NavItemProps) => {
-  const pathname = usePathname();
-  const isActive = href === "/admin" ? pathname === href : pathname.startsWith(href);
-
+const NavItem = ({
+  label,
+  href,
+  icon,
+  collapsed,
+  isActive = false,
+}: NavItemProps) => {
   return (
     <li>
       <Link
         href={href}
-        className={`${styles["navitem-container"]} ${isActive ? styles.active : ""}`}
+        className={`${styles["navitem-container"]} ${
+          isActive ? styles.active : ""
+        }`}
       >
         <div className={styles["navitem-wrapper"]}>
           {icon}
@@ -52,20 +53,12 @@ const NavItem = ({ label, href, icon, collapsed }: NavItemProps) => {
 
 const NavDropdown = ({ collapsed }: NavDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
-  
-  const isDropdownActive = pathname.startsWith("/admin/day-tour-activities") ||
-                           pathname.startsWith("/admin/cabins");
-
-  const handleToggle = () => {
-    if (!collapsed) setIsOpen((prev) => !prev);
-  };
 
   return (
     <>
       <li
-        className={`${styles["navitem-dropdown-container"]} ${isDropdownActive ? styles.active : ""}`}
-        onClick={handleToggle}
+        className={styles["navitem-dropdown-container"]}
+        onClick={() => setIsOpen(!isOpen)}
       >
         <div className={styles["navitem-dropdown-wrapper"]}>
           <div className={styles["navitem-dropdown-label"]}>
@@ -82,48 +75,54 @@ const NavDropdown = ({ collapsed }: NavDropdownProps) => {
         </div>
       </li>
       <div
-        className={`${!isOpen || collapsed ? styles.hidden : ""} ${
+        className={`${!isOpen ? styles.hidden : ""} ${
           styles["dropdown-items"]
         }`}
       >
         <NavItem
           href="/admin/day-tour-activities"
           label="Day Tour Activities"
-          collapsed={collapsed}
+          collapsed={false}
         />
-        <NavItem href="/admin/cabins" label="Cabins" collapsed={collapsed} />
+        <NavItem href="/admin/cabins" label="Cabins" collapsed={false} />
       </div>
     </>
   );
 };
 
 const NavList = ({ collapsed }: NavListProps) => {
+  const pathname = usePathname();
   return (
     <ul className={styles["navlist"]}>
       <NavItem
         href="/admin"
         label="Dashboard"
         icon={<FaHome />}
+        isActive={pathname === "/admin"}
         collapsed={collapsed}
       />
       <NavItem
         href="/admin/bookings"
         label="Booking & Transactions"
         collapsed={collapsed}
+        isActive={pathname === "/admin/bookings"}
         icon={<LuCalendarDays />}
       />
       <NavDropdown collapsed={collapsed} />
       <NavItem
-        href="/admin/admin_accounts"
+        href="/admin/accounts"
         label="Admin Accounts"
         collapsed={collapsed}
+        isActive={pathname === "/admin/accounts"}
         icon={<FaRegUser />}
       />
     </ul>
   );
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ isSideBarOpen, toggleSidebar }) => {
+const Sidebar: React.FC = () => {
+  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+
   return (
     <div
       className={`${styles["sidebar-container"]} ${
@@ -151,7 +150,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSideBarOpen, toggleSidebar }) => {
         </nav>
       </aside>
       <div className={styles["sidebar-footer"]}>
-        <button onClick={toggleSidebar}>
+        <button onClick={() => setIsSideBarOpen(!isSideBarOpen)}>
           {isSideBarOpen ? <TbArrowBarToLeft /> : <TbArrowBarToRight />}
         </button>
       </div>

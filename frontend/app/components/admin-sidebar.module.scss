@@ -1,8 +1,8 @@
-$side-bar-full-width: 25rem;
-$side-bar-close-width: 5rem;
+$side-bar-full-width: 15rem;
+$side-bar-close-width: 3rem;
 
 .sidebar-container {
-  position: fixed;
+  position: relative;
   display: flex;
   flex-direction: column;
   top: 0;
@@ -10,7 +10,7 @@ $side-bar-close-width: 5rem;
   min-height: 100vh;
   transition: width 0.3s ease, transform 0.3s ease;
   z-index: 9;
-  max-width: $side-bar-full-width;
+  min-width: $side-bar-full-width;
   background-color: var(--color-sunset-orange-500);
   color: var(--color-neutral-200);
   padding-top: 1rem;
@@ -21,8 +21,8 @@ $side-bar-close-width: 5rem;
 }
 
 .closed {
-
-  .navlabel {
+  min-width: $side-bar-close-width;
+  .navbar-label {
     display: none;
   }
 }
@@ -66,7 +66,7 @@ $side-bar-close-width: 5rem;
 }
 
 .active {
-  background-color: var(--color-sunset-orange-600); 
+  background-color: var(--color-sunset-orange-600);
 }
 
 .navitem-container.active,
@@ -82,6 +82,16 @@ $side-bar-close-width: 5rem;
 
 .hidden {
   display: none;
+  position: absolute;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .navitem-wrapper {
