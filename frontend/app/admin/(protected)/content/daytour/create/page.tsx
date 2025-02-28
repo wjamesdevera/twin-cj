@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  ChangeEvent,
+  FormEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { Loading } from '@/app/components/loading';
 
@@ -23,16 +29,17 @@ function Page() {
     quantity: '',
   });
 
-  const [showNameHelperText, setShowNameHelperText] = useState<boolean>(false);
-  const [showDescriptionHelperText, setshowDescriptionHelperText] =
-    useState<boolean>(false);
-  const [showRateHelperText, setShowRateHelperText] = useState<boolean>(false);
-  const [showQuantityHelperText, setShowQuantityHelperText] =
-    useState<boolean>(false);
+  const [helperText, setHelperText] = useState<{ [key: string]: boolean }>({
+    name: false,
+    description: false,
+    price: false,
+    quantity: false,
+  });
+
   const [isMutating, setIsMutating] = useState<boolean>(false);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
-  useEffect(() => {
+  const validateForm = useCallback(() => {
     const isValid =
       !!formData.name &&
       !!formData.description &&
@@ -52,36 +59,34 @@ function Page() {
     setIsFormValid(isValid);
   }, [formData]);
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, files } = e.target as HTMLInputElement;
-    setFormData({
-      ...formData,
-      [name]: files ? files[0] : value,
-    });
+  useEffect(() => {
+    validateForm();
+  }, [formData, validateForm]);
 
-    switch (name) {
-      case 'name':
-        setShowNameHelperText(value.length >= 50);
-        break;
-      case 'description':
-        setshowDescriptionHelperText(value.length >= 100);
-        break;
-      case 'price':
-        const priceRegex = /^\d+(\.\d+)?$/;
-        setShowRateHelperText(
-          !priceRegex.test(value) || parseFloat(value) <= 0
-        );
-        break;
-      case 'quantity':
-        const quantityRegex = /^\d+$/;
-        setShowQuantityHelperText(
-          !quantityRegex.test(value) || parseInt(value) <= 0
-        );
-        break;
-    }
-  };
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value, files } = e.target as HTMLInputElement;
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: files ? files[0] : value,
+      }));
+
+      setHelperText((prevHelperText) => ({
+        ...prevHelperText,
+        [name]:
+          name === 'name'
+            ? value.length >= 50
+            : name === 'description'
+            ? value.length >= 100
+            : name === 'price'
+            ? !/^\d+(\.\d+)?$/.test(value) || parseFloat(value) <= 0
+            : name === 'quantity'
+            ? !/^\d+$/.test(value) || parseInt(value) <= 0
+            : false,
+      }));
+    },
+    []
+  );
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -144,7 +149,7 @@ function Page() {
                 onChange={handleChange}
                 maxLength={50}
               />
-              {showNameHelperText && (
+              {helperText.name && (
                 <small>Title must not exceed 50 characters</small>
               )}
             </div>
@@ -157,7 +162,7 @@ function Page() {
                 onChange={handleChange}
                 maxLength={100}
               />
-              {showDescriptionHelperText && (
+              {helperText.description && (
                 <small>Description must not exceed 100 characters</small>
               )}
             </div>
@@ -178,7 +183,7 @@ function Page() {
                 value={formData.price}
                 onChange={handleChange}
               />
-              {showRateHelperText && (
+              {helperText.price && (
                 <small>Rate must be a positive number only</small>
               )}
             </div>
@@ -190,7 +195,7 @@ function Page() {
                 value={formData.quantity}
                 onChange={handleChange}
               />
-              {showQuantityHelperText && (
+              {helperText.quantity && (
                 <small>Quantity must be a positive integer</small>
               )}
             </div>

@@ -1,5 +1,11 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  ChangeEvent,
+  FormEvent,
+} from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from '../edit.module.scss';
 import { Loading } from '@/app/components/loading';
@@ -27,12 +33,12 @@ const EditDayTour: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isMutating, setIsMutating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [showNameHelperText, setShowNameHelperText] = useState<boolean>(false);
-  const [showDescriptionHelperText, setShowDescriptionHelperText] =
-    useState<boolean>(false);
-  const [showRateHelperText, setShowRateHelperText] = useState<boolean>(false);
-  const [showQuantityHelperText, setShowQuantityHelperText] =
-    useState<boolean>(false);
+  const [helperText, setHelperText] = useState<{ [key: string]: boolean }>({
+    name: false,
+    description: false,
+    price: false,
+    quantity: false,
+  });
   const [originalData, setOriginalData] = useState<DayTour | null>(null);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
@@ -112,39 +118,30 @@ const EditDayTour: React.FC = () => {
     setIsFormValid(isValid && hasChanges());
   }, [formData, imageFile]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    let updatedValue = value.trim();
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value, files } = e.target as HTMLInputElement;
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: files ? files[0] : value,
+      }));
 
-    if (name === 'price') {
-      if (!/^\d*\.?\d{0,2}$/.test(updatedValue)) return;
-    }
-
-    if (name === 'quantity') {
-      if (!/^\d*$/.test(updatedValue) && updatedValue !== '') return;
-    }
-
-    setFormData((prev) => ({ ...prev, [name]: updatedValue }));
-
-    switch (name) {
-      case 'name':
-        setShowNameHelperText(value.length >= 50);
-        break;
-      case 'description':
-        setShowDescriptionHelperText(value.length >= 100);
-        break;
-      case 'price':
-        setShowRateHelperText(
-          !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
-        );
-        break;
-      case 'quantity':
-        setShowQuantityHelperText(!/^\d+$/.test(value) || parseInt(value) <= 0);
-        break;
-    }
-  };
+      setHelperText((prevHelperText) => ({
+        ...prevHelperText,
+        [name]:
+          name === 'name'
+            ? value.length >= 50
+            : name === 'description'
+            ? value.length >= 100
+            : name === 'price'
+            ? !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
+            : name === 'quantity'
+            ? !/^\d+$/.test(value) || parseInt(value) <= 0
+            : false,
+      }));
+    },
+    []
+  );
 
   const hasChanges = () => {
     if (!originalData) return false;
@@ -164,7 +161,7 @@ const EditDayTour: React.FC = () => {
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     setIsMutating(true);
@@ -212,11 +209,11 @@ const EditDayTour: React.FC = () => {
     } finally {
       setIsMutating(false);
     }
-
-    if (loading) return <Loading />;
-    if (error) return <div>Error: {error}</div>;
-    if (!formData) return <div>No data found</div>;
   };
+
+  if (loading) return <Loading />;
+  if (error) return <div>Error: {error}</div>;
+  if (!formData) return <div>No data found</div>;
 
   return (
     <div className={styles.container}>
@@ -237,7 +234,7 @@ const EditDayTour: React.FC = () => {
                 maxLength={50}
                 required
               />
-              {showNameHelperText && (
+              {helperText.name && (
                 <small className={styles.helperText}>
                   Name must not exceed 50 characters
                 </small>
@@ -254,7 +251,7 @@ const EditDayTour: React.FC = () => {
                 maxLength={100}
                 required
               />
-              {showDescriptionHelperText && (
+              {helperText.description && (
                 <small className={styles.helperText}>
                   Description must not exceed 100 characters
                 </small>
@@ -281,7 +278,7 @@ const EditDayTour: React.FC = () => {
                 onChange={handleChange}
                 required
               />
-              {showRateHelperText && (
+              {helperText.price && (
                 <small className={styles.helperText}>
                   Rate must be a positive number only
                 </small>
@@ -297,7 +294,7 @@ const EditDayTour: React.FC = () => {
                 onChange={handleChange}
                 required
               />
-              {showQuantityHelperText && (
+              {helperText.quantity && (
                 <small className={styles.helperText}>
                   Quantity must be a positive integer
                 </small>
