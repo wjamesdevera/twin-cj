@@ -16,20 +16,11 @@ import { cabinSchema } from "../schemas/service.schemas";
 export const getCabinHandler = catchErrors(
   async (req: Request, res: Response) => {
     const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Invalid cabin ID." });
-    }
+    appAssert(!isNaN(id), BAD_REQUEST, "Invalid cabin ID.");
+
     const cabin = await getCabin(id);
-
-    if (!cabin) {
-      return res.status(404).json({
-        status: "error",
-        message: `Cabin with ID ${id} not found.`,
-      });
-    }
-
+    appAssert(cabin, 404, `Cabin with ID ${id} not found.`);
+    
     res.status(OK).json({
       status: "success",
       data: { cabin },
@@ -95,35 +86,10 @@ export const createCabinHandler = catchErrors(
     }
 
     // NOTE: You may remove this after accomplishing the task
+
     // Apply the given structure above to request that requires files and text data
 
-    // TODO: ADD Validations
-
     // TODO: Implement adding the data to the database
-
-    // if (!service || !cabin) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     message: "Service and cabin data are required.",
-    //   });
-    // }
-
-    // if (
-    //   additionalFee &&
-    //   (additionalFee.amount == null || additionalFee.amount < 0)
-    // ) {
-    //   return res.status(400).json({
-    //     status: "error",
-    //     message: "Additional fee must have a valid amount.",
-    //   });
-    // }
-
-    // const result = await createCabin({ service, cabin, additionalFee });
-
-    // res.status(CREATED).json({
-    //   status: "success",
-    //   data: result,
-    // });
   }
 );
 
@@ -144,23 +110,11 @@ export const deleteCabinHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const cabinId = Number(id);
-
-    if (isNaN(cabinId)) {
-      return res.status(400).json({
-        status: "error",
-        message: "Invalid cabin ID.",
-      });
-    }
+    appAssert(!isNaN(cabinId), BAD_REQUEST, "Invalid cabin ID.");
 
     try {
       const deletedData = await deleteCabin(cabinId);
-
-      if (!deletedData) {
-        return res.status(404).json({
-          status: "error",
-          message: `Cabin with ID ${cabinId} not found.`,
-        });
-      }
+      appAssert(deletedData, 404, `Cabin with ID ${cabinId} not found.`);
 
       const { deletedCabin, deletedService } = deletedData;
 
@@ -206,28 +160,17 @@ export const deleteSelectedCabinsHandler = catchErrors(
 export const updateCabinHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { service, cabin, additionalFee } = req.body;
+    appAssert(!isNaN(Number(id)), BAD_REQUEST, "Invalid cabin ID.");
 
-    if (!service && !cabin && additionalFee === undefined) {
-      return res.status(400).json({
-        status: "error",
-        message:
-          "At least one field (service, cabin, or additionalFee) must be provided for an update.",
-      });
-    }
+    const { service, cabin, additionalFee } = req.body;
+    appAssert(service || cabin || additionalFee !== undefined, BAD_REQUEST, "At least one field (service, cabin, or additionalFee) must be provided for an update.");
 
     const updatedData = await updateCabin(Number(id), {
       service,
       cabin,
       additionalFee,
     });
-
-    if (!updatedData) {
-      return res.status(404).json({
-        status: "error",
-        message: `Cabin with ID ${id} not found.`,
-      });
-    }
+    appAssert(updatedData, 404, `Cabin with ID ${id} not found.`);
 
     res.status(OK).json({
       status: "success",
