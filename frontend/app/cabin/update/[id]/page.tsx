@@ -81,7 +81,7 @@ export default function UpdateCabin() {
           };
   
           setFormData(formattedData);
-          setInitialData(formattedData); // Store initial data for comparison
+          setInitialData(formattedData);
         } else {
           throw new Error(data.message || "Failed to fetch cabin details.");
         }
@@ -114,25 +114,22 @@ export default function UpdateCabin() {
   
     if (files && files[0]) {
       const file = files[0];
-      const validFormats = ["image/jpeg", "image/jpg", "image/png"]; // Allowed formats
-  
-      // Check for valid format
+      const validFormats = ["image/jpeg", "image/jpg", "image/png"];
+
       if (!validFormats.includes(file.type)) {
         setErrors((prev) => ({ ...prev, image: "Invalid image format. Only JPG or PNG allowed." }));
-        e.target.value = ""; // Reset file input
-        setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } })); // Reset image state
+        e.target.value = "";
+        setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } }));
         return;
       }
-  
-      // Check for file size
+
       if (file.size > 1048576) {
         setErrors((prev) => ({ ...prev, image: "File size must be less than 1MB." }));
-        e.target.value = ""; // Reset file input
-        setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } })); // Reset image state
+        e.target.value = "";
+        setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } }));
         return;
       }
-  
-      // If file is valid, store the new image and reset errors
+
       setErrors((prev) => ({ ...prev, image: "" }));
       setFormData((prev) => ({
         ...prev,
@@ -141,7 +138,7 @@ export default function UpdateCabin() {
     } else {
       const numericFields = ["quantity", "price", "minCapacity", "maxCapacity", "amount"];
       const newValue = numericFields.includes(name) 
-        ? value === "" ? "" : Number(value)  // Convert empty string to null
+        ? value === "" ? "" : Number(value)
         : value;
   
       setFormData((prev) => ({
@@ -154,11 +151,10 @@ export default function UpdateCabin() {
         [name]: validateField(name, newValue),
       }));
 
-      // Ensure correct handling of additional fee fields
       if (section === "additionalFee") {
         const updatedAdditionalFee = {
           ...formData.additionalFee,
-          [name]: newValue, // Ensure type safety
+          [name]: newValue,
         };
       
         const { type, description, amount } = updatedAdditionalFee;
@@ -173,14 +169,12 @@ export default function UpdateCabin() {
   };
   
   const validateField = (name: string, value: any) => {
-    // Check for empty values first
     if (value === "" || value === null || value === undefined) {
       if (["name", "description", "quantity", "price", "minCapacity", "maxCapacity"].includes(name)) {
         return "This field is required.";
       }
     }
-    
-    // Custom validation rules
+
     if (name === "price" && (isNaN(value) || value < 1)) {
       return "Rate must be greater than 0.";
     }
@@ -194,8 +188,8 @@ export default function UpdateCabin() {
       if (isNaN(value) || value < 1) {
         return "Maximum capacity must be at least 1.";
       }
-      if (value < formData.cabin.minCapacity) {
-        return "Maximum capacity cannot be less than minimum capacity.";
+      if (value <= formData.cabin.minCapacity) {
+        return "Maximum capacity should be greater than minimum capacity.";
       }
     }
   
@@ -205,6 +199,15 @@ export default function UpdateCabin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const { type, description, amount } = formData.additionalFee;
+    const isAdditionalFeeFilled = type || description || amount > 0;
+    const isAdditionalFeeComplete = type && description && amount > 0;
+
+    if (isAdditionalFeeFilled && !isAdditionalFeeComplete) {
+      setAdditionalFeeWarning("Please complete all additional fee fields or leave them empty.");
+      return;
+    }
+    
     const isConfirmed = window.confirm("Are you sure you want to update this cabin?");
     if (!isConfirmed) return;
 
@@ -223,8 +226,7 @@ export default function UpdateCabin() {
     if (Object.values(newErrors).some((error) => error !== "")) {
       return;
     }
-  
-    // Check if any field has changed
+
     const isChanged = JSON.stringify(formData) !== JSON.stringify(initialData);
     if (!isChanged) {
       alert("No changes detected. Please modify at least one field before submitting.");

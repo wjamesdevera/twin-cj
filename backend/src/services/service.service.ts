@@ -86,16 +86,15 @@ export const createCabin = async (data: {
       data: data.service,
     });
 
-    let newAdditionalFee = null;
-    if (data.additionalFee) {
-      newAdditionalFee = await tx.additionalFee.create({
-        data: {
-          type: data.additionalFee.type,
-          description: data.additionalFee.description || null,
-          amount: data.additionalFee.amount,
-        },
-      });
-    }
+    const newAdditionalFee = data.additionalFee
+      ? await tx.additionalFee.create({
+          data: {
+            type: data.additionalFee.type,
+            description: data.additionalFee.description || null,
+            amount: data.additionalFee.amount,
+          },
+        })
+      : null;
 
     const newCabin = await tx.cabin.create({
       data: {

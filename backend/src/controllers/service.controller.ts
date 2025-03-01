@@ -8,7 +8,7 @@ import {
   getCabin,
   updateCabin,
 } from "../services/service.service";
-import { CREATED, OK } from "../constants/http";
+import { BAD_REQUEST, CREATED, OK } from "../constants/http";
 import { ROOT_STATIC_URL } from "../constants/url";
 import appAssert from "../utils/appAssert";
 import { cabinSchema } from "../schemas/service.schemas";
@@ -58,16 +58,41 @@ export const getAllCabinsHandler = catchErrors(
 
 export const createCabinHandler = catchErrors(
   async (req: Request, res: Response) => {
-    appAssert(req.file, 400, "Image is required");
+    appAssert(req.file, BAD_REQUEST, "Image is required");
     const imageUrl = `${ROOT_STATIC_URL}/${req.file.filename}`;
-    const data = JSON.parse(req.body.data);
-    console.log(data);
-    const cabin = cabinSchema.parse(data);
-    const cabinData = { ...cabin, imageUrl };
 
-    res.json({
-      cabin: cabinData,
-    });
+    let jsonData;
+    try {
+      jsonData = JSON.parse(req.body.data);
+    } catch (error) {
+      console.error("JSON Parsing Error:", error);
+      return res.status(BAD_REQUEST).json({ status: "error", message: "Invalid JSON Input" });
+    }
+
+    try {
+      const validatedData = cabinSchema.parse(jsonData);
+      const requestBody = {
+        service: {
+          name: validatedData.name,
+          description: validatedData.description,
+          imageUrl,
+          quantity: validatedData.quantity,
+          price: validatedData.price,
+        },
+        cabin: {
+          minCapacity: validatedData.minCapacity,
+          maxCapacity: validatedData.maxCapacity,
+        },
+        additionalFee: validatedData.additionalFee?.type ? validatedData.additionalFee: undefined,
+      };
+
+      const createdCabin = await createCabin(requestBody);
+
+      res.status(CREATED).json({ status: "success", data: { cabin: createdCabin } });
+    } catch (validationError) {
+      console.error("Validation Error: ", validationError);
+      return res.status(BAD_REQUEST).json({ status: "error", message: "Invalid Data Format" });
+    }
 
     // NOTE: You may remove this after accomplishing the task
     // Apply the given structure above to request that requires files and text data

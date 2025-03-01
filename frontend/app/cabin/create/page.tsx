@@ -43,31 +43,28 @@ export default function CreateCabin() {
   
     if (files && files[0]) {
       const file = files[0];
-      const validFormats = ["image/jpeg", "image/jpg", "image/png"]; // Allowed formats
-  
-      // Check for valid format
+      const validFormats = ["image/jpeg", "image/jpg", "image/png"];
+
       if (!validFormats.includes(file.type)) {
         setErrors((prev) => ({ ...prev, image: "Invalid image format. Only JPG or PNG allowed." }));
-        e.target.value = ""; // Clear the file input
+        e.target.value = "";
         setFormData((prev) => ({
           ...prev,
-          service: { ...prev.service, image: null }, // Clear previously uploaded image
+          service: { ...prev.service, image: null },
         }));
         return;
       }
-  
-      // Check for file size
+
       if (file.size > 1048576) {
         setErrors((prev) => ({ ...prev, image: "File size must be less than 1MB." }));
         e.target.value = "";
         setFormData((prev) => ({
           ...prev,
-          service: { ...prev.service, image: null }, // Clear previously uploaded image
+          service: { ...prev.service, image: null },
         }));
         return;
       }
-  
-      // If file is valid, clear errors and store the new image
+
       setErrors((prev) => ({ ...prev, image: "" }));
       setFormData((prev) => ({
         ...prev,
@@ -75,11 +72,11 @@ export default function CreateCabin() {
       }));
     } else {
       const numericFields = ["quantity", "price", "minCapacity", "maxCapacity", "amount"];
-      const newValue = numericFields.includes(name) ? (value === "" ? "" : Number(value)) : value; // Ensure numeric conversion
+      const newValue = numericFields.includes(name) ? (value === "" ? "" : Number(value)) : value;
       
       setFormData((prev) => ({
         ...prev,
-        [section]: { ...prev[section], [name]: newValue }, // Use `newValue` instead of `value`
+        [section]: { ...prev[section], [name]: newValue },
       }));
   
       setErrors((prev) => ({
@@ -87,11 +84,10 @@ export default function CreateCabin() {
         [name]: validateField(name, newValue),
       }));
 
-      // Ensure correct handling of additional fee fields
       if (section === "additionalFee") {
         const updatedAdditionalFee = {
           ...formData.additionalFee,
-          [name]: newValue, // Ensure type safety
+          [name]: newValue,
         };
       
         const { type, description, amount } = updatedAdditionalFee;
@@ -106,14 +102,12 @@ export default function CreateCabin() {
   };  
 
   const validateField = (name: string, value: any) => {
-    // Check for empty values first
     if (value === "" || value === null || value === undefined) {
       if (["name", "description", "quantity", "price", "minCapacity", "maxCapacity"].includes(name)) {
         return "This field is required.";
       }
     }
-  
-    // Custom validation rules
+
     if (name === "price" && (isNaN(value) || value < 1)) {
       return "Rate must be greater than 0.";
     }
@@ -127,8 +121,8 @@ export default function CreateCabin() {
       if (isNaN(value) || value < 1) {
         return "Maximum capacity must be at least 1.";
       }
-      if (value < formData.cabin.minCapacity) {
-        return "Maximum capacity cannot be less than minimum capacity.";
+      if (value <= formData.cabin.minCapacity) {
+        return "Maximum capacity should be greater than minimum capacity.";
       }
     }
   
@@ -138,10 +132,18 @@ export default function CreateCabin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const { type, description, amount } = formData.additionalFee;
+    const isAdditionalFeeFilled = type || description || amount > 0;
+    const isAdditionalFeeComplete = type && description && amount > 0;
+
+    if (isAdditionalFeeFilled && !isAdditionalFeeComplete) {
+      setAdditionalFeeWarning("Please complete all additional fee fields or leave them empty.");
+      return;
+    }
+    
     const isConfirmed = window.confirm("Are you sure you want to add this cabin?");
     if (!isConfirmed) return;
 
-    // Validate all fields before submission
     const newErrors = {
       name: validateField("name", formData.service.name),
       description: validateField("description", formData.service.description),
@@ -153,59 +155,40 @@ export default function CreateCabin() {
     };
 
     setErrors(newErrors);
-
-    // Check if there are any errors before proceeding
+    
     if (Object.values(newErrors).some((error) => error !== "")) {
       return;
     }
 
-    let imageUrl = "";
-    if (formData.service.image) {
-      const imageFormData = new FormData();
-      imageFormData.append("image", formData.service.image);
-
-      try {
-        const uploadResponse = await fetch("http://localhost:8080/api/upload", {
-          method: "POST",
-          body: imageFormData,
-        });
-
-        const uploadData = await uploadResponse.json();
-        if (!uploadResponse.ok) {
-          throw new Error(uploadData.message || "Image upload failed");
+    const data = new FormData();
+    const jsonData = {
+      name: formData.service.name,
+      description: formData.service.description,
+      price: Number(formData.service.price),
+      quantity: Number(formData.service.quantity),
+      minCapacity: Number(formData.cabin.minCapacity),
+      maxCapacity: Number(formData.cabin.maxCapacity),
+      additionalFee: formData.additionalFee.type?.trim()
+      ? {
+          type: formData.additionalFee.type,
+          description: formData.additionalFee.description || "",
+          amount: Number(formData.additionalFee.amount),
         }
-        imageUrl = uploadData.imageUrl;
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        return;
-      }
-    }
-
-    const requestBody = {
-      service: {
-        name: formData.service.name,
-        description: formData.service.description,
-        imageUrl: imageUrl,
-        quantity: formData.service.quantity,
-        price: formData.service.price,
-      },
-      cabin: {
-        minCapacity: formData.cabin.minCapacity,
-        maxCapacity: formData.cabin.maxCapacity,
-      },
-      additionalFee: formData.additionalFee.type && formData.additionalFee.amount > 0
-        ? { ...formData.additionalFee }
-        : undefined,
+      : undefined,    
     };
 
+    data.append("data", JSON.stringify(jsonData));
+    if (formData.service.image) {
+      data.append("image", formData.service.image);
+    }
+
     try {
-      const response = await fetch("http://localhost:8080/api/services/cabins", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch("http://localhost:8080/api/services/cabins",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create cabin");
@@ -214,10 +197,10 @@ export default function CreateCabin() {
       alert("Cabin created successfully!");
       router.push("/cabin");
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error", error);
     }
   };
-
+  
   return (
     <form onSubmit={handleSubmit}>
       <div style={{ marginTop: "80px" }}></div>
