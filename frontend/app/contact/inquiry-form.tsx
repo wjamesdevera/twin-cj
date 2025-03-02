@@ -33,7 +33,8 @@ const feedbackSchema = z.object({
     .string()
     .min(11, "Contact number must be exactly 11 digits")
     .max(11, "Contact number must be exactly 11 digits")
-    .regex(/^\d+$/, "Contact number should only contain numbers"),
+    .regex(/^\d+$/, "Contact number should only contain numbers")
+    .refine((val) => val.startsWith("09"), "Contact number must start with 09"),
   inquiryType: z.string().min(1, "Inquiry type is required"),
   message: z
     .string()
