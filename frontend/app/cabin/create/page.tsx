@@ -201,6 +201,42 @@ export default function CreateCabin() {
     }
   };
   
+  const isFormInvalid = Object.values(errors).some((error) => error !== "") || additionalFeeWarning !== "";
+
+  const handleClear = () => {
+    setFormData({
+      service: {
+        name: "",
+        description: "",
+        image: null,
+        quantity: 1,
+        price: 1,
+      },
+      cabin: {
+        minCapacity: 1,
+        maxCapacity: 1,
+      },
+      additionalFee: {
+        type: "",
+        description: "",
+        amount: 0,
+      },
+    });
+    setErrors({
+      name: "",
+      description: "",
+      minCapacity: "",
+      maxCapacity: "",
+      image: "",
+      quantity: "",
+      price: "",
+    });
+    setAdditionalFeeWarning("");
+    document.querySelectorAll("input, textarea").forEach((input) => {
+      (input as HTMLInputElement | HTMLTextAreaElement).value = "";
+    });
+  };
+  
   return (
     <form onSubmit={handleSubmit}>
       <div style={{ marginTop: "80px" }}></div>
@@ -268,7 +304,8 @@ export default function CreateCabin() {
       <p style={{ color: "red" }}>{additionalFeeWarning}</p>
       <br />
 
-      <button type="submit">Add Cabin</button>
+      <button type="submit" disabled={isFormInvalid} style={{ opacity: isFormInvalid ? 0.9 : 1, cursor: isFormInvalid ? "not-allowed" : "pointer" }}>Add Cabin</button>
+      <button type="button" onClick={handleClear}>Clear</button>
       <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
 
       <div style={{ marginBottom: "80px" }}></div>

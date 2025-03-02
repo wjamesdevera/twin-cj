@@ -294,6 +294,27 @@ export default function UpdateCabin() {
     }
   };
 
+  const isFormInvalid = Object.values(errors).some((error) => error !== "") || additionalFeeWarning !== "" || JSON.stringify(formData) === JSON.stringify(initialData);
+
+  const handleClear = () => {
+    if (initialData) {
+      setFormData(initialData);
+      setErrors({
+        name: "",
+        description: "",
+        minCapacity: "",
+        maxCapacity: "",
+        quantity: "",
+        price: "",
+        image: "",
+      });
+      setAdditionalFeeWarning("");
+      document.querySelectorAll("input, textarea").forEach((input) => {
+        (input as HTMLInputElement | HTMLTextAreaElement).value = "";
+      });
+    }
+  };
+
   if (loading) return <p>Loading cabin details...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -386,7 +407,8 @@ export default function UpdateCabin() {
       <p style={{ color: "red" }}>{additionalFeeWarning}</p>
       <br />
 
-      <button type="submit">Update Cabin</button>
+      <button type="submit" disabled={isFormInvalid} style={{ opacity: isFormInvalid ? 0.5 : 1, cursor: isFormInvalid ? "not-allowed" : "pointer" }}>Update Cabin</button>
+      <button type="button" onClick={handleClear}>Reset</button>
       <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
 
       <div style={{ marginBottom: "80px" }}></div>

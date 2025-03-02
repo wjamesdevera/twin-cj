@@ -13,11 +13,18 @@ interface Service {
   quantity: number;
 }
 
+interface AdditionalFee {
+  type: string;
+  description: string;
+  amount: number;
+}
+
 interface Cabin {
   id: number;
   minCapacity: number;
   maxCapacity: number;
   service: Service;
+  additionalFee?: AdditionalFee | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -42,6 +49,7 @@ const CabinDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCabins, setSelectedCabins] = useState<number[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     const fetchCabins = async () => {
@@ -82,6 +90,7 @@ const CabinDashboard = () => {
 
       setCabins((prevCabins) => prevCabins.filter((cabin) => cabin.id !== id));
       setSelectedCabins((prev) => prev.filter((cabinId) => cabinId !== id));
+      setSelectAll(false);
 
       alert("Cabin deleted successfully!");
     } catch (err) {
@@ -111,12 +120,22 @@ const CabinDashboard = () => {
 
       setCabins((prevCabins) => prevCabins.filter((cabin) => !selectedCabins.includes(cabin.id)));
       setSelectedCabins([]);
+      setSelectAll(false);
 
       alert("Selected cabin/s deleted successfully!");
     } catch (err) {
       console.error("Error deleting selected cabin/s:", err);
       alert("Error deleting selected cabin/s.");
     }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      setSelectedCabins([]);
+    } else {
+      setSelectedCabins(cabins.map((cabin) => cabin.id));
+    }
+    setSelectAll(!selectAll);
   };
 
   if (loading) return <p>Loading cabins...</p>;
@@ -133,7 +152,13 @@ const CabinDashboard = () => {
         <table style={{ width: "100%", textAlign: "center" }}>
           <thead>
             <tr>
-              <th style={{ border: "1px solid" }}>Select</th>
+              <th style={{ border: "1px solid" }}>
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={toggleSelectAll}
+                />
+              </th>
               <th style={{ border: "1px solid" }}>Action</th>
               <th style={{ border: "1px solid" }}>ID</th>
               <th style={{ border: "1px solid" }}>Name</th>
@@ -143,6 +168,9 @@ const CabinDashboard = () => {
               <th style={{ border: "1px solid" }}>Minimum Capacity</th>
               <th style={{ border: "1px solid" }}>Maximum Capacity</th>
               <th style={{ border: "1px solid" }}>Quantity</th>
+              <th style={{ border: "1px solid" }}>Additional Fee Type</th>
+              <th style={{ border: "1px solid" }}>Additional Fee Description</th>
+              <th style={{ border: "1px solid" }}>Additional Fee Amount</th>
               <th style={{ border: "1px solid" }}>Date Created</th>
               <th style={{ border: "1px solid" }}>Last Updated</th>
             </tr>
@@ -173,6 +201,15 @@ const CabinDashboard = () => {
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.minCapacity}</td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.maxCapacity}</td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.service.quantity}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {cabin.additionalFee?.type || "N/A"}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {cabin.additionalFee?.description || "N/A"}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {cabin.additionalFee?.amount ? `₱${formatPrice(cabin.additionalFee.amount)}` : "N/A"}
+                </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>{formatDate(cabin.createdAt)}</td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>{formatDate(cabin.updatedAt)}</td>
               </tr>
