@@ -29,6 +29,8 @@ import { hashPassword, verifyPassword } from "../utils/password";
 import { sendMail } from "../utils/sendMail";
 
 type CreateAccountParams = {
+  firstName: string | null;
+  lastName: string | null;
   email: string;
   password: string;
   phoneNumber: string;
@@ -66,6 +68,8 @@ export const createAccount = async (data: CreateAccountParams) => {
 
   const createUser = await prisma.personalDetail.create({
     data: {
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email,
       phoneNumber: data.phoneNumber,
       userAccount: {

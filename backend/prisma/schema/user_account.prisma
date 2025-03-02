@@ -5,7 +5,7 @@ model UserAccount {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
-    personalDetail PersonalDetail @relation(fields: [personalId], references: [id])
+    personalDetail PersonalDetail @relation(fields: [personalId], references: [id], onDelete: Cascade)
     personalId     String         @unique @map("personal_id")
 
     userAccountStatus UserAccountStatus? @relation(fields: [statusId], references: [id])
