@@ -16,7 +16,9 @@ interface DayTour {
   description: string;
   imageUrl: string;
   price: string;
-  quantity: string;
+  additionalFeeType: string;
+  additionalFeeDescription: string;
+  additionalFeeAmount: string;
 }
 
 const EditDayTour: React.FC = () => {
@@ -26,7 +28,9 @@ const EditDayTour: React.FC = () => {
     description: '',
     imageUrl: '',
     price: '',
-    quantity: '',
+    additionalFeeType: '',
+    additionalFeeDescription: '',
+    additionalFeeAmount: '',
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -38,6 +42,9 @@ const EditDayTour: React.FC = () => {
     description: false,
     price: false,
     quantity: false,
+    additionalFeeType: false,
+    additionalFeeDescription: false,
+    additionalFeeAmount: false,
   });
   const [originalData, setOriginalData] = useState<DayTour | null>(null);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
@@ -71,6 +78,7 @@ const EditDayTour: React.FC = () => {
 
         if (data?.data?.dayTour?.service) {
           const service = data.data.dayTour.service;
+          const additionalFee = service.additionalFee || {};
           const fetchedData = {
             id: data.data.dayTour.id,
             name: service.name || '',
@@ -78,8 +86,10 @@ const EditDayTour: React.FC = () => {
             imageUrl: service?.imageUrl
               ? `http://localhost:8080/uploads/${service.imageUrl}`
               : '',
-            price: service.price || 0,
-            quantity: service.quantity || 0,
+            price: service.price.toString() || '',
+            additionalFeeType: additionalFee.type || '',
+            additionalFeeDescription: additionalFee.description || '',
+            additionalFeeAmount: additionalFee.amount?.toString() || '',
           };
           setFormData(fetchedData);
           setOriginalData(fetchedData);
@@ -99,23 +109,43 @@ const EditDayTour: React.FC = () => {
   }, [id]);
 
   useEffect(() => {
-    const priceStr = String(formData.price).trim();
-    const quantityStr = String(formData.quantity).trim();
+    if (!originalData) return;
+
+    const isNameValid =
+      formData.name.trim().length > 0 && formData.name.trim().length <= 50;
+
+    const isDescriptionValid =
+      formData.description.trim().length > 0 &&
+      formData.description.trim().length <= 100;
+
+    const isPriceValid =
+      typeof formData.price === 'string'
+        ? /^\d+(\.\d{1,2})?$/.test(formData.price.trim()) &&
+          parseFloat(formData.price) > 0
+        : !isNaN(formData.price) && formData.price > 0;
+
+    const isImageValid =
+      !imageFile ||
+      (imageFile.size <= 1024 * 1024 &&
+        ['image/jpeg', 'image/png', 'image/jpg'].includes(imageFile.type));
+
+    const isAdditionalFeeValid =
+      formData.additionalFeeType.trim() === '' ||
+      (formData.additionalFeeType.trim().length > 0 &&
+        formData.additionalFeeDescription.trim().length > 0 &&
+        formData.additionalFeeAmount.trim().length > 0 &&
+        /^\d+(\.\d{1,2})?$/.test(formData.additionalFeeAmount.trim()) &&
+        parseFloat(formData.additionalFeeAmount) > 0);
 
     const isValid =
-      !!formData.name &&
-      !!formData.description &&
-      !!priceStr &&
-      !!quantityStr &&
-      formData.name.length <= 50 &&
-      formData.description.length <= 100 &&
-      /^\d+(\.\d{1,2})?$/.test(priceStr) &&
-      parseFloat(priceStr) > 0 &&
-      /^\d+$/.test(quantityStr) &&
-      parseInt(quantityStr) > 0 &&
-      (!imageFile || imageFile.size <= 1024 * 1024);
+      isNameValid &&
+      isDescriptionValid &&
+      isPriceValid &&
+      isImageValid &&
+      isAdditionalFeeValid &&
+      hasChanges();
 
-    setIsFormValid(isValid && hasChanges());
+    setIsFormValid(isValid);
   }, [formData, imageFile]);
 
   const handleChange = useCallback(
@@ -135,19 +165,29 @@ const EditDayTour: React.FC = () => {
             ? value.length >= 100
             : name === 'price'
             ? !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
-            : name === 'quantity'
-            ? !/^\d+$/.test(value) || parseInt(value) <= 0
+            : name === 'additionalFeeType'
+            ? value.trim().length === 0 &&
+              formData.additionalFeeDescription.trim() !== ''
+            : name === 'additionalFeeDescription'
+            ? value.trim().length === 0 &&
+              formData.additionalFeeType.trim() !== ''
+            : name === 'additionalFeeAmount'
+            ? !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
             : false,
       }));
     },
-    []
+    [formData]
   );
 
   const hasChanges = () => {
     if (!originalData) return false;
 
-    const compareWithoutWhitespace = (a: string, b: string) =>
+    // checks if the value of the previous data are the same with the new data
+    const compareWithoutWhitespace = (a: string = '', b: string = '') =>
       a.trim() === b.trim();
+
+    const parseNumber = (val: string) =>
+      val.trim() === '' ? 0 : parseFloat(val);
 
     return (
       !compareWithoutWhitespace(formData.name, originalData.name) ||
@@ -155,8 +195,17 @@ const EditDayTour: React.FC = () => {
         formData.description,
         originalData.description
       ) ||
-      parseFloat(formData.price) !== parseFloat(originalData.price) ||
-      parseInt(formData.quantity) !== parseInt(originalData.quantity) ||
+      parseNumber(formData.price) !== parseNumber(originalData.price) ||
+      !compareWithoutWhitespace(
+        formData.additionalFeeType,
+        originalData.additionalFeeType
+      ) ||
+      !compareWithoutWhitespace(
+        formData.additionalFeeDescription,
+        originalData.additionalFeeDescription
+      ) ||
+      parseNumber(formData.additionalFeeAmount) !==
+        parseNumber(originalData.additionalFeeAmount) ||
       !!imageFile
     );
   };
@@ -167,7 +216,6 @@ const EditDayTour: React.FC = () => {
     setIsMutating(true);
 
     if (!hasChanges()) {
-      alert('Please make changes before saving.');
       setIsMutating(false);
       return;
     }
@@ -178,12 +226,23 @@ const EditDayTour: React.FC = () => {
     }
 
     const data = new FormData();
-    const jsonData = {
+    const jsonData: any = {
       name: formData.name,
       description: formData.description,
       price: Number(formData.price),
-      quantity: Number(formData.quantity),
     };
+
+    if (
+      formData.additionalFeeType &&
+      formData.additionalFeeDescription &&
+      formData.additionalFeeAmount
+    ) {
+      jsonData.additionalFee = {
+        type: formData.additionalFeeType,
+        description: formData.additionalFeeDescription,
+        amount: Number(formData.additionalFeeAmount),
+      };
+    }
     data.append('data', JSON.stringify(jsonData));
     if (imageFile) {
       data.append('image', imageFile);
@@ -285,18 +344,50 @@ const EditDayTour: React.FC = () => {
               )}
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor="quantity">Quantity</label>
+              <h1>Additional Fees (Optional)</h1>
+              <label htmlFor="additionalFeeType">Additional Fee Type</label>
               <input
                 type="text"
-                id="quantity"
-                name="quantity"
-                value={formData?.quantity || ''}
+                id="additionalFeeType"
+                name="additionalFeeType"
+                value={formData.additionalFeeType || ''}
                 onChange={handleChange}
-                required
               />
-              {helperText.quantity && (
+              {helperText.additionalFeeType && (
                 <small className={styles.helperText}>
-                  Quantity must be a positive integer
+                  Additional Fee Type is required
+                </small>
+              )}
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="additionalFeeDescription">
+                Additional Fee Description
+              </label>
+              <input
+                type="text"
+                id="additionalFeeDescription"
+                name="additionalFeeDescription"
+                value={formData.additionalFeeDescription || ''}
+                onChange={handleChange}
+              />
+              {helperText.additionalFeeDescription && (
+                <small className={styles.helperText}>
+                  Additional Fee Description is required
+                </small>
+              )}
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="additionalFeeAmount">Additional Fee Amount</label>
+              <input
+                type="text"
+                id="additionalFeeAmount"
+                name="additionalFeeAmount"
+                value={formData.additionalFeeAmount || ''}
+                onChange={handleChange}
+              />
+              {helperText.additionalFeeAmount && (
+                <small className={styles.helperText}>
+                  Additional Fee Amount must be a positive number only
                 </small>
               )}
             </div>
