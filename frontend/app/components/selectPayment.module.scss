@@ -3,10 +3,11 @@
   height: auto;
   width: auto;
   padding: 20px;
-  margin: 10px 10px 10px 50px;
+  margin: 10px 0 0 50px;
   flex-shrink: 0;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.2);
+  font-family: 'Open Sans';
 }
 
 .paymentOptions {
@@ -23,7 +24,7 @@
 
 .heading {
   color: var(--text, #555);
-  font-family: "Open Sans";
+  font-family: 'Open Sans';
   font-size: 1.5625rem;
   font-style: normal;
   font-weight: 600;
@@ -36,7 +37,7 @@
 
 .subheading {
   color: #000;
-  font-family: "Open Sans";
+  font-family: 'Open Sans';
   font-size: 1rem;
   font-style: normal;
   font-weight: 300;
@@ -58,7 +59,7 @@
   margin: 10px;
 }
 
-.fileUpload input[type="file"] {
+.fileUpload input[type='file'] {
   display: none;
 }
 

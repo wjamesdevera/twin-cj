@@ -1,21 +1,33 @@
 .paymentContainer {
   height: auto;
   max-width: 100vw;
+  font-family: 'Open Sans';
+}
+
+.backBtn {
+  margin: 70px 0;
+  color: var(--color-sunset-orange-200);
+  font-family: 'Open Sans';
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--text-line-height-xl);
 }
 
 .paymentDetails {
   display: grid;
-  margin: 0 60px;
-  border-top: 0.5px solid var(--color-neutral-500);
+  margin: 15px 60px;
+  border-top: 0.5px solid rgba(135, 135, 135, 0.28);
   width: 90%;
-  padding: 20px;
+  padding: 50px 20px;
 }
 
-.text {
+.paymentDetailsTitle {
   color: var(--color-neutral-600);
-  font-size: var(--text-size-xl);
-  font-family: var(--font-primary);
-  font-weight: bold;
+  font-size: var(--text-size-2xl);
+  font-family: 'Open Sans';
+  font-weight: 600;
+  margin: 0 0 20px 0;
 }
 
 .bold {
@@ -23,9 +35,13 @@
 }
 
 .paymentContainers {
-  margin: 20px -50px;
+  margin: 20px -30px;
   display: grid;
   grid-template-columns: 1.4fr 1fr;
+  width: 100%;
+  height: auto;
+  font-family: 'Open Sans';
+  padding: 0;
 }
 
 .leftContainer {
@@ -66,6 +82,7 @@
     max-width: 100vw;
     display: flex;
     flex-direction: column;
+    font-family: var(--font-primary);
   }
 
   .paymentDetails {
@@ -77,6 +94,67 @@
 
   .paymentContainers {
     margin: 20px -50px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .leftContainer {
+    height: auto;
+    max-width: 85vw;
+    width: 95%;
+  }
+
+  .rightContainer {
+    height: auto;
+    max-width: 85vw;
+    width: 95%;
+  }
+
+  .text {
+    color: var(--color-neutral-600);
+    font-size: var(--text-size-xl);
+    line-height: var(--text-line-height-base);
+  }
+
+  .container1 {
+    order: 1;
+  }
+
+  .container2 {
+    order: 2;
+  }
+
+  .container3 {
+    order: 3;
+  }
+
+  .container4 {
+    order: 4;
+  }
+
+  .container5 {
+    order: 5;
+  }
+}
+
+@media (max-width: 992px) {
+  .paymentContainer {
+    height: auto;
+    max-width: 100vw;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .paymentDetails {
+    margin: 0 20px;
+    border-top: 0.5px solid var(--color-neutral-500);
+    width: 90vw;
+    padding: 20px;
+  }
+
+  .paymentContainers {
+    margin: 20px -50px;
+    width: 100%;
     display: flex;
     flex-direction: column;
   }

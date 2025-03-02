@@ -1,34 +1,15 @@
-:root {
-  --font-primary: "Arial, sans-serif";
-  --text-2xl: 1.5rem;
-  --color-amber-400: #de954a;
-  --text-line-height-5xl: 4.4794rem;
-}
-
-.global-font-primary {
-  font-family: var(--font-primary);
-}
-
-.global-text-2xl {
-  font-size: var(--text-2xl);
-}
-
-.global-color-amber-300 {
-  color: var(--color-amber-400);
-}
-
 .backBtn {
   color: var(--color-amber-300);
-  font: var(--font-primary);
+  font-family: 'Open Sans';
   font-size: var(--text-2xl);
   border: none;
   background: transparent;
   cursor: pointer;
-  width: 300px;
-}
-
-.lessThan {
-  line-height: var(--text-line-height-5xl);
+  width: 400px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 }
 
 @media (max-width: 768px) {

@@ -1,5 +1,5 @@
-import React from "react";
-import styles from "./pricingContainer.module.scss";
+import React from 'react';
+import styles from './pricingContainer.module.scss';
 
 interface PricingContainerProps {
   className?: string;
@@ -22,6 +22,7 @@ const PricingContainer: React.FC<PricingContainerProps> = ({
         <div className={styles.pricingImg}>
           <img src="/assets/MaxiCabin.png" alt="cabin" />
         </div>
+
         <div className={styles.pricingHeader}>
           <h3 className={styles.text}>{numberOfGuests}</h3>
           <h3 className={styles.text}>{type}</h3>
@@ -37,6 +38,7 @@ const PricingContainer: React.FC<PricingContainerProps> = ({
           <h3 className={styles.text}>₱ 5,000</h3>
         </div>
       </div>
+
       <div className={styles.totalAmountContainer}>
         <div className={styles.leftContainer}>
           <h2 className={styles.title}>Total Amount</h2>

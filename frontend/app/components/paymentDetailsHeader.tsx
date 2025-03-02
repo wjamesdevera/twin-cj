@@ -1,5 +1,5 @@
-import React from "react";
-import styles from "./paymentDetails.module.scss";
+import React from 'react';
+import styles from './paymentDetails.module.scss';
 
 export default function paymentDetailsHeader() {
   return (

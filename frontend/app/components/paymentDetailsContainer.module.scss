@@ -11,19 +11,20 @@
   width: auto;
   height: auto;
   margin: 10px 0 10px 50px;
+  font-family: 'Open Sans';
 }
 
 .heading {
   color: var(--text, #555);
-  font-family: "Open Sans";
-  font-size: 1.5625rem;
+
+  font-size: var(--text-size-xl);
   font-style: normal;
   font-weight: 600;
-  line-height: 2.1875rem; /* 140% */
+  line-height: 2.1875rem;
 }
 
 .subheading {
-  font-size: 1rem;
+  font-size: var(--text-size-base);
   font-style: normal;
   font-weight: 400;
   line-height: 1.5625rem;

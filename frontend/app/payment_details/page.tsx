@@ -1,13 +1,10 @@
-import React from "react";
-import PaymentDetailsHeader from "../components/paymentDetailsHeader";
-import styles from "./paymentDetails.module.scss";
-import BackBtn from "../components/backButton";
-import PaymentContainer from "../components/paymentDetailsContainer";
-import PaymentMethod from "../components/selectPayment";
-import ConfirmBooking from "../components/confirmBooking";
-import PaymentDetailsContainer from "../components/paymentDetailsContainer";
-import SelectPayment from "../components/selectPayment";
-import PricingContainer from "../components/pricingContainer";
+import React from 'react';
+import PaymentDetailsHeader from '../components/paymentDetailsHeader';
+import styles from './paymentDetails.module.scss';
+import BackBtn from '../components/backButton';
+import PaymentContainer from '../components/paymentDetailsContainer';
+import SelectPayment from '../components/selectPayment';
+import PricingContainer from '../components/pricingContainer';
 
 export default function () {
   return (
@@ -16,7 +13,7 @@ export default function () {
 
       <BackBtn className={styles.backBtn} />
       <div className={styles.paymentDetails}>
-        <h2 className={styles.text}>Payment Details</h2>
+        <h2 className={styles.paymentDetailsTitle}>Payment Details</h2>
         <div className={styles.paymentContainers}>
           <PricingContainer
             className={`${styles.rightContainer} ${styles.container1}`}
@@ -42,7 +39,7 @@ export default function () {
             heading="Cancellation Policy"
             subheading={
               <>
-                Cancellations made at least{" "}
+                Cancellations made at least{' '}
                 <span className={styles.bold}>3 business days</span> prior to
                 the scheduled booking will be eligible for a refund or
                 reschedule. In cases of typhoon, natural calamities, or other

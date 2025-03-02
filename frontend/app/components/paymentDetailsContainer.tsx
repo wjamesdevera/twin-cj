@@ -1,5 +1,5 @@
-import React, { ReactNode } from "react";
-import styles from "./paymentDetailsContainer.module.scss";
+import React, { ReactNode } from 'react';
+import styles from './paymentDetailsContainer.module.scss';
 
 interface PaymentDetailsContainerProps {
   className?: string;
