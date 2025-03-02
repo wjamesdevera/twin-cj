@@ -1,73 +1,92 @@
 .page_container {
-    display: flex;
-    transition: all 0.3s ease-in-out;
-  }
-  
-  .main_content {
-    flex: 1;
-    padding: 50px 60px 20px 300px;
-    transition: margin-left 0.3s ease;
-  }
-  
-  .sidebar_collapsed {
-    padding-left: 100px;
-  }
-  
-  .page_header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  
+  display: flex;
+  transition: all 0.3s ease-in-out;
+  flex-direction: column;
+}
+
+.main_content {
+  flex: 1;
+  padding: 50px 60px 20px 300px;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar_collapsed {
+  padding-left: 100px;
+}
+
+.page_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.title {
+  color: #a45f14;
+  font-size: 24px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.add_user_container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
   .title {
-    color: #a45f14;
-    font-size: 24px;
-    font-weight: bold;
-    white-space: nowrap; 
+    font-size: 22px;
   }
-  
   .add_user_container {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
+    width: 100%;
+    justify-content: flex-start;
   }
-  
-  @media (max-width: 1024px) {
-    .title {
-      font-size: 22px; 
-    }
-    .add_user_container {
-        width: 100%;
-        justify-content: flex-start;
-      }
+}
+
+@media (max-width: 768px) {
+  .page_header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
-  
-  @media (max-width: 768px) {
-    .page_header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px; 
-    }
-  
-    .title {
-      font-size: 20px;
-    }
-  
-    .add_user_container {
-      width: 100%;
-      justify-content: flex-start; 
-    }
+
+  .title {
+    font-size: 20px;
   }
-  
-  @media (max-width: 480px) {
-    .title {
-      font-size: 18px;
-    }
-  
-    .add_user_container {
-      justify-content: center; 
-    }
+
+  .add_user_container {
+    width: 100%;
+    justify-content: flex-start;
   }
-  
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 18px;
+  }
+
+  .add_user_container {
+    justify-content: center;
+  }
+}
+
+.primaryLink {
+  border-radius: 15px;
+  padding: 8px 25px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  border: 1px solid #a45f14;
+  background: white;
+  color: #a45f14;
+  text-decoration: none;
+
+  &:hover,
+  &:active {
+    text-decoration: none;
+    background: #a45f14;
+    color: white;
+  }
+}

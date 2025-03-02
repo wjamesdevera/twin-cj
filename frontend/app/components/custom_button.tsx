@@ -1,45 +1,31 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
+import React, { ButtonHTMLAttributes } from "react";
 import styles from "./custom_button.module.scss";
 
-interface CustomButtonProps {
+interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
   href?: string;
-  onClick?: () => void;
   variant?: "primary" | "secondary";
   size?: "small" | "default";
   disabled?: boolean;
+  children?: React.ReactNode;
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
   label,
-  href,
-  onClick,
   variant = "primary",
   size = "default",
   disabled = false,
+  ...rest
 }) => {
-  const router = useRouter();
-
-  const handleClick = () => {
-    if (disabled) return; 
-
-    if (href) {
-      router.push(href);
-    } else if (onClick) {
-      onClick();
-    }
-  };
-
   return (
     <button
-      className={`${styles.button} ${styles[variant]} ${size === "small" ? styles.small : ""} ${
-        disabled ? styles.disabled : ""
-      }`}
-      onClick={handleClick}
-      disabled={disabled} 
+      className={`${styles.button} ${styles[variant]} ${
+        size === "small" ? styles.small : ""
+      } ${disabled ? styles.disabled : ""}`}
+      disabled={disabled}
+      {...rest}
     >
       {label}
     </button>
