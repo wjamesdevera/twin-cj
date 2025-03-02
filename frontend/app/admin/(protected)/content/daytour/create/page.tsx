@@ -18,7 +18,9 @@ function Page() {
     description: string;
     image: File | null;
     price: string;
-    quantity: string;
+    additionalFeeType: string;
+    additionalFeeDescription: string;
+    additionalFeeAmount: string;
   }
 
   const [formData, setFormData] = useState<DayTourFormData>({
@@ -26,35 +28,56 @@ function Page() {
     description: '',
     image: null,
     price: '',
-    quantity: '',
+    additionalFeeType: '',
+    additionalFeeDescription: '',
+    additionalFeeAmount: '',
   });
 
+  // helper text initital state
   const [helperText, setHelperText] = useState<{ [key: string]: boolean }>({
     name: false,
     description: false,
     price: false,
-    quantity: false,
+    additionalFeeType: false,
+    additionalFeeDescription: false,
+    additionalFeeAmount: false,
   });
 
   const [isMutating, setIsMutating] = useState<boolean>(false);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
+  // form validations
   const validateForm = useCallback(() => {
-    const isValid =
-      !!formData.name &&
-      !!formData.description &&
-      !!formData.price &&
-      !!formData.quantity &&
-      !!formData.image &&
-      formData.name.length <= 50 &&
-      formData.description.length <= 100 &&
-      /^\d+(\.\d+)?$/.test(formData.price) &&
-      parseFloat(formData.price) > 0 &&
-      /^\d+$/.test(formData.quantity) &&
-      parseInt(formData.quantity) > 0 &&
+    const isNameValid =
+      formData.name.trim().length > 0 && formData.name.trim().length <= 50;
+
+    const isDescriptionValid =
+      formData.description.trim().length > 0 &&
+      formData.description.trim().length <= 100;
+
+    const isPriceValid =
+      /^\d+(\.\d+)?$/.test(formData.price.trim()) &&
+      parseFloat(formData.price) > 0;
+
+    const isImageValid =
       formData.image !== null &&
       formData.image.size <= 1024 * 1024 &&
       ['image/jpeg', 'image/png', 'image/jpg'].includes(formData.image.type);
+
+    const isAdditionalFeeValid =
+      formData.additionalFeeType.trim() === '' ||
+      (formData.additionalFeeType.trim().length > 0 &&
+        formData.additionalFeeDescription.trim().length > 0 &&
+        formData.additionalFeeAmount.trim().length > 0 &&
+        /^\d+(\.\d+)?$/.test(formData.additionalFeeAmount.trim()) &&
+        parseFloat(formData.additionalFeeAmount) > 0);
+
+    const isValid =
+      isNameValid &&
+      isDescriptionValid &&
+      isPriceValid &&
+      isImageValid &&
+      isAdditionalFeeValid;
 
     setIsFormValid(isValid);
   }, [formData]);
@@ -80,8 +103,12 @@ function Page() {
             ? value.length >= 100
             : name === 'price'
             ? !/^\d+(\.\d+)?$/.test(value) || parseFloat(value) <= 0
-            : name === 'quantity'
-            ? !/^\d+$/.test(value) || parseInt(value) <= 0
+            : name === 'additionalFeeType'
+            ? value.length === 0
+            : name === 'additionalFeeDescription'
+            ? value.length === 0
+            : name === 'additionalFeeAmount'
+            ? !/^\d+(\.\d+)?$/.test(value) || parseFloat(value) <= 0
             : false,
       }));
     },
@@ -99,12 +126,24 @@ function Page() {
     }
 
     const data = new FormData();
-    const jsonData = {
+    const jsonData: any = {
       name: formData.name,
       description: formData.description,
       price: Number(formData.price),
-      quantity: Number(formData.quantity),
     };
+
+    if (
+      formData.additionalFeeType &&
+      formData.additionalFeeDescription &&
+      formData.additionalFeeAmount
+    ) {
+      jsonData.additionalFee = {
+        type: formData.additionalFeeType,
+        description: formData.additionalFeeDescription,
+        amount: Number(formData.additionalFeeAmount),
+      };
+    }
+
     data.append('data', JSON.stringify(jsonData));
 
     if (formData.image) {
@@ -188,15 +227,42 @@ function Page() {
               )}
             </div>
             <div>
-              <label>Quantity:</label>
+              <h1>Additional Fees (Optional)</h1>
+              <label>Additional Fee Type:</label>
               <input
                 type="text"
-                name="quantity"
-                value={formData.quantity}
+                name="additionalFeeType"
+                value={formData.additionalFeeType}
                 onChange={handleChange}
               />
-              {helperText.quantity && (
-                <small>Quantity must be a positive integer</small>
+              {helperText.additionalFeeType && (
+                <small>Additional Fee Type is required</small>
+              )}
+            </div>
+            <div>
+              <label>Additional Fee Description:</label>
+              <input
+                type="text"
+                name="additionalFeeDescription"
+                value={formData.additionalFeeDescription}
+                onChange={handleChange}
+              />
+              {helperText.additionalFeeDescription && (
+                <small>Additional Fee Description is required</small>
+              )}
+            </div>
+            <div>
+              <label>Additional Fee Amount:</label>
+              <input
+                type="text"
+                name="additionalFeeAmount"
+                value={formData.additionalFeeAmount}
+                onChange={handleChange}
+              />
+              {helperText.additionalFeeAmount && (
+                <small>
+                  Additional Fee Amount must be a positive number only
+                </small>
               )}
             </div>
             <button type="submit" disabled={!isFormValid}>

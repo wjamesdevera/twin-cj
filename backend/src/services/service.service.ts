@@ -5,7 +5,11 @@ interface CreateDayTourInput {
   description: string;
   imageUrl: string;
   price: number;
-  quantity: number;
+  additionalFee?: {
+    type: string;
+    description: string;
+    amount: number;
+  };
 }
 
 export const createDayTour = async (input: CreateDayTourInput) => {
@@ -17,9 +21,21 @@ export const createDayTour = async (input: CreateDayTourInput) => {
           description: input.description,
           imageUrl: input.imageUrl,
           price: input.price,
-          quantity: input.quantity,
         },
       },
+      additionalFee:
+        input.additionalFee &&
+        input.additionalFee.type &&
+        input.additionalFee.description &&
+        input.additionalFee.amount !== undefined
+          ? {
+              create: {
+                type: input.additionalFee.type,
+                description: input.additionalFee.description,
+                amount: input.additionalFee.amount,
+              },
+            }
+          : undefined,
     },
     include: {
       service: true,
@@ -57,23 +73,60 @@ export const updateDayTour = async (
     description: string;
     imageUrl: string;
     rate: number;
-    quantity: number;
+    additionalFee: {
+      type?: string;
+      description?: string;
+      amount?: number;
+    };
   }
 ) => {
-  return await prisma.dayTourActivities.update({
-    where: { id },
-    data: {
-      updatedAt: new Date(),
-      service: {
-        update: {
-          name: data.name,
-          description: data.description,
-          imageUrl: data.imageUrl,
-          price: parseFloat(data.rate.toString()),
-          quantity: data.quantity,
-        },
+  const updateData: any = {
+    updatedAt: new Date(),
+    service: {
+      update: {
+        name: data.name,
+        description: data.description,
+        imageUrl: data.imageUrl,
+        price: parseFloat(data.rate.toString()),
       },
     },
+  };
+
+  if (data.additionalFee) {
+    const existingAdditionalFee = await prisma.additionalFee.findFirst({
+      where: { dayTourActivity: { id } },
+    });
+
+    if (existingAdditionalFee) {
+      updateData.additionalFee = {
+        update: {
+          ...(data.additionalFee.type && { type: data.additionalFee.type }),
+          ...(data.additionalFee.description && {
+            description: data.additionalFee.description,
+          }),
+          ...(data.additionalFee.amount !== undefined && {
+            amount: data.additionalFee.amount,
+          }),
+        },
+      };
+    } else {
+      updateData.additionalFee = {
+        create: {
+          ...(data.additionalFee.type && { type: data.additionalFee.type }),
+          ...(data.additionalFee.description && {
+            description: data.additionalFee.description,
+          }),
+          ...(data.additionalFee.amount !== undefined && {
+            amount: data.additionalFee.amount,
+          }),
+        },
+      };
+    }
+  }
+
+  return await prisma.dayTourActivities.update({
+    where: { id },
+    data: updateData,
     include: {
       service: true,
       additionalFee: true,

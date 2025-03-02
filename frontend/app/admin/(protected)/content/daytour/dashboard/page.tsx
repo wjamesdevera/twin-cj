@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './dashboard.module.scss';
 import { useRouter } from 'next/navigation';
+import { Loading } from '@/app/components/loading';
 
 interface DayTour {
   id: number;
@@ -9,7 +10,9 @@ interface DayTour {
   description: string;
   imageUrl: string;
   rate: number;
-  quantity: number;
+  additionalFeeType: string;
+  additionalFeeDescription: string;
+  additionalFeeAmount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,7 +45,6 @@ const DayTourView = () => {
 
         if (Array.isArray(data?.data?.dayTours)) {
           const mappedDayTours = data.data.dayTours.map((tour: any) => {
-            console.log('Image URL:', tour.service.imageUrl);
             return {
               id: tour.id,
               name: tour.service?.name || 'Unnamed Tour',
@@ -50,7 +52,11 @@ const DayTourView = () => {
                 tour.service?.description || 'No description available',
               imageUrl: tour.service?.imageUrl || '',
               rate: parseFloat(tour.service?.price || 0).toFixed(2),
-              quantity: tour.service?.quantity || 0,
+              additionalFeeType: tour.additionalFee?.type || '',
+              additionalFeeDescription: tour.additionalFee?.description || '',
+              additionalFeeAmount: parseFloat(
+                tour.additionalFee?.amount || 0
+              ).toFixed(2),
               createdAt: new Date(tour.createdAt).toLocaleDateString(),
               updatedAt: new Date(tour.updatedAt).toLocaleDateString(),
             };
@@ -149,9 +155,7 @@ const DayTourView = () => {
     );
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <Loading />;
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -180,7 +184,9 @@ const DayTourView = () => {
             <th>Image</th>
             <th>Description</th>
             <th>Rate</th>
-            <th>Quantity</th>
+            <th>Type (Additional)</th>
+            <th>Description (Additional)</th>
+            <th>Amount (Additional)</th>
             <th>Date Created</th>
             <th>Last Updated</th>
           </tr>
@@ -226,7 +232,9 @@ const DayTourView = () => {
               </td>
               <td>{dayTour.description}</td>
               <td>₱{dayTour.rate}</td>
-              <td>{dayTour.quantity}</td>
+              <td>{dayTour.additionalFeeType}</td>
+              <td>{dayTour.additionalFeeDescription}</td>
+              <td>₱{dayTour.additionalFeeAmount}</td>
               <td>{dayTour.createdAt}</td>
               <td>{dayTour.updatedAt}</td>
             </tr>

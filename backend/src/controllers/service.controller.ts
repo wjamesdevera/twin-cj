@@ -32,7 +32,22 @@ export const createDayTourHandler = catchErrors(
 
     try {
       const validatedData = serviceSchema.parse(jsonData);
-      const requestBody = { ...validatedData, imageUrl };
+      const requestBody = {
+        name: validatedData.name,
+        description: validatedData.description,
+        imageUrl,
+        price: validatedData.price,
+        additionalFee:
+          validatedData.additionalFee?.type &&
+          validatedData.additionalFee?.description &&
+          validatedData.additionalFee?.amount !== undefined
+            ? {
+                type: validatedData.additionalFee.type,
+                description: validatedData.additionalFee.description,
+                amount: validatedData.additionalFee.amount,
+              }
+            : undefined,
+      };
 
       const createdDayTour = await createDayTour(requestBody);
 
@@ -114,6 +129,7 @@ export const updateDayTourHandler = catchErrors(
         ...validatedData,
         imageUrl,
         rate: validatedData.price,
+        additionalFee: validatedData.additionalFee || {},
       });
 
       res.status(OK).json({
