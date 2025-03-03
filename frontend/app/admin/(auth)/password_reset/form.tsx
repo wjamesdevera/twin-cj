@@ -9,7 +9,7 @@ import { Loading } from "@/app/components/loading";
 
 const Timer = ({ trigger }: { trigger: () => void }) => {
   const Ref = useRef<NodeJS.Timeout | null>(null);
-  const [time, setTime] = useState<string>("5:00");
+  const [time, setTime] = useState<string>("05:00");
   const [isResendAvailable, setIsResetAvailable] = useState(false);
 
   const getTimeRemaining = (endTime: Date) => {
@@ -48,7 +48,7 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
 
   const getDeadTime = (): Date => {
     const deadline = new Date();
-    deadline.setMinutes(deadline.getMinutes() + 1);
+    deadline.setMinutes(deadline.getMinutes() + 5);
     return deadline;
   };
 
@@ -57,7 +57,7 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
     return () => {
       if (Ref.current) clearInterval(Ref.current);
     };
-  });
+  }, []);
 
   const onClickReset = () => {
     clearTimer(getDeadTime());
@@ -65,7 +65,7 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
   };
 
   return (
-    <div>
+    <div className={styles.timer}>
       <p>
         Resend in <span>{time}</span>
       </p>
