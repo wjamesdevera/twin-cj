@@ -20,7 +20,7 @@ export const getCabinHandler = catchErrors(
 
     const cabin = await getCabin(id);
     appAssert(cabin, 404, `Cabin with ID ${id} not found.`);
-    
+
     res.status(OK).json({
       status: "success",
       data: { cabin },
@@ -57,39 +57,22 @@ export const createCabinHandler = catchErrors(
       jsonData = JSON.parse(req.body.data);
     } catch (error) {
       console.error("JSON Parsing Error:", error);
-      return res.status(BAD_REQUEST).json({ status: "error", message: "Invalid JSON Input" });
+      return res
+        .status(BAD_REQUEST)
+        .json({ status: "error", message: "Invalid JSON Input" });
     }
 
-    try {
-      const validatedData = cabinSchema.parse(jsonData);
-      const requestBody = {
-        service: {
-          name: validatedData.name,
-          description: validatedData.description,
-          imageUrl,
-          quantity: validatedData.quantity,
-          price: validatedData.price,
-        },
-        cabin: {
-          minCapacity: validatedData.minCapacity,
-          maxCapacity: validatedData.maxCapacity,
-        },
-        additionalFee: validatedData.additionalFee?.type ? validatedData.additionalFee: undefined,
-      };
+    const validatedData = cabinSchema.parse(jsonData);
+    appAssert(validatedData, BAD_REQUEST, "Invalid Data format");
 
-      const createdCabin = await createCabin(requestBody);
+    const createdCabin = await createCabin({
+      ...validatedData,
+      imageUrl: imageUrl,
+    });
 
-      res.status(CREATED).json({ status: "success", data: { cabin: createdCabin } });
-    } catch (validationError) {
-      console.error("Validation Error: ", validationError);
-      return res.status(BAD_REQUEST).json({ status: "error", message: "Invalid Data Format" });
-    }
-
-    // NOTE: You may remove this after accomplishing the task
-
-    // Apply the given structure above to request that requires files and text data
-
-    // TODO: Implement adding the data to the database
+    res
+      .status(CREATED)
+      .json({ status: "success", data: { cabin: createdCabin } });
   }
 );
 
@@ -163,7 +146,11 @@ export const updateCabinHandler = catchErrors(
     appAssert(!isNaN(Number(id)), BAD_REQUEST, "Invalid cabin ID.");
 
     const { service, cabin, additionalFee } = req.body;
-    appAssert(service || cabin || additionalFee !== undefined, BAD_REQUEST, "At least one field (service, cabin, or additionalFee) must be provided for an update.");
+    appAssert(
+      service || cabin || additionalFee !== undefined,
+      BAD_REQUEST,
+      "At least one field (service, cabin, or additionalFee) must be provided for an update."
+    );
 
     const updatedData = await updateCabin(Number(id), {
       service,

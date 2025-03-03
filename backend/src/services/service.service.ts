@@ -34,79 +34,78 @@ export const getCabin = async (id: number) => {
 };
 
 export const getAllCabins = async () => {
-  return await prisma.cabin.findMany({
-    select: {
-      id: true,
-      minCapacity: true,
-      maxCapacity: true,
-      createdAt: true,
-      updatedAt: true,
-      service: {
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          price: true,
-          imageUrl: true,
-          quantity: true,
-        },
-      },
-      additionalFee: {
-        select: {
-          id: true,
-          type: true,
-          description: true,
-          amount: true,
-        },
-      },
+  const cabins = await prisma.cabin.findMany({
+    include: {
+      additionalFee: true,
+      service: true,
     },
+  });
+
+  return cabins.map((cabin) => {
+    return {
+      id: cabin.service.id,
+      name: cabin.service.name,
+      description: cabin.service.description,
+      price: cabin.service.price,
+      imageUrl: cabin.service.imageUrl,
+      quantity: cabin.service.quantity,
+      minCapacity: cabin.minCapacity,
+      maxCapacity: cabin.maxCapacity,
+      createdAt: cabin.createdAt,
+      updatedAt: cabin.updatedAt,
+    };
   });
 };
 
-export const createCabin = async (data: {
-  service: {
-    name: string;
-    description: string;
-    imageUrl: string;
-    quantity: number;
-    price: number;
-  };
-  cabin: {
-    minCapacity: number;
-    maxCapacity: number;
-  };
-  additionalFee?: {
-    type: string;
-    description?: string;
-    amount: number;
-  };
-}) => {
-  return await prisma.$transaction(async (tx) => {
-    const newService = await tx.service.create({
-      data: data.service,
-    });
+type CreateCabinParams = {
+  minCapacity: number;
+  maxCapacity: number;
+  name: string;
+  description: string;
+  quantity: number;
+  price: number;
+  imageUrl: string;
+  additionalFee?:
+    | {
+        type: string;
+        amount: number;
+        description?: string | undefined;
+      }
+    | undefined;
+};
 
-    const newAdditionalFee = data.additionalFee
-      ? await tx.additionalFee.create({
-          data: {
-            type: data.additionalFee.type,
-            description: data.additionalFee.description || null,
-            amount: data.additionalFee.amount,
-          },
-        })
-      : null;
-
-    const newCabin = await tx.cabin.create({
-      data: {
-        serviceId: newService.id,
-        minCapacity: data.cabin.minCapacity,
-        maxCapacity: data.cabin.maxCapacity,
-        additionalFeeId: newAdditionalFee ? newAdditionalFee.id : null,
+export const createCabin = async (data: CreateCabinParams) => {
+  const createdCabin = await prisma.cabin.create({
+    data: {
+      minCapacity: data.minCapacity,
+      maxCapacity: data.maxCapacity,
+      service: {
+        create: {
+          name: data.name,
+          description: data.description,
+          quantity: data.quantity,
+          price: data.price,
+          imageUrl: data.imageUrl,
+        },
       },
-    });
-
-    return { service: newService, cabin: newCabin, additionalFee: newAdditionalFee };
+    },
+    include: {
+      service: true,
+    },
   });
+
+  return {
+    id: createdCabin.service.id,
+    name: createdCabin.service.name,
+    description: createdCabin.service.description,
+    price: createdCabin.service.price,
+    imageUrl: createdCabin.service.imageUrl,
+    quantity: createdCabin.service.quantity,
+    minCapacity: createdCabin.minCapacity,
+    maxCapacity: createdCabin.maxCapacity,
+    createdAt: createdCabin.service.createdAt,
+    updatedAt: createdCabin.service.updatedAt,
+  };
 };
 
 export const deleteAllCabins = async () => {
@@ -114,7 +113,10 @@ export const deleteAllCabins = async () => {
     const deletedCabins = await tx.cabin.deleteMany();
     const deletedServices = await tx.service.deleteMany();
 
-    return { deletedCabins: deletedCabins.count, deletedServices: deletedServices.count };
+    return {
+      deletedCabins: deletedCabins.count,
+      deletedServices: deletedServices.count,
+    };
   });
 };
 
@@ -131,7 +133,11 @@ export const deleteCabin = async (id: number) => {
     const imageUrl = existingCabin.service?.imageUrl;
 
     if (imageUrl) {
-      const imagePath = path.join(__dirname, "../../uploads", path.basename(imageUrl));
+      const imagePath = path.join(
+        __dirname,
+        "../../uploads",
+        path.basename(imageUrl)
+      );
 
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
@@ -140,7 +146,7 @@ export const deleteCabin = async (id: number) => {
         console.warn(`Image file not found: ${imagePath}`);
       }
     }
-    
+
     await tx.cabin.delete({ where: { id } });
 
     if (serviceId) {
@@ -151,7 +157,11 @@ export const deleteCabin = async (id: number) => {
       await tx.additionalFee.delete({ where: { id: additionalFee.id } });
     }
 
-    return { deletedCabin: existingCabin, deletedService: serviceId ? existingCabin.service : null, deletedAdditionalFee: additionalFee ? additionalFee : null };
+    return {
+      deletedCabin: existingCabin,
+      deletedService: serviceId ? existingCabin.service : null,
+      deletedAdditionalFee: additionalFee ? additionalFee : null,
+    };
   });
 };
 
@@ -188,8 +198,15 @@ export const updateCabin = async (
     const { serviceId } = existingCabin;
     let updatedImageUrl = existingCabin.service.imageUrl;
 
-    if (data.service?.imageUrl && data.service.imageUrl !== existingCabin.service.imageUrl) {
-      const oldImagePath = path.join(__dirname, "../../uploads", path.basename(existingCabin.service.imageUrl));
+    if (
+      data.service?.imageUrl &&
+      data.service.imageUrl !== existingCabin.service.imageUrl
+    ) {
+      const oldImagePath = path.join(
+        __dirname,
+        "../../uploads",
+        path.basename(existingCabin.service.imageUrl)
+      );
 
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
@@ -219,7 +236,9 @@ export const updateCabin = async (
 
     if (data.additionalFee !== undefined) {
       if (data.additionalFee === null && existingCabin.additionalFee) {
-        await tx.additionalFee.delete({ where: { id: existingCabin.additionalFee.id } });
+        await tx.additionalFee.delete({
+          where: { id: existingCabin.additionalFee.id },
+        });
         updatedAdditionalFee = null;
       } else if (data.additionalFee) {
         if (existingCabin.additionalFee) {
@@ -240,6 +259,10 @@ export const updateCabin = async (
       }
     }
 
-    return { service: updatedService, cabin: updatedCabin, additionalFee: updatedAdditionalFee };
+    return {
+      service: updatedService,
+      cabin: updatedCabin,
+      additionalFee: updatedAdditionalFee,
+    };
   });
 };
