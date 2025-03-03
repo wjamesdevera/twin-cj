@@ -1,4 +1,4 @@
-import { request, Request, Response } from "express";
+import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
 import { prisma } from "../config/db";
 import appAssert from "../utils/appAssert";
@@ -59,7 +59,7 @@ export const getAllUsersHandler = catchErrors(
 
 export const editUserHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const id = idSchema.parse(request.params);
+    const id = idSchema.parse(request.params.id);
 
     appAssert(id, BAD_REQUEST, "Id is required");
     const userDetails = editUserSchema.parse(request.body);

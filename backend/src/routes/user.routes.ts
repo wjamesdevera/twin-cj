@@ -12,7 +12,7 @@ const router = Router();
 router.get("/", getUserHandler);
 router.get("/all", getAllUsersHandler);
 router.get("/:id", getUserByIdHandler);
-router.put("/", editUserHandler);
+router.put("/:id", editUserHandler);
 router.delete("/:id", deleteUserHandler);
 
 export default router;

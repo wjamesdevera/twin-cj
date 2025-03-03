@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
@@ -17,25 +17,42 @@ interface EditUserArg {
 }
 
 const Form: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { data: userData, isLoading } = useSWR(id, getUserById);
-  const user = userData?.data;
-  const { trigger } = useSWRMutation(
-    "edit",
-    (key, { arg }: { arg: EditUserArg }) => editUser(id, arg)
-  );
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    trigger(formData);
-  };
-
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EditUserArg>({
     firstName: "",
     lastName: "",
     email: "",
     phoneNumber: "",
   });
+  const { id } = useParams<{ id: string }>();
+  const { data: userData, isLoading } = useSWR(id, getUserById, {
+    onSuccess: () => {
+      setFormData({
+        firstName: userData?.data.firstName,
+        lastName: userData?.data.lastName,
+        email: userData?.data.email,
+        phoneNumber: userData?.data.phoneNumber,
+      });
+    },
+  });
+  const { trigger } = useSWRMutation(
+    "edit",
+    (key, { arg }: { arg: EditUserArg }) => editUser(id, arg)
+  );
+  useEffect(() => {
+    if (userData?.data) {
+      setFormData({
+        firstName: userData.data.firstName || "",
+        lastName: userData.data.lastName || "",
+        email: userData.data.email || "",
+        phoneNumber: userData.data.phoneNumber || "",
+      });
+    }
+  }, [userData]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    trigger(formData);
+  };
 
   const [errors, setErrors] = useState({
     email: false,
@@ -90,7 +107,7 @@ const Form: React.FC = () => {
         <input
           type="text"
           name="firstName"
-          value={user.firstName}
+          value={formData.firstName}
           onChange={handleChange}
         />
       </div>
@@ -101,7 +118,7 @@ const Form: React.FC = () => {
         <input
           type="text"
           name="lastName"
-          value={user.lastName}
+          value={formData.lastName}
           onChange={handleChange}
         />
       </div>
@@ -112,7 +129,7 @@ const Form: React.FC = () => {
         <input
           type="email"
           name="email"
-          value={user.email}
+          value={formData.email}
           onChange={handleChange}
           className={errors.email ? styles.invalid_input : ""}
         />
@@ -129,7 +146,7 @@ const Form: React.FC = () => {
           <input
             type="tel"
             name="phoneNumber"
-            value={user.phoneNumber}
+            value={formData.phoneNumber}
             onChange={handleChange}
             className={errors.phoneNumber ? styles.invalid_input : ""}
           />
@@ -142,7 +159,12 @@ const Form: React.FC = () => {
       {/* Buttons */}
       <div className={`${styles.form_group} ${styles.full_width}`}>
         <div className={styles.button_container}>
-          <CustomButton label="Save Changes" variant="primary" size="small" />
+          <CustomButton
+            label="Save Changes"
+            variant="primary"
+            size="small"
+            type="submit"
+          />
           <CustomButton
             label="Cancel"
             variant="secondary"
