@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loading } from '@/app/components/loading';
 
 export default function CreateCabin() {
   const router = useRouter();
+
+  const [isMutating, setIsMutating] = useState<boolean>(false);
 
   const [formData, setFormData] = useState({
     service: {
@@ -139,7 +142,7 @@ export default function CreateCabin() {
     if (isAdditionalFeeFilled && !isAdditionalFeeComplete) {
       setAdditionalFeeWarning("Please complete all additional fee fields or leave them empty.");
       return;
-    }
+    };
     
     const isConfirmed = window.confirm("Are you sure you want to add this cabin?");
     if (!isConfirmed) return;
@@ -183,6 +186,8 @@ export default function CreateCabin() {
     }
 
     try {
+      setIsMutating(true);
+
       const response = await fetch("http://localhost:8080/api/services/cabins",
         {
           method: "POST",
@@ -198,11 +203,13 @@ export default function CreateCabin() {
       router.push("/cabin");
     } catch (error) {
       console.error("Error", error);
+    } finally {
+      setIsMutating(false);
     }
   };
   
   const isFormInvalid = Object.values(errors).some((error) => error !== "") || additionalFeeWarning !== "";
-
+  
   const handleClear = () => {
     setFormData({
       service: {
@@ -238,77 +245,83 @@ export default function CreateCabin() {
   };
   
   return (
-    <form onSubmit={handleSubmit}>
-      <div style={{ marginTop: "80px" }}></div>
-
-      <label>Title</label>
-      <br />
-      <input type="text" name="name" data-section="service" onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.name}</p>
-      <br />
-
-      <label>Description</label>
-      <br />
-      <textarea name="description" data-section="service" onChange={handleChange} rows={3} cols={30} />
-      <p className="error" style={{ color: "red" }}>{errors.description}</p>
-      <br />
-
-      <label>Minimum Capacity</label>
-      <br />
-      <input type="number" name="minCapacity" data-section="cabin" min="1" value={formData.cabin.minCapacity || ""} onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.minCapacity}</p>
-      <br />
-
-      <label>Maximum Capacity</label>
-      <br />
-      <input type="number" name="maxCapacity" data-section="cabin" min={formData.cabin.minCapacity} value={formData.cabin.maxCapacity || ""} onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.maxCapacity}</p>
-      <br />
-
-      <label>Image</label>
-      <br />
-      <input type="file" name="image" data-section="service" accept="image/jpeg, image/jpg, image/png, image/gif" onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.image}</p>
-      <br />
-
-      <label>Quantity</label>
-      <br />
-      <input type="number" name="quantity" data-section="service" min="1" value={formData.service.quantity || ""} onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.quantity}</p>
-      <br />
-
-      <label>Rate</label>
-      <br />
-      <input type="number" name="price" placeholder="₱" data-section="service" min="1" step="0.01" value={formData.service.price || ""} onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.price}</p>
-      <br />
-
-      <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
-      <br />
-
-      <label>Type</label>
-      <br />
-      <input type="text" name="type" data-section="additionalFee" onChange={handleChange} />
-      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-      <br />
-
-      <label>Description</label>
-      <br />
-      <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={3} cols={30} />
-      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-      <br />
-
-      <label>Amount</label>
-      <br />
-      <input type="number" name="amount" placeholder="₱" data-section="additionalFee" min="0" step="0.01" onChange={handleChange} />
-      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-      <br />
-
-      <button type="submit" disabled={isFormInvalid} style={{ opacity: isFormInvalid ? 0.9 : 1, cursor: isFormInvalid ? "not-allowed" : "pointer" }}>Add Cabin</button>
-      <button type="button" onClick={handleClear}>Clear</button>
-      <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
-
-      <div style={{ marginBottom: "80px" }}></div>
-    </form>
+    <div>
+      {isMutating ? (
+        <Loading />
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginTop: "80px" }}></div>
+        
+          <label>Title</label>
+          <br />
+          <input type="text" name="name" data-section="service" onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.name}</p>
+          <br />
+        
+          <label>Description</label>
+          <br />
+          <textarea name="description" data-section="service" onChange={handleChange} rows={3} cols={30} />
+          <p className="error" style={{ color: "red" }}>{errors.description}</p>
+          <br />
+        
+          <label>Minimum Capacity</label>
+          <br />
+          <input type="number" name="minCapacity" data-section="cabin" min="1" value={formData.cabin.minCapacity || ""} onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.minCapacity}</p>
+          <br />
+        
+          <label>Maximum Capacity</label>
+          <br />
+          <input type="number" name="maxCapacity" data-section="cabin" min={formData.cabin.minCapacity} value={formData.cabin.maxCapacity || ""} onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.maxCapacity}</p>
+          <br />
+        
+          <label>Image</label>
+          <br />
+          <input type="file" name="image" data-section="service" accept="image/jpeg, image/jpg, image/png, image/gif" onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.image}</p>
+          <br />
+        
+          <label>Quantity</label>
+          <br />
+          <input type="number" name="quantity" data-section="service" min="1" value={formData.service.quantity || ""} onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.quantity}</p>
+          <br />
+        
+          <label>Rate</label>
+          <br />
+          <input type="number" name="price" placeholder="₱" data-section="service" min="1" step="0.01" value={formData.service.price || ""} onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.price}</p>
+          <br />
+        
+          <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
+          <br />
+        
+          <label>Type</label>
+          <br />
+          <input type="text" name="type" data-section="additionalFee" onChange={handleChange} />
+          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          <br />
+        
+          <label>Description</label>
+          <br />
+          <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={3} cols={30} />
+          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          <br />
+        
+          <label>Amount</label>
+          <br />
+          <input type="number" name="amount" placeholder="₱" data-section="additionalFee" min="0" step="0.01" onChange={handleChange} />
+          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          <br />
+        
+          <button type="submit" disabled={isFormInvalid} style={{ opacity: isFormInvalid ? 0.9 : 1, cursor: isFormInvalid ? "not-allowed" : "pointer" }}>Add Cabin</button>
+          <button type="button" onClick={handleClear}>Clear</button>
+          <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
+        
+          <div style={{ marginBottom: "80px" }}></div>
+        </form>
+      )}
+    </div>
   );
 }

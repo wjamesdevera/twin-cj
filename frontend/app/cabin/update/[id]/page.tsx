@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { Loading } from '@/app/components/loading';
 
 export default function UpdateCabin() {
   const router = useRouter();
@@ -47,7 +48,8 @@ export default function UpdateCabin() {
       description: string;
       amount: number;
     };
-  } | null>(null);  
+  } | null>(null);
+  const [isMutating, setIsMutating] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchCabin = async () => {
@@ -255,7 +257,7 @@ export default function UpdateCabin() {
         return;
       }
     }
-  
+
     const requestBody = {
       service: {
         name: formData.service.name,
@@ -275,6 +277,8 @@ export default function UpdateCabin() {
     };
   
     try {
+      setIsMutating(true);
+
       const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`, {
         method: "PUT",
         headers: {
@@ -291,6 +295,8 @@ export default function UpdateCabin() {
       }
     } catch (error) {
       console.error("Error updating cabin:", error);
+    } finally {
+      setIsMutating(false);
     }
   };
 
@@ -319,99 +325,105 @@ export default function UpdateCabin() {
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div style={{ marginTop: "80px" }}></div>
-
-      <label>Title</label>
-      <br />
-      <input type="text" name="name" data-section="service" value={formData.service.name} onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.name}</p>
-      <br />
-
-      <label>Description</label>
-      <br />
-      <textarea
-        name="description"
-        data-section="service"
-        value={formData.service.description}
-        onChange={handleChange}
-        rows={3}
-        cols={30}
-        style={{ resize: "vertical" }}
-      />
-      <p className="error" style={{ color: "red" }}>{errors.description}</p>
-      <br />
-
-      <label>Minimum Capacity</label>
-      <br />
-      <input
-        type="number"
-        name="minCapacity"
-        data-section="cabin"
-        value={formData.cabin.minCapacity || ""}
-        min="1"
-        onChange={handleChange}
-      />
-      <p className="error" style={{ color: "red" }}>{errors.minCapacity}</p>
-      <br />
-
-      <label>Maximum Capacity</label>
-      <br />
-      <input
-        type="number"
-        name="maxCapacity"
-        data-section="cabin"
-        value={formData.cabin.maxCapacity || ""}
-        min={formData.cabin.minCapacity}
-        onChange={handleChange}
-      />
-      <p className="error" style={{ color: "red" }}>{errors.maxCapacity}</p>
-      <br />
-
-      <label>New Image (Optional)</label>
-      <br />
-      <input type="file" name="image" data-section="service" accept="image/jpeg, image/jpg, image/png, image/gif" onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.image}</p>
-      <br />
-
-      <label>Quantity</label>
-      <br />
-      <input type="number" name="quantity" data-section="service" value={formData.service.quantity || ""} min="1" onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.quantity}</p>
-      <br />
-
-      <label>Rate</label>
-      <br />
-      <input type="number" name="price" placeholder="₱" data-section="service" step="0.01" value={formData.service.price || ""} min="1" onChange={handleChange} />
-      <p className="error" style={{ color: "red" }}>{errors.price}</p>
-      <br />
-
-      <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
-      <br />
-
-      Type
-      <br />
-      <input type="text" name="type" data-section="additionalFee" value={formData.additionalFee.type} onChange={handleChange} />
-      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-      <br />
-
-      Description
-      <br />
-      <textarea name="description" data-section="additionalFee" value={formData.additionalFee.description} onChange={handleChange} rows={3} cols={30} />
-      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-      <br />
-
-      Amount
-      <br />
-      <input type="number" name="amount" data-section="additionalFee" value={formData.additionalFee.amount} min="0" step="0.01" onChange={handleChange} />
-      <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-      <br />
-
-      <button type="submit" disabled={isFormInvalid} style={{ opacity: isFormInvalid ? 0.5 : 1, cursor: isFormInvalid ? "not-allowed" : "pointer" }}>Update Cabin</button>
-      <button type="button" onClick={handleClear}>Reset</button>
-      <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
-
-      <div style={{ marginBottom: "80px" }}></div>
-    </form>
+    <div>
+      {isMutating ? (
+        <Loading />
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginTop: "80px" }}></div>
+        
+          <label>Title</label>
+          <br />
+          <input type="text" name="name" data-section="service" value={formData.service.name} onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.name}</p>
+          <br />
+        
+          <label>Description</label>
+          <br />
+          <textarea
+            name="description"
+            data-section="service"
+            value={formData.service.description}
+            onChange={handleChange}
+            rows={3}
+            cols={30}
+            style={{ resize: "vertical" }}
+          />
+          <p className="error" style={{ color: "red" }}>{errors.description}</p>
+          <br />
+        
+          <label>Minimum Capacity</label>
+          <br />
+          <input
+            type="number"
+            name="minCapacity"
+            data-section="cabin"
+            value={formData.cabin.minCapacity || ""}
+            min="1"
+            onChange={handleChange}
+          />
+          <p className="error" style={{ color: "red" }}>{errors.minCapacity}</p>
+          <br />
+        
+          <label>Maximum Capacity</label>
+          <br />
+          <input
+            type="number"
+            name="maxCapacity"
+            data-section="cabin"
+            value={formData.cabin.maxCapacity || ""}
+            min={formData.cabin.minCapacity}
+            onChange={handleChange}
+          />
+          <p className="error" style={{ color: "red" }}>{errors.maxCapacity}</p>
+          <br />
+        
+          <label>New Image (Optional)</label>
+          <br />
+          <input type="file" name="image" data-section="service" accept="image/jpeg, image/jpg, image/png, image/gif" onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.image}</p>
+          <br />
+        
+          <label>Quantity</label>
+          <br />
+          <input type="number" name="quantity" data-section="service" value={formData.service.quantity || ""} min="1" onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.quantity}</p>
+          <br />
+        
+          <label>Rate</label>
+          <br />
+          <input type="number" name="price" placeholder="₱" data-section="service" step="0.01" value={formData.service.price || ""} min="1" onChange={handleChange} />
+          <p className="error" style={{ color: "red" }}>{errors.price}</p>
+          <br />
+        
+          <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
+          <br />
+        
+          Type
+          <br />
+          <input type="text" name="type" data-section="additionalFee" value={formData.additionalFee.type} onChange={handleChange} />
+          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          <br />
+        
+          Description
+          <br />
+          <textarea name="description" data-section="additionalFee" value={formData.additionalFee.description} onChange={handleChange} rows={3} cols={30} />
+          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          <br />
+        
+          Amount
+          <br />
+          <input type="number" name="amount" data-section="additionalFee" value={formData.additionalFee.amount} min="0" step="0.01" onChange={handleChange} />
+          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          <br />
+        
+          <button type="submit" disabled={isFormInvalid} style={{ opacity: isFormInvalid ? 0.5 : 1, cursor: isFormInvalid ? "not-allowed" : "pointer" }}>Update Cabin</button>
+          <button type="button" onClick={handleClear}>Reset</button>
+          <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
+        
+          <div style={{ marginBottom: "80px" }}></div>
+        </form>
+      )}
+    </div>
   );
 }
