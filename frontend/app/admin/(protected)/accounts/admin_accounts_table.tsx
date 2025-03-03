@@ -2,8 +2,8 @@
 import { FaEdit, FaTrash } from "react-icons/fa";
 import styles from "./admin_accounts_table.module.scss";
 import useSWR from "swr";
-import { deleteUser, getAllUsers } from "../lib/api";
-import { Loading } from "./loading";
+import { deleteUser, getAllUsers } from "../../../lib/api";
+import { Loading } from "../../../components/loading";
 import { useRouter } from "next/navigation";
 import useSWRMutation from "swr/mutation";
 

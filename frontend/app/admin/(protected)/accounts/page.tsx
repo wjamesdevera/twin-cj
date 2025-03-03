@@ -1,7 +1,7 @@
 import CustomButton from "../../../components/custom_button";
 // import ConfirmModal from "../../../components/confirm_modal";
 // import NotificationModal from "../../../components/notification_modal";
-import AdminAccountsTable from "../../../components/admin_accounts_table";
+import AdminAccountsTable from "./admin_accounts_table";
 import styles from "./page.module.scss";
 import Link from "next/link";
 
@@ -48,7 +48,6 @@ const AdminAccountsPage = () => {
           Add User
         </Link>
       </div>
-
       <AdminAccountsTable />
     </div>
   );
