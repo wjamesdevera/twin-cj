@@ -1,11 +1,83 @@
 "use client";
 import styles from "./password_reset.module.scss";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import useSWRMutation from "swr/mutation";
 import { forgotPasword } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
+
+const Timer = ({ trigger }: { trigger: () => void }) => {
+  const Ref = useRef<NodeJS.Timeout | null>(null);
+  const [time, setTime] = useState<string>("5:00");
+  const [isResendAvailable, setIsResetAvailable] = useState(false);
+
+  const getTimeRemaining = (endTime: Date) => {
+    const total =
+      Date.parse(endTime.toString()) - Date.parse(new Date().toString());
+
+    const seconds = Math.floor((total / 1000) % 60);
+    const minutes = Math.floor((total / 1000 / 60) % 60);
+    return {
+      total,
+      minutes,
+      seconds,
+    };
+  };
+
+  const startTimer = (endTime: Date) => {
+    const { total, minutes, seconds } = getTimeRemaining(endTime);
+    if (total >= 0) {
+      setTime(
+        `${minutes.toString().padStart(2, "0")}:${seconds
+          .toString()
+          .padStart(2, "0")}`
+      );
+    } else {
+      setIsResetAvailable(true);
+    }
+  };
+
+  const clearTimer = (endTime: Date) => {
+    setTime("05:00");
+    setIsResetAvailable(false);
+    if (Ref.current) clearInterval(Ref.current);
+    const id = setInterval(() => startTimer(endTime), 1000);
+    Ref.current = id;
+  };
+
+  const getDeadTime = (): Date => {
+    const deadline = new Date();
+    deadline.setMinutes(deadline.getMinutes() + 1);
+    return deadline;
+  };
+
+  useEffect(() => {
+    clearTimer(getDeadTime());
+    return () => {
+      if (Ref.current) clearInterval(Ref.current);
+    };
+  });
+
+  const onClickReset = () => {
+    clearTimer(getDeadTime());
+    trigger();
+  };
+
+  return (
+    <div>
+      <p>
+        Resend in <span>{time}</span>
+      </p>
+      <input
+        type="button"
+        disabled={!isResendAvailable}
+        value={"Resend"}
+        onClick={onClickReset}
+      />
+    </div>
+  );
+};
 
 export function PasswordResetForm() {
   const [email, setEmail] = useState("");
@@ -47,9 +119,9 @@ export function PasswordResetForm() {
               ) : (
                 <div className={styles["success-container"]}>
                   <p className={styles["success-message"]}>
-                    We&apos;ve sent a reset link to your email. Please check
-                    your inbox to proceed.
+                    {`A password reset email has been sent to ${email}`}
                   </p>
+                  <Timer trigger={handleForgotPassword} />
                 </div>
               )}
             </div>
