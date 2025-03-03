@@ -24,16 +24,7 @@ const Form: React.FC = () => {
     phoneNumber: "",
   });
   const { id } = useParams<{ id: string }>();
-  const { data: userData, isLoading } = useSWR(id, getUserById, {
-    onSuccess: () => {
-      setFormData({
-        firstName: userData?.data.firstName,
-        lastName: userData?.data.lastName,
-        email: userData?.data.email,
-        phoneNumber: userData?.data.phoneNumber,
-      });
-    },
-  });
+  const { data: userData, isLoading } = useSWR(id, getUserById);
   const { trigger } = useSWRMutation(
     "edit",
     (key, { arg }: { arg: EditUserArg }) => editUser(id, arg)
