@@ -4,7 +4,13 @@ import { Loading } from "./loading";
 import clsx from "clsx";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "danger" | "outline-white" | "outline-black";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "outline"
+    | "danger"
+    | "outline-white"
+    | "outline-black";
   fullWidth?: boolean;
   isLoading?: boolean;
   className?: string;
@@ -19,6 +25,7 @@ const Button: React.FC<ButtonProps> = ({
   className,
   onClick,
   children,
+  ...rest
 }) => {
   return (
     <button
@@ -29,9 +36,12 @@ const Button: React.FC<ButtonProps> = ({
         className
       )}
       onClick={onClick}
+      disabled={isLoading || rest.disabled}
+      {...rest}
     >
       {isLoading ? <Loading /> : children}
     </button>
   );
 };
+
 export default Button;

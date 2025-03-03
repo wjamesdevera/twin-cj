@@ -91,34 +91,6 @@
   }
 }
 
-.section-header {
-  color: var(--color-sand-500);
-  margin-bottom: 2rem;
-  text-align: center;
-
-  .subtext {
-    font-size: var(--text-size-base);
-    text-transform: uppercase;
-  }
-
-  .title {
-    font-size: var(--text-size-xl);
-    line-height: var(--text-line-height-xl);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 18%;
-
-    &::after {
-      display: block;
-      margin: 0.5rem auto;
-      content: "";
-      width: 120px;
-      height: 3px;
-      background-color: var(--color-sand-500);
-    }
-  }
-}
-
 .footstepsSection {
   position: relative;
   height: 50vh;
