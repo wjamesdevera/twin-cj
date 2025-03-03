@@ -1,13 +1,8 @@
-import CustomButton from "../../../components/custom_button";
-// import ConfirmModal from "../../../components/confirm_modal";
-// import NotificationModal from "../../../components/notification_modal";
 import AdminAccountsTable from "./admin_accounts_table";
 import styles from "./page.module.scss";
 import Link from "next/link";
 
 const AdminAccountsPage = () => {
-  // const [isClient, setIsClient] = useState(false);
-  // const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   // const [isModalOpen, setIsModalOpen] = useState(false);
   // const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   // const [notificationMessage, setNotificationMessage] = useState("");
@@ -19,10 +14,6 @@ const AdminAccountsPage = () => {
   // useEffect(() => {
   //   setIsClient(true);
   // }, []);
-
-  // const toggleSidebar = () => {
-  //   setIsSidebarOpen((prev) => !prev);
-  // };
 
   // const handleConfirmDelete = () => {
   //   // if (selectedId !== null) {
