@@ -6,6 +6,8 @@ import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import useSWRMutation from "swr/mutation";
 import { forgotPasword } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react"; 
 
 const Timer = ({ trigger }: { trigger: () => void }) => {
   const Ref = useRef<NodeJS.Timeout | null>(null);
@@ -82,6 +84,7 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
 export function PasswordResetForm() {
   const [email, setEmail] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const router = useRouter();
 
   const { trigger, isMutating, error } = useSWRMutation(
     "forgot-password",
@@ -102,6 +105,8 @@ export function PasswordResetForm() {
       {isMutating ? (
         <Loading />
       ) : (
+        <div className={styles["right-container"]}>
+        <ArrowLeft className={styles["back-arrow"]} onClick={() => router.push("/admin/login")} />
         <div className={styles["login-form-container"]}>
           <div className={styles["login-form-wrapper"]}>
             <div className={styles["form-title"]}>
@@ -153,6 +158,7 @@ export function PasswordResetForm() {
               </div>
             )}
           </div>
+        </div>
         </div>
       )}
     </>
