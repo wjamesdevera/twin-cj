@@ -36,6 +36,7 @@ const Form: React.FC = () => {
       });
     },
   });
+
   const { trigger } = useSWRMutation(
     "edit",
     (key, { arg }: { arg: EditUserArg }) => editUser(id, arg)
