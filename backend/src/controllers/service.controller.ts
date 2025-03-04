@@ -33,20 +33,15 @@ export const createDayTourHandler = catchErrors(
     try {
       const validatedData = serviceSchema.parse(jsonData);
       const requestBody = {
-        name: validatedData.name,
-        description: validatedData.description,
+        ...validatedData,
         imageUrl,
-        price: validatedData.price,
-        additionalFee:
-          validatedData.additionalFee?.type &&
-          validatedData.additionalFee?.description &&
-          validatedData.additionalFee?.amount !== undefined
-            ? {
-                type: validatedData.additionalFee.type,
-                description: validatedData.additionalFee.description,
-                amount: validatedData.additionalFee.amount,
-              }
-            : undefined,
+        additionalFee: validatedData.additionalFee
+          ? {
+              type: validatedData.additionalFee.type || '',
+              description: validatedData.additionalFee.description || '',
+              amount: validatedData.additionalFee.amount || 0,
+            }
+          : undefined,
       };
 
       const createdDayTour = await createDayTour(requestBody);
@@ -129,7 +124,11 @@ export const updateDayTourHandler = catchErrors(
         ...validatedData,
         imageUrl,
         rate: validatedData.price,
-        additionalFee: validatedData.additionalFee || {},
+        additionalFee: {
+          type: validatedData.additionalFee?.type || '',
+          description: validatedData.additionalFee?.description || '',
+          amount: validatedData.additionalFee?.amount || 0,
+        },
       });
 
       res.status(OK).json({

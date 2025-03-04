@@ -151,9 +151,11 @@ const EditDayTour: React.FC = () => {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, files } = e.target as HTMLInputElement;
+      const trimmedValue = value.trim();
+
       setFormData((prevData) => ({
         ...prevData,
-        [name]: files ? files[0] : value,
+        [name]: files ? files[0] : trimmedValue,
       }));
 
       setHelperText((prevHelperText) => ({
@@ -166,13 +168,15 @@ const EditDayTour: React.FC = () => {
             : name === 'price'
             ? !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
             : name === 'additionalFeeType'
-            ? value.trim().length === 0 &&
-              formData.additionalFeeDescription.trim() !== ''
+            ? value.trim().length > 0 &&
+              (formData.additionalFeeDescription.trim().length === 0 ||
+                formData.additionalFeeAmount.trim().length === 0)
             : name === 'additionalFeeDescription'
-            ? value.trim().length === 0 &&
-              formData.additionalFeeType.trim() !== ''
+            ? formData.additionalFeeType.trim().length > 0 &&
+              value.trim().length === 0
             : name === 'additionalFeeAmount'
-            ? !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
+            ? formData.additionalFeeType.trim().length > 0 &&
+              (!/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0)
             : false,
       }));
     },
@@ -353,6 +357,7 @@ const EditDayTour: React.FC = () => {
                 value={formData.additionalFeeType || ''}
                 onChange={handleChange}
               />
+
               {helperText.additionalFeeType && (
                 <small className={styles.helperText}>
                   Additional Fee Type is required

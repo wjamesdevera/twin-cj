@@ -73,7 +73,7 @@ export const updateDayTour = async (
     description: string;
     imageUrl: string;
     rate: number;
-    additionalFee: {
+    additionalFee?: {
       type?: string;
       description?: string;
       amount?: number;
