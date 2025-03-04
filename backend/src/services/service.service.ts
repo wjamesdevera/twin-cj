@@ -109,14 +109,12 @@ export const createCabin = async (data: CreateCabinParams) => {
 };
 
 export const deleteAllCabins = async () => {
-  return await prisma.$transaction(async (tx) => {
-    const deletedCabins = await tx.cabin.deleteMany();
-    const deletedServices = await tx.service.deleteMany();
-
-    return {
-      deletedCabins: deletedCabins.count,
-      deletedServices: deletedServices.count,
-    };
+  await prisma.service.deleteMany({
+    where: {
+      cabin: {
+        id: {},
+      },
+    },
   });
 };
 
