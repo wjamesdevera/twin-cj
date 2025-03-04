@@ -137,13 +137,15 @@ const EditDayTour: React.FC = () => {
         /^\d+(\.\d{1,2})?$/.test(formData.additionalFeeAmount.trim()) &&
         parseFloat(formData.additionalFeeAmount) > 0);
 
-    const isValid =
+    const isValid = !!(
       isNameValid &&
       isDescriptionValid &&
       isPriceValid &&
       isImageValid &&
       isAdditionalFeeValid &&
-      hasChanges();
+      hasChanges()
+    );
+    setIsFormValid(isValid);
 
     setIsFormValid(isValid);
   }, [formData, imageFile]);
@@ -158,26 +160,33 @@ const EditDayTour: React.FC = () => {
         [name]: files ? files[0] : trimmedValue,
       }));
 
-      setHelperText((prevHelperText) => ({
-        ...prevHelperText,
-        [name]:
-          name === 'name'
-            ? value.length >= 50
-            : name === 'description'
-            ? value.length >= 100
-            : name === 'price'
+      const isFilled = (val: string) => val.trim().length > 0;
+
+      setHelperText((prev) => ({
+        ...prev,
+        name: name === 'name' ? value.length >= 50 : prev.name,
+        description:
+          name === 'description' ? value.length >= 100 : prev.description,
+        price:
+          name === 'price'
             ? !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
-            : name === 'additionalFeeType'
-            ? value.trim().length > 0 &&
-              (formData.additionalFeeDescription.trim().length === 0 ||
-                formData.additionalFeeAmount.trim().length === 0)
-            : name === 'additionalFeeDescription'
-            ? formData.additionalFeeType.trim().length > 0 &&
-              value.trim().length === 0
-            : name === 'additionalFeeAmount'
-            ? formData.additionalFeeType.trim().length > 0 &&
-              (!/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0)
-            : false,
+            : prev.price,
+
+        additionalFeeType:
+          name === 'additionalFeeType' &&
+          (isFilled(formData.additionalFeeDescription) ||
+            isFilled(formData.additionalFeeAmount)) &&
+          !isFilled(trimmedValue),
+
+        additionalFeeDescription:
+          name === 'additionalFeeDescription' &&
+          isFilled(formData.additionalFeeType) &&
+          !isFilled(trimmedValue),
+
+        additionalFeeAmount:
+          name === 'additionalFeeAmount' &&
+          isFilled(formData.additionalFeeType) &&
+          (!/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0),
       }));
     },
     [formData]
@@ -186,20 +195,22 @@ const EditDayTour: React.FC = () => {
   const hasChanges = () => {
     if (!originalData) return false;
 
-    // checks if the value of the previous data are the same with the new data
     const compareWithoutWhitespace = (a: string = '', b: string = '') =>
       a.trim() === b.trim();
 
     const parseNumber = (val: string) =>
       val.trim() === '' ? 0 : parseFloat(val);
 
-    return (
+    const requiredFieldsChanged =
       !compareWithoutWhitespace(formData.name, originalData.name) ||
       !compareWithoutWhitespace(
         formData.description,
         originalData.description
       ) ||
       parseNumber(formData.price) !== parseNumber(originalData.price) ||
+      !!imageFile;
+
+    const additionalFeeChanged =
       !compareWithoutWhitespace(
         formData.additionalFeeType,
         originalData.additionalFeeType
@@ -209,8 +220,11 @@ const EditDayTour: React.FC = () => {
         originalData.additionalFeeDescription
       ) ||
       parseNumber(formData.additionalFeeAmount) !==
-        parseNumber(originalData.additionalFeeAmount) ||
-      !!imageFile
+        parseNumber(originalData.additionalFeeAmount);
+
+    return (
+      requiredFieldsChanged ||
+      (formData.additionalFeeType && additionalFeeChanged)
     );
   };
 
