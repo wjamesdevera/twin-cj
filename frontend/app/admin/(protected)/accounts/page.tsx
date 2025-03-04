@@ -1,33 +1,31 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import AdminAccountsTable from "./admin_accounts_table";
+import NotificationModal from "../../../components/notification_modal"; 
 import styles from "./page.module.scss";
 import Link from "next/link";
 
 const AdminAccountsPage = () => {
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  // const [notificationMessage, setNotificationMessage] = useState("");
-  // const [notificationType, setNotificationType] = useState<"success" | "error">(
-  // "success"
-  // );
-  // const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState<"success" | "error">("success");
 
-  // useEffect(() => {
-  //   setIsClient(true);
-  // }, []);
+  const showNotification = (message: string, type: "success" | "error") => {
+    setNotificationMessage(message);
+    setNotificationType(type);
+    setIsNotificationOpen(true);
+  };
 
-  // const handleConfirmDelete = () => {
-  //   // if (selectedId !== null) {
-  //   //   setAdminAccounts((prev) =>
-  //   //     prev.filter((account) => account.id !== selectedId)
-  //   //   );
-  //   //   setIsModalOpen(false);
-  //   //   setTimeout(() => {
-  //   //     setNotificationMessage("Admin deleted successfully.");
-  //   //     setNotificationType("success");
-  //   //     setIsNotificationOpen(true);
-  //   //   }, 200);
-  //   // }
-  // };
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const adminAdded = localStorage.getItem("adminAdded");
+      if (adminAdded) {
+        showNotification("Admin account added successfully!", "success");
+        localStorage.removeItem("adminAdded"); 
+      }
+    }
+  }, []);
 
   return (
     <div className={styles.page_container}>
@@ -39,7 +37,15 @@ const AdminAccountsPage = () => {
           Add User
         </Link>
       </div>
-      <AdminAccountsTable />
+      
+      <AdminAccountsTable showNotification={showNotification} />
+
+      <NotificationModal
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        message={notificationMessage}
+        type={notificationType}
+      />
     </div>
   );
 };

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   margin-top: 20px; 
-  padding: 50px 60px 20px 100px; 
+  padding: 50px 60px 20px 70px; 
   transition: padding-left 0.3s ease, width 0.3s ease;
   width: 100%; 
   box-sizing: border-box; 
@@ -36,9 +36,6 @@
 }
 
 @media (max-width: 1024px) {
-  .page_container {
-    padding: 40px 50px 20px 100px; 
-  }
 
   .sidebar_collapsed .page_container {
     padding-left: 80px;
@@ -55,10 +52,6 @@
 }
 
 @media (max-width: 768px) {
-  .page_container {
-    padding: 30px 40px 20px 80px;
-  }
-
   .sidebar_collapsed .page_container {
     padding-left: 60px;
   }
@@ -80,9 +73,6 @@
 }
 
 @media (max-width: 480px) {
-  .page_container {
-    padding: 20px 30px 20px 50px;
-  }
 
   .sidebar_collapsed .page_container {
     padding-left: 30px;

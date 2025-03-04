@@ -1,13 +1,12 @@
 .table_container {
     width: 100%;
-    overflow-x: hidden; 
   }
   
   .table_wrapper {
     width: 100%;
     overflow-x: hidden; 
     max-height: 66.4vh; 
-    margin: 10px;
+    margin: 10px auto; 
   }
   
   .table {
@@ -62,9 +61,21 @@
     color: #666666;
   }
 
+  @media (max-width: 1024px) {
+    .table_container {
+      -webkit-overflow-scrolling: touch; 
+    }
+  
+    .table_wrapper {
+      overflow-x: auto; 
+    }
+  
+    .table {
+      min-width: 900px; 
+    }
+  }
   @media (max-width: 768px) {
     .table_container {
-      overflow-x: auto; 
       -webkit-overflow-scrolling: touch; 
     }
   

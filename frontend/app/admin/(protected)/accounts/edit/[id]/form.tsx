@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation"; 
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import useSWR from "swr";
@@ -17,12 +17,14 @@ interface EditUserArg {
 }
 
 const Form: React.FC = () => {
+  const router = useRouter(); 
   const [formData, setFormData] = useState<EditUserArg>({
     firstName: "",
     lastName: "",
     email: "",
     phoneNumber: "",
   });
+
   const { id } = useParams<{ id: string }>();
   const { data: userData, isLoading } = useSWR(id, getUserById, {
     onSuccess: () => {
@@ -34,10 +36,12 @@ const Form: React.FC = () => {
       });
     },
   });
+
   const { trigger } = useSWRMutation(
     "edit",
     (key, { arg }: { arg: EditUserArg }) => editUser(id, arg)
   );
+
   useEffect(() => {
     if (userData?.data) {
       setFormData({
@@ -52,6 +56,10 @@ const Form: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     trigger(formData);
+  };
+
+  const handleCancel = () => {
+    router.push("/admin/accounts"); 
   };
 
   const [errors, setErrors] = useState({
@@ -73,7 +81,7 @@ const Form: React.FC = () => {
     }
 
     if (name === "firstName" || name === "lastName") {
-      updatedValue = value.replace(/[^a-zA-Z]/g, "").slice(0, 50);
+      updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50);
     }
 
     setFormData((prev) => {
@@ -169,7 +177,7 @@ const Form: React.FC = () => {
             label="Cancel"
             variant="secondary"
             size="small"
-            onClick={handleSubmit}
+            onClick={handleCancel} 
           />
         </div>
       </div>

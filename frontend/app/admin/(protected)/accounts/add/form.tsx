@@ -23,10 +23,12 @@ const Form: React.FC = () => {
     (key, { arg }: { arg: RegisterUserArg }) => register(arg),
     {
       onSuccess: () => {
-        router.push("/admin/accounts");
+        localStorage.setItem("adminAdded", "true"); 
+        router.push("/admin/accounts"); 
       },
     }
   );
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -86,9 +88,9 @@ const Form: React.FC = () => {
     }
 
     if (name === "firstName" || name === "lastName") {
-      updatedValue = value.replace(/[^a-zA-Z]/g, "").slice(0, 50);
+      updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50);
     }
-
+    
     setFormData((prev) => {
       const updatedFormData = {
         ...prev,
@@ -121,8 +123,8 @@ const Form: React.FC = () => {
 
     setErrors((prev) => ({
       ...prev,
-      firstName: name === "firstName" && !/^[A-Za-z]{2,}$/.test(value),
-      lastName: name === "lastName" && !/^[A-Za-z]{2,}$/.test(value),
+      firstName: name === "firstName" && !/^[A-Za-z\s]{2,}$/.test(value),
+      lastName: name === "lastName" && !/^[A-Za-z\s]{2,}$/.test(value),
       email: name === "email" && !validateEmail(value),
       phoneNumber: name === "phoneNumber" && value.length !== 10,
       password:
