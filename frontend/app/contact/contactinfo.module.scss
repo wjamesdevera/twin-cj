@@ -52,6 +52,7 @@
   }
 }
 
+/* Styles for screens ≥ 48rem (tablets and larger) */
 @media (width >= 48rem) {
   .contactContainer {
     grid-template-columns: repeat(2, 1fr);
@@ -61,10 +62,59 @@
 
   .contactInfo {
     padding: 0 1rem;
-    font-size: var(--text-size-sm);
+    font-size: var(--text-size-base);
 
     h3 {
-      font-size: var(--text-size-base);
+      font-size: var(--text-size-lg);
     }
+  }
+}
+
+@media (max-width: 1440px) {
+  .contactSection {
+    padding-top: 4rem;
+    padding-bottom: 3rem;
+  }
+
+  .contactInfo {
+    h3 {
+      font-size: calc(var(--text-size-lg) * 0.9);
+    }
+
+    .contact-details {
+      font-size: calc(var(--text-size-base) * 0.9);
+      line-height: 1.8;
+    }
+  }
+
+  .mapContainer {
+    min-height: 15rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .contactSection {
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+  }
+
+  .contactInfo {
+    text-align: center;
+    h3 {
+      font-size: var(--text-size-base);
+      margin-bottom: 0.5rem;
+    }
+
+    .contact-details {
+      font-size: calc(var(--text-size-base) * 0.9);
+      line-height: 1.4;
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .mapContainer {
+    min-height: 15rem;
+    padding: 0 1.2rem;
+    margin: 0 0 1rem 0;
   }
 }
