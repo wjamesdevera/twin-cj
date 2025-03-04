@@ -53,14 +53,25 @@ const Form: React.FC = () => {
     }
   }, [userData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    trigger(formData);
+    
+    try {
+      await trigger(formData); 
+      localStorage.setItem("adminUpdated", "true"); 
+      router.push("/admin/accounts"); 
+    } catch (error) {
+      console.error("Failed to update user:", error);
+    }
   };
+  
 
   const handleCancel = () => {
     router.push("/admin/accounts"); 
   };
+  
+  
+  
 
   const [errors, setErrors] = useState({
     email: false,
@@ -171,6 +182,7 @@ const Form: React.FC = () => {
             label="Cancel"
             variant="secondary"
             size="small"
+            type="button"  
             onClick={handleCancel} 
           />
         </div>

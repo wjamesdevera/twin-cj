@@ -19,13 +19,21 @@ const AdminAccountsPage = () => {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const adminUpdated = localStorage.getItem("adminUpdated");
+      
+      if (adminUpdated) {
+        showNotification("Admin account updated successfully!", "success"); // 
+        localStorage.removeItem("adminUpdated"); 
+      }
+      
       const adminAdded = localStorage.getItem("adminAdded");
       if (adminAdded) {
         showNotification("Admin account added successfully!", "success");
-        localStorage.removeItem("adminAdded"); 
+        localStorage.removeItem("adminAdded");
       }
     }
   }, []);
+  
 
   return (
     <div className={styles.page_container}>
