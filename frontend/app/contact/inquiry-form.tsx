@@ -64,6 +64,16 @@ const InquiryForm: React.FC = () => {
   });
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showSuccessMessage) {
+      timer = setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 10000);
+    }
+    return () => clearTimeout(timer);
+  }, [showSuccessMessage]);
+
   // Validate the form data whenever it changes
   useEffect(() => {
     const result = feedbackSchema.safeParse(formData);
@@ -77,6 +87,19 @@ const InquiryForm: React.FC = () => {
           errorMap[err.path[0]] = err.message;
         }
       });
+
+      // Shows an error if all fields are filled out except for inquiry type
+      const isInquiryTypeEmpty =
+        !formData.inquiryType &&
+        formData.fullName &&
+        formData.email &&
+        formData.contactNumber &&
+        formData.message;
+
+      if (isInquiryTypeEmpty) {
+        errorMap.inquiryType = "Inquiry type is required";
+      }
+
       setErrors(errorMap);
       setIsFormValid(false);
     }
@@ -217,11 +240,14 @@ const InquiryForm: React.FC = () => {
 
         <div className={styles["form-row"]}>
           <div className={styles["form-field"]}>
-            <label htmlFor="fullName">Full Name *</label>
+            <label htmlFor="fullName">
+              Full Name <span className={styles["asterisk"]}>*</span>{" "}
+            </label>
             <input
               type="text"
               id="fullName"
               name="fullName"
+              placeholder="Enter your full name"
               value={formData.fullName}
               onChange={handleChange}
               className={`${errors.fullName ? styles["error-input"] : ""} ${
@@ -238,11 +264,14 @@ const InquiryForm: React.FC = () => {
             )}
           </div>
           <div className={styles["form-field"]}>
-            <label htmlFor="email">Email Address *</label>
+            <label htmlFor="email">
+              Email Address <span className={styles["asterisk"]}>*</span>
+            </label>
             <input
               type="email"
               id="email"
               name="email"
+              placeholder="email@email.com"
               value={formData.email}
               onChange={handleChange}
               onKeyDown={handleEmailKeyDown}
@@ -260,11 +289,14 @@ const InquiryForm: React.FC = () => {
         </div>
         <div className={styles["form-row"]}>
           <div className={styles["form-field"]}>
-            <label htmlFor="contactNumber">Contact Number *</label>
+            <label htmlFor="contactNumber">
+              Contact Number <span className={styles["asterisk"]}>*</span>
+            </label>
             <input
               type="tel"
               id="contactNumber"
               name="contactNumber"
+              placeholder="09XXXXXXXXX"
               value={formData.contactNumber}
               onChange={handleContactNumberChange}
               className={`${
@@ -284,7 +316,9 @@ const InquiryForm: React.FC = () => {
             )}
           </div>
           <div className={styles["form-field"]}>
-            <label htmlFor="inquiryType">Inquiry Type *</label>
+            <label htmlFor="inquiryType">
+              Inquiry Type <span className={styles["asterisk"]}>* </span>
+            </label>
             <div className={styles["select-wrapper"]}>
               <select
                 id="inquiryType"
@@ -298,12 +332,15 @@ const InquiryForm: React.FC = () => {
                     : ""
                 }`}
                 onChange={handleChange}
+                style={{
+                  color: formData.inquiryType ? "black" : "#ADADAD",
+                }}
               >
-                <option value="" disabled style={{ color: "#ADADAD" }}>
+                <option value="" disabled>
                   Select an option
                 </option>
                 {options.map((option, index) => (
-                  <option value={option} key={index} style={{ color: "black" }}>
+                  <option value={option} key={index}>
                     {option}
                   </option>
                 ))}
@@ -334,10 +371,13 @@ const InquiryForm: React.FC = () => {
           </div>
         </div>
         <div className={styles["form-field"]}>
-          <label htmlFor="message">Message *</label>
+          <label htmlFor="message">
+            Message <span className={styles["asterisk"]}>*</span>
+          </label>
           <textarea
             id="message"
             name="message"
+            placeholder="Enter your message here"
             value={formData.message}
             onChange={handleChange}
             className={`${errors.message ? styles["error-input"] : ""} ${

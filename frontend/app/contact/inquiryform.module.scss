@@ -32,6 +32,19 @@
   }
 }
 
+.form-description {
+  color: #555;
+  font-size: var(--text-size-sm);
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+
+  @media (width >= 48rem) {
+    // Tablets & Mobile
+    font-size: var(--text-size-sm);
+  }
+}
+
 .form-field {
   flex: 1;
   display: flex;
@@ -41,10 +54,14 @@
 
 .form-field label {
   color: var(--text-neutral-300);
-  font-size: var(--text-size-base);
+  font-size: var(--text-size-sm);
   line-height: var(--text-line-height-base);
   margin-bottom: 0.5rem;
   font-weight: 300;
+}
+
+.asterisk {
+  color: red;
 }
 
 .form-field input,
@@ -59,6 +76,14 @@
   outline: none;
   box-shadow: none;
 }
+
+// @media (min-width: 1200px) {
+//   // Tablets & Mobile
+//   .form-field input,
+//   .form-field textarea {
+//     height: 2.5rem;
+//   }
+// }
 
 .select-wrapper {
   position: relative;
@@ -81,10 +106,6 @@
   select {
     font-family: var(--font-primary);
   }
-}
-
-.select-field {
-  font-family: var(--font-primary);
 }
 
 .option {
@@ -111,6 +132,7 @@
 .form-field textarea {
   height: 100px;
   resize: vertical;
+  max-height: 200px;
 }
 
 .buttons {
@@ -147,7 +169,7 @@
 
 @media (width >= 48rem) {
   .inquiry-form {
-    width: 80%;
+    width: 60%;
   }
 }
 
@@ -158,14 +180,14 @@
 .error-text {
   color: red;
   font-style: italic;
-  font-size: 0.875rem;
+  font-size: var(--text-size-xs);
   margin-top: 0.25rem;
 }
 
 .success-text {
   color: green;
   font-style: italic;
-  font-size: 0.875rem;
+  font-size: var(--text-size-xs);
   margin-top: 0.25rem;
 }
 
@@ -209,14 +231,6 @@
   font-style: italic;
   font-weight: 600;
   color: var(--color-green-900);
-}
-
-.form-description {
-  color: #555;
-  font-size: 0.9rem;
-  margin-top: -1rem;
-  margin-bottom: 2rem;
-  text-align: center;
 }
 
 .char-count {

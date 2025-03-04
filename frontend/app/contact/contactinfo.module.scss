@@ -56,9 +56,15 @@
   .contactContainer {
     grid-template-columns: repeat(2, 1fr);
     grid-template-areas: "map info";
+    width: 80%;
   }
 
   .contactInfo {
     padding: 0 1rem;
+    font-size: var(--text-size-sm);
+
+    h3 {
+      font-size: var(--text-size-base);
+    }
   }
 }

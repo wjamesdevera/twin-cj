@@ -408,6 +408,27 @@ $font-primary: "Open Sans", serif;
   margin-inline: auto;
 }
 
+/* form fields placeholder color */
+
+.select-field {
+  font-family: var(--font-primary);
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: #adadad;
+  opacity: 1;
+}
+
+select:invalid {
+  color: #adadad;
+}
+
+select:valid {
+  color: black;
+}
+
 body {
   min-height: 100vh;
   display: flex;
