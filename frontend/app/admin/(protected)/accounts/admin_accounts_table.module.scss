@@ -32,6 +32,11 @@
     background: none; 
   }
   
+  .table th:first-child,
+  .table td:first-child {
+    padding-left: 40px 
+  }
+
   .table tr {
     border-bottom: 1px solid #c5c5c5; 
   }
