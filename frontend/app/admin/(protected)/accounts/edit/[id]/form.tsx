@@ -36,7 +36,6 @@ const Form: React.FC = () => {
       });
     },
   });
-
   const { trigger } = useSWRMutation(
     "edit",
     (key, { arg }: { arg: EditUserArg }) => editUser(id, arg)
@@ -67,8 +66,6 @@ const Form: React.FC = () => {
     phoneNumber: false,
   });
 
-  const [isEmailValid, setIsEmailValid] = useState(true);
-
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -89,10 +86,6 @@ const Form: React.FC = () => {
         ...prev,
         [name]: updatedValue,
       };
-
-      if (name === "email") {
-        setIsEmailValid(value === "" || validateEmail(value));
-      }
 
       return updatedFormData;
     });
