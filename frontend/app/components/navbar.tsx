@@ -31,16 +31,24 @@ const NavLink = ({ label, href, isActive }: NavLinkProps) => {
 
 const NavLinks = () => {
   const pathname = usePathname();
+
   return (
     <ul className={styles.navlist}>
-      {navlist.map((navlink) => (
-        <NavLink
-          isActive={pathname === navlink.href}
-          label={navlink.label}
-          href={navlink.href}
-          key={navlink.label}
-        />
-      ))}
+      {navlist.map((navlink) => {
+        const isHome =
+          navlink.href === "/home" &&
+          (pathname === "/" || pathname === "/home");
+        const isActive = isHome || pathname.startsWith(navlink.href);
+
+        return (
+          <NavLink
+            isActive={isActive}
+            label={navlink.label}
+            href={navlink.href}
+            key={navlink.label}
+          />
+        );
+      })}
     </ul>
   );
 };

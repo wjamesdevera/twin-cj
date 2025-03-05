@@ -34,6 +34,14 @@ type EditUserData = {
   phoneNumber: string;
 };
 
+type SendFeedbackData = {
+  fullName: string;
+  email: string;
+  inquiryType: string;
+  contactNumber: string;
+  message: string;
+};
+
 export const login = async (data: LoginData) =>
   API.post("/api/auth/login", data);
 export const logout = async () => API.get("/api/auth/logout");
@@ -49,6 +57,7 @@ export const changePassword = async (data: ChangePasswordData) =>
 export const getAllUsers = async () => API.get("/api/users/all");
 export const getUserById = async (id: string) => API.get(`/api/users/${id}`);
 export const deleteUser = async (id: string) => API.delete(`/api/users/${id}`);
-export const editUser = async (id: string, data: EditUserData) => {
+export const editUser = async (id: string, data: EditUserData) =>
   API.put(`/api/users/${id}`, data);
-};
+export const sendFeedback = async (data: SendFeedbackData) =>
+  API.post("/api/feedbacks", data);

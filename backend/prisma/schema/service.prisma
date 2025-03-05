@@ -10,6 +10,7 @@ model Service {
 
     // Relation
     dayTourActivity DayTourActivities?
+    cabin Cabin?
 
     @@map("services")
 }
