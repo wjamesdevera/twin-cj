@@ -93,7 +93,7 @@ export const updateDayTour = async (
   data: {
     name: string;
     description: string;
-    imageUrl: string;
+    imageUrl?: string;
     price: number;
     additionalFee?: {
       type?: string;
@@ -111,13 +111,15 @@ export const updateDayTour = async (
     throw new Error(`Day tour with ID ${id} not found`);
   }
 
+  const updatedImageUrl = data.imageUrl || existingDayTour.service.imageUrl;
+
   const updateData: any = {
     updatedAt: new Date(),
     service: {
       update: {
         name: data.name,
         description: data.description,
-        imageUrl: data.imageUrl,
+        imageUrl: updatedImageUrl,
         price: data.price,
       },
     },
@@ -155,8 +157,7 @@ export const updateDayTour = async (
     }
   }
 
-  // Delete the old image if a new image URL is provided
-  if (existingDayTour.service.imageUrl !== data.imageUrl) {
+  if (data.imageUrl && existingDayTour.service.imageUrl !== data.imageUrl) {
     const oldImagePath = path.join(
       __dirname,
       '../../uploads',
@@ -171,7 +172,7 @@ export const updateDayTour = async (
     }
   }
 
-  return await prisma.dayTourActivities.update({
+  const updatedDayTour = await prisma.dayTourActivities.update({
     where: { id },
     data: updateData,
     include: {
@@ -179,6 +180,19 @@ export const updateDayTour = async (
       additionalFee: true,
     },
   });
+
+  return {
+    id: updatedDayTour.service.id,
+    name: updatedDayTour.service.name,
+    description: updatedDayTour.service.description,
+    price: updatedDayTour.service.price,
+    imageUrl: updatedDayTour.service.imageUrl
+      ? `http://localhost:8080/uploads/${updatedDayTour.service.imageUrl}`
+      : '',
+    additionalFee: updatedDayTour.additionalFee,
+    createdAt: updatedDayTour.createdAt,
+    updatedAt: updatedDayTour.updatedAt,
+  };
 };
 
 // Delete

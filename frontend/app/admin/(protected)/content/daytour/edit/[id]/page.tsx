@@ -41,7 +41,6 @@ const EditDayTour: React.FC = () => {
     name: false,
     description: false,
     price: false,
-    quantity: false,
     additionalFeeType: false,
     additionalFeeDescription: false,
     additionalFeeAmount: false,
@@ -108,9 +107,7 @@ const EditDayTour: React.FC = () => {
     fetchDayTour();
   }, [id]);
 
-  useEffect(() => {
-    if (!originalData) return;
-
+  const validateForm = useCallback(() => {
     const isNameValid =
       formData.name.trim().length > 0 && formData.name.trim().length <= 50;
 
@@ -119,36 +116,45 @@ const EditDayTour: React.FC = () => {
       formData.description.trim().length <= 100;
 
     const isPriceValid =
-      typeof formData.price === 'string'
-        ? /^\d+(\.\d{1,2})?$/.test(formData.price.trim()) &&
-          parseFloat(formData.price) > 0
-        : !isNaN(formData.price) && formData.price > 0;
+      /^\d+(\.\d+)?$/.test(formData.price.trim()) &&
+      parseFloat(formData.price) > 0;
 
     const isImageValid =
       !imageFile ||
       (imageFile.size <= 1024 * 1024 &&
         ['image/jpeg', 'image/png', 'image/jpg'].includes(imageFile.type));
 
+    const isAdditionalFeeTypeTouched =
+      formData.additionalFeeType.trim().length > 0;
+    const isAdditionalFeeDescriptionTouched =
+      formData.additionalFeeDescription.trim().length > 0;
+    const isAdditionalFeeAmountTouched =
+      formData.additionalFeeAmount.trim().length > 0;
+
     const isAdditionalFeeValid =
-      formData.additionalFeeType.trim() === '' ||
-      (formData.additionalFeeType.trim().length > 0 &&
-        formData.additionalFeeDescription.trim().length > 0 &&
-        formData.additionalFeeAmount.trim().length > 0 &&
-        /^\d+(\.\d{1,2})?$/.test(formData.additionalFeeAmount.trim()) &&
+      (!isAdditionalFeeTypeTouched &&
+        !isAdditionalFeeDescriptionTouched &&
+        !isAdditionalFeeAmountTouched) ||
+      (isAdditionalFeeTypeTouched &&
+        isAdditionalFeeDescriptionTouched &&
+        isAdditionalFeeAmountTouched &&
+        /^\d+(\.\d+)?$/.test(formData.additionalFeeAmount.trim()) &&
         parseFloat(formData.additionalFeeAmount) > 0);
 
-    const isValid = !!(
+    const isValid: boolean =
       isNameValid &&
       isDescriptionValid &&
       isPriceValid &&
       isImageValid &&
       isAdditionalFeeValid &&
-      hasChanges()
-    );
-    setIsFormValid(isValid);
+      Boolean(hasChanges());
 
     setIsFormValid(isValid);
   }, [formData, imageFile]);
+
+  useEffect(() => {
+    validateForm();
+  }, [formData, imageFile, validateForm]);
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -169,24 +175,32 @@ const EditDayTour: React.FC = () => {
           name === 'description' ? value.length >= 100 : prev.description,
         price:
           name === 'price'
-            ? !/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0
+            ? !/^\d+(\.\d{1,2})?$/.test(trimmedValue) ||
+              isNaN(parseFloat(trimmedValue)) ||
+              parseFloat(trimmedValue) <= 0
             : prev.price,
 
         additionalFeeType:
           name === 'additionalFeeType' &&
           (isFilled(formData.additionalFeeDescription) ||
             isFilled(formData.additionalFeeAmount)) &&
-          !isFilled(trimmedValue),
+          !isFilled(trimmedValue)
+            ? true
+            : prev.additionalFeeType,
 
         additionalFeeDescription:
           name === 'additionalFeeDescription' &&
           isFilled(formData.additionalFeeType) &&
-          !isFilled(trimmedValue),
+          !isFilled(trimmedValue)
+            ? true
+            : prev.additionalFeeDescription,
 
         additionalFeeAmount:
           name === 'additionalFeeAmount' &&
           isFilled(formData.additionalFeeType) &&
-          (!/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0),
+          (!/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0)
+            ? true
+            : prev.additionalFeeAmount,
       }));
     },
     [formData]
@@ -276,6 +290,16 @@ const EditDayTour: React.FC = () => {
       );
 
       if (!response.ok) throw new Error('Failed to update day tour');
+
+      const updatedData = await response.json();
+      const updatedImageUrl = updatedData?.data?.dayTour?.imageUrl;
+
+      if (updatedImageUrl) {
+        setFormData((prevData) => ({
+          ...prevData,
+          imageUrl: `http://localhost:8080/${updatedImageUrl}?t=${new Date().getTime()}`,
+        }));
+      }
 
       alert('Day tour updated successfully!');
       router.push('/admin/content/daytour/dashboard');

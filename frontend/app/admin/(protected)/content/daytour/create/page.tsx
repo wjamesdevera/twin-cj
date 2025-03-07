@@ -33,7 +33,7 @@ function Page() {
     additionalFeeAmount: '',
   });
 
-  // helper text initital state
+  // helper text initial state
   const [helperText, setHelperText] = useState<{ [key: string]: boolean }>({
     name: false,
     description: false,
@@ -64,11 +64,20 @@ function Page() {
       formData.image.size <= 1024 * 1024 &&
       ['image/jpeg', 'image/png', 'image/jpg'].includes(formData.image.type);
 
+    const isAdditionalFeeTypeTouched =
+      formData.additionalFeeType.trim().length > 0;
+    const isAdditionalFeeDescriptionTouched =
+      formData.additionalFeeDescription.trim().length > 0;
+    const isAdditionalFeeAmountTouched =
+      formData.additionalFeeAmount.trim().length > 0;
+
     const isAdditionalFeeValid =
-      formData.additionalFeeType.trim() === '' ||
-      (formData.additionalFeeType.trim().length > 0 &&
-        formData.additionalFeeDescription.trim().length > 0 &&
-        formData.additionalFeeAmount.trim().length > 0 &&
+      (!isAdditionalFeeTypeTouched &&
+        !isAdditionalFeeDescriptionTouched &&
+        !isAdditionalFeeAmountTouched) ||
+      (isAdditionalFeeTypeTouched &&
+        isAdditionalFeeDescriptionTouched &&
+        isAdditionalFeeAmountTouched &&
         /^\d+(\.\d+)?$/.test(formData.additionalFeeAmount.trim()) &&
         parseFloat(formData.additionalFeeAmount) > 0);
 
@@ -91,24 +100,26 @@ function Page() {
       const { name, value, files } = e.target as HTMLInputElement;
       setFormData((prevData) => ({
         ...prevData,
-        [name]: files ? files[0] : value,
+        [name]: files ? files[0] : value.trim(),
       }));
 
       setHelperText((prevHelperText) => ({
         ...prevHelperText,
         [name]:
           name === 'name'
-            ? value.length >= 50
+            ? value.trim().length >= 50
             : name === 'description'
-            ? value.length >= 100
+            ? value.trim().length >= 100
             : name === 'price'
-            ? !/^\d+(\.\d+)?$/.test(value) || parseFloat(value) <= 0
+            ? !/^\d+(\.\d+)?$/.test(value.trim()) ||
+              parseFloat(value.trim()) <= 0
             : name === 'additionalFeeType'
-            ? value.length === 0
+            ? value.trim().length === 0
             : name === 'additionalFeeDescription'
-            ? value.length === 0
+            ? value.trim().length === 0
             : name === 'additionalFeeAmount'
-            ? !/^\d+(\.\d+)?$/.test(value) || parseFloat(value) <= 0
+            ? !/^\d+(\.\d+)?$/.test(value.trim()) ||
+              parseFloat(value.trim()) <= 0
             : false,
       }));
     },

@@ -54,11 +54,10 @@ const DayTourView = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
 
         const data = await response.json();
-        console.log('API Response:', data); // Debugging log
+        console.log('Fetched Data:', data);
 
         if (Array.isArray(data?.data?.dayTours)) {
           const mappedDayTours = data.data.dayTours.map((tour: any) => {
-            console.log('Tour Dates:', tour.createdAt, tour.updatedAt); // Debugging log
             return {
               id: tour.id,
               name: tour.name || 'Unnamed Tour',
@@ -75,8 +74,6 @@ const DayTourView = () => {
               updatedAt: formatDate(tour.updatedAt),
             };
           });
-
-          console.log('Mapped Day Tours:', mappedDayTours); // Debugging log
 
           setDayTours((prevTours) => {
             const isSameData =
@@ -236,7 +233,7 @@ const DayTourView = () => {
                     src={
                       dayTour.imageUrl.startsWith('http')
                         ? dayTour.imageUrl
-                        : `http://localhost:8080/${dayTour.imageUrl}`
+                        : `http://localhost:8080/uploads/${dayTour.imageUrl}`
                     }
                     alt={dayTour.name}
                     width="100"

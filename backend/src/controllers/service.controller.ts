@@ -95,6 +95,9 @@ export const updateDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     let imageUrl = req.body.imageUrl;
+    if (req.file) {
+      imageUrl = `${ROOT_STATIC_URL}/${req.file.filename}`;
+    }
 
     appAssert(id && !isNaN(Number(id)), BAD_REQUEST, 'Invalid ID');
 
