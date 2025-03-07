@@ -131,14 +131,18 @@ const EditDayTour: React.FC = () => {
     const isAdditionalFeeAmountTouched =
       formData.additionalFeeAmount.trim().length > 0;
 
+    const areAdditionalFeesEmpty =
+      formData.additionalFeeType.trim() === '' &&
+      formData.additionalFeeDescription.trim() === '' &&
+      formData.additionalFeeAmount.trim() === '';
+
     const isAdditionalFeeValid =
-      (!isAdditionalFeeTypeTouched &&
-        !isAdditionalFeeDescriptionTouched &&
-        !isAdditionalFeeAmountTouched) ||
-      (isAdditionalFeeTypeTouched &&
-        isAdditionalFeeDescriptionTouched &&
-        isAdditionalFeeAmountTouched &&
-        /^\d+(\.\d+)?$/.test(formData.additionalFeeAmount.trim()) &&
+      (formData.additionalFeeType.trim() === '' &&
+        formData.additionalFeeDescription.trim() === '' &&
+        formData.additionalFeeAmount.trim() === '') ||
+      (formData.additionalFeeType.trim() !== '' &&
+        formData.additionalFeeDescription.trim() !== '' &&
+        /^\d+(\.\d{1,2})?$/.test(formData.additionalFeeAmount.trim()) &&
         parseFloat(formData.additionalFeeAmount) > 0);
 
     const isValid: boolean =
@@ -147,7 +151,7 @@ const EditDayTour: React.FC = () => {
       isPriceValid &&
       isImageValid &&
       isAdditionalFeeValid &&
-      Boolean(hasChanges());
+      (areAdditionalFeesEmpty || Boolean(hasChanges()));
 
     setIsFormValid(isValid);
   }, [formData, imageFile]);
@@ -247,9 +251,15 @@ const EditDayTour: React.FC = () => {
       parseNumber(formData.additionalFeeAmount) !==
         parseNumber(originalData.additionalFeeAmount);
 
+    const additionalFeeWasFilled =
+      originalData.additionalFeeType?.trim() !== '' ||
+      originalData.additionalFeeDescription?.trim() !== '' ||
+      parseNumber(originalData.additionalFeeAmount) !== 0;
+
     return (
       requiredFieldsChanged ||
-      (formData.additionalFeeType && additionalFeeChanged)
+      ((additionalFeeWasFilled || formData.additionalFeeType) &&
+        additionalFeeChanged)
     );
   };
 
@@ -257,6 +267,8 @@ const EditDayTour: React.FC = () => {
     e.preventDefault();
 
     setIsMutating(true);
+
+    validateForm();
 
     if (!hasChanges()) {
       setIsMutating(false);
@@ -285,7 +297,14 @@ const EditDayTour: React.FC = () => {
         description: formData.additionalFeeDescription,
         amount: Number(formData.additionalFeeAmount),
       };
+    } else {
+      jsonData.additionalFee = {
+        type: 'N/A',
+        description: 'N/A',
+        amount: 0,
+      };
     }
+
     data.append('data', JSON.stringify(jsonData));
     if (imageFile) {
       data.append('image', imageFile);

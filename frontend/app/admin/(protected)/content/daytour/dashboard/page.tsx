@@ -54,7 +54,6 @@ const DayTourView = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
 
         const data = await response.json();
-        console.log('Fetched Data:', data);
 
         if (Array.isArray(data?.data?.dayTours)) {
           const mappedDayTours = data.data.dayTours.map((tour: any) => {
