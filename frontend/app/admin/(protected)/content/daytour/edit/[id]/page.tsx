@@ -163,7 +163,7 @@ const EditDayTour: React.FC = () => {
 
       setFormData((prevData) => ({
         ...prevData,
-        [name]: files ? files[0] : trimmedValue,
+        [name]: files ? files[0] : value,
       }));
 
       const isFilled = (val: string) => val.trim().length > 0;
@@ -392,6 +392,7 @@ const EditDayTour: React.FC = () => {
                 type="text"
                 id="additionalFeeType"
                 name="additionalFeeType"
+                maxLength={50}
                 value={formData.additionalFeeType || ''}
                 onChange={handleChange}
               />
@@ -410,6 +411,7 @@ const EditDayTour: React.FC = () => {
                 type="text"
                 id="additionalFeeDescription"
                 name="additionalFeeDescription"
+                maxLength={100}
                 value={formData.additionalFeeDescription || ''}
                 onChange={handleChange}
               />
