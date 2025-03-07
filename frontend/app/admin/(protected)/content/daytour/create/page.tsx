@@ -98,28 +98,32 @@ function Page() {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, files } = e.target as HTMLInputElement;
+      const trimmedValue = value.trim();
+
       setFormData((prevData) => ({
         ...prevData,
-        [name]: files ? files[0] : value.trim(),
+        [name]: files ? files[0] : value,
       }));
+
+      const isFilled = (val: string) => val.trim().length > 0;
 
       setHelperText((prevHelperText) => ({
         ...prevHelperText,
         [name]:
           name === 'name'
-            ? value.trim().length >= 50
+            ? trimmedValue.length === 0 || trimmedValue.length > 50
             : name === 'description'
-            ? value.trim().length >= 100
+            ? trimmedValue.length === 0 || trimmedValue.length > 100
             : name === 'price'
-            ? !/^\d+(\.\d+)?$/.test(value.trim()) ||
-              parseFloat(value.trim()) <= 0
+            ? !/^\d+(\.\d+)?$/.test(trimmedValue) ||
+              parseFloat(trimmedValue) <= 0
             : name === 'additionalFeeType'
-            ? value.trim().length === 0
+            ? trimmedValue.length === 0
             : name === 'additionalFeeDescription'
-            ? value.trim().length === 0
+            ? trimmedValue.length === 0
             : name === 'additionalFeeAmount'
-            ? !/^\d+(\.\d+)?$/.test(value.trim()) ||
-              parseFloat(value.trim()) <= 0
+            ? !/^\d+(\.\d+)?$/.test(trimmedValue) ||
+              parseFloat(trimmedValue) <= 0
             : false,
       }));
     },
