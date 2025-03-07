@@ -37,13 +37,13 @@ const EditDayTour: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isMutating, setIsMutating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [helperText, setHelperText] = useState<{ [key: string]: boolean }>({
-    name: false,
-    description: false,
-    price: false,
-    additionalFeeType: false,
-    additionalFeeDescription: false,
-    additionalFeeAmount: false,
+  const [helperText, setHelperText] = useState<{ [key: string]: string }>({
+    name: '',
+    description: '',
+    price: '',
+    additionalFeeType: '',
+    additionalFeeDescription: '',
+    additionalFeeAmount: '',
   });
   const [originalData, setOriginalData] = useState<DayTour | null>(null);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
@@ -170,14 +170,22 @@ const EditDayTour: React.FC = () => {
 
       setHelperText((prev) => ({
         ...prev,
-        name: name === 'name' ? value.length >= 50 : prev.name,
+        name:
+          name === 'name' &&
+          (trimmedValue.length === 0 || trimmedValue.length > 50)
+            ? 'Name must not be empty or exceed 50 characters'
+            : prev.name,
         description:
-          name === 'description' ? value.length >= 100 : prev.description,
+          name === 'description' &&
+          (trimmedValue.length === 0 || trimmedValue.length > 100)
+            ? 'Description must not be empty or exceed 100 characters'
+            : prev.description,
         price:
-          name === 'price'
-            ? !/^\d+(\.\d{1,2})?$/.test(trimmedValue) ||
-              isNaN(parseFloat(trimmedValue)) ||
-              parseFloat(trimmedValue) <= 0
+          name === 'price' &&
+          (!/^\d+(\.\d{1,2})?$/.test(trimmedValue) ||
+            isNaN(parseFloat(trimmedValue)) ||
+            parseFloat(trimmedValue) <= 0)
+            ? 'Rate must be a positive number only'
             : prev.price,
 
         additionalFeeType:
@@ -185,25 +193,28 @@ const EditDayTour: React.FC = () => {
           (isFilled(formData.additionalFeeDescription) ||
             isFilled(formData.additionalFeeAmount)) &&
           !isFilled(trimmedValue)
-            ? true
+            ? 'Additional Fee Type is required'
             : prev.additionalFeeType,
 
         additionalFeeDescription:
           name === 'additionalFeeDescription' &&
           isFilled(formData.additionalFeeType) &&
           !isFilled(trimmedValue)
-            ? true
+            ? 'Additional Fee Description is required'
             : prev.additionalFeeDescription,
 
         additionalFeeAmount:
           name === 'additionalFeeAmount' &&
           isFilled(formData.additionalFeeType) &&
-          (!/^\d+(\.\d{1,2})?$/.test(value) || parseFloat(value) <= 0)
-            ? true
+          (!/^\d+(\.\d{1,2})?$/.test(trimmedValue) ||
+            parseFloat(trimmedValue) <= 0)
+            ? 'Additional Fee Amount must be a positive number only'
             : prev.additionalFeeAmount,
       }));
+
+      validateForm();
     },
-    [formData]
+    [formData, validateForm]
   );
 
   const hasChanges = () => {
