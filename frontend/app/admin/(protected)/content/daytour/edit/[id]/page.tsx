@@ -124,18 +124,6 @@ const EditDayTour: React.FC = () => {
       (imageFile.size <= 1024 * 1024 &&
         ['image/jpeg', 'image/png', 'image/jpg'].includes(imageFile.type));
 
-    const isAdditionalFeeTypeTouched =
-      formData.additionalFeeType.trim().length > 0;
-    const isAdditionalFeeDescriptionTouched =
-      formData.additionalFeeDescription.trim().length > 0;
-    const isAdditionalFeeAmountTouched =
-      formData.additionalFeeAmount.trim().length > 0;
-
-    const areAdditionalFeesEmpty =
-      formData.additionalFeeType.trim() === '' &&
-      formData.additionalFeeDescription.trim() === '' &&
-      formData.additionalFeeAmount.trim() === '';
-
     const isAdditionalFeeValid =
       (formData.additionalFeeType.trim() === '' &&
         formData.additionalFeeDescription.trim() === '' &&
@@ -150,14 +138,13 @@ const EditDayTour: React.FC = () => {
       isDescriptionValid &&
       isPriceValid &&
       isImageValid &&
-      isAdditionalFeeValid &&
-      (areAdditionalFeesEmpty || Boolean(hasChanges()));
+      isAdditionalFeeValid;
 
     setIsFormValid(isValid);
   }, [formData, imageFile]);
 
   useEffect(() => {
-    validateForm();
+    setIsFormValid(hasChanges() ? true : false);
   }, [formData, imageFile, validateForm]);
 
   const handleChange = useCallback(
@@ -240,35 +227,39 @@ const EditDayTour: React.FC = () => {
       !!imageFile;
 
     const additionalFeeChanged =
-      !compareWithoutWhitespace(
-        formData.additionalFeeType,
-        originalData.additionalFeeType
-      ) ||
-      !compareWithoutWhitespace(
-        formData.additionalFeeDescription,
-        originalData.additionalFeeDescription
-      ) ||
-      parseNumber(formData.additionalFeeAmount) !==
-        parseNumber(originalData.additionalFeeAmount);
+      (formData.additionalFeeType.trim() !== '' &&
+        !compareWithoutWhitespace(
+          formData.additionalFeeType,
+          originalData.additionalFeeType
+        )) ||
+      (formData.additionalFeeDescription.trim() !== '' &&
+        !compareWithoutWhitespace(
+          formData.additionalFeeDescription,
+          originalData.additionalFeeDescription
+        )) ||
+      (formData.additionalFeeAmount.trim() !== '' &&
+        parseNumber(formData.additionalFeeAmount) !==
+          parseNumber(originalData.additionalFeeAmount));
 
-    const additionalFeeWasFilled =
-      originalData.additionalFeeType?.trim() !== '' ||
-      originalData.additionalFeeDescription?.trim() !== '' ||
-      parseNumber(originalData.additionalFeeAmount) !== 0;
+    const additionalFeeRemoved =
+      originalData?.additionalFeeType &&
+      originalData?.additionalFeeDescription &&
+      originalData?.additionalFeeAmount &&
+      !formData.additionalFeeType.trim() &&
+      !formData.additionalFeeDescription.trim() &&
+      !formData.additionalFeeAmount.trim();
 
     return (
-      requiredFieldsChanged ||
-      ((additionalFeeWasFilled || formData.additionalFeeType) &&
-        additionalFeeChanged)
+      requiredFieldsChanged || additionalFeeChanged || additionalFeeRemoved
     );
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    setIsMutating(true);
+    hasChanges();
 
-    validateForm();
+    setIsMutating(true);
 
     if (!hasChanges()) {
       setIsMutating(false);
@@ -366,9 +357,7 @@ const EditDayTour: React.FC = () => {
                 required
               />
               {helperText.name && (
-                <small className={styles.helperText}>
-                  Name must not exceed 50 characters
-                </small>
+                <small className={styles.helperText}>{helperText.name}</small>
               )}
             </div>
             <div className={styles.formGroup}>
@@ -384,7 +373,7 @@ const EditDayTour: React.FC = () => {
               />
               {helperText.description && (
                 <small className={styles.helperText}>
-                  Description must not exceed 100 characters
+                  {helperText.description}
                 </small>
               )}
             </div>
@@ -410,9 +399,7 @@ const EditDayTour: React.FC = () => {
                 required
               />
               {helperText.price && (
-                <small className={styles.helperText}>
-                  Rate must be a positive number only
-                </small>
+                <small className={styles.helperText}>{helperText.price}</small>
               )}
             </div>
             <div className={styles.formGroup}>
@@ -426,10 +413,9 @@ const EditDayTour: React.FC = () => {
                 value={formData.additionalFeeType || ''}
                 onChange={handleChange}
               />
-
               {helperText.additionalFeeType && (
                 <small className={styles.helperText}>
-                  Additional Fee Type is required
+                  {helperText.additionalFeeType}
                 </small>
               )}
             </div>
@@ -447,7 +433,7 @@ const EditDayTour: React.FC = () => {
               />
               {helperText.additionalFeeDescription && (
                 <small className={styles.helperText}>
-                  Additional Fee Description is required
+                  {helperText.additionalFeeDescription}
                 </small>
               )}
             </div>
@@ -462,14 +448,14 @@ const EditDayTour: React.FC = () => {
               />
               {helperText.additionalFeeAmount && (
                 <small className={styles.helperText}>
-                  Additional Fee Amount must be a positive number only
+                  {helperText.additionalFeeAmount}
                 </small>
               )}
             </div>
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={!isFormValid}
+              disabled={!isFormValid || !hasChanges()}
             >
               Save Changes
             </button>
