@@ -77,7 +77,7 @@ const EditDayTour: React.FC = () => {
 
         if (data?.data?.dayTour?.service) {
           const service = data.data.dayTour.service;
-          const additionalFee = service.additionalFee || {};
+          const additionalFee = data.data.dayTour.additionalFee || {};
           const fetchedData = {
             id: data.data.dayTour.id,
             name: service.name || '',
