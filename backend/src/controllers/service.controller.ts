@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import catchErrors from '../utils/catchErrors';
 import {
   createDayTour,
   getAllDayTours,
@@ -7,13 +8,10 @@ import {
   updateDayTour,
 } from '../services/service.service';
 import { BAD_REQUEST, CREATED, OK } from '../constants/http';
-import catchErrors from '../utils/catchErrors';
-import path from 'path';
-import fs from 'fs';
-import appAssert from '../utils/appAssert';
 import { ROOT_STATIC_URL } from '../constants/url';
+import appAssert from '../utils/appAssert';
+import { z, ZodError } from 'zod';
 import { serviceSchema } from '../schemas/service.schemas';
-import { ZodError } from 'zod';
 
 export const createDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -62,6 +60,15 @@ export const createDayTourHandler = catchErrors(
 export const getAllDayToursHandler = catchErrors(
   async (req: Request, res: Response) => {
     const dayTours = await getAllDayTours();
+
+    if (dayTours.length === 0) {
+      return res.status(OK).json({
+        status: 'success',
+        message: 'No day tours found.',
+        data: { dayTours: [] },
+      });
+    }
+
     res.status(OK).json({
       status: 'success',
       data: { dayTours },
@@ -72,13 +79,11 @@ export const getAllDayToursHandler = catchErrors(
 export const getDayTourByIdHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+    appAssert(!isNaN(Number(id)), BAD_REQUEST, 'Invalid day tour ID.');
+
     const dayTour = await getDayTourById(Number(id));
-    if (!dayTour) {
-      return res.status(BAD_REQUEST).json({
-        status: BAD_REQUEST,
-        message: 'Day Tour not found',
-      });
-    }
+    appAssert(dayTour, 404, `Day Tour with ID ${id} not found.`);
+
     res.status(OK).json({
       status: 'success',
       data: { dayTour },
@@ -105,25 +110,10 @@ export const updateDayTourHandler = catchErrors(
     try {
       const validatedData = serviceSchema.parse(jsonData);
 
-      if (req.file) {
-        imageUrl = `uploads/${req.file.filename}`;
-        const existingDayTour = await getDayTourById(Number(id));
-        if (existingDayTour?.service?.imageUrl) {
-          const oldImagePath = path.join(
-            __dirname,
-            '../../uploads',
-            existingDayTour.service.imageUrl.replace(/^.*[\\\/]/, '')
-          );
-          fs.unlink(oldImagePath, (err) => {
-            if (err) console.error('Failed to delete old image file:', err);
-          });
-        }
-      }
-
       const updatedDayTour = await updateDayTour(Number(id), {
         ...validatedData,
         imageUrl,
-        rate: validatedData.price,
+        price: validatedData.price,
         additionalFee: {
           type: validatedData.additionalFee?.type || '',
           description: validatedData.additionalFee?.description || '',
@@ -133,7 +123,7 @@ export const updateDayTourHandler = catchErrors(
 
       res.status(OK).json({
         status: 'success',
-        data: { DayTour: updatedDayTour },
+        data: { dayTour: updatedDayTour },
       });
     } catch (error) {
       if (error instanceof ZodError) {
@@ -151,31 +141,35 @@ export const updateDayTourHandler = catchErrors(
 export const deleteDayTourHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const dayTour = await getDayTourById(Number(id));
-    if (!dayTour) {
-      return res.status(404).json({
-        status: BAD_REQUEST,
-        message: 'Day Tour not found',
-      });
-    }
+    appAssert(!isNaN(Number(id)), BAD_REQUEST, 'Invalid day tour ID.');
 
-    if (dayTour.service && dayTour.service.imageUrl) {
-      const imagePath = path.join(
-        __dirname,
-        '../../uploads',
-        dayTour.service.imageUrl.replace(/^.*[\\\/]/, '')
-      );
-      fs.unlink(imagePath, (err) => {
-        if (err) {
-          console.error('Failed to delete image file:', err);
-        }
-      });
-    }
+    const dayTour = await getDayTourById(Number(id));
+    appAssert(dayTour, 404, `Day Tour with ID ${id} not found.`);
 
     await deleteDayTour(Number(id));
     res.status(OK).json({
       status: 'success',
       message: `Day Tour Activity with ID ${id} deleted successfully`,
+    });
+  }
+);
+
+export const deleteSelectedDayToursHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid request. Provide day tour IDs.',
+      });
+    }
+
+    await Promise.all(ids.map((id) => deleteDayTour(id)));
+
+    res.status(OK).json({
+      status: 'success',
+      message: `${ids.length} day tours deleted successfully.`,
     });
   }
 );

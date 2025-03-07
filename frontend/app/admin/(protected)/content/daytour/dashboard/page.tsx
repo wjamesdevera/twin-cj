@@ -9,13 +9,25 @@ interface DayTour {
   name: string;
   description: string;
   imageUrl: string;
-  rate: number;
+  rate: string;
   additionalFeeType: string;
   additionalFeeDescription: string;
-  additionalFeeAmount: number;
+  additionalFeeAmount: string;
   createdAt: string;
   updatedAt: string;
 }
+
+const formatDate = (isoString?: string) => {
+  if (!isoString) return 'N/A';
+  const date = new Date(isoString);
+  return isNaN(date.getTime())
+    ? 'N/A'
+    : date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+      });
+};
 
 const DayTourView = () => {
   const [dayTours, setDayTours] = useState<DayTour[]>([]);
@@ -42,25 +54,29 @@ const DayTourView = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
 
         const data = await response.json();
+        console.log('API Response:', data); // Debugging log
 
         if (Array.isArray(data?.data?.dayTours)) {
           const mappedDayTours = data.data.dayTours.map((tour: any) => {
+            console.log('Tour Dates:', tour.createdAt, tour.updatedAt); // Debugging log
             return {
               id: tour.id,
-              name: tour.service?.name || 'Unnamed Tour',
-              description:
-                tour.service?.description || 'No description available',
-              imageUrl: tour.service?.imageUrl || '',
-              rate: parseFloat(tour.service?.price || 0).toFixed(2),
-              additionalFeeType: tour.additionalFee?.type || '',
-              additionalFeeDescription: tour.additionalFee?.description || '',
+              name: tour.name || 'Unnamed Tour',
+              description: tour.description || 'No description available',
+              imageUrl: tour.imageUrl || '',
+              rate: parseFloat(tour.price || 0).toFixed(2),
+              additionalFeeType: tour.additionalFee?.type || 'N/A',
+              additionalFeeDescription:
+                tour.additionalFee?.description || 'N/A',
               additionalFeeAmount: parseFloat(
                 tour.additionalFee?.amount || 0
               ).toFixed(2),
-              createdAt: new Date(tour.createdAt).toLocaleDateString(),
-              updatedAt: new Date(tour.updatedAt).toLocaleDateString(),
+              createdAt: formatDate(tour.createdAt),
+              updatedAt: formatDate(tour.updatedAt),
             };
           });
+
+          console.log('Mapped Day Tours:', mappedDayTours); // Debugging log
 
           setDayTours((prevTours) => {
             const isSameData =
@@ -235,8 +251,8 @@ const DayTourView = () => {
               <td>{dayTour.additionalFeeType}</td>
               <td>{dayTour.additionalFeeDescription}</td>
               <td>₱{dayTour.additionalFeeAmount}</td>
-              <td>{dayTour.createdAt}</td>
-              <td>{dayTour.updatedAt}</td>
+              <td>{formatDate(dayTour.createdAt)}</td>
+              <td>{formatDate(dayTour.updatedAt)}</td>
             </tr>
           ))}
         </tbody>
