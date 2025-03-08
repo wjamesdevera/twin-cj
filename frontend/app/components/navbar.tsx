@@ -31,11 +31,13 @@ const NavLink = ({ label, href, isActive }: NavLinkProps) => {
 
 const NavLinks = () => {
   const pathname = usePathname();
-  
+
   return (
     <ul className={styles.navlist}>
       {navlist.map((navlink) => {
-        const isHome = navlink.href === "/home" && (pathname === "/" || pathname === "/home");
+        const isHome =
+          navlink.href === "/home" &&
+          (pathname === "/" || pathname === "/home");
         const isActive = isHome || pathname.startsWith(navlink.href);
 
         return (
@@ -50,7 +52,6 @@ const NavLinks = () => {
     </ul>
   );
 };
-
 
 export default function Navbar() {
   const [isNavActive, setIsNavActive] = useState(false);

@@ -1,41 +1,48 @@
-import { prisma } from '../config/db';
-import path from 'path';
-import fs from 'fs';
+import { prisma } from "../config/db";
+import path from "path";
+import fs from "fs";
+import appAssert from "../utils/appAssert";
+import { NOT_FOUND } from "../constants/http";
+import app from "../app";
+import { number } from "zod";
 
-interface CreateDayTourInput {
+interface CreateDayTourParams {
   name: string;
   description: string;
   imageUrl: string;
   price: number;
-  additionalFee?: {
+  additionalFee?: Partial<{
     type: string;
     description: string;
     amount: number;
-  };
+  }> | null;
 }
 
-export const createDayTour = async (input: CreateDayTourInput) => {
+export const createDayTour = async (data: CreateDayTourParams) => {
   const createdDayTour = await prisma.dayTourActivities.create({
     data: {
       service: {
         create: {
-          name: input.name,
-          description: input.description,
-          imageUrl: input.imageUrl,
-          price: input.price,
+          name: data.name,
+          description: data.description,
+          imageUrl: data.imageUrl,
+          price: data.price,
         },
       },
-      additionalFee: input.additionalFee
+      ...(data.additionalFee &&
+      data.additionalFee.type &&
+      data.additionalFee.description &&
+      data.additionalFee.amount !== undefined
         ? {
-            create: {
-              type: input.additionalFee.type,
-              description: input.additionalFee.description,
-              amount: input.additionalFee.amount,
+            additionalFee: {
+              create: {
+                type: data.additionalFee.type,
+                description: data.additionalFee.description,
+                amount: data.additionalFee.amount,
+              },
             },
           }
-        : undefined,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+        : {}),
     },
     include: {
       service: true,
@@ -78,118 +85,104 @@ export const getAllDayTours = async () => {
 
 // Read a specific DayTourActivity by ID
 export const getDayTourById = async (id: number) => {
-  return await prisma.dayTourActivities.findUnique({
+  const service = await prisma.service.findUnique({
     where: { id },
     include: {
-      service: true,
-      additionalFee: true,
+      dayTourActivity: {
+        include: {
+          additionalFee: true,
+        },
+      },
     },
   });
+
+  appAssert(service, NOT_FOUND, "Service Not Found");
+
+  return {
+    id: service.id,
+    name: service.name,
+    description: service.description,
+    price: service.price,
+    imageUrl: service.imageUrl,
+    additionalFee: service.dayTourActivity?.additionalFee,
+    createdAt: service.createdAt,
+    updatedAt: service.updatedAt,
+  };
 };
 
-// Update
-export const updateDayTour = async (
-  id: number,
+interface UpdateDayTourParams {
+  id: number;
   data: {
     name: string;
     description: string;
-    imageUrl?: string;
+    imageUrl: string;
     price: number;
-    additionalFee?: {
-      type?: string;
-      description?: string;
-      amount?: number;
-    };
-  }
-) => {
-  const existingDayTour = await prisma.dayTourActivities.findUnique({
-    where: { id },
-    include: { service: true },
+    additionalFee?: Partial<{
+      type: string;
+      description: string;
+      amount: number;
+    }> | null;
+  };
+}
+
+// Update
+export const updateDayTour = async ({ id, data }: UpdateDayTourParams) => {
+  const existingDayTour = await prisma.service.findUnique({
+    where: {
+      id,
+    },
   });
 
-  if (!existingDayTour) {
-    throw new Error(`Day tour with ID ${id} not found`);
-  }
+  appAssert(existingDayTour, NOT_FOUND, `Day tour with ID ${id} not found`);
 
-  const updatedImageUrl = data.imageUrl || existingDayTour.service.imageUrl;
-
-  const updateData: any = {
-    updatedAt: new Date(),
-    service: {
-      update: {
-        name: data.name,
-        description: data.description,
-        imageUrl: updatedImageUrl,
-        price: data.price,
+  const updatedDayTour = await prisma.service.update({
+    where: { id },
+    data: {
+      name: data.name ?? undefined,
+      description: data.description ?? undefined,
+      price: data.price ?? undefined,
+      imageUrl: data.imageUrl ?? undefined,
+      dayTourActivity: {
+        update: {
+          ...(data.additionalFee
+            ? {
+                additionalFee: {
+                  upsert: {
+                    create: {
+                      type: data.additionalFee.type ?? "default-type",
+                      description: data.additionalFee.description ?? "",
+                      amount: data.additionalFee.amount ?? 0,
+                    },
+                    update: {
+                      type: data.additionalFee.type ?? undefined,
+                      description: data.additionalFee.description ?? undefined,
+                      amount: data.additionalFee.amount ?? undefined,
+                    },
+                  },
+                },
+              }
+            : {}),
+        },
       },
     },
-  };
-
-  if (data.additionalFee) {
-    const existingAdditionalFee = await prisma.additionalFee.findFirst({
-      where: { dayTourActivity: { id } },
-    });
-
-    if (existingAdditionalFee) {
-      updateData.additionalFee = {
-        update: {
-          ...(data.additionalFee.type && { type: data.additionalFee.type }),
-          ...(data.additionalFee.description && {
-            description: data.additionalFee.description,
-          }),
-          ...(data.additionalFee.amount !== undefined && {
-            amount: data.additionalFee.amount,
-          }),
-        },
-      };
-    } else {
-      updateData.additionalFee = {
-        create: {
-          ...(data.additionalFee.type && { type: data.additionalFee.type }),
-          ...(data.additionalFee.description && {
-            description: data.additionalFee.description,
-          }),
-          ...(data.additionalFee.amount !== undefined && {
-            amount: data.additionalFee.amount,
-          }),
-        },
-      };
-    }
-  }
-
-  if (data.imageUrl && existingDayTour.service.imageUrl !== data.imageUrl) {
-    const oldImagePath = path.join(
-      __dirname,
-      '../../uploads',
-      path.basename(existingDayTour.service.imageUrl)
-    );
-
-    if (fs.existsSync(oldImagePath)) {
-      fs.unlinkSync(oldImagePath);
-      console.log(`Deleted old image file: ${oldImagePath}`);
-    } else {
-      console.warn(`Old image file not found: ${oldImagePath}`);
-    }
-  }
-
-  const updatedDayTour = await prisma.dayTourActivities.update({
-    where: { id },
-    data: updateData,
     include: {
-      service: true,
-      additionalFee: true,
+      dayTourActivity: {
+        include: {
+          additionalFee: true,
+        },
+      },
     },
   });
 
+  appAssert(updateDayTour, NOT_FOUND, `Day tour with ID ${id} not found`);
+
   return {
-    id: updatedDayTour.service.id,
-    name: updatedDayTour.service.name,
-    description: updatedDayTour.service.description,
-    price: updatedDayTour.service.price,
-    imageUrl: updatedDayTour.service.imageUrl
-      ? `http://localhost:8080/uploads/${updatedDayTour.service.imageUrl}`
-      : '',
-    additionalFee: updatedDayTour.additionalFee,
+    id: updatedDayTour.id,
+    name: updatedDayTour.name,
+    description: updatedDayTour.description,
+    price: updatedDayTour.price,
+    imageUrl: updatedDayTour.imageUrl,
+    additionalFee: updatedDayTour.dayTourActivity?.additionalFee,
     createdAt: updatedDayTour.createdAt,
     updatedAt: updatedDayTour.updatedAt,
   };
@@ -197,22 +190,53 @@ export const updateDayTour = async (
 
 // Delete
 export const deleteDayTour = async (id: number) => {
-  return await prisma.$transaction(async (tx) => {
-    const existingDayTour = await tx.dayTourActivities.findUnique({
-      where: { id },
-      include: { service: true, additionalFee: true },
-    });
+  const existingDayTour = await prisma.service.findFirst({
+    where: {
+      id,
+    },
+  });
 
-    if (!existingDayTour) return null;
+  appAssert(existingDayTour, NOT_FOUND, `Day tour with ID ${id} not found`);
 
-    const { serviceId, additionalFee } = existingDayTour;
-    const imageUrl = existingDayTour.service?.imageUrl;
+  const deletedDayTour = await prisma.service.delete({
+    where: { id },
+    include: {
+      dayTourActivity: {
+        include: {
+          additionalFee: true,
+        },
+      },
+    },
+  });
 
-    if (imageUrl) {
+  if (deletedDayTour.imageUrl) {
+    const imagePath = path.join(
+      __dirname,
+      "../../uploads",
+      path.basename(deletedDayTour.imageUrl)
+    );
+
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+      console.log(`Deleted image file: ${imagePath}`);
+    } else {
+      console.warn(`Image file not found: ${imagePath}`);
+    }
+  }
+};
+
+export const deleteMultipleDayTour = async (ids: number[]) => {
+  const services = await prisma.service.findMany({
+    where: { id: { in: ids } },
+    select: { imageUrl: true },
+  });
+
+  services.forEach((service) => {
+    if (service.imageUrl) {
       const imagePath = path.join(
         __dirname,
-        '../../uploads',
-        path.basename(imageUrl)
+        "../../uploads",
+        path.basename(service.imageUrl)
       );
 
       if (fs.existsSync(imagePath)) {
@@ -222,21 +246,269 @@ export const deleteDayTour = async (id: number) => {
         console.warn(`Image file not found: ${imagePath}`);
       }
     }
+  });
+  await prisma.service.deleteMany({
+    where: {
+      id: { in: ids },
+    },
+  });
+};
 
-    await tx.dayTourActivities.delete({ where: { id } });
+export const getCabinById = async (id: number) => {
+  const service = await prisma.service.findUnique({
+    where: { id },
+    include: {
+      cabin: {
+        include: {
+          additionalFee: true,
+        },
+      },
+    },
+  });
 
-    if (serviceId) {
-      await tx.service.delete({ where: { id: serviceId } });
-    }
+  appAssert(service, NOT_FOUND, "Service Not Found");
 
-    if (additionalFee) {
-      await tx.additionalFee.delete({ where: { id: additionalFee.id } });
-    }
+  return {
+    id: service.id,
+    name: service.name,
+    description: service.description,
+    price: service.price,
+    imageUrl: service.imageUrl,
+    additionalFee: service.cabin?.additionalFee,
+    createdAt: service.createdAt,
+    updatedAt: service.updatedAt,
+  };
+};
 
+export const getAllCabins = async () => {
+  const cabins = await prisma.cabin.findMany({
+    include: {
+      additionalFee: true,
+      service: true,
+    },
+  });
+
+  return cabins.map((cabin) => {
     return {
-      deletedDayTour: existingDayTour,
-      deletedService: serviceId ? existingDayTour.service : null,
-      deletedAdditionalFee: additionalFee ? additionalFee : null,
+      id: cabin.service.id,
+      name: cabin.service.name,
+      description: cabin.service.description,
+      price: cabin.service.price,
+      imageUrl: cabin.service.imageUrl,
+      minCapacity: cabin.minCapacity,
+      maxCapacity: cabin.maxCapacity,
+      createdAt: cabin.createdAt,
+      updatedAt: cabin.updatedAt,
     };
   });
+};
+
+type CreateCabinParams = {
+  minCapacity: number;
+  maxCapacity: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  additionalFee?: Partial<{
+    type: string;
+    description: string;
+    amount: number;
+  }> | null;
+};
+
+export const createCabin = async (data: CreateCabinParams) => {
+  const createdCabin = await prisma.cabin.create({
+    data: {
+      minCapacity: data.minCapacity,
+      maxCapacity: data.maxCapacity,
+      service: {
+        create: {
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          imageUrl: data.imageUrl,
+        },
+      },
+      ...(data.additionalFee &&
+      data.additionalFee.type &&
+      data.additionalFee.description &&
+      data.additionalFee.amount !== undefined
+        ? {
+            additionalFee: {
+              create: {
+                type: data.additionalFee.type,
+                description: data.additionalFee.description,
+                amount: data.additionalFee.amount,
+              },
+            },
+          }
+        : {}),
+    },
+    include: {
+      service: true,
+      additionalFee: true,
+    },
+  });
+
+  return {
+    id: createdCabin.service.id,
+    name: createdCabin.service.name,
+    description: createdCabin.service.description,
+    price: createdCabin.service.price,
+    imageUrl: createdCabin.service.imageUrl,
+    minCapacity: createdCabin.minCapacity,
+    maxCapacity: createdCabin.maxCapacity,
+    createdAt: createdCabin.service.createdAt,
+    updatedAt: createdCabin.service.updatedAt,
+  };
+};
+
+export const deleteMultipleCabin = async (ids: number[]) => {
+  const services = await prisma.service.findMany({
+    where: { id: { in: ids } },
+    select: { imageUrl: true },
+  });
+
+  services.forEach((service) => {
+    if (service.imageUrl) {
+      const imagePath = path.join(
+        __dirname,
+        "../../uploads",
+        path.basename(service.imageUrl)
+      );
+
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+        console.log(`Deleted image file: ${imagePath}`);
+      } else {
+        console.warn(`Image file not found: ${imagePath}`);
+      }
+    }
+  });
+
+  await prisma.service.deleteMany({
+    where: {
+      id: { in: ids },
+    },
+  });
+};
+
+export const deleteCabin = async (id: number) => {
+  const existingCabin = await prisma.service.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  appAssert(existingCabin, NOT_FOUND, `Cabin with ID ${id} not found`);
+
+  const deletedCabin = await prisma.service.delete({
+    where: { id },
+    include: {
+      dayTourActivity: {
+        include: {
+          additionalFee: true,
+        },
+      },
+    },
+  });
+
+  if (deletedCabin.imageUrl) {
+    const imagePath = path.join(
+      __dirname,
+      "../../uploads",
+      path.basename(deletedCabin.imageUrl)
+    );
+
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+      console.log(`Deleted image file: ${imagePath}`);
+    } else {
+      console.warn(`Image file not found: ${imagePath}`);
+    }
+  }
+};
+
+interface UpdateCabinParams {
+  id: number;
+  data: {
+    minCapacity: number;
+    maxCapacity: number;
+    name: string;
+    description: string;
+    price: number;
+    imageUrl: string;
+    additionalFee?: Partial<{
+      type: string;
+      description: string;
+      amount: number;
+    }> | null;
+  };
+}
+
+export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
+  const existingCabin = await prisma.service.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  appAssert(existingCabin, NOT_FOUND, `Day tour with ID ${id} not found`);
+
+  const updatedCabin = await prisma.service.update({
+    where: { id },
+    data: {
+      name: data.name ?? undefined,
+      description: data.description ?? undefined,
+      price: data.price ?? undefined,
+      imageUrl: data.imageUrl ?? undefined,
+      cabin: {
+        update: {
+          minCapacity: data.minCapacity ?? undefined,
+          maxCapacity: data.maxCapacity ?? undefined,
+          ...(data.additionalFee
+            ? {
+                additionalFee: {
+                  upsert: {
+                    create: {
+                      type: data.additionalFee.type ?? "default-type",
+                      description: data.additionalFee.description ?? "",
+                      amount: data.additionalFee.amount ?? 0,
+                    },
+                    update: {
+                      type: data.additionalFee.type ?? undefined,
+                      description: data.additionalFee.description ?? undefined,
+                      amount: data.additionalFee.amount ?? undefined,
+                    },
+                  },
+                },
+              }
+            : {}),
+        },
+      },
+    },
+    include: {
+      cabin: {
+        include: {
+          additionalFee: true,
+        },
+      },
+    },
+  });
+
+  appAssert(updatedCabin, NOT_FOUND, `Day tour with ID ${id} not found`);
+
+  return {
+    id: updatedCabin.id,
+    name: updatedCabin.name,
+    description: updatedCabin.description,
+    price: updatedCabin.price,
+    imageUrl: updatedCabin.imageUrl,
+    additionalFee: updatedCabin.cabin?.additionalFee,
+    minCapacity: updatedCabin.cabin?.minCapacity,
+    maxCapacity: updatedCabin.cabin?.maxCapacity,
+    createdAt: updatedCabin.createdAt,
+    updatedAt: updatedCabin.updatedAt,
+  };
 };

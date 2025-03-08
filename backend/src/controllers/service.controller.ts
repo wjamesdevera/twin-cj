@@ -1,178 +1,264 @@
-import { Request, Response } from 'express';
-import catchErrors from '../utils/catchErrors';
 import {
+  cabinSchema,
+  deleteItemsSchema,
+  serviceSchema,
+} from "../schemas/service.schemas";
+
+import { Request, Response } from "express";
+import catchErrors from "../utils/catchErrors";
+import {
+  createCabin,
   createDayTour,
-  getAllDayTours,
-  getDayTourById,
+  deleteCabin,
   deleteDayTour,
+  deleteMultipleCabin,
+  deleteMultipleDayTour,
+  getAllCabins,
+  getAllDayTours,
+  getCabinById,
+  getDayTourById,
+  updateCabin,
   updateDayTour,
-} from '../services/service.service';
-import { BAD_REQUEST, CREATED, OK } from '../constants/http';
-import { ROOT_STATIC_URL } from '../constants/url';
-import appAssert from '../utils/appAssert';
-import { z, ZodError } from 'zod';
-import { serviceSchema } from '../schemas/service.schemas';
+} from "../services/service.service";
+import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from "../constants/http";
+import { ROOT_STATIC_URL } from "../constants/url";
+import appAssert from "../utils/appAssert";
+import { idSchema, jsonSchema } from "../schemas/schemas";
 
 export const createDayTourHandler = catchErrors(
-  async (req: Request, res: Response) => {
-    appAssert(req.file, BAD_REQUEST, 'Image is required');
-    const imageUrl = `${ROOT_STATIC_URL}/${req.file.filename}`;
+  async (request: Request, response: Response) => {
+    appAssert(request.file, BAD_REQUEST, "Image is required");
+    const imageUrl = `${ROOT_STATIC_URL}/${request.file.filename}`;
 
-    let jsonData;
-    try {
-      jsonData = JSON.parse(req.body.data);
-    } catch (error) {
-      console.error('JSON Parsing Error:', error);
-      return res
-        .status(BAD_REQUEST)
-        .json({ status: 'error', message: 'Invalid JSON input' });
-    }
+    const jsonData = jsonSchema.parse(request.body);
 
-    try {
-      const validatedData = serviceSchema.parse(jsonData);
-      const requestBody = {
-        ...validatedData,
-        imageUrl,
-        additionalFee: validatedData.additionalFee
-          ? {
-              type: validatedData.additionalFee.type || '',
-              description: validatedData.additionalFee.description || '',
-              amount: validatedData.additionalFee.amount || 0,
-            }
-          : undefined,
-      };
+    const parsedJsonData = JSON.parse(jsonData.data);
 
-      const createdDayTour = await createDayTour(requestBody);
+    const validatedData = serviceSchema.parse(parsedJsonData);
 
-      res.status(CREATED).json({
-        status: 'success',
-        data: { dayTour: createdDayTour },
-      });
-    } catch (validationError) {
-      console.error('Validation Error:', validationError);
-      return res
-        .status(BAD_REQUEST)
-        .json({ status: 'error', message: 'Invalid data format' });
-    }
+    const requestBody = {
+      ...validatedData,
+      imageUrl,
+    };
+
+    console.log(requestBody);
+
+    const createdDayTour = await createDayTour(requestBody);
+
+    response.status(CREATED).json({
+      status: "success",
+      data: { dayTour: createdDayTour },
+    });
   }
 );
 
 export const getAllDayToursHandler = catchErrors(
-  async (req: Request, res: Response) => {
+  async (request: Request, response: Response) => {
     const dayTours = await getAllDayTours();
 
-    if (dayTours.length === 0) {
-      return res.status(OK).json({
-        status: 'success',
-        message: 'No day tours found.',
-        data: { dayTours: [] },
-      });
-    }
+    appAssert(dayTours, NOT_FOUND, "No Day Tours Available");
 
-    res.status(OK).json({
-      status: 'success',
+    return response.status(OK).json({
+      status: "success",
       data: { dayTours },
     });
   }
 );
 
 export const getDayTourByIdHandler = catchErrors(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    appAssert(!isNaN(Number(id)), BAD_REQUEST, 'Invalid day tour ID.');
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+    appAssert(!isNaN(Number(id)), BAD_REQUEST, "Invalid day tour ID.");
 
     const dayTour = await getDayTourById(Number(id));
     appAssert(dayTour, 404, `Day Tour with ID ${id} not found.`);
 
-    res.status(OK).json({
-      status: 'success',
+    response.status(OK).json({
+      status: "success",
       data: { dayTour },
     });
   }
 );
 
 export const updateDayTourHandler = catchErrors(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    let imageUrl = req.body.imageUrl;
-    if (req.file) {
-      imageUrl = `${ROOT_STATIC_URL}/${req.file.filename}`;
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+    let imageUrl = request.body.imageUrl;
+    if (request.file) {
+      imageUrl = `${ROOT_STATIC_URL}/${request.file.filename}`;
     }
 
-    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, 'Invalid ID');
+    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, "Invalid ID");
 
-    let jsonData;
-    try {
-      jsonData = JSON.parse(req.body.data);
-    } catch (error) {
-      return res
-        .status(BAD_REQUEST)
-        .json({ status: 'error', message: 'Invalid JSON input' });
-    }
+    const transformedId = Number(id);
 
-    try {
-      const validatedData = serviceSchema.parse(jsonData);
+    const jsonData = jsonSchema.parse(request.body);
 
-      const updatedDayTour = await updateDayTour(Number(id), {
-        ...validatedData,
-        imageUrl,
-        price: validatedData.price,
-        additionalFee: {
-          type: validatedData.additionalFee?.type || '',
-          description: validatedData.additionalFee?.description || '',
-          amount: validatedData.additionalFee?.amount || 0,
-        },
-      });
+    const parsedJsonData = JSON.parse(jsonData.data);
 
-      res.status(OK).json({
-        status: 'success',
-        data: { dayTour: updatedDayTour },
-      });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        console.error('Validation Error:', error);
-        return res.status(BAD_REQUEST).json({
-          status: 'error',
-          message: error.errors || 'Invalid data format',
-        });
-      }
-      throw error;
-    }
+    const validatedData = serviceSchema.parse(parsedJsonData);
+
+    const updatedDayTour = await updateDayTour({
+      id: transformedId,
+      data: { ...validatedData, imageUrl },
+    });
+
+    response.status(OK).json({
+      status: "success",
+      data: { dayTour: updatedDayTour },
+    });
   }
 );
 
 export const deleteDayTourHandler = catchErrors(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    appAssert(!isNaN(Number(id)), BAD_REQUEST, 'Invalid day tour ID.');
-
-    const dayTour = await getDayTourById(Number(id));
-    appAssert(dayTour, 404, `Day Tour with ID ${id} not found.`);
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+    appAssert(!isNaN(Number(id)), BAD_REQUEST, "Invalid day tour ID.");
 
     await deleteDayTour(Number(id));
-    res.status(OK).json({
-      status: 'success',
+    response.status(OK).json({
+      status: "success",
       message: `Day Tour Activity with ID ${id} deleted successfully`,
     });
   }
 );
 
 export const deleteSelectedDayToursHandler = catchErrors(
-  async (req: Request, res: Response) => {
-    const { ids } = req.body;
+  async (request: Request, response: Response) => {
+    const { ids } = deleteItemsSchema.parse(request.query);
 
-    if (!Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Invalid request. Provide day tour IDs.',
-      });
+    await deleteMultipleDayTour(ids);
+
+    response.status(OK).json({
+      status: "success",
+      message: `${ids.length} day tours deleted successfully.`,
+    });
+  }
+);
+
+export const getCabinByIdHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+    appAssert(!isNaN(Number(id)), BAD_REQUEST, "Invalid Cabin ID.");
+
+    const cabin = await getCabinById(Number(id));
+    appAssert(cabin, 404, `Cabin with ID ${id} not found.`);
+
+    response.status(OK).json({
+      status: "success",
+      data: { cabin },
+    });
+  }
+);
+
+export const getAllCabinsHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const cabins = await getAllCabins();
+
+    appAssert(cabins, NOT_FOUND, "No Cabins Available");
+
+    response.status(OK).json({
+      status: "success",
+      data: { cabins },
+    });
+  }
+);
+
+export const createCabinHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    appAssert(request.file, BAD_REQUEST, "Image is required");
+    const imageUrl = `${ROOT_STATIC_URL}/${request.file.filename}`;
+
+    const jsonData = jsonSchema.parse(request.body);
+
+    const parsedJsonData = JSON.parse(jsonData.data);
+
+    const validatedData = cabinSchema.parse(parsedJsonData);
+
+    appAssert(validatedData, BAD_REQUEST, "Invalid Data format");
+
+    const requestBody = {
+      ...validatedData,
+      imageUrl,
+    };
+
+    const createdCabin = await createCabin(requestBody);
+
+    response
+      .status(CREATED)
+      .json({ status: "success", data: { cabin: createdCabin } });
+  }
+);
+
+// export const deleteAllCabinsHandler = catchErrors(
+//   async (request: Request, response: Response) => {
+//     const deletedData = await deleteAllCabins();
+
+//     response.status(OK).json({
+//       status: "success",
+//       message:
+//         "All cabins and their corresponding services have been deleted successfully.",
+//       data: deletedData,
+//     });
+//   }
+// );
+
+export const deleteCabinHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+    appAssert(!isNaN(Number(id)), BAD_REQUEST, "Invalid day tour ID.");
+
+    await deleteCabin(Number(id));
+
+    response.status(OK).json({
+      status: "success",
+      message: `Cabin with ID ${id} deleted successfully`,
+    });
+  }
+);
+
+export const deleteSelectedCabinsHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { ids } = deleteItemsSchema.parse(request.query);
+
+    await deleteMultipleCabin(ids);
+
+    response.status(OK).json({
+      status: "success",
+      message: `${ids.length} cabins deleted successfully.`,
+    });
+  }
+);
+
+export const updateCabinHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+
+    let imageUrl = request.body.imageUrl;
+    if (request.file) {
+      imageUrl = `${ROOT_STATIC_URL}/${request.file.filename}`;
     }
 
-    await Promise.all(ids.map((id) => deleteDayTour(id)));
+    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, "Invalid ID");
 
-    res.status(OK).json({
-      status: 'success',
-      message: `${ids.length} day tours deleted successfully.`,
+    const transformedId = Number(id);
+
+    const jsonData = jsonSchema.parse(request.body);
+
+    const parsedJsonData = JSON.parse(jsonData.data);
+
+    const validatedData = cabinSchema.parse(parsedJsonData);
+    const updatedCabin = await updateCabin({
+      id: transformedId,
+      data: {
+        ...validatedData,
+        imageUrl,
+      },
+    });
+
+    response.status(OK).json({
+      status: "success",
+      data: { cabin: updatedCabin },
     });
   }
 );

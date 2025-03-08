@@ -5,6 +5,7 @@ import userRoutes from "./user.routes";
 import feedbackRoutes from "./feedback.routes";
 import serviceRoutes from "./service.routes";
 import { authenticate } from "../middlewares/auth.middleware";
+import { upload } from "../middlewares/upload";
 
 const router = Router();
 
@@ -19,8 +20,16 @@ router.get("/health", (request: Request, response: Response) => {
 
 router.use("/auth", authRoutes);
 router.use("/users", authenticate, userRoutes);
+router.use("/services", serviceRoutes);
 router.use("/feedbacks", feedbackRoutes);
 router.use("/services", serviceRoutes);
+
+router.post("/upload-test", upload.single("file"), (req, res) => {
+  res.json({
+    file: req.file,
+    body: req.body,
+  });
+});
 
 router.get("/auth-test", authenticate, (req, res) => {
   res.json({

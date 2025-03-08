@@ -4,7 +4,7 @@ import Image from "next/image";
 import twinCJLogo from "@/public/assets/admin-logo.svg";
 import HomePageCarousel from "./components/home-page-carousel";
 import Button from "./components/button";
-
+import SectionHeader from "./components/SectionHeader";
 
 const cabins = [
   {
@@ -38,20 +38,6 @@ type CabinCardProps = {
   availableCabins: number;
 };
 
-type SectionHeaderProps = {
-  title: string;
-  subtext?: string;
-};
-
-const SectionHeader = ({ title, subtext }: SectionHeaderProps) => {
-  return (
-    <div className={styles["section-header"]}>
-      {subtext && <p className={styles["subtext"]}>{subtext}</p>}
-      <h2 className={styles["title"]}>{title}</h2>
-    </div>
-  );
-};
-
 const CabinCard: React.FC<CabinCardProps> = ({
   imageSrc,
   imgAltText,
@@ -76,7 +62,7 @@ const CabinCard: React.FC<CabinCardProps> = ({
     </div>
   );
 };
-export default function Home() {
+export default function page() {
   return (
     <main>
       <section className={styles.heroSection}>
@@ -219,6 +205,4 @@ export default function Home() {
       </section>
     </main>
   );
-};
-
-export default page;
+}
