@@ -131,7 +131,7 @@ const DayTourView = () => {
         await Promise.all(
           selectedIds.map(async (id) => {
             const response = await fetch(
-              `http://localhost:8080/api/services/day-tour/${id}`,
+              `http://localhost:8080/api/services/day-tours/${id}`,
               {
                 method: "DELETE",
                 headers: {
