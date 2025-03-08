@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import styles from "./inquiryform.module.scss";
-import Button from "../components/button";
+import Button from "../../components/button";
 import useSWRMutation from "swr/mutation";
-import { sendFeedback } from "../lib/api";
-import { Loading } from "../components/loading";
+import { sendFeedback } from "../../lib/api";
+import { Loading } from "../../components/loading";
 import { z } from "zod";
 import Swal from "sweetalert2";
 
