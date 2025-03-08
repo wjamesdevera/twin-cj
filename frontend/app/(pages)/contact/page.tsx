@@ -2,7 +2,7 @@ import React from "react";
 import ContactInfo from "./contactinfo";
 import InquiryForm from "./inquiry-form";
 import styles from "./page.module.scss";
-import SectionHeader from "../components/SectionHeader";
+import SectionHeader from "../../components/SectionHeader";
 import Image from "next/image";
 
 const Header: React.FC = () => {

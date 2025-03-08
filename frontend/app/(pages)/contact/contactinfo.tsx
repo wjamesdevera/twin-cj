@@ -1,4 +1,4 @@
-import SectionHeader from "../components/SectionHeader";
+import SectionHeader from "../../components/SectionHeader";
 import styles from "./contactinfo.module.scss";
 const ContactInfo: React.FC = () => {
   return (

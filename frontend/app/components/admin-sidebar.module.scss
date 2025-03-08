@@ -1,8 +1,8 @@
-$side-bar-full-width: 20rem;
-$side-bar-close-width: 5rem;
+$side-bar-full-width: 15rem;
+$side-bar-close-width: 3rem;
 
 .sidebar-container {
-  position: fixed;
+  position: relative;
   display: flex;
   flex-direction: column;
   top: 0;
@@ -10,7 +10,7 @@ $side-bar-close-width: 5rem;
   min-height: 100vh;
   transition: width 0.3s ease, transform 0.3s ease;
   z-index: 9;
-  max-width: $side-bar-full-width;
+  min-width: $side-bar-full-width;
   background-color: var(--color-sunset-orange-500);
   color: var(--color-neutral-200);
   padding-top: 1rem;
@@ -21,8 +21,8 @@ $side-bar-close-width: 5rem;
 }
 
 .closed {
-  // transform: translateX(-75%);
-  .navlabel {
+  min-width: $side-bar-close-width;
+  .navbar-label {
     display: none;
   }
 }
@@ -52,6 +52,7 @@ $side-bar-close-width: 5rem;
   display: flex;
   padding: 1rem;
   border-bottom: 1px solid var(--color-sunset-orange-400);
+  transition: background-color 0.3s ease;
 
   a {
     text-decoration: none;
@@ -60,11 +61,37 @@ $side-bar-close-width: 5rem;
   &:hover {
     background-color: var(--color-sunset-orange-600);
     cursor: pointer;
+    text-decoration: none !important;
+  }
+}
+
+.active {
+  background-color: var(--color-sunset-orange-600);
+}
+
+.navitem-container.active,
+.navitem-dropdown-container.active {
+  background-color: var(--color-sunset-orange-600);
+}
+
+.dropdown-items {
+  .navitem-container.active {
+    background-color: var(--color-sunset-orange-700);
   }
 }
 
 .hidden {
   display: none;
+  position: absolute;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .navitem-wrapper {
