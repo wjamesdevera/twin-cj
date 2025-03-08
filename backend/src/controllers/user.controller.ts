@@ -7,7 +7,7 @@ import {
   editUserSchema,
   idSchema,
   registerSchema,
-} from "../schemas/auth.schems";
+} from "../schemas/auth.schema";
 import app from "../app";
 
 export const getUserHandler = catchErrors(

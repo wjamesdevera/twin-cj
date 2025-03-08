@@ -35,14 +35,9 @@ const NavLinks = () => {
   return (
     <ul className={styles.navlist}>
       {navlist.map((navlink) => {
-        const isHome =
-          navlink.href === "/home" &&
-          (pathname === "/" || pathname === "/home");
-        const isActive = isHome || pathname.startsWith(navlink.href);
-
         return (
           <NavLink
-            isActive={isActive}
+            isActive={navlink.href == pathname}
             label={navlink.label}
             href={navlink.href}
             key={navlink.label}

@@ -6,11 +6,6 @@ import { useRouter } from "next/navigation";
 
 interface Service {
   id: number;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  quantity: number;
 }
 
 interface AdditionalFee {
@@ -23,6 +18,11 @@ interface Cabin {
   id: number;
   minCapacity: number;
   maxCapacity: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  quantity: number;
   service: Service;
   additionalFee?: AdditionalFee | null;
   createdAt?: string;
@@ -30,7 +30,10 @@ interface Cabin {
 }
 
 const formatPrice = (price: number) => {
-  return price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return price.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 const formatDate = (isoString?: string) => {
@@ -54,7 +57,9 @@ const CabinDashboard = () => {
   useEffect(() => {
     const fetchCabins = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/services/cabins");
+        const response = await fetch(
+          "http://localhost:8080/api/services/cabins"
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch cabins");
         }
@@ -72,7 +77,9 @@ const CabinDashboard = () => {
 
   const toggleSelection = (id: number) => {
     setSelectedCabins((prev) =>
-      prev.includes(id) ? prev.filter((cabinId) => cabinId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((cabinId) => cabinId !== id)
+        : [...prev, id]
     );
   };
 
@@ -80,9 +87,12 @@ const CabinDashboard = () => {
     if (!window.confirm("Are you sure you want to delete this cabin?")) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/services/cabins/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete cabin");
@@ -105,20 +115,28 @@ const CabinDashboard = () => {
       return;
     }
 
-    if (!window.confirm("Are you sure you want to delete the selected cabin/s?")) return;
+    if (
+      !window.confirm("Are you sure you want to delete the selected cabin/s?")
+    )
+      return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/services/cabins/bulk-delete`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selectedCabins }),
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/services/cabins/bulk-delete`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: selectedCabins }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete selected cabin/s");
       }
 
-      setCabins((prevCabins) => prevCabins.filter((cabin) => !selectedCabins.includes(cabin.id)));
+      setCabins((prevCabins) =>
+        prevCabins.filter((cabin) => !selectedCabins.includes(cabin.id))
+      );
       setSelectedCabins([]);
       setSelectAll(false);
 
@@ -146,7 +164,12 @@ const CabinDashboard = () => {
       <div style={{ marginTop: "80px" }}></div>
 
       <button onClick={() => router.push("/cabin/create")}>Add Cabin</button>
-      <button onClick={deleteSelectedCabins} disabled={selectedCabins.length === 0}>Delete Selected</button>
+      <button
+        onClick={deleteSelectedCabins}
+        disabled={selectedCabins.length === 0}
+      >
+        Delete Selected
+      </button>
 
       <div>
         <table style={{ width: "100%", textAlign: "center" }}>
@@ -169,7 +192,9 @@ const CabinDashboard = () => {
               <th style={{ border: "1px solid" }}>Maximum Capacity</th>
               <th style={{ border: "1px solid" }}>Quantity</th>
               <th style={{ border: "1px solid" }}>Additional Fee Type</th>
-              <th style={{ border: "1px solid" }}>Additional Fee Description</th>
+              <th style={{ border: "1px solid" }}>
+                Additional Fee Description
+              </th>
               <th style={{ border: "1px solid" }}>Additional Fee Amount</th>
               <th style={{ border: "1px solid" }}>Date Created</th>
               <th style={{ border: "1px solid" }}>Last Updated</th>
@@ -186,21 +211,50 @@ const CabinDashboard = () => {
                   />
                 </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  <button onClick={() => router.push(`/cabin/update/${cabin.id}`)}>Edit</button>
+                  <button
+                    onClick={() => router.push(`/cabin/update/${cabin.id}`)}
+                  >
+                    Edit
+                  </button>
                   <button onClick={() => deleteCabin(cabin.id)}>Delete</button>
                 </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.id}</td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.service.name}</td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <Image src={cabin.service.imageUrl} alt={cabin.service.name} width={135} height={90} />
+                  {cabin.id}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {cabin.name}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Image
+                      src={cabin.imageUrl}
+                      alt={cabin.name}
+                      width={135}
+                      height={90}
+                    />
                   </div>
                 </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.service.description}</td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>₱{formatPrice(cabin.service.price)}</td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.minCapacity}</td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.maxCapacity}</td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{cabin.service.quantity}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {cabin.description}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  ₱{formatPrice(cabin.price)}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {cabin.minCapacity}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {cabin.maxCapacity}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {cabin.quantity}
+                </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
                   {cabin.additionalFee?.type || "N/A"}
                 </td>
@@ -208,10 +262,16 @@ const CabinDashboard = () => {
                   {cabin.additionalFee?.description || "N/A"}
                 </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.additionalFee?.amount ? `₱${formatPrice(cabin.additionalFee.amount)}` : "N/A"}
+                  {cabin.additionalFee?.amount
+                    ? `₱${formatPrice(cabin.additionalFee.amount)}`
+                    : "N/A"}
                 </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{formatDate(cabin.createdAt)}</td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>{formatDate(cabin.updatedAt)}</td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {formatDate(cabin.createdAt)}
+                </td>
+                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
+                  {formatDate(cabin.updatedAt)}
+                </td>
               </tr>
             ))}
           </tbody>
