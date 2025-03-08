@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+import { deleteCabin, getCabins, multiDeleteCabin } from "@/app/lib/api";
+import { Loading } from "@/app/components/loading";
+import useSWRMutation from "swr/mutation";
 
 interface Service {
   id: number;
@@ -22,7 +26,6 @@ interface Cabin {
   description: string;
   price: number;
   imageUrl: string;
-  quantity: number;
   service: Service;
   additionalFee?: AdditionalFee | null;
   createdAt?: string;
@@ -48,32 +51,12 @@ const formatDate = (isoString?: string) => {
 const CabinDashboard = () => {
   const router = useRouter();
 
-  const [cabins, setCabins] = useState<Cabin[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedCabins, setSelectedCabins] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
 
-  useEffect(() => {
-    const fetchCabins = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:8080/api/services/cabins"
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch cabins");
-        }
-        const data = await response.json();
-        setCabins(data.data.cabins);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data, isLoading } = useSWR("getCabins", getCabins);
 
-    fetchCabins();
-  }, []);
+  const { cabins } = data?.data || [];
 
   const toggleSelection = (id: number) => {
     setSelectedCabins((prev) =>
@@ -83,30 +66,14 @@ const CabinDashboard = () => {
     );
   };
 
-  const deleteCabin = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this cabin?")) return;
+  const { trigger, isMutating } = useSWRMutation(
+    "deleteCabin",
+    (key, { arg }: { arg: number }) => deleteCabin(arg)
+  );
 
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/services/cabins/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete cabin");
-      }
-
-      setCabins((prevCabins) => prevCabins.filter((cabin) => cabin.id !== id));
-      setSelectedCabins((prev) => prev.filter((cabinId) => cabinId !== id));
-      setSelectAll(false);
-
-      alert("Cabin deleted successfully!");
-    } catch (err) {
-      console.error("Error deleting cabin:", err);
-      alert("Error deleting cabin.");
-    }
+  const handleDeletCabin = async (id: number) => {
+    // NOTE: Add a modal before running the trigger for delete
+    trigger(id);
   };
 
   const deleteSelectedCabins = async () => {
@@ -114,56 +81,32 @@ const CabinDashboard = () => {
       alert("No cabins selected.");
       return;
     }
+    // NOTE: ADD modal before deletion
+    multiDeleteCabin(selectedCabins.join(","));
+    setSelectedCabins([]);
+    setSelectAll(false);
 
-    if (
-      !window.confirm("Are you sure you want to delete the selected cabin/s?")
-    )
-      return;
-
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/services/cabins/bulk-delete`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids: selectedCabins }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete selected cabin/s");
-      }
-
-      setCabins((prevCabins) =>
-        prevCabins.filter((cabin) => !selectedCabins.includes(cabin.id))
-      );
-      setSelectedCabins([]);
-      setSelectAll(false);
-
-      alert("Selected cabin/s deleted successfully!");
-    } catch (err) {
-      console.error("Error deleting selected cabin/s:", err);
-      alert("Error deleting selected cabin/s.");
-    }
+    alert("Selected cabin/s deleted successfully!");
   };
 
   const toggleSelectAll = () => {
     if (selectAll) {
       setSelectedCabins([]);
     } else {
-      setSelectedCabins(cabins.map((cabin) => cabin.id));
+      setSelectedCabins(cabins.map((cabin: Cabin) => cabin.id));
     }
     setSelectAll(!selectAll);
   };
 
-  if (loading) return <p>Loading cabins...</p>;
-  if (error) return <p>Error: {error}</p>;
-
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <div>
       <div style={{ marginTop: "80px" }}></div>
 
-      <button onClick={() => router.push("/cabin/create")}>Add Cabin</button>
+      <button onClick={() => router.push("/admin/cabins/create")}>
+        Add Cabin
+      </button>
       <button
         onClick={deleteSelectedCabins}
         disabled={selectedCabins.length === 0}
@@ -190,7 +133,6 @@ const CabinDashboard = () => {
               <th style={{ border: "1px solid" }}>Rate</th>
               <th style={{ border: "1px solid" }}>Minimum Capacity</th>
               <th style={{ border: "1px solid" }}>Maximum Capacity</th>
-              <th style={{ border: "1px solid" }}>Quantity</th>
               <th style={{ border: "1px solid" }}>Additional Fee Type</th>
               <th style={{ border: "1px solid" }}>
                 Additional Fee Description
@@ -201,7 +143,7 @@ const CabinDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {cabins.map((cabin) => (
+            {cabins.map((cabin: Cabin) => (
               <tr key={cabin.id}>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
                   <input
@@ -212,11 +154,15 @@ const CabinDashboard = () => {
                 </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
                   <button
-                    onClick={() => router.push(`/cabin/update/${cabin.id}`)}
+                    onClick={() =>
+                      router.push(`/admin/cabins/update/${cabin.id}`)
+                    }
                   >
                     Edit
                   </button>
-                  <button onClick={() => deleteCabin(cabin.id)}>Delete</button>
+                  <button onClick={() => handleDeletCabin(cabin.id)}>
+                    Delete
+                  </button>
                 </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
                   {cabin.id}
@@ -251,9 +197,6 @@ const CabinDashboard = () => {
                 </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
                   {cabin.maxCapacity}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.quantity}
                 </td>
                 <td style={{ border: "1px solid", verticalAlign: "middle" }}>
                   {cabin.additionalFee?.type || "N/A"}

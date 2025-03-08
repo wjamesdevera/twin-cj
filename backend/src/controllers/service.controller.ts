@@ -190,19 +190,6 @@ export const createCabinHandler = catchErrors(
   }
 );
 
-// export const deleteAllCabinsHandler = catchErrors(
-//   async (request: Request, response: Response) => {
-//     const deletedData = await deleteAllCabins();
-
-//     response.status(OK).json({
-//       status: "success",
-//       message:
-//         "All cabins and their corresponding services have been deleted successfully.",
-//       data: deletedData,
-//     });
-//   }
-// );
-
 export const deleteCabinHandler = catchErrors(
   async (request: Request, response: Response) => {
     const { id } = idSchema.parse(request.params);

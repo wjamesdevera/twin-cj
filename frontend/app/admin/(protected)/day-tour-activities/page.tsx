@@ -1,8 +1,8 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import styles from './dashboard.module.scss';
-import { useRouter } from 'next/navigation';
-import { Loading } from '@/app/components/loading';
+"use client";
+import React, { useEffect, useState } from "react";
+import styles from "./dashboard.module.scss";
+import { useRouter } from "next/navigation";
+import { Loading } from "@/app/components/loading";
 
 interface DayTour {
   id: number;
@@ -18,14 +18,14 @@ interface DayTour {
 }
 
 const formatDate = (isoString?: string) => {
-  if (!isoString) return 'N/A';
+  if (!isoString) return "N/A";
   const date = new Date(isoString);
   return isNaN(date.getTime())
-    ? 'N/A'
-    : date.toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric',
+    ? "N/A"
+    : date.toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
       });
 };
 
@@ -40,12 +40,12 @@ const DayTourView = () => {
     const fetchDayTours = async () => {
       try {
         const response = await fetch(
-          'http://localhost:8080/api/services/day-tours',
+          "http://localhost:8080/api/services/day-tours",
           {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache',
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
             },
           }
         );
@@ -59,13 +59,13 @@ const DayTourView = () => {
           const mappedDayTours = data.data.dayTours.map((tour: any) => {
             return {
               id: tour.id,
-              name: tour.name || 'Unnamed Tour',
-              description: tour.description || 'No description available',
-              imageUrl: tour.imageUrl || '',
+              name: tour.name || "Unnamed Tour",
+              description: tour.description || "No description available",
+              imageUrl: tour.imageUrl || "",
               rate: parseFloat(tour.price || 0).toFixed(2),
-              additionalFeeType: tour.additionalFee?.type || 'N/A',
+              additionalFeeType: tour.additionalFee?.type || "N/A",
               additionalFeeDescription:
-                tour.additionalFee?.description || 'N/A',
+                tour.additionalFee?.description || "N/A",
               additionalFeeAmount: parseFloat(
                 tour.additionalFee?.amount || 0
               ).toFixed(2),
@@ -80,11 +80,11 @@ const DayTourView = () => {
             return isSameData ? prevTours : mappedDayTours;
           });
         } else {
-          throw new Error('Invalid response format');
+          throw new Error("Invalid response format");
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : 'An unknown error occurred'
+          err instanceof Error ? err.message : "An unknown error occurred"
         );
       } finally {
         setLoading(false);
@@ -95,16 +95,16 @@ const DayTourView = () => {
   }, []);
 
   const handleAdd = () => {
-    router.push('/admin/content/daytour/create');
+    router.push("/admin/day-tour-activities/create");
   };
 
   const handleEdit = (id: number) => {
-    router.push(`/admin/content/daytour/edit/${id}`);
+    router.push(`/admin/day-tour-activities/edit/${id}`);
   };
 
   const handleDelete = async (id?: number) => {
     const confirmed = window.confirm(
-      'Are you sure you want to delete the selected day tour/s?'
+      "Are you sure you want to delete the selected day tour/s?"
     );
     if (!confirmed) {
       return;
@@ -116,9 +116,9 @@ const DayTourView = () => {
         const response = await fetch(
           `http://localhost:8080/api/services/day-tour/${id}`,
           {
-            method: 'DELETE',
+            method: "DELETE",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
           }
         );
@@ -133,9 +133,9 @@ const DayTourView = () => {
             const response = await fetch(
               `http://localhost:8080/api/services/day-tour/${id}`,
               {
-                method: 'DELETE',
+                method: "DELETE",
                 headers: {
-                  'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
               }
             );
@@ -149,12 +149,12 @@ const DayTourView = () => {
           prevTours.filter((tour) => !selectedIds.includes(tour.id))
         );
         setSelectedIds([]);
-        alert('Selected day tours deleted successfully!');
+        alert("Selected day tours deleted successfully!");
       }
     } catch (err) {
       console.error(err);
       setError(
-        err instanceof Error ? err.message : 'An unknown error occurred'
+        err instanceof Error ? err.message : "An unknown error occurred"
       );
     }
   };
@@ -230,7 +230,7 @@ const DayTourView = () => {
                 {dayTour.imageUrl ? (
                   <img
                     src={
-                      dayTour.imageUrl.startsWith('http')
+                      dayTour.imageUrl.startsWith("http")
                         ? dayTour.imageUrl
                         : `http://localhost:8080/uploads/${dayTour.imageUrl}`
                     }
@@ -239,7 +239,7 @@ const DayTourView = () => {
                     height="100"
                   />
                 ) : (
-                  'No image available'
+                  "No image available"
                 )}
               </td>
               <td>{dayTour.description}</td>

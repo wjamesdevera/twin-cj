@@ -3,8 +3,6 @@ import path from "path";
 import fs from "fs";
 import appAssert from "../utils/appAssert";
 import { NOT_FOUND } from "../constants/http";
-import app from "../app";
-import { number } from "zod";
 
 interface CreateDayTourParams {
   name: string;
@@ -297,6 +295,7 @@ export const getAllCabins = async () => {
       imageUrl: cabin.service.imageUrl,
       minCapacity: cabin.minCapacity,
       maxCapacity: cabin.maxCapacity,
+      additionalFee: cabin.additionalFee,
       createdAt: cabin.createdAt,
       updatedAt: cabin.updatedAt,
     };
