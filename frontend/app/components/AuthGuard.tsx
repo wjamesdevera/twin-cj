@@ -12,8 +12,9 @@ export default function AuthGuard({
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  if (isLoading) return <Loading />;
-  if (!user) {
+  if (isLoading) {
+    return <Loading />;
+  } else if (!user) {
     router.push("/admin/login");
     return null;
   }

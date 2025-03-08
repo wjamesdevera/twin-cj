@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { nullable, z } from "zod";
 
 export const emailSchema = z
   .string()
@@ -10,6 +10,7 @@ export const emailSchema = z
 
 const passwordSchema = z.string().min(6).max(255);
 const phoneNumberSchema = z.string().min(11).max(15);
+const nameSchema = z.string().nullable();
 
 export const loginSchema = z.object({
   email: emailSchema,
@@ -19,6 +20,8 @@ export const loginSchema = z.object({
 
 export const registerSchema = loginSchema
   .extend({
+    firstName: nameSchema,
+    lastName: nameSchema,
     confirmPassword: passwordSchema,
     phoneNumber: phoneNumberSchema,
   })
@@ -37,4 +40,13 @@ export const resetPasswordSchema = z.object({
 export const changePasswordSchema = z.object({
   oldPassword: passwordSchema,
   newPassword: passwordSchema,
+});
+
+export const idSchema = z.string().uuid().trim();
+
+export const editUserSchema = z.object({
+  email: emailSchema,
+  firstName: nameSchema.nullable(),
+  lastName: nameSchema.nullable(),
+  phoneNumber: phoneNumberSchema,
 });

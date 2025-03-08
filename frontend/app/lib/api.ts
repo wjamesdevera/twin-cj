@@ -27,6 +27,13 @@ type ChangePasswordData = {
   newPassword: string;
 };
 
+type EditUserData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+};
+
 type SendFeedbackData = {
   fullName: string;
   email: string;
@@ -47,6 +54,10 @@ export const resetPassword = async (data: ResetPasswordData) =>
   API.post("/api/auth/password/reset", data);
 export const changePassword = async (data: ChangePasswordData) =>
   API.post("/api/auth/password/change", data);
-export const sendFeedback = async (data: SendFeedbackData) => {
+export const getAllUsers = async () => API.get("/api/users/all");
+export const getUserById = async (id: string) => API.get(`/api/users/${id}`);
+export const deleteUser = async (id: string) => API.delete(`/api/users/${id}`);
+export const editUser = async (id: string, data: EditUserData) =>
+  API.put(`/api/users/${id}`, data);
+export const sendFeedback = async (data: SendFeedbackData) =>
   API.post("/api/feedbacks", data);
-};
