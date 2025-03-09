@@ -3,22 +3,31 @@
 import { useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import styles from "./admin_accounts_table.module.scss";
-import useSWR, { mutate } from "swr"; 
-import { deleteUser, getAllUsers } from "../../../lib/api";
+import useSWR, { mutate } from "swr";
+import { deleteUser, getAllUsers } from "@/app/lib/api";
 import { Loading } from "../../../components/loading";
 import { useRouter } from "next/navigation";
 import useSWRMutation from "swr/mutation";
 import ConfirmModal from "../../../components/confirm_modal";
+import useAuth from "@/app/hooks/useAuth";
 
 interface AdminAccountsTableProps {
   showNotification: (message: string, type: "success" | "error") => void;
 }
 
-const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({ showNotification }) => {
-  const { data, isLoading } = useSWR("getUsers", getAllUsers);
-  const { trigger } = useSWRMutation(
+const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({
+  showNotification,
+}) => {
+  const { data, isLoading: loadingUsers } = useSWR("getUsers", getAllUsers);
+  const { user, isLoading: authLoading } = useAuth();
+  const { trigger: deleteUserTrigger } = useSWRMutation(
     "delete",
-    (key, { arg }: { arg: string }) => deleteUser(arg)
+    (key, { arg }: { arg: string }) => deleteUser(arg),
+    {
+      onSuccess: () => {
+        window.location.reload();
+      },
+    }
   );
   const router = useRouter();
 
@@ -39,19 +48,23 @@ const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({ showNotificatio
   const handleConfirmDelete = async () => {
     if (selectedUserId) {
       try {
-        await trigger(selectedUserId);
+        await deleteUserTrigger(selectedUserId);
 
-        mutate("getUsers", async (currentData: any) => {
-          if (!currentData) return;
-          return {
-            ...currentData,
-            data: {
-              users: currentData.data.users.filter(
-                (user: any) => user.id !== selectedUserId
-              ),
-            },
-          };
-        }, false);
+        mutate(
+          "getUsers",
+          async (currentData: any) => {
+            if (!currentData) return;
+            return {
+              ...currentData,
+              data: {
+                users: currentData.data.users.filter(
+                  (user: any) => user.id !== selectedUserId
+                ),
+              },
+            };
+          },
+          false
+        );
 
         showNotification("Admin Account deleted successfully!", "success");
       } catch (error) {
@@ -63,7 +76,7 @@ const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({ showNotificatio
     setSelectedUserId(null);
   };
 
-  return isLoading ? (
+  return loadingUsers ? (
     <Loading />
   ) : (
     <div className={styles.table_container}>
@@ -120,9 +133,9 @@ const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({ showNotificatio
         onConfirm={handleConfirmDelete}
         title="Are you sure you want to delete this Admin Account?"
         confirmText="Delete"
-        confirmColor="#A80000" 
+        confirmColor="#A80000"
         cancelText="Cancel"
-        cancelColor="#CCCCCC" 
+        cancelColor="#CCCCCC"
       />
     </div>
   );
