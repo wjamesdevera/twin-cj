@@ -8,55 +8,82 @@
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.2);
   background: #fff;
-  margin: 10px 0 10px 50px;
-  font-family: 'Open Sans';
   width: 100%;
+  min-width: 400px;
+  box-sizing: border-box;
 }
 
 .banner {
   display: flex;
   flex-direction: row;
+  align-items: center;
   width: 100%;
-  padding: 20px;
+  padding: 20px 0;
   border-bottom: 1px solid rgba(135, 135, 135, 0.28);
 }
 
 .pricingImg {
   display: flex;
-  flex-direction: row;
+  align-items: center;
+  img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
 }
 
 .pricingHeader {
   display: flex;
   flex-direction: column;
-  margin: 0 20px;
-  display: flex;
-  justify-content: end;
+  margin-left: 20px;
   gap: 7px;
 }
 
 .text {
   color: var(--color-neutral-400);
-  font-size: var(--text-size-lg);
-  line-height: var(--text-line-height-base);
+  font-size: var(--text-size-base);
+  line-height: var(--text-line-height-xs);
 }
 
 .title {
   font-size: var(--text-size-xl);
   line-height: var(--text-line-height-base);
   font-weight: 600;
+  margin-top: 5px;
 }
 
 .detailsContainer {
   width: 100%;
   display: flex;
-  justify-content: end;
+  justify-content: space-between;
   gap: 10px;
-  padding: 15px 0 0 0;
+  padding: 15px 0 55px 0;
+  flex-wrap: wrap;
 }
 
 .detailsContainer h2 {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+}
+
+.pricingTitle {
+  font-size: var(--text-size-lg);
+  line-height: var(--text-line-height-xs);
+  font-weight: 600;
+}
+
+.pricingText {
+  font-size: var(--text-size-base);
+  line-height: var(--text-line-height-xs);
+}
+
+.prices {
+  font-size: var(--text-size-base);
+}
+
+.totalAmount {
+  font-size: var(--text-size-lg);
+  font-weight: 600;
 }
 
 .leftContainer {
@@ -67,37 +94,80 @@
 .rightContainer {
   display: flex;
   justify-content: flex-end;
-  align-items: end;
+  align-items: flex-end;
+  padding-bottom: 10px;
 }
 
 .totalAmountContainer {
   width: 100%;
   display: flex;
-  justify-content: end;
-  align-items: end;
+  justify-content: flex-end;
+  align-items: flex-end;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1550px) {
+  .pricingContainer {
+    width: 100%;
+    min-width: 400px;
+    max-width: 450px;
+    padding: 25px 20px;
+  }
+}
+
+@media screen and (max-width: 1280px) {
+  .pricingContainer {
+    width: 100%;
+    min-width: 200px;
+    max-width: 380px;
+    padding: 25px 20px;
+  }
+
+  .pricingImg {
+    img {
+      width: 130px;
+      height: 130px;
+    }
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .pricingContainer {
+    width: 100%;
+    max-width: 300px;
+    padding: 25px 20px;
+  }
+
+  .pricingImg {
+    img {
+      width: 120px;
+      height: 120px;
+    }
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .pricingContainer {
+    width: 100%;
+    min-width: 200px;
+    max-width: 450px;
+    padding: 25px 20px;
+  }
+
   .banner {
-    display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
     padding: 20px;
     border-bottom: 1px solid var(--color-neutral-500);
   }
 
-  .pricingContainer {
-    margin: 10px 0 10px 50px;
-  }
-
   .pricingImg {
-    width: 110px;
+    img {
+      width: 100px;
+      height: 100px;
+    }
   }
 
   .text {
-    color: var(--color-neutral-400);
     font-size: var(--text-size-base);
     line-height: var(--text-line-height-base);
   }
@@ -106,5 +176,51 @@
     font-size: var(--text-size-lg);
     line-height: var(--text-line-height-base);
     font-weight: bold;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .pricingContainer {
+    width: 100%;
+    min-width: 200px;
+    max-width: 600px;
+    padding: 25px 30px;
+  }
+
+  .banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--color-neutral-500);
+  }
+
+  .pricingImg {
+    width: 100%;
+    img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  }
+
+  .pricingHeader {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  .detailsContainer {
+    flex-direction: column;
+    gap: 20px;
+    padding: 15px 0;
+    font-family: "Open Sans";
+  }
+
+  .rightContainer {
+    justify-content: flex-start;
+  }
+
+  .totalAmountContainer {
+    justify-content: flex-start;
   }
 }

@@ -1,35 +1,36 @@
 .paymentContainer {
-  margin-top: -300px;
   height: auto;
-  width: auto;
+  width: 100%;
+  max-width: 800px;
   padding: 20px;
-  margin: 10px 0 0 50px;
   flex-shrink: 0;
+  background-color: #fff;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  font-family: 'Open Sans';
-  width: 100%;
+  font-family: "Open Sans";
 }
 
 .paymentOptions {
   border-radius: 10px;
   border: 1px solid rgba(22, 22, 22, 0.4);
   opacity: 0.4;
-  width: 400px;
+  width: 700px;
   height: 40px;
   flex-shrink: 0;
   opacity: 0.4;
   max-width: 100%;
-  margin-bottom: 30px;
+  margin: 20px 0 10px 7px;
+  padding: 7px;
 }
 
 .heading {
   color: var(--text, #555);
-  font-family: 'Open Sans';
-  font-size: 1.5625rem;
+  font-family: "Open Sans";
+  font-size: var(--text-size-xl);
   font-style: normal;
   font-weight: 600;
   line-height: 2.1875rem; /* 140% */
+  padding: 5px 0 0 10px;
 }
 
 .required {
@@ -38,11 +39,11 @@
 
 .subheading {
   color: #000;
-  font-family: 'Open Sans';
-  font-size: 1rem;
+  font-family: "Open Sans";
+  font-size: var(--text-size-base);
   font-style: normal;
   font-weight: 300;
-  line-height: 2.1875rem;
+
   margin: 10px;
 }
 
@@ -60,7 +61,7 @@
   margin: 10px;
 }
 
-.fileUpload input[type='file'] {
+.fileUpload input[type="file"] {
   display: none;
 }
 
@@ -75,4 +76,52 @@
 
 .uploadIcon {
   padding-right: 5px;
+}
+
+.uploadSubtext {
+  font-size: var(--text-size-sm);
+  color: #000;
+  font-family: "Open Sans";
+  font-weight: 300;
+  font-style: italic;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 1550px) {
+  .paymentContainer {
+    height: auto;
+    width: 100%;
+    max-width: 700px;
+  }
+}
+
+@media screen and (max-width: 1280px) {
+  .paymentContainer {
+    width: 100%;
+    max-width: 400px;
+    padding: 25px 20px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .paymentContainer {
+    max-width: 450px;
+    padding: 25px 20px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .paymentContainer {
+    max-width: 320px;
+    padding: 25px 20px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .paymentContainer {
+    width: 100%;
+    min-width: 200px;
+    max-width: 600px;
+    padding: 25px 30px;
+  }
 }
