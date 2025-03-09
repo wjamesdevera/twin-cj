@@ -12,6 +12,7 @@ import {
   deleteUser,
   getAllUsers,
   getUser,
+  getUserById,
   updateUser,
 } from "../services/user.service";
 
@@ -63,27 +64,12 @@ export const getUserByIdHandler = catchErrors(
 
     appAssert(id, BAD_REQUEST, "Id is required");
 
-    const user = await prisma.userAccount.findFirst({
-      where: {
-        id: id,
-      },
-      include: {
-        personalDetail: true,
-      },
-    });
-
-    appAssert(user, NOT_FOUND, "User not found");
+    const user = await getUserById(id);
 
     return response.status(OK).json({
       status: "success",
       data: {
-        id: user.id,
-        firstName: user.personalDetail.firstName,
-        lastName: user.personalDetail.lastName,
-        email: user.personalDetail.email,
-        phoneNumber: user.personalDetail.phoneNumber,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        user,
       },
     });
   }

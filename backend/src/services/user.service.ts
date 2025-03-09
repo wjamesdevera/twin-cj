@@ -145,3 +145,37 @@ export const deleteUser = async (id: string) => {
 
   return existingUserAccount.id;
 };
+
+export const getUserById = async (id: string) => {
+  const user = await prisma.userAccount.findFirst({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      isVerified: true,
+      createdAt: true,
+      updatedAt: true,
+      personalDetail: {
+        select: {
+          email: true,
+          firstName: true,
+          lastName: true,
+          phoneNumber: true,
+        },
+      },
+    },
+  });
+  appAssert(user, NOT_FOUND, "User not found");
+
+  return {
+    id: user.id,
+    isVerified: user.isVerified,
+    email: user.personalDetail.email,
+    firstName: user.personalDetail.firstName,
+    lastName: user.personalDetail.lastName,
+    phoneNumber: user.personalDetail.phoneNumber,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+};
