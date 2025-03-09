@@ -1,272 +1,378 @@
 {
-	"info": {
-		"_postman_id": "a666e73e-908d-48b9-bd46-75c48ec9d243",
-		"name": "Twin CJ API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "37721218"
-	},
-	"item": [
-		{
-			"name": "auth",
-			"item": [
-				{
-					"name": "register",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"firstName\": \"sampleName\",\r\n    \"lastName\": \"sampleName\",\r\n    \"email\": \"sampleEmail@email.com\",\r\n    \"phoneNumber\": \"+63 9777777777\",\r\n    \"password\": \"samplePassword\",\r\n    \"confirmPassword\": \"samplePassword\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/register",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"register"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "logout",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/auth/logout",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"logout"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "forgot password",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"sampleEmail@email.com\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/password/forgot",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"password",
-								"forgot"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "reset password",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"verificationCode\": \"662c76881161a09656b81a8c\",\r\n    \"password\": \"111111\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/password/reset",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"password",
-								"reset"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "verify email",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/auth/email/verify/:code",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"email",
-								"verify",
-								":code"
-							],
-							"variable": [
-								{
-									"key": "code",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "login",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"sampleEmail@email.com\",\r\n    \"password\": \"samplePassword\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/api/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "refresh",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/auth/refresh",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"refresh"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "users",
-			"item": [
-				{
-					"name": "users",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"users"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "bookings",
-			"item": []
-		},
-		{
-			"name": "transactions",
-			"item": []
-		},
-		{
-			"name": "GET /health",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/api/health",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"api",
-						"health"
-					]
-				}
-			},
-			"response": []
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"packages": {},
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"packages": {},
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8080",
-			"type": "default"
-		}
-	]
+  "info": {
+    "_postman_id": "cc8c4703-e792-4513-ae31-2191f638d12e",
+    "name": "Twin CJ API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "41180003"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"sampleEmail@email.com\",\r\n    \"password\": \"samplePassword\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"firstName\": \"sampleFirstName\",\r\n    \"lastName\": \"sampleLastName\",\r\n    \"email\": \"sampleEmail@email.com\",\r\n    \"phoneNumber\": \"+63 9123456789\",\r\n    \"password\": \"samplePassword\",\r\n    \"confirmPassword\": \"samplePassword\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "forgot password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"sampleEmail@email.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/password/forgot",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "password", "forgot"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "reset password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"verificationCode\": \"5b1f3c61-192c-4340-a334-8b7d85de7803\",\r\n    \"password\": \"simplePa$$w0rd\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/password/reset",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "password", "reset"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verify email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/email/verify/:code",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "email", "verify", ":code"],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "refresh",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "refresh"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "bookings",
+      "item": []
+    },
+    {
+      "name": "transactions",
+      "item": []
+    },
+    {
+      "name": "feedbacks",
+      "item": [
+        {
+          "name": "feedbacks",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"fullName\": \"exampleName\",\r\n    \"email\": \"example@email.com\",\r\n    \"inquiryType\": \"General\",\r\n    \"contactNumber\": \"09 658108388\",\r\n    \"message\": \"Hello World\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/feedbacks/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "feedbacks", ""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "services",
+      "item": [
+        {
+          "name": "cabins",
+          "item": [
+            {
+              "name": "get cabin",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/services/cabins/1",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "services", "cabins", "1"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get all cabins",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/services/cabins",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "services", "cabins"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create cabin",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"service\": {\r\n    \"name\": \"Mini Cabin - Day Tour\",\r\n    \"description\": \"For 2-4 guests\",\r\n    \"imageUrl\": \"https://example.com/image.jpg\",\r\n    \"quantity\": 1,\r\n    \"price\": 2000\r\n  },\r\n  \"cabin\": {\r\n    \"minCapacity\": 2,\r\n    \"maxCapacity\": 4\r\n  },\r\n  \"additionalFee\": {\r\n    \"type\": \"Cleaning Fee\",\r\n    \"description\": \"A mandatory cleaning fee for maintenance\",\r\n    \"amount\": 500\r\n  }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/api/services/cabins",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "services", "cabins"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete cabin",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/services/cabins/1",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "services", "cabins", "1"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete all cabins",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/services/cabins",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "services", "cabins"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update cabin",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"service\": {\r\n    \"name\": \"Updated Mini Cabin - Day Tour\",\r\n    \"description\": \"Updated for 2-4 guests\",\r\n    \"imageUrl\": \"https://example.com/updated_image.jpg\",\r\n    \"quantity\": 2,\r\n    \"price\": 2500\r\n  },\r\n  \"cabin\": {\r\n    \"minCapacity\": 3,\r\n    \"maxCapacity\": 4\r\n  },\r\n  \"additionalFee\": {\r\n    \"type\": \"Packing Fee\",\r\n    \"description\": \"Extra charge for packing things\",\r\n    \"amount\": 100\r\n  }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/api/services/cabins/1",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8080",
+                  "path": ["api", "services", "cabins", "1"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GET /health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/authTest",
+          "host": ["{{base_url}}"],
+          "path": ["api", "authTest"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "default"
+    }
+  ]
 }

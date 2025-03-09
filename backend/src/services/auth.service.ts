@@ -1,4 +1,3 @@
-import app from "../app";
 import config from "../config/config";
 import { prisma } from "../config/db";
 import {
@@ -30,6 +29,8 @@ import { hashPassword, verifyPassword } from "../utils/password";
 import { sendMail } from "../utils/sendMail";
 
 type CreateAccountParams = {
+  firstName: string | null;
+  lastName: string | null;
   email: string;
   password: string;
   phoneNumber: string;
@@ -40,6 +41,12 @@ type LoginAccountParams = {
   email: string;
   password: string;
   userAgent?: string;
+};
+
+type ChangePasswordParams = {
+  userId: string;
+  oldPassword: string;
+  newPassword: string;
 };
 
 export const createAccount = async (data: CreateAccountParams) => {
@@ -61,6 +68,8 @@ export const createAccount = async (data: CreateAccountParams) => {
 
   const createUser = await prisma.personalDetail.create({
     data: {
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email,
       phoneNumber: data.phoneNumber,
       userAccount: {
@@ -332,6 +341,81 @@ export const resetPassword = async ({
       lastName: updateUser.personalDetail.lastName,
       phoneNumber: updateUser.personalDetail.phoneNumber,
       email: updateUser.personalDetail.email,
+    },
+  };
+};
+
+export const changePassword = async ({
+  userId,
+  oldPassword,
+  newPassword,
+}: ChangePasswordParams) => {
+  try {
+    const user = await prisma.userAccount.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    appAssert(user, UNAUTHORIZED, "User not found");
+
+    const isOldPasswordValid = verifyPassword(oldPassword, user.password);
+
+    appAssert(isOldPasswordValid, UNAUTHORIZED, "Invalid password");
+
+    const updatedUser = await prisma.userAccount.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: await hashPassword(newPassword),
+      },
+    });
+
+    return updatedUser;
+  } catch (error: Error | any) {
+    console.error(error.message);
+  }
+};
+
+export const verifyEmail = async (code: string) => {
+  const validCode = await prisma.verificationCode.findFirst({
+    where: {
+      id: code,
+    },
+    include: {
+      userAccount: true,
+    },
+  });
+  appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
+
+  const updatedUser = await prisma.userAccount.update({
+    where: {
+      id: validCode.userAccountId,
+    },
+    data: {
+      isVerified: true,
+    },
+    include: {
+      personalDetail: true,
+    },
+  });
+
+  appAssert(updatedUser, INTERNAL_SERVER_ERROR, "Failed to verify email");
+
+  await prisma.verificationCode.delete({
+    where: {
+      id: validCode.id,
+    },
+  });
+
+  return {
+    user: {
+      firstName: updatedUser.personalDetail.firstName,
+      lastName: updatedUser.personalDetail.lastName,
+      phoneNumber: updatedUser.personalDetail.phoneNumber,
+      email: updatedUser.personalDetail.email,
+      isVerified: updatedUser.isVerified,
     },
   };
 };

@@ -11,13 +11,6 @@
   margin: 0;
 }
 
-body {
-  /* 3. Add accessible line-height */
-  line-height: 1.5;
-  /* 4. Improve text rendering */
-  -webkit-font-smoothing: antialiased;
-}
-
 /* 5. Improve media defaults */
 img,
 picture,
@@ -176,7 +169,7 @@ section {
   display: block;
 }
 body {
-  line-height: 1;
+  line-height: 1.5;
 }
 ol,
 ul {
@@ -322,6 +315,16 @@ table {
   --color-red-800: #b91c1c;
   --color-red-900: #991b1b;
   --color-red-1000: #7f1d1d;
+  --color-green-100: #ecfdf5;
+  --color-green-200: #d1fae5;
+  --color-green-300: #a7f3d0;
+  --color-green-400: #6ee7b7;
+  --color-green-500: #34d399;
+  --color-green-600: #10b981;
+  --color-green-700: #059669;
+  --color-green-800: #047857;
+  --color-green-900: #065f46;
+  --color-green-1000: #064e3b;
 
   /* number */
   --text-line-height-xs: 1.0416rem;
@@ -346,6 +349,7 @@ table {
   --font-secondary: "Poltawski Nowy", serif;
   --font-brand: "Abril Fatface", serif;
   --navbar-height: 5rem;
+  --swiper-pagination-color: var(--color-sand-300);
 }
 
 $font-primary: "Open Sans", serif;
@@ -402,6 +406,27 @@ $font-primary: "Open Sans", serif;
   --padding: 3rem;
   width: min(var(--max-width), 100% - var(--padding));
   margin-inline: auto;
+}
+
+/* form fields placeholder color */
+
+.select-field {
+  font-family: var(--font-primary);
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: #adadad;
+  opacity: 1;
+}
+
+select:invalid {
+  color: #adadad;
+}
+
+select:valid {
+  color: black;
 }
 
 body {

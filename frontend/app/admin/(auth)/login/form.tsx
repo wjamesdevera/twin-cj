@@ -16,10 +16,13 @@ export function LoginForm() {
 
   const { trigger, error, isMutating } = useSWRMutation(
     "login",
-    (key, { arg }) => login(arg),
+    (key, { arg }: { arg: { email: string; password: string } }) => login(arg),
     {
       onSuccess: () => {
-        router.push("/admin");
+        router.replace("/admin");
+      },
+      onError: () => {
+        console.log("ERROR");
       },
     }
   );

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import useAuth from "../hooks/useAuth";
 import { Loading } from "./loading";
 import { useRouter } from "next/navigation";
@@ -12,11 +12,13 @@ export default function AuthGuard({
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  if (isLoading) return <Loading />;
-  if (!user) {
-    router.push("/admin/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace("/admin/login"); // Redirect only after checking user state
+    }
+  }, [isLoading, user, router]);
 
-  return <>{children}</>;
+  if (isLoading) return <Loading />;
+
+  return user ? <>{children}</> : null;
 }
