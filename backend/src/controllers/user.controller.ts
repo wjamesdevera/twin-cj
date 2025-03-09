@@ -8,8 +8,7 @@ import {
   idSchema,
   registerSchema,
 } from "../schemas/auth.schema";
-import app from "../app";
-import { getUser } from "../services/user.service";
+import { getAllUsers, getUser } from "../services/user.service";
 
 export const getUserHandler = catchErrors(
   async (request: Request, response: Response) => {
@@ -22,29 +21,12 @@ export const getUserHandler = catchErrors(
 
 export const getAllUsersHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const users = await prisma.userAccount.findMany({
-      include: {
-        personalDetail: true,
-      },
-    });
-    appAssert(users, 404, "No Users Found");
-
-    const transformUsers = users.map((user) => {
-      return {
-        id: user.id,
-        firstName: user.personalDetail.firstName,
-        lastName: user.personalDetail.lastName,
-        email: user.personalDetail.email,
-        phoneNumber: user.personalDetail.phoneNumber,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
-    });
+    const users = await getAllUsers();
 
     return response.status(OK).json({
       status: "success",
       data: {
-        users: transformUsers,
+        users: users,
       },
     });
   }
