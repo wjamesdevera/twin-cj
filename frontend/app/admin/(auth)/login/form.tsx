@@ -19,7 +19,10 @@ export function LoginForm() {
     (key, { arg }: { arg: { email: string; password: string } }) => login(arg),
     {
       onSuccess: () => {
-        router.push("/admin");
+        router.replace("/admin");
+      },
+      onError: () => {
+        console.log("ERROR");
       },
     }
   );
