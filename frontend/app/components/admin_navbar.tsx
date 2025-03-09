@@ -45,7 +45,7 @@ const AdminNavbar: React.FC = () => {
           {isDropdownOpen && (
             <ul className={styles.dropdownMenu}>
               <li>
-                <a href="/change-password">Change Password</a>
+                <Link href="/admin/change-password">Change Password</Link>
               </li>
               <li>
                 <LogoutButton className={styles.logoutBtn} />
