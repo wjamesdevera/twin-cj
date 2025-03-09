@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation"; 
+import { useParams, useRouter } from "next/navigation";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import useSWR from "swr";
 import { editUser, getUserById } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
+import ConfirmModal from "@/app/components/confirm_modal";
 
 interface EditUserArg {
   firstName: string;
@@ -17,7 +18,9 @@ interface EditUserArg {
 }
 
 const Form: React.FC = () => {
-  const router = useRouter(); 
+  const router = useRouter();
+  const { id } = useParams<{ id: string }>();
+  const [isFormTouched, setIsFormTouched] = useState(false);
   const [formData, setFormData] = useState<EditUserArg>({
     firstName: "",
     lastName: "",
@@ -25,15 +28,17 @@ const Form: React.FC = () => {
     phoneNumber: "",
   });
 
-  const { id } = useParams<{ id: string }>();
+  const validateName = (name: string) => name.trim().length >= 2;
+
+  const [initialData, setInitialData] = useState<EditUserArg | null>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
+
   const { data: userData, isLoading } = useSWR(id, getUserById, {
-    onSuccess: () => {
-      setFormData({
-        firstName: userData?.data.firstName,
-        lastName: userData?.data.lastName,
-        email: userData?.data.email,
-        phoneNumber: userData?.data.phoneNumber,
-      });
+    onSuccess: (data) => {
+      if (data?.data) {
+        setInitialData(data.data);
+        setFormData(data.data);
+      }
     },
   });
 
@@ -44,39 +49,93 @@ const Form: React.FC = () => {
 
   useEffect(() => {
     if (userData?.data) {
-      setFormData({
-        firstName: userData.data.firstName || "",
-        lastName: userData.data.lastName || "",
-        email: userData.data.email || "",
-        phoneNumber: userData.data.phoneNumber || "",
-      });
+      setInitialData(userData.data);
+      setFormData(userData.data);
     }
   }, [userData]);
 
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    onConfirm: (() => void) | null;
+  }>({
+    isOpen: false,
+    title: "",
+    onConfirm: null,
+  });
+
+  const openModal = (title: string, onConfirm: () => void) => {
+    setModalConfig({ isOpen: true, title, onConfirm });
+  };
+
+  const closeModal = () => {
+    setModalConfig({ isOpen: false, title: "", onConfirm: null });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    try {
-      await trigger(formData); 
-      localStorage.setItem("adminUpdated", "true"); 
-      router.push("/admin/accounts"); 
-    } catch (error) {
-      console.error("Failed to update user:", error);
-    }
+
+    if (!isFormValid) return;
+
+    openModal("Are you sure you want to save changes?", async () => {
+      try {
+        await trigger(formData);
+        localStorage.setItem("adminUpdated", "true");
+        router.push("/admin/accounts");
+      } catch (error) {
+        console.error("Failed to update user:", error);
+      }
+      closeModal();
+    });
   };
-  
 
   const handleCancel = () => {
-    router.push("/admin/accounts"); 
+    if (isFormTouched) {
+      openModal("Are you sure you want to cancel? Unsaved changes will be lost.", () => {
+        router.push("/admin/accounts");
+        closeModal();
+      });
+    } else {
+      router.push("/admin/accounts");
+    }
   };
-  
-  
-  
+
+  useEffect(() => {
+    const handleBackButton = (event: PopStateEvent) => {
+      if (isFormTouched) {
+        event.preventDefault();
+        openModal("Going back will lose your progress. Continue?", () => {
+          setIsFormTouched(false);
+          closeModal();
+          window.removeEventListener("popstate", handleBackButton);
+          router.back();
+        });
+
+        window.history.pushState(null, "", window.location.href);
+      } else {
+        window.removeEventListener("popstate", handleBackButton);
+        router.back();
+      }
+    };
+
+    if (isFormTouched) {
+      window.history.pushState(null, "", window.location.href);
+    }
+
+    window.addEventListener("popstate", handleBackButton);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, [router, isFormTouched]);
 
   const [errors, setErrors] = useState({
+    firstName: false,
+    lastName: false,
     email: false,
     phoneNumber: false,
   });
+  
 
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -84,37 +143,50 @@ const Form: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let updatedValue = value;
-
+  
     if (name === "phoneNumber") {
-      updatedValue = value.replace(/\D/g, "").slice(0, 10);
+      updatedValue = value.replace(/\D/g, "").slice(0, 11); 
     }
-
+  
     if (name === "firstName" || name === "lastName") {
       updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50);
     }
-
-    setFormData((prev) => {
-      const updatedFormData = {
-        ...prev,
-        [name]: updatedValue,
-      };
-
-      return updatedFormData;
-    });
-
+  
+    setFormData((prev) => ({
+      ...prev,
+      [name]: updatedValue,
+    }));
+  
     setErrors((prev) => ({
       ...prev,
-      email: name === "email" && value !== "" && !validateEmail(value),
-      phoneNumber:
-        name === "phoneNumber" && value !== "" && value.length !== 10,
+      firstName: name === "firstName" && !validateName(updatedValue),
+      lastName: name === "lastName" && !validateName(updatedValue),
+      email: name === "email" && updatedValue !== "" && !validateEmail(updatedValue),
+      phoneNumber: name === "phoneNumber" && updatedValue.length !== 11, 
     }));
+  
+    setIsFormTouched(true);
   };
+  
+ useEffect(() => {
+  if (initialData) {
+    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialData);
+    const isValid =
+      validateName(formData.firstName) &&
+      validateName(formData.lastName) &&
+      validateEmail(formData.email) &&
+      formData.phoneNumber.length === 11 &&
+      hasChanges;
+
+    setIsFormValid(isValid);
+  }
+}, [formData, initialData]);
+
 
   return isLoading ? (
     <Loading />
   ) : (
     <form className={styles.form} onSubmit={handleSubmit}>
-      {/* First Name */}
       <div className={styles.form_group}>
         <label>First Name</label>
         <input
@@ -122,7 +194,11 @@ const Form: React.FC = () => {
           name="firstName"
           value={formData.firstName}
           onChange={handleChange}
+          className={errors.firstName ? styles.invalid_input : ""}
         />
+        {errors.firstName && (
+          <span className={styles.error}>Must be at least 2 letters.</span>
+        )}
       </div>
 
       {/* Last Name */}
@@ -133,7 +209,11 @@ const Form: React.FC = () => {
           name="lastName"
           value={formData.lastName}
           onChange={handleChange}
+          className={errors.lastName ? styles.invalid_input : ""}
         />
+        {errors.lastName && (
+          <span className={styles.error}>Must be at least 2 letters.</span>
+        )}
       </div>
 
       {/* Email */}
@@ -154,20 +234,29 @@ const Form: React.FC = () => {
       {/* Phone Number */}
       <div className={styles.form_group}>
         <label>Phone Number</label>
-        <div className={styles.phone_input_container}>
-          <span className={styles.phone_prefix}>+63</span>
-          <input
-            type="tel"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            className={errors.phoneNumber ? styles.invalid_input : ""}
-          />
-        </div>
+        <input
+          type="tel"
+          name="phoneNumber"
+          value={formData.phoneNumber}
+          onChange={handleChange}
+          className={errors.phoneNumber ? styles.invalid_input : ""}
+        />
         {errors.phoneNumber && (
-          <span className={styles.error}>Must be 10 digits only.</span>
+          <span className={styles.error}>Must be 11 digits only.</span>
         )}
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        onConfirm={modalConfig.onConfirm || closeModal}
+        onClose={closeModal}
+        confirmText="Yes"
+        confirmColor="#A80000"
+        cancelText="No"
+        cancelColor="#CCCCCC"
+      />
 
       {/* Buttons */}
       <div className={`${styles.form_group} ${styles.full_width}`}>
@@ -177,13 +266,14 @@ const Form: React.FC = () => {
             variant="primary"
             size="small"
             type="submit"
+            disabled={!isFormValid}
           />
           <CustomButton
             label="Cancel"
             variant="secondary"
             size="small"
-            type="button"  
-            onClick={handleCancel} 
+            type="button"
+            onClick={handleCancel}
           />
         </div>
       </div>

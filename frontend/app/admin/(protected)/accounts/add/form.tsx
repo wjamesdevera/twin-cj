@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./form.module.scss";
 import CustomButton from "../../../../components/custom_button";
 import useSWRMutation from "swr/mutation";
 import { register } from "@/app/lib/api";
 import { useRouter } from "next/navigation";
+import ConfirmModal from "../../../../components/confirm_modal";
 
 type RegisterUserArg = {
   firstName: string;
@@ -38,6 +39,73 @@ const Form: React.FC = () => {
     confirmPassword: "",
   });
 
+  const [isFormTouched, setIsFormTouched] = useState(false);
+
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    onConfirm: (() => void) | null;
+  }>({
+    isOpen: false,
+    title: "",
+    onConfirm: null,
+  });
+
+  const openModal = (title: string, onConfirm: () => void) => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      onConfirm,
+    });
+  };
+
+  const closeModal = () => {
+    setModalConfig({ isOpen: false, title: "", onConfirm: null });
+  };
+
+
+  const handleClearFields = (e: React.MouseEvent) => {
+    e.preventDefault();
+  
+    openModal("Are you sure you want to clear all fields?", () => {
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNumber: "",
+        password: "",
+        confirmPassword: "",
+      });
+  
+      setErrors({
+        firstName: false,
+        lastName: false,
+        email: false,
+        phoneNumber: false,
+        password: false,
+        confirmPassword: false,
+      });
+  
+      setPasswordValidations({
+        length: false,
+        lowercase: false,
+        uppercase: false,
+        number: false,
+        special: false,
+      });
+  
+      setPasswordMatch(true);
+      setIsEmailValid(true);
+      setIsConfirmPasswordActive(false);
+      setHasTypedConfirmPassword(false);
+      setIsFormTouched(false);
+  
+      window.history.replaceState(null, "", window.location.href);
+  
+      closeModal();
+    });
+  };
+  
   const [errors, setErrors] = useState({
     firstName: false,
     lastName: false,
@@ -75,7 +143,6 @@ const Form: React.FC = () => {
 
     setPasswordValidations(validations);
 
-    // Enable confirm password field only if all password requirements are met
     setIsConfirmPasswordActive(Object.values(validations).every(Boolean));
   };
 
@@ -84,56 +151,53 @@ const Form: React.FC = () => {
     let updatedValue = value;
 
     if (name === "phoneNumber") {
-      updatedValue = value.replace(/\D/g, "").slice(0, 10);
+        updatedValue = value.replace(/\D/g, "").slice(0, 11); 
+    } else if (name === "firstName" || name === "lastName") {
+        updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50); 
     }
 
-    if (name === "firstName" || name === "lastName") {
-      updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50);
-    }
-    
     setFormData((prev) => {
-      const updatedFormData = {
-        ...prev,
-        [name]: updatedValue,
-      };
+        if (prev[name as keyof typeof formData] === updatedValue) return prev;
 
-      if (name === "password") {
-        validatePassword(value);
-        setPasswordMatch(value === updatedFormData.confirmPassword);
+        const updatedFormData = { ...prev, [name]: updatedValue };
 
-        // If password is cleared, reset confirmPassword and disable it
-        if (value === "") {
-          updatedFormData.confirmPassword = "";
-          setIsConfirmPasswordActive(false);
-          setHasTypedConfirmPassword(false);
+        if (!isFormTouched) setIsFormTouched(true);
+
+        if (name === "password") {
+            validatePassword(updatedValue);
+            setPasswordMatch(updatedValue === updatedFormData.confirmPassword);
+
+            if (updatedValue === "") {
+                updatedFormData.confirmPassword = "";
+                setIsConfirmPasswordActive(false);
+                setHasTypedConfirmPassword(false);
+            }
         }
-      }
 
-      if (name === "confirmPassword") {
-        setPasswordMatch(value === updatedFormData.password);
-        setHasTypedConfirmPassword(value.length > 0);
-      }
+        if (name === "confirmPassword") {
+            setPasswordMatch(updatedValue === updatedFormData.password);
+            setHasTypedConfirmPassword(updatedValue.length > 0);
+        }
 
-      if (name === "email") {
-        setIsEmailValid(validateEmail(value));
-      }
+        if (name === "email") {
+            setIsEmailValid(validateEmail(updatedValue));
+        }
 
-      return updatedFormData;
+        return updatedFormData;
     });
 
     setErrors((prev) => ({
-      ...prev,
-      firstName: name === "firstName" && !/^[A-Za-z\s]{2,}$/.test(value),
-      lastName: name === "lastName" && !/^[A-Za-z\s]{2,}$/.test(value),
-      email: name === "email" && !validateEmail(value),
-      phoneNumber: name === "phoneNumber" && value.length !== 10,
-      password:
-        name === "password" &&
-        !Object.values(passwordValidations).every(Boolean),
-      confirmPassword:
-        name === "confirmPassword" && value !== formData.password,
+        ...prev,
+        firstName: name === "firstName" && !/^[A-Za-z\s]{2,}$/.test(updatedValue),
+        lastName: name === "lastName" && !/^[A-Za-z\s]{2,}$/.test(updatedValue),
+        email: name === "email" && !validateEmail(updatedValue),
+        phoneNumber: name === "phoneNumber" && updatedValue.length > 0 && updatedValue.length !== 11,
+        password:
+            name === "password" &&
+            !Object.values(passwordValidations).every(Boolean),
+        confirmPassword: name === "confirmPassword" && updatedValue !== formData.password,
     }));
-  };
+};
 
   const isFormValid = () => {
     return (
@@ -141,32 +205,50 @@ const Form: React.FC = () => {
       formData.lastName &&
       formData.email &&
       isEmailValid &&
-      formData.phoneNumber.length === 10 &&
+      formData.phoneNumber.length === 11 &&
       Object.values(passwordValidations).every(Boolean) &&
       passwordMatch &&
       !Object.values(errors).includes(true)
     );
   };
 
+  useEffect(() => {
+    const handleBackButton = () => {
+      if (isFormTouched) {
+        openModal("Going back will lose your progress. Continue?", () => {
+          closeModal(); 
+          router.push("/admin/accounts"); 
+        });
+  
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+  
+    if (isFormTouched) {
+      window.history.pushState(null, "", window.location.href);
+    }
+  
+    window.addEventListener("popstate", handleBackButton);
+  
+    return () => {
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, [router, isFormTouched]);
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!isFormValid()) {
       alert("Please fill out all required fields correctly.");
       return;
     }
-
-    trigger({
-      ...formData,
-      phoneNumber: `+63${formData.phoneNumber}`,
-    });
-
-    console.log("Form Submitted", {
-      ...formData,
-      phoneNumber: `+63${formData.phoneNumber}`,
+  
+    openModal("Are you sure you want to add this Admin?", () => {
+      trigger(formData);
+      closeModal();
     });
   };
-
+  
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       {/* First Name */}
@@ -228,8 +310,6 @@ const Form: React.FC = () => {
         <label>
           Phone Number <span className={styles.required}>*</span>
         </label>
-        <div className={styles.phone_input_container}>
-          <span className={styles.phone_prefix}>+63</span>
           <input
             type="tel"
             name="phoneNumber"
@@ -238,9 +318,8 @@ const Form: React.FC = () => {
             required
             className={errors.phoneNumber ? styles.invalid_input : ""}
           />
-        </div>
         {errors.phoneNumber && (
-          <span className={styles.error}>Must be 10 digits only.</span>
+          <span className={styles.error}>Must be 11 digits only.</span>
         )}
       </div>
 
@@ -322,7 +401,24 @@ const Form: React.FC = () => {
         )}
       </div>
 
-      {/* Buttons */}
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        onConfirm={() => {
+          if (modalConfig.onConfirm) {
+            modalConfig.onConfirm();
+          }
+          setTimeout(() => {
+            closeModal();
+          }, 50);
+        }}
+        onClose={closeModal}
+        confirmText="Yes"
+        confirmColor="#A80000"
+        cancelText="No"
+        cancelColor="#CCCCCC"
+      />
+
       <div className={`${styles.form_group} ${styles.full_width}`}>
         <div className={styles.button_container}>
           <CustomButton
@@ -336,42 +432,14 @@ const Form: React.FC = () => {
             label="Clear"
             variant="secondary"
             size="small"
-            onClick={() => {
-              setFormData(() => ({
-                firstName: "",
-                lastName: "",
-                email: "",
-                phoneNumber: "",
-                password: "",
-                confirmPassword: "",
-              }));
-
-              setErrors(() => ({
-                firstName: false,
-                lastName: false,
-                email: false,
-                phoneNumber: false,
-                password: false,
-                confirmPassword: false,
-              }));
-
-              setPasswordValidations(() => ({
-                length: false,
-                lowercase: false,
-                uppercase: false,
-                number: false,
-                special: false,
-              }));
-
-              setPasswordMatch(true);
-              setIsEmailValid(true);
-              setIsConfirmPasswordActive(false);
-              setHasTypedConfirmPassword(false);
-            }}
+            onClick={(e) => handleClearFields(e)} 
+            disabled={!isFormTouched}
           />
+
         </div>
       </div>
     </form>
+    
   );
 };
 
