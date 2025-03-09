@@ -113,7 +113,7 @@ const NavList = ({ collapsed }: NavListProps) => {
         href="/admin/accounts"
         label="Admin Accounts"
         collapsed={collapsed}
-        isActive={pathname === "/admin/accounts"}
+        isActive={pathname.startsWith("/admin/accounts")} 
         icon={<FaRegUser />}
       />
     </ul>
