@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/utils/password";
 const prisma = new PrismaClient();
 async function main() {
+  const hashedPassword = await hashPassword("Pa$$w0rd123");
   const adminDetail = await prisma.personalDetail.upsert({
     where: {
       email: "admin@email.com",
@@ -14,7 +15,8 @@ async function main() {
       phoneNumber: "09123456789",
       userAccount: {
         create: {
-          password: await hashPassword("Pa$$w0rd123"),
+          password: hashedPassword,
+          isVerified: false,
         },
       },
     },

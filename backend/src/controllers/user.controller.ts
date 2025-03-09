@@ -8,7 +8,12 @@ import {
   idSchema,
   registerSchema,
 } from "../schemas/auth.schema";
-import { getAllUsers, getUser, updateUser } from "../services/user.service";
+import {
+  deleteUser,
+  getAllUsers,
+  getUser,
+  updateUser,
+} from "../services/user.service";
 
 export const getUserHandler = catchErrors(
   async (request: Request, response: Response) => {
@@ -90,21 +95,12 @@ export const deleteUserHandler = catchErrors(
 
     appAssert(id, BAD_REQUEST, "Id is required");
 
-    const user = await prisma.userAccount.delete({
-      where: {
-        id: id,
-      },
-      include: {
-        personalDetail: true,
-      },
-    });
-
-    appAssert(user, NOT_FOUND, "User not found");
+    const deletedUserId = await deleteUser(id);
 
     return response.status(OK).json({
       status: "success",
       data: {
-        message: `User: ${user.id} has been deleted`,
+        message: `User: ${deletedUserId} has been deleted`,
       },
     });
   }

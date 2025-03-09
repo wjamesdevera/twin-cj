@@ -125,3 +125,23 @@ export const updateUser = async ({ id, data }: EditUserParams) => {
     updatedAt: updatedUser.updatedAt,
   };
 };
+
+export const deleteUser = async (id: string) => {
+  const existingUserAccount = await prisma.userAccount.findFirst({
+    where: {
+      id,
+    },
+  });
+
+  appAssert(existingUserAccount, NOT_FOUND, `User with ID: ${id} not found`);
+
+  const deletedUser = await prisma.personalDetail.delete({
+    where: {
+      id: existingUserAccount.personalId,
+    },
+  });
+
+  appAssert(deletedUser, NOT_FOUND, `User with ID: ${id} not found`);
+
+  return existingUserAccount.id;
+};
