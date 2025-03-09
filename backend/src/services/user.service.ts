@@ -1,3 +1,4 @@
+import { UnwrapPromise } from "@prisma/client/runtime/library";
 import { prisma } from "../config/db";
 import { NOT_FOUND, TOO_MANY_REQUESTS } from "../constants/http";
 import appAssert from "../utils/appAssert";
@@ -70,4 +71,57 @@ export const getAllUsers = async () => {
   });
 
   return transformUsers;
+};
+
+interface EditUserParams {
+  id: string;
+  data: {
+    email?: string;
+    phoneNumber?: string;
+    firstName?: string | null;
+    lastName?: string | null;
+  };
+}
+
+export const updateUser = async ({ id, data }: EditUserParams) => {
+  const user = await prisma.userAccount.findFirst({
+    where: {
+      id: id,
+    },
+    include: {
+      personalDetail: true,
+    },
+  });
+  appAssert(user, NOT_FOUND, "User not found");
+
+  const updatedUser = await prisma.userAccount.update({
+    where: {
+      id,
+    },
+    data: {
+      personalDetail: {
+        update: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phoneNumber: data.phoneNumber,
+          email: data.email,
+        },
+      },
+    },
+    include: {
+      personalDetail: true,
+    },
+  });
+  appAssert(updatedUser, NOT_FOUND, "User not found");
+
+  return {
+    id: updatedUser.id,
+    isVerified: updatedUser.isVerified,
+    email: updatedUser.personalDetail.email,
+    firstName: updatedUser.personalDetail.firstName,
+    lastName: updatedUser.personalDetail.lastName,
+    phoneNumber: updatedUser.personalDetail.phoneNumber,
+    createdAt: updatedUser.createdAt,
+    updatedAt: updatedUser.updatedAt,
+  };
 };

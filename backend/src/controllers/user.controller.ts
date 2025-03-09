@@ -8,7 +8,7 @@ import {
   idSchema,
   registerSchema,
 } from "../schemas/auth.schema";
-import { getAllUsers, getUser } from "../services/user.service";
+import { getAllUsers, getUser, updateUser } from "../services/user.service";
 
 export const getUserHandler = catchErrors(
   async (request: Request, response: Response) => {
@@ -40,32 +40,13 @@ export const editUserHandler = catchErrors(
     const userDetails = editUserSchema.parse(request.body);
 
     appAssert(userDetails, BAD_REQUEST, "User Details Needed");
-    const user = await prisma.userAccount.findFirst({
-      where: {
-        id: id,
-      },
-      include: {
-        personalDetail: true,
-      },
-    });
-    appAssert(user, NOT_FOUND, "User not found");
-    const updateUser = await prisma.personalDetail.update({
-      where: {
-        id: user?.personalId,
-      },
-      data: {
-        firstName: userDetails.firstName,
-        lastName: userDetails.lastName,
-        phoneNumber: userDetails.phoneNumber,
-        email: userDetails.email,
-      },
-    });
-    appAssert(updateUser, NOT_FOUND, "User not found");
+
+    const updatedUser = await updateUser({ id, data: userDetails });
 
     return response.status(OK).json({
       status: "success",
       data: {
-        updateUser,
+        user: updatedUser,
       },
     });
   }
