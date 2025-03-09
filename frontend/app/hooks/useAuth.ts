@@ -1,13 +1,21 @@
 import { getUser } from "../lib/api";
-import useSWR from "swr";
+import useSWR, { SWRConfiguration } from "swr";
 
 export const AUTH = "auth";
 
-const useAuth = (opts = {}) => {
-  const { data: user, ...rest } = useSWR([AUTH], getUser, opts);
+const useAuth = (opts?: SWRConfiguration) => {
+  const {
+    data: user,
+    error,
+    isValidating,
+    mutate,
+  } = useSWR([AUTH], getUser, opts);
   return {
     user,
-    ...rest,
+    isLoading: !error && !user,
+    isError: !error,
+    isValidating,
+    mutate,
   };
 };
 

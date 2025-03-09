@@ -2,6 +2,7 @@
 
 import { logout } from "@/app/lib/api";
 import { useRouter } from "next/navigation";
+import { mutate } from "swr";
 import useSWRMutation from "swr/mutation";
 
 export default function LogoutButton() {
@@ -9,7 +10,9 @@ export default function LogoutButton() {
   const { trigger } = useSWRMutation("logout", async () => await logout(), {
     revalidate: true,
     onSuccess: () => {
-      router.push("/admin/login");
+      mutate("auth", null, false);
+      router.replace("/admin/login");
+      window.location.reload();
     },
   });
   const handleLogout = async () => {

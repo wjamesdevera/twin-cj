@@ -11,7 +11,7 @@ API.interceptors.response.use(
   (response) => response.data,
   (error) => {
     const { status, data } = error.response;
-    return Promise.reject({ status, data });
+    return Promise.reject({ status, ...data });
   }
 );
 
