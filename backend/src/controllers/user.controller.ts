@@ -9,18 +9,11 @@ import {
   registerSchema,
 } from "../schemas/auth.schema";
 import app from "../app";
+import { getUser } from "../services/user.service";
 
 export const getUserHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const user = await prisma.userAccount.findFirst({
-      where: {
-        id: request.userId,
-      },
-      include: {
-        personalDetail: true,
-      },
-    });
-    appAssert(user, NOT_FOUND, "User not found");
+    const user = await getUser(request.userId);
     return response.status(OK).json({
       user,
     });
