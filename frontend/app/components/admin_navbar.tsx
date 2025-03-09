@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import styles from "./admin_navbar.module.scss";
+import Link from "next/link";
+import LogoutButton from "./logout-button";
 
 const AdminNavbar: React.FC = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
@@ -16,19 +18,27 @@ const AdminNavbar: React.FC = () => {
   return (
     <nav className={styles.adminNavbar}>
       <div className={styles.container}>
-        <a href="/" className={styles.viewSiteLink}>
+        <Link href="/" className={styles.viewSiteLink}>
           View Site
-        </a>
+        </Link>
 
         <div
-          className={`${styles.adminDropdown} ${isDropdownOpen ? styles.open : ""}`}
+          className={`${styles.adminDropdown} ${
+            isDropdownOpen ? styles.open : ""
+          }`}
         >
           <button
-            className={`${styles.adminButton} ${isAdminNameBold ? styles.bold : ""}`}
+            className={`${styles.adminButton} ${
+              isAdminNameBold ? styles.bold : ""
+            }`}
             onClick={toggleDropdown}
           >
             ADMIN NAME
-            {isDropdownOpen ? <FaChevronUp className={styles.chevron} /> : <FaChevronDown className={styles.chevron} />}
+            {isDropdownOpen ? (
+              <FaChevronUp className={styles.chevron} />
+            ) : (
+              <FaChevronDown className={styles.chevron} />
+            )}
           </button>
 
           {/* Dropdown Menu */}
@@ -38,7 +48,7 @@ const AdminNavbar: React.FC = () => {
                 <a href="/change-password">Change Password</a>
               </li>
               <li>
-                <a href="/logout">Logout</a>
+                <LogoutButton className={styles.logoutBtn} />
               </li>
             </ul>
           )}

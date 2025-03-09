@@ -104,3 +104,19 @@
 .adminDropdown.open .dropdownMenu {
   display: block;
 }
+
+.logoutBtn {
+  all: inherit;
+  width: 100%;
+  cursor: pointer;
+  display: block;
+  padding: 0.5rem 1rem;
+  color: #a45f14;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: normal;
+
+  &:hover {
+    background-color: #f4f4f4;
+  }
+}
