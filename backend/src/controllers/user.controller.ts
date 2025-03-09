@@ -8,19 +8,17 @@ import {
   idSchema,
   registerSchema,
 } from "../schemas/auth.schema";
-import app from "../app";
+import {
+  deleteUser,
+  getAllUsers,
+  getUser,
+  getUserById,
+  updateUser,
+} from "../services/user.service";
 
 export const getUserHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const user = await prisma.userAccount.findFirst({
-      where: {
-        id: request.userId,
-      },
-      include: {
-        personalDetail: true,
-      },
-    });
-    appAssert(user, NOT_FOUND, "User not found");
+    const user = await getUser(request.userId);
     return response.status(OK).json({
       user,
     });
@@ -29,29 +27,12 @@ export const getUserHandler = catchErrors(
 
 export const getAllUsersHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const users = await prisma.userAccount.findMany({
-      include: {
-        personalDetail: true,
-      },
-    });
-    appAssert(users, 404, "No Users Found");
-
-    const transformUsers = users.map((user) => {
-      return {
-        id: user.id,
-        firstName: user.personalDetail.firstName,
-        lastName: user.personalDetail.lastName,
-        email: user.personalDetail.email,
-        phoneNumber: user.personalDetail.phoneNumber,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
-    });
+    const users = await getAllUsers();
 
     return response.status(OK).json({
       status: "success",
       data: {
-        users: transformUsers,
+        users: users,
       },
     });
   }
@@ -65,32 +46,13 @@ export const editUserHandler = catchErrors(
     const userDetails = editUserSchema.parse(request.body);
 
     appAssert(userDetails, BAD_REQUEST, "User Details Needed");
-    const user = await prisma.userAccount.findFirst({
-      where: {
-        id: id,
-      },
-      include: {
-        personalDetail: true,
-      },
-    });
-    appAssert(user, NOT_FOUND, "User not found");
-    const updateUser = await prisma.personalDetail.update({
-      where: {
-        id: user?.personalId,
-      },
-      data: {
-        firstName: userDetails.firstName,
-        lastName: userDetails.lastName,
-        phoneNumber: userDetails.phoneNumber,
-        email: userDetails.email,
-      },
-    });
-    appAssert(updateUser, NOT_FOUND, "User not found");
+
+    const updatedUser = await updateUser({ id, data: userDetails });
 
     return response.status(OK).json({
       status: "success",
       data: {
-        updateUser,
+        user: updatedUser,
       },
     });
   }
@@ -102,27 +64,12 @@ export const getUserByIdHandler = catchErrors(
 
     appAssert(id, BAD_REQUEST, "Id is required");
 
-    const user = await prisma.userAccount.findFirst({
-      where: {
-        id: id,
-      },
-      include: {
-        personalDetail: true,
-      },
-    });
-
-    appAssert(user, NOT_FOUND, "User not found");
+    const user = await getUserById(id);
 
     return response.status(OK).json({
       status: "success",
       data: {
-        id: user.id,
-        firstName: user.personalDetail.firstName,
-        lastName: user.personalDetail.lastName,
-        email: user.personalDetail.email,
-        phoneNumber: user.personalDetail.phoneNumber,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        user,
       },
     });
   }
@@ -134,21 +81,12 @@ export const deleteUserHandler = catchErrors(
 
     appAssert(id, BAD_REQUEST, "Id is required");
 
-    const user = await prisma.userAccount.delete({
-      where: {
-        id: id,
-      },
-      include: {
-        personalDetail: true,
-      },
-    });
-
-    appAssert(user, NOT_FOUND, "User not found");
+    const deletedUserId = await deleteUser(id);
 
     return response.status(OK).json({
       status: "success",
       data: {
-        message: `User: ${user.id} has been deleted`,
+        message: `User: ${deletedUserId} has been deleted`,
       },
     });
   }
