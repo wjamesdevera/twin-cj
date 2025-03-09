@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Loading } from '@/app/components/loading';
+import { Loading } from "@/app/components/loading";
+import useSWR from "swr";
+import { getCabin } from "@/app/lib/api";
 
 export default function UpdateCabin() {
   const router = useRouter();
@@ -14,7 +16,6 @@ export default function UpdateCabin() {
       description: "",
       imageUrl: "",
       image: null as File | null,
-      quantity: 1,
       price: 1,
     },
     cabin: {
@@ -26,17 +27,16 @@ export default function UpdateCabin() {
       description: "",
       amount: 0,
     },
-  });  
+  });
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
   const [initialData, setInitialData] = useState<{
     service: {
       name: string;
       description: string;
       imageUrl: string;
       image: File | null;
-      quantity: number;
       price: number;
     };
     cabin: {
@@ -51,84 +51,76 @@ export default function UpdateCabin() {
   } | null>(null);
   const [isMutating, setIsMutating] = useState<boolean>(false);
 
+  const { data, isLoading } = useSWR(id, getCabin);
+
   useEffect(() => {
-    const fetchCabin = async () => {
-      try {
-        const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`);
-        const data = await response.json();
-  
-        if (response.ok && data.data?.cabin) {
-          const cabin = data.data.cabin;
-  
-          const formattedData = {
-            service: {
-              name: cabin.service.name || "",
-              description: cabin.service.description || "",
-              imageUrl: cabin.service.imageUrl || "",
-              image: null,
-              quantity: cabin.service.quantity || 1,
-              price: cabin.service.price || 0,
-            },
-            cabin: {
-              minCapacity: cabin.minCapacity || 1,
-              maxCapacity: cabin.maxCapacity || 1,
-            },
-            additionalFee: cabin.additionalFee
-              ? {
-                  type: cabin.additionalFee.type || "",
-                  description: cabin.additionalFee.description || "",
-                  amount: cabin.additionalFee.amount || 0,
-                }
-              : { type: "", description: "", amount: 0 },
-          };
-  
-          setFormData(formattedData);
-          setInitialData(formattedData);
-        } else {
-          throw new Error(data.message || "Failed to fetch cabin details.");
-        }
-      } catch (err) {
-        console.error("Error fetching cabin:", err);
-        setError("Something went wrong while fetching data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchCabin();
-  }, [id]);
+    if (data) {
+      const { cabin } = data.data;
+      setFormData({
+        service: {
+          name: cabin?.name || "",
+          description: cabin.description || "",
+          imageUrl: cabin.imageUrl || "",
+          image: null,
+          price: cabin.price,
+        },
+        cabin: {
+          minCapacity: cabin.minCapacity ?? 1,
+          maxCapacity: cabin.maxCapacity ?? 1,
+        },
+        additionalFee: {
+          type: cabin.additionalFee?.type || "",
+          description: cabin.additionalFee?.description || "",
+          amount: cabin.additionalFee?.amount || 0,
+        },
+      });
+    }
+  }, [data]);
 
   const [errors, setErrors] = useState({
     name: "",
     description: "",
     minCapacity: "",
     maxCapacity: "",
-    quantity: "",
     price: "",
     image: "",
   });
 
   const [additionalFeeWarning, setAdditionalFeeWarning] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
-  
+
     if (files && files[0]) {
       const file = files[0];
       const validFormats = ["image/jpeg", "image/jpg", "image/png"];
 
       if (!validFormats.includes(file.type)) {
-        setErrors((prev) => ({ ...prev, image: "Invalid image format. Only JPG or PNG allowed." }));
+        setErrors((prev) => ({
+          ...prev,
+          image: "Invalid image format. Only JPG or PNG allowed.",
+        }));
         e.target.value = "";
-        setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } }));
+        setFormData((prev) => ({
+          ...prev,
+          service: { ...prev.service, image: null },
+        }));
         return;
       }
 
       if (file.size > 1048576) {
-        setErrors((prev) => ({ ...prev, image: "File size must be less than 1MB." }));
+        setErrors((prev) => ({
+          ...prev,
+          image: "File size must be less than 1MB.",
+        }));
         e.target.value = "";
-        setFormData((prev) => ({ ...prev, service: { ...prev.service, image: null } }));
+        setFormData((prev) => ({
+          ...prev,
+          service: { ...prev.service, image: null },
+        }));
         return;
       }
 
@@ -138,16 +130,18 @@ export default function UpdateCabin() {
         service: { ...prev.service, image: file },
       }));
     } else {
-      const numericFields = ["quantity", "price", "minCapacity", "maxCapacity", "amount"];
-      const newValue = numericFields.includes(name) 
-        ? value === "" ? "" : Number(value)
+      const numericFields = ["price", "minCapacity", "maxCapacity", "amount"];
+      const newValue = numericFields.includes(name)
+        ? value === ""
+          ? ""
+          : Number(value)
         : value;
-  
+
       setFormData((prev) => ({
         ...prev,
         [section]: { ...prev[section], [name]: newValue },
       }));
-  
+
       setErrors((prev) => ({
         ...prev,
         [name]: validateField(name, newValue),
@@ -158,30 +152,36 @@ export default function UpdateCabin() {
           ...formData.additionalFee,
           [name]: newValue,
         };
-      
+
         const { type, description, amount } = updatedAdditionalFee;
 
-        if ((type || description || amount) && (!type || !description || amount <= 0)) {
-          setAdditionalFeeWarning("Please complete all additional fee fields or leave them empty.");
+        if (
+          (type || description || amount) &&
+          (!type || !description || amount <= 0)
+        ) {
+          setAdditionalFeeWarning(
+            "Please complete all additional fee fields or leave them empty."
+          );
         } else {
           setAdditionalFeeWarning("");
         }
       }
     }
   };
-  
+
   const validateField = (name: string, value: any) => {
     if (value === "" || value === null || value === undefined) {
-      if (["name", "description", "quantity", "price", "minCapacity", "maxCapacity"].includes(name)) {
+      if (
+        ["name", "description", "price", "minCapacity", "maxCapacity"].includes(
+          name
+        )
+      ) {
         return "This field is required.";
       }
     }
 
     if (name === "price" && (isNaN(value) || value < 1)) {
       return "Rate must be greater than 0.";
-    }
-    if (name === "quantity" && (isNaN(value) || value < 1)) {
-      return "Quantity must be at least 1.";
     }
     if (name === "minCapacity" && (isNaN(value) || value < 1)) {
       return "Minimum capacity must be at least 1.";
@@ -194,7 +194,7 @@ export default function UpdateCabin() {
         return "Maximum capacity should be greater than minimum capacity.";
       }
     }
-  
+
     return "";
   };
 
@@ -206,11 +206,15 @@ export default function UpdateCabin() {
     const isAdditionalFeeComplete = type && description && amount > 0;
 
     if (isAdditionalFeeFilled && !isAdditionalFeeComplete) {
-      setAdditionalFeeWarning("Please complete all additional fee fields or leave them empty.");
+      setAdditionalFeeWarning(
+        "Please complete all additional fee fields or leave them empty."
+      );
       return;
     }
-    
-    const isConfirmed = window.confirm("Are you sure you want to update this cabin?");
+
+    const isConfirmed = window.confirm(
+      "Are you sure you want to update this cabin?"
+    );
     if (!isConfirmed) return;
 
     const newErrors = {
@@ -218,7 +222,6 @@ export default function UpdateCabin() {
       description: validateField("description", formData.service.description),
       minCapacity: validateField("minCapacity", formData.cabin.minCapacity),
       maxCapacity: validateField("maxCapacity", formData.cabin.maxCapacity),
-      quantity: validateField("quantity", formData.service.quantity),
       price: validateField("price", formData.service.price),
       image: "",
     };
@@ -231,22 +234,24 @@ export default function UpdateCabin() {
 
     const isChanged = JSON.stringify(formData) !== JSON.stringify(initialData);
     if (!isChanged) {
-      alert("No changes detected. Please modify at least one field before submitting.");
+      alert(
+        "No changes detected. Please modify at least one field before submitting."
+      );
       return;
     }
-  
+
     let imageUrl = formData.service.imageUrl;
-  
+
     if (formData.service.image) {
       const imageFormData = new FormData();
       imageFormData.append("image", formData.service.image);
-  
+
       try {
         const uploadResponse = await fetch("http://localhost:8080/api/upload", {
           method: "POST",
           body: imageFormData,
         });
-  
+
         const uploadData = await uploadResponse.json();
         if (!uploadResponse.ok) {
           throw new Error(uploadData.message || "Image upload failed");
@@ -263,7 +268,6 @@ export default function UpdateCabin() {
         name: formData.service.name,
         description: formData.service.description,
         imageUrl: imageUrl,
-        quantity: formData.service.quantity,
         price: formData.service.price,
       },
       cabin: {
@@ -271,22 +275,27 @@ export default function UpdateCabin() {
         maxCapacity: formData.cabin.maxCapacity,
       },
       additionalFee:
-        formData.additionalFee.type || formData.additionalFee.description || formData.additionalFee.amount > 0
+        formData.additionalFee.type ||
+        formData.additionalFee.description ||
+        formData.additionalFee.amount > 0
           ? { ...formData.additionalFee }
           : null,
     };
-  
+
     try {
       setIsMutating(true);
 
-      const response = await fetch(`http://localhost:8080/api/services/cabins/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
-  
+      const response = await fetch(
+        `http://localhost:8080/api/services/cabins/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
       if (response.ok) {
         alert("Cabin updated successfully!");
         router.push("/cabin");
@@ -300,7 +309,10 @@ export default function UpdateCabin() {
     }
   };
 
-  const isFormInvalid = Object.values(errors).some((error) => error !== "") || additionalFeeWarning !== "" || JSON.stringify(formData) === JSON.stringify(initialData);
+  const isFormInvalid =
+    Object.values(errors).some((error) => error !== "") ||
+    additionalFeeWarning !== "" ||
+    JSON.stringify(formData) === JSON.stringify(initialData);
 
   const handleClear = () => {
     if (initialData) {
@@ -310,7 +322,6 @@ export default function UpdateCabin() {
         description: "",
         minCapacity: "",
         maxCapacity: "",
-        quantity: "",
         price: "",
         image: "",
       });
@@ -321,8 +332,8 @@ export default function UpdateCabin() {
     }
   };
 
-  if (loading) return <p>Loading cabin details...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+  // if (loading) return <p>Loading cabin details...</p>;
+  // if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div>
@@ -331,13 +342,19 @@ export default function UpdateCabin() {
       ) : (
         <form onSubmit={handleSubmit}>
           <div style={{ marginTop: "80px" }}></div>
-        
           <label>Title</label>
           <br />
-          <input type="text" name="name" data-section="service" value={formData.service.name} onChange={handleChange} />
-          <p className="error" style={{ color: "red" }}>{errors.name}</p>
+          <input
+            type="text"
+            name="name"
+            data-section="service"
+            value={formData.service.name}
+            onChange={handleChange}
+          />
+          <p className="error" style={{ color: "red" }}>
+            {errors.name}
+          </p>
           <br />
-        
           <label>Description</label>
           <br />
           <textarea
@@ -349,9 +366,10 @@ export default function UpdateCabin() {
             cols={30}
             style={{ resize: "vertical" }}
           />
-          <p className="error" style={{ color: "red" }}>{errors.description}</p>
+          <p className="error" style={{ color: "red" }}>
+            {errors.description}
+          </p>
           <br />
-        
           <label>Minimum Capacity</label>
           <br />
           <input
@@ -362,9 +380,10 @@ export default function UpdateCabin() {
             min="1"
             onChange={handleChange}
           />
-          <p className="error" style={{ color: "red" }}>{errors.minCapacity}</p>
+          <p className="error" style={{ color: "red" }}>
+            {errors.minCapacity}
+          </p>
           <br />
-        
           <label>Maximum Capacity</label>
           <br />
           <input
@@ -375,52 +394,93 @@ export default function UpdateCabin() {
             min={formData.cabin.minCapacity}
             onChange={handleChange}
           />
-          <p className="error" style={{ color: "red" }}>{errors.maxCapacity}</p>
+          <p className="error" style={{ color: "red" }}>
+            {errors.maxCapacity}
+          </p>
           <br />
-        
           <label>New Image (Optional)</label>
           <br />
-          <input type="file" name="image" data-section="service" accept="image/jpeg, image/jpg, image/png, image/gif" onChange={handleChange} />
-          <p className="error" style={{ color: "red" }}>{errors.image}</p>
+          <input
+            type="file"
+            name="image"
+            data-section="service"
+            accept="image/jpeg, image/jpg, image/png, image/gif"
+            onChange={handleChange}
+          />
+          <p className="error" style={{ color: "red" }}>
+            {errors.image}
+          </p>
           <br />
-        
-          <label>Quantity</label>
-          <br />
-          <input type="number" name="quantity" data-section="service" value={formData.service.quantity || ""} min="1" onChange={handleChange} />
-          <p className="error" style={{ color: "red" }}>{errors.quantity}</p>
-          <br />
-        
           <label>Rate</label>
           <br />
-          <input type="number" name="price" placeholder="₱" data-section="service" step="0.01" value={formData.service.price || ""} min="1" onChange={handleChange} />
-          <p className="error" style={{ color: "red" }}>{errors.price}</p>
+          <input
+            type="number"
+            name="price"
+            placeholder="₱"
+            data-section="service"
+            step="0.01"
+            value={formData.service.price || ""}
+            min="1"
+            onChange={handleChange}
+          />
+          <p className="error" style={{ color: "red" }}>
+            {errors.price}
+          </p>
           <br />
-        
           <h1 style={{ fontWeight: "bold" }}>Additional Fees (Optional)</h1>
           <br />
-        
           Type
           <br />
-          <input type="text" name="type" data-section="additionalFee" value={formData.additionalFee.type} onChange={handleChange} />
+          <input
+            type="text"
+            name="type"
+            data-section="additionalFee"
+            value={formData.additionalFee.type}
+            onChange={handleChange}
+          />
           <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           <br />
-        
           Description
           <br />
-          <textarea name="description" data-section="additionalFee" value={formData.additionalFee.description} onChange={handleChange} rows={3} cols={30} />
+          <textarea
+            name="description"
+            data-section="additionalFee"
+            value={formData.additionalFee.description}
+            onChange={handleChange}
+            rows={3}
+            cols={30}
+          />
           <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           <br />
-        
           Amount
           <br />
-          <input type="number" name="amount" data-section="additionalFee" value={formData.additionalFee.amount} min="0" step="0.01" onChange={handleChange} />
+          <input
+            type="number"
+            name="amount"
+            data-section="additionalFee"
+            value={formData.additionalFee.amount}
+            min="0"
+            step="0.01"
+            onChange={handleChange}
+          />
           <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           <br />
-        
-          <button type="submit" disabled={isFormInvalid} style={{ opacity: isFormInvalid ? 0.5 : 1, cursor: isFormInvalid ? "not-allowed" : "pointer" }}>Update Cabin</button>
-          <button type="button" onClick={handleClear}>Reset</button>
-          <button type="button" onClick={() => router.push("/cabin")}>Cancel</button>
-        
+          <button
+            type="submit"
+            disabled={isFormInvalid}
+            style={{
+              opacity: isFormInvalid ? 0.5 : 1,
+              cursor: isFormInvalid ? "not-allowed" : "pointer",
+            }}
+          >
+            Update Cabin
+          </button>
+          <button type="button" onClick={handleClear}>
+            Reset
+          </button>
+          <button type="button" onClick={() => router.push("/cabin")}>
+            Cancel
+          </button>
           <div style={{ marginBottom: "80px" }}></div>
         </form>
       )}

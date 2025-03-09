@@ -2,10 +2,19 @@
   color: var(--color-sand-500);
   margin-bottom: 2rem;
   text-align: center;
+  margin-bottom: 3rem;
 
   .subtext {
     font-size: var(--text-size-base);
     text-transform: uppercase;
+
+    @media (max-width: 1024px) {
+      font-size: calc(var(--text-size-base) * 0.9);
+    }
+
+    @media (max-width: 768px) {
+      font-size: calc(var(--text-size-base) * 0.8);
+    }
   }
 
   .title {
@@ -17,11 +26,21 @@
 
     &::after {
       display: block;
-      margin: 0.5rem auto;
+      margin: 1rem auto;
       content: "";
       width: 120px;
       height: 3px;
       background-color: var(--color-sand-500);
+    }
+
+    @media (max-width: 1440px) {
+      font-size: calc(var(--text-size-lg) * 1);
+      line-height: calc(var(--text-line-height-xl) * 0.9);
+    }
+
+    @media (max-width: 768px) {
+      font-size: calc(var(--text-size-xl) * 0.8);
+      line-height: calc(var(--text-line-height-xl) * 0.8);
     }
   }
 }

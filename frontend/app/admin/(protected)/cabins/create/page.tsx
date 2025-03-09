@@ -3,18 +3,27 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
+import useSWRMutation from "swr/mutation";
+import { createCabin } from "@/app/lib/api";
 
 export default function CreateCabin() {
   const router = useRouter();
 
-  const [isMutating, setIsMutating] = useState<boolean>(false);
+  const { trigger, isMutating } = useSWRMutation(
+    "create cabin",
+    (key, { arg }: { arg: FormData }) => createCabin(arg),
+    {
+      onSuccess: () => {
+        router.push("/admin/cabins");
+      },
+    }
+  );
 
   const [formData, setFormData] = useState({
     service: {
       name: "",
       description: "",
       image: null as File | null,
-      quantity: 1,
       price: 1,
     },
     cabin: {
@@ -34,7 +43,6 @@ export default function CreateCabin() {
     minCapacity: "",
     maxCapacity: "",
     image: "",
-    quantity: "",
     price: "",
   });
 
@@ -82,13 +90,7 @@ export default function CreateCabin() {
         [section]: { ...prev[section], [name]: file },
       }));
     } else {
-      const numericFields = [
-        "quantity",
-        "price",
-        "minCapacity",
-        "maxCapacity",
-        "amount",
-      ];
+      const numericFields = ["price", "minCapacity", "maxCapacity", "amount"];
       const newValue = numericFields.includes(name)
         ? value === ""
           ? ""
@@ -130,14 +132,9 @@ export default function CreateCabin() {
   const validateField = (name: string, value: any) => {
     if (value === "" || value === null || value === undefined) {
       if (
-        [
-          "name",
-          "description",
-          "quantity",
-          "price",
-          "minCapacity",
-          "maxCapacity",
-        ].includes(name)
+        ["name", "description", "price", "minCapacity", "maxCapacity"].includes(
+          name
+        )
       ) {
         return "This field is required.";
       }
@@ -145,9 +142,6 @@ export default function CreateCabin() {
 
     if (name === "price" && (isNaN(value) || value < 1)) {
       return "Rate must be greater than 0.";
-    }
-    if (name === "quantity" && (isNaN(value) || value < 1)) {
-      return "Quantity must be at least 1.";
     }
     if (name === "minCapacity" && (isNaN(value) || value < 1)) {
       return "Minimum capacity must be at least 1.";
@@ -178,17 +172,17 @@ export default function CreateCabin() {
       return;
     }
 
-    const isConfirmed = window.confirm(
-      "Are you sure you want to add this cabin?"
-    );
-    if (!isConfirmed) return;
+    // const isConfirmed = window.confirm(
+    //   "Are you sure you want to add this cabin?"
+    // );
+    // if (!isConfirmed) return;
+    // NOTE: ADD a modal before adding of cabin
 
     const newErrors = {
       name: validateField("name", formData.service.name),
       description: validateField("description", formData.service.description),
       minCapacity: validateField("minCapacity", formData.cabin.minCapacity),
       maxCapacity: validateField("maxCapacity", formData.cabin.maxCapacity),
-      quantity: validateField("quantity", formData.service.quantity),
       price: validateField("price", formData.service.price),
       image: formData.service.image ? "" : "Image is required.",
     };
@@ -204,7 +198,6 @@ export default function CreateCabin() {
       name: formData.service.name,
       description: formData.service.description,
       price: Number(formData.service.price),
-      quantity: Number(formData.service.quantity),
       minCapacity: Number(formData.cabin.minCapacity),
       maxCapacity: Number(formData.cabin.maxCapacity),
       additionalFee: formData.additionalFee.type?.trim()
@@ -221,28 +214,7 @@ export default function CreateCabin() {
       data.append("file", formData.service.image);
     }
 
-    try {
-      setIsMutating(true);
-
-      const response = await fetch(
-        "http://localhost:8080/api/services/cabins",
-        {
-          method: "POST",
-          body: data,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to create cabin");
-      }
-
-      alert("Cabin created successfully!");
-      router.push("/cabin");
-    } catch (error) {
-      console.error("Error", error);
-    } finally {
-      setIsMutating(false);
-    }
+    trigger(data);
   };
 
   const isFormInvalid =
@@ -255,7 +227,6 @@ export default function CreateCabin() {
         name: "",
         description: "",
         image: null,
-        quantity: 1,
         price: 1,
       },
       cabin: {
@@ -274,7 +245,6 @@ export default function CreateCabin() {
       minCapacity: "",
       maxCapacity: "",
       image: "",
-      quantity: "",
       price: "",
     });
     setAdditionalFeeWarning("");
@@ -359,21 +329,6 @@ export default function CreateCabin() {
           />
           <p className="error" style={{ color: "red" }}>
             {errors.image}
-          </p>
-          <br />
-
-          <label>Quantity</label>
-          <br />
-          <input
-            type="number"
-            name="quantity"
-            data-section="service"
-            min="1"
-            value={formData.service.quantity || ""}
-            onChange={handleChange}
-          />
-          <p className="error" style={{ color: "red" }}>
-            {errors.quantity}
           </p>
           <br />
 

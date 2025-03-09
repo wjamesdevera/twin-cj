@@ -4,8 +4,8 @@ import authRoutes from "./auth.routes";
 import userRoutes from "./user.routes";
 import feedbackRoutes from "./feedback.routes";
 import serviceRoutes from "./service.routes";
+import sessionRoutes from "./session.routes";
 import { authenticate } from "../middlewares/auth.middleware";
-import uploadRoutes from "./upload";
 import { upload } from "../middlewares/upload";
 
 const router = Router();
@@ -20,9 +20,11 @@ router.get("/health", (request: Request, response: Response) => {
 });
 
 router.use("/auth", authRoutes);
+router.use("/sessions", sessionRoutes);
 router.use("/users", authenticate, userRoutes);
 router.use("/services", serviceRoutes);
 router.use("/feedbacks", feedbackRoutes);
+router.use("/services", serviceRoutes);
 
 router.post("/upload-test", upload.single("file"), (req, res) => {
   res.json({
@@ -36,7 +38,5 @@ router.get("/auth-test", authenticate, (req, res) => {
     message: "authenticated",
   });
 });
-
-router.use("/upload", uploadRoutes);
 
 export default router;
