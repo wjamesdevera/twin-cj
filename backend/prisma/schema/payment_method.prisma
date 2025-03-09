@@ -1,0 +1,12 @@
+model PaymentMethod {
+    id        Int      @id @default(autoincrement()) @map("payment_method_id")
+    name      String   @map("name")
+    type      String   @map("type")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    paymentAccount PaymentAccount[]
+
+    @@map("payment_methods")
+}
