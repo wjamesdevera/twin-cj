@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './selectPayment.module.scss';
+import React from "react";
+import styles from "./selectPayment.module.scss";
 
 interface SelectPaymentProps {
   className?: string;
@@ -14,7 +14,7 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({ style, className }) => {
       </h2>
       <select
         className={styles.paymentOptions}
-        defaultValue={'Select Payment Method'}
+        defaultValue={"Select Payment Method"}
       >
         <option value="Select Payment Method" disabled>
           Select Payment Method
@@ -23,7 +23,7 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({ style, className }) => {
         <option value="CreditCard">Credit Card</option>
       </select>
       <h3 className={styles.subheading}>
-        Please upload your proof of payment here{' '}
+        Please upload your proof of payment here{" "}
         <span className={styles.required}>*</span>
       </h3>
       <label className={styles.fileUpload}>
@@ -45,7 +45,8 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({ style, className }) => {
           Upload
         </span>
       </label>
-      {/* <span>Max file size accepted is 1 MB.</span> */}
+      <br></br>
+      <h5 className={styles.uploadSubtext}>Max file size accepted is 1 MB.</h5>
     </div>
   );
 };
