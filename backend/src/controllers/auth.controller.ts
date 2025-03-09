@@ -35,20 +35,27 @@ export const registerHandler = catchErrors(
       userAgent: request.headers["user-agent"],
     });
 
-    const { user, accessToken, refreshToken } = await createAccount(
-      requestBody
-    );
+    const { user } = await createAccount(requestBody);
 
-    setAuthCookies({ response, accessToken, refreshToken })
-      .status(CREATED)
-      .json({
-        status: "success",
-        data: {
-          user: {
-            email: user.email,
-          },
+    return response.status(CREATED).json({
+      status: "success",
+      data: {
+        user: {
+          email: user.email,
         },
-      });
+      },
+    });
+
+    // setAuthCookies({ response, accessToken, refreshToken })
+    //   .status(CREATED)
+    //   .json({
+    //     status: "success",
+    //     data: {
+    //       user: {
+    //         email: user.email,
+    //       },
+    //     },
+    //   });
   }
 );
 

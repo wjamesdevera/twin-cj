@@ -85,8 +85,6 @@ export const createAccount = async (data: CreateAccountParams) => {
 
   const userAccountId = createUser.userAccount?.id;
 
-  const oneYear = oneYearFromNow();
-
   const verificationCode = await prisma.verificationCode.create({
     data: {
       userAccountId: userAccountId,
@@ -105,22 +103,22 @@ export const createAccount = async (data: CreateAccountParams) => {
   //ignore email errors for now
   if (error) console.log(error);
 
-  const session = await prisma.session.create({
-    data: {
-      userAccountId: userAccountId,
-      userAgent: data.userAgent,
-      expiresAt: thirtyDaysFromNow(),
-    },
-  });
+  // const session = await prisma.session.create({
+  //   data: {
+  //     userAccountId: userAccountId,
+  //     userAgent: data.userAgent,
+  //     expiresAt: thirtyDaysFromNow(),
+  //   },
+  // });
 
-  const refreshToken = signToken({
-    sessionId: session.id,
-  });
+  // const refreshToken = signToken({
+  //   sessionId: session.id,
+  // });
 
-  const accessToken = signToken({
-    userId: userAccountId,
-    sessionId: session.id,
-  });
+  // const accessToken = signToken({
+  //   userId: userAccountId,
+  //   sessionId: session.id,
+  // });
 
   return {
     user: {
@@ -129,8 +127,8 @@ export const createAccount = async (data: CreateAccountParams) => {
       phoneNumber: createUser.phoneNumber,
       email: createUser.email,
     },
-    accessToken: accessToken,
-    refreshToken: refreshToken,
+    // accessToken: accessToken,
+    // refreshToken: refreshToken,
   };
 };
 
