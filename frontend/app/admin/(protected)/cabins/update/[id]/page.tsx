@@ -244,7 +244,7 @@ export default function UpdateCabin() {
 
     if (formData.service.image) {
       const imageFormData = new FormData();
-      imageFormData.append("image", formData.service.image);
+      imageFormData.append("file", formData.service.image);
 
       try {
         const uploadResponse = await fetch("http://localhost:8080/api/upload", {
@@ -298,7 +298,7 @@ export default function UpdateCabin() {
 
       if (response.ok) {
         alert("Cabin updated successfully!");
-        router.push("/cabin");
+        router.push("/admin/cabins");
       } else {
         throw new Error("Failed to update cabin.");
       }
@@ -478,7 +478,7 @@ export default function UpdateCabin() {
           <button type="button" onClick={handleClear}>
             Reset
           </button>
-          <button type="button" onClick={() => router.push("/cabin")}>
+          <button type="button" onClick={() => router.push("/admin/cabins")}>
             Cancel
           </button>
           <div style={{ marginBottom: "80px" }}></div>
