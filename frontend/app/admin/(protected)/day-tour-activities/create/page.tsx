@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, {
   useState,
@@ -6,9 +6,9 @@ import React, {
   useCallback,
   ChangeEvent,
   FormEvent,
-} from "react";
-import { useRouter } from "next/navigation";
-import { Loading } from "@/app/components/loading";
+} from 'react';
+import { useRouter } from 'next/navigation';
+import { Loading } from '@/app/components/loading';
 
 function Page() {
   const router = useRouter();
@@ -24,13 +24,13 @@ function Page() {
   }
 
   const [formData, setFormData] = useState<DayTourFormData>({
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     image: null,
-    price: "",
-    additionalFeeType: "",
-    additionalFeeDescription: "",
-    additionalFeeAmount: "",
+    price: '',
+    additionalFeeType: '',
+    additionalFeeDescription: '',
+    additionalFeeAmount: '',
   });
 
   // helper text initial state
@@ -62,7 +62,7 @@ function Page() {
     const isImageValid =
       formData.image !== null &&
       formData.image.size <= 1024 * 1024 &&
-      ["image/jpeg", "image/png", "image/jpg"].includes(formData.image.type);
+      ['image/jpeg', 'image/png', 'image/jpg'].includes(formData.image.type);
 
     const isAdditionalFeeTypeTouched =
       formData.additionalFeeType.trim().length > 0;
@@ -110,18 +110,18 @@ function Page() {
       setHelperText((prevHelperText) => ({
         ...prevHelperText,
         [name]:
-          name === "name"
+          name === 'name'
             ? trimmedValue.length === 0 || trimmedValue.length > 50
-            : name === "description"
+            : name === 'description'
             ? trimmedValue.length === 0 || trimmedValue.length > 100
-            : name === "price"
+            : name === 'price'
             ? !/^\d+(\.\d+)?$/.test(trimmedValue) ||
               parseFloat(trimmedValue) <= 0
-            : name === "additionalFeeType"
+            : name === 'additionalFeeType'
             ? trimmedValue.length === 0
-            : name === "additionalFeeDescription"
+            : name === 'additionalFeeDescription'
             ? trimmedValue.length === 0
-            : name === "additionalFeeAmount"
+            : name === 'additionalFeeAmount'
             ? !/^\d+(\.\d+)?$/.test(trimmedValue) ||
               parseFloat(trimmedValue) <= 0
             : false,
@@ -135,7 +135,7 @@ function Page() {
 
     setIsMutating(true);
 
-    if (!window.confirm("Are you sure you want to add this Day tour?")) {
+    if (!window.confirm('Are you sure you want to add this Day tour?')) {
       setIsMutating(false);
       return;
     }
@@ -159,27 +159,27 @@ function Page() {
       };
     }
 
-    data.append("data", JSON.stringify(jsonData));
+    data.append('data', JSON.stringify(jsonData));
 
     if (formData.image) {
-      data.append("file", formData.image);
+      data.append('file', formData.image);
     }
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/services/day-tours/",
+        'http://localhost:8080/api/services/day-tours/',
         {
-          method: "POST",
+          method: 'POST',
           body: data,
         }
       );
 
       if (response.ok) {
-        alert("Day tour created successfully!");
-        router.push("/admin/content/daytour/dashboard");
+        alert('Day tour created successfully!');
+        router.push('/admin/day-tour-activities');
       }
     } catch (error) {
-      console.error("Error creating day tour:", error);
+      console.error('Error creating day tour:', error);
     } finally {
       setIsMutating(false);
     }
@@ -285,7 +285,7 @@ function Page() {
             </button>
             <button
               type="button"
-              onClick={() => router.push("/admin/content/daytour/dashboard")}
+              onClick={() => router.push('/admin/content/daytour/dashboard')}
             >
               Cancel
             </button>
