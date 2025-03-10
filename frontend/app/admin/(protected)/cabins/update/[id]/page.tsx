@@ -263,23 +263,54 @@ export default function UpdateCabin() {
       }
     }
 
+    // const requestBody = {
+    //   service: {
+    //     name: formData.service.name,
+    //     description: formData.service.description,
+    //     imageUrl: imageUrl,
+    //     price: formData.service.price,
+    //   },
+    //   cabin: {
+    //     minCapacity: formData.cabin.minCapacity,
+    //     maxCapacity: formData.cabin.maxCapacity,
+    //   },
+    //   additionalFee:
+    //     formData.additionalFee.type ||
+    //     formData.additionalFee.description ||
+    //     formData.additionalFee.amount > 0
+    //       ? { ...formData.additionalFee }
+    //       : null,
+    // };
+
+    const jsonData: any = {
+      name: formData.service.name,
+      description: formData.service.description,
+      price: Number(formData.service.price),
+      imageUrl: imageUrl,
+      minCapacity: formData.cabin.minCapacity,
+      maxCapacity: formData.cabin.maxCapacity,
+    };
+
+    if (
+      formData.additionalFee.type &&
+      formData.additionalFee.description &&
+      formData.additionalFee.amount
+    ) {
+      jsonData.additionalFee = {
+        type: formData.additionalFee.type,
+        description: formData.additionalFee.description,
+        amount: Number(formData.additionalFee.amount),
+      };
+    } else {
+      jsonData.additionalFee = {
+        type: "N/A",
+        description: "N/A",
+        amount: 0,
+      };
+    }
+
     const requestBody = {
-      service: {
-        name: formData.service.name,
-        description: formData.service.description,
-        imageUrl: imageUrl,
-        price: formData.service.price,
-      },
-      cabin: {
-        minCapacity: formData.cabin.minCapacity,
-        maxCapacity: formData.cabin.maxCapacity,
-      },
-      additionalFee:
-        formData.additionalFee.type ||
-        formData.additionalFee.description ||
-        formData.additionalFee.amount > 0
-          ? { ...formData.additionalFee }
-          : null,
+      data: JSON.stringify(jsonData),
     };
 
     try {
