@@ -453,7 +453,7 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
     },
   });
 
-  appAssert(existingCabin, NOT_FOUND, `Day tour with ID ${id} not found`);
+  appAssert(existingCabin, NOT_FOUND, `Cabin with ID ${id} not found`);
 
   const updatedCabin = await prisma.service.update({
     where: { id },
@@ -496,7 +496,7 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
     },
   });
 
-  appAssert(updatedCabin, NOT_FOUND, `Day tour with ID ${id} not found`);
+  appAssert(updatedCabin, NOT_FOUND, `Cabin with ID ${id} not found`);
 
   return {
     id: updatedCabin.id,

@@ -282,7 +282,7 @@ export default function UpdateCabin() {
     //       : null,
     // };
 
-    const jsonData: any = {
+    const requestBody: any = {
       name: formData.service.name,
       description: formData.service.description,
       price: Number(formData.service.price),
@@ -296,21 +296,21 @@ export default function UpdateCabin() {
       formData.additionalFee.description &&
       formData.additionalFee.amount
     ) {
-      jsonData.additionalFee = {
+      requestBody.additionalFee = {
         type: formData.additionalFee.type,
         description: formData.additionalFee.description,
         amount: Number(formData.additionalFee.amount),
       };
     } else {
-      jsonData.additionalFee = {
-        type: "N/A",
-        description: "N/A",
+      requestBody.additionalFee = {
+        type: "",
+        description: "",
         amount: 0,
       };
     }
 
-    const requestBody = {
-      data: JSON.stringify(jsonData),
+    const jsonData = {
+      data: JSON.stringify(requestBody),
     };
 
     try {
@@ -323,7 +323,7 @@ export default function UpdateCabin() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(jsonData),
         }
       );
 
