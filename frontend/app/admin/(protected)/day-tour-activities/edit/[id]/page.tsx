@@ -1,14 +1,14 @@
-'use client';
+"use client";
 import React, {
   useEffect,
   useState,
   useCallback,
   ChangeEvent,
   FormEvent,
-} from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import styles from '../edit.module.scss';
-import { Loading } from '@/app/components/loading';
+} from "react";
+import { useRouter, useParams } from "next/navigation";
+import styles from "../edit.module.scss";
+import { Loading } from "@/app/components/loading";
 
 interface DayTour {
   id: number;
@@ -24,13 +24,13 @@ interface DayTour {
 const EditDayTour: React.FC = () => {
   const [formData, setFormData] = useState<DayTour>({
     id: 0,
-    name: '',
-    description: '',
-    imageUrl: '',
-    price: '',
-    additionalFeeType: '',
-    additionalFeeDescription: '',
-    additionalFeeAmount: '',
+    name: "",
+    description: "",
+    imageUrl: "",
+    price: "",
+    additionalFeeType: "",
+    additionalFeeDescription: "",
+    additionalFeeAmount: "",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -38,12 +38,12 @@ const EditDayTour: React.FC = () => {
   const [isMutating, setIsMutating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [helperText, setHelperText] = useState<{ [key: string]: string }>({
-    name: '',
-    description: '',
-    price: '',
-    additionalFeeType: '',
-    additionalFeeDescription: '',
-    additionalFeeAmount: '',
+    name: "",
+    description: "",
+    price: "",
+    additionalFeeType: "",
+    additionalFeeDescription: "",
+    additionalFeeAmount: "",
   });
   const [originalData, setOriginalData] = useState<DayTour | null>(null);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
@@ -54,7 +54,7 @@ const EditDayTour: React.FC = () => {
 
   useEffect(() => {
     if (!id) {
-      setError('No ID provided');
+      setError("No ID provided");
       setLoading(false);
       return;
     }
@@ -64,8 +64,8 @@ const EditDayTour: React.FC = () => {
         const response = await fetch(
           `http://localhost:8080/api/services/day-tours/${id}`,
           {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
           }
         );
 
@@ -80,24 +80,24 @@ const EditDayTour: React.FC = () => {
           const additionalFee = data.data.dayTour.additionalFee || {};
           const fetchedData = {
             id: dayTour.id,
-            name: dayTour.name || '',
-            description: dayTour.description || '',
+            name: dayTour.name || "",
+            description: dayTour.description || "",
             imageUrl: dayTour?.imageUrl
               ? `http://localhost:8080/uploads/${dayTour.imageUrl}`
-              : '',
-            price: dayTour.price.toString() || '',
-            additionalFeeType: additionalFee.type || '',
-            additionalFeeDescription: additionalFee.description || '',
-            additionalFeeAmount: additionalFee.amount?.toString() || '',
+              : "",
+            price: dayTour.price.toString() || "",
+            additionalFeeType: additionalFee.type || "",
+            additionalFeeDescription: additionalFee.description || "",
+            additionalFeeAmount: additionalFee.amount?.toString() || "",
           };
           setFormData(fetchedData);
           setOriginalData(fetchedData);
         } else {
-          setError('Invalid data structure received');
+          setError("Invalid data structure received");
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : 'An unknown error occurred'
+          err instanceof Error ? err.message : "An unknown error occurred"
         );
       } finally {
         setLoading(false);
@@ -122,14 +122,14 @@ const EditDayTour: React.FC = () => {
     const isImageValid =
       !imageFile ||
       (imageFile.size <= 1024 * 1024 &&
-        ['image/jpeg', 'image/png', 'image/jpg'].includes(imageFile.type));
+        ["image/jpeg", "image/png", "image/jpg"].includes(imageFile.type));
 
     const isAdditionalFeeValid =
-      (formData.additionalFeeType.trim() === '' &&
-        formData.additionalFeeDescription.trim() === '' &&
-        formData.additionalFeeAmount.trim() === '') ||
-      (formData.additionalFeeType.trim() !== '' &&
-        formData.additionalFeeDescription.trim() !== '' &&
+      (formData.additionalFeeType.trim() === "" &&
+        formData.additionalFeeDescription.trim() === "" &&
+        formData.additionalFeeAmount.trim() === "") ||
+      (formData.additionalFeeType.trim() !== "" &&
+        formData.additionalFeeDescription.trim() !== "" &&
         /^\d+(\.\d{1,2})?$/.test(formData.additionalFeeAmount.trim()) &&
         parseFloat(formData.additionalFeeAmount) > 0);
 
@@ -162,44 +162,44 @@ const EditDayTour: React.FC = () => {
       setHelperText((prev) => ({
         ...prev,
         name:
-          name === 'name' &&
+          name === "name" &&
           (trimmedValue.length === 0 || trimmedValue.length > 50)
-            ? 'Name must not be empty or exceed 50 characters'
+            ? "Name must not be empty or exceed 50 characters"
             : prev.name,
         description:
-          name === 'description' &&
+          name === "description" &&
           (trimmedValue.length === 0 || trimmedValue.length > 100)
-            ? 'Description must not be empty or exceed 100 characters'
+            ? "Description must not be empty or exceed 100 characters"
             : prev.description,
         price:
-          name === 'price' &&
+          name === "price" &&
           (!/^\d+(\.\d{1,2})?$/.test(trimmedValue) ||
             isNaN(parseFloat(trimmedValue)) ||
             parseFloat(trimmedValue) <= 0)
-            ? 'Rate must be a positive number only'
+            ? "Rate must be a positive number only"
             : prev.price,
 
         additionalFeeType:
-          name === 'additionalFeeType' &&
+          name === "additionalFeeType" &&
           (isFilled(formData.additionalFeeDescription) ||
             isFilled(formData.additionalFeeAmount)) &&
           !isFilled(trimmedValue)
-            ? 'Additional Fee Type is required'
+            ? "Additional Fee Type is required"
             : prev.additionalFeeType,
 
         additionalFeeDescription:
-          name === 'additionalFeeDescription' &&
+          name === "additionalFeeDescription" &&
           isFilled(formData.additionalFeeType) &&
           !isFilled(trimmedValue)
-            ? 'Additional Fee Description is required'
+            ? "Additional Fee Description is required"
             : prev.additionalFeeDescription,
 
         additionalFeeAmount:
-          name === 'additionalFeeAmount' &&
+          name === "additionalFeeAmount" &&
           isFilled(formData.additionalFeeType) &&
           (!/^\d+(\.\d{1,2})?$/.test(trimmedValue) ||
             parseFloat(trimmedValue) <= 0)
-            ? 'Additional Fee Amount must be a positive number only'
+            ? "Additional Fee Amount must be a positive number only"
             : prev.additionalFeeAmount,
       }));
 
@@ -211,11 +211,11 @@ const EditDayTour: React.FC = () => {
   const hasChanges = () => {
     if (!originalData) return false;
 
-    const compareWithoutWhitespace = (a: string = '', b: string = '') =>
+    const compareWithoutWhitespace = (a: string = "", b: string = "") =>
       a.trim() === b.trim();
 
     const parseNumber = (val: string) =>
-      val.trim() === '' ? 0 : parseFloat(val);
+      val.trim() === "" ? 0 : parseFloat(val);
 
     const requiredFieldsChanged =
       !compareWithoutWhitespace(formData.name, originalData.name) ||
@@ -227,17 +227,17 @@ const EditDayTour: React.FC = () => {
       !!imageFile;
 
     const additionalFeeChanged =
-      (formData.additionalFeeType.trim() !== '' &&
+      (formData.additionalFeeType.trim() !== "" &&
         !compareWithoutWhitespace(
           formData.additionalFeeType,
           originalData.additionalFeeType
         )) ||
-      (formData.additionalFeeDescription.trim() !== '' &&
+      (formData.additionalFeeDescription.trim() !== "" &&
         !compareWithoutWhitespace(
           formData.additionalFeeDescription,
           originalData.additionalFeeDescription
         )) ||
-      (formData.additionalFeeAmount.trim() !== '' &&
+      (formData.additionalFeeAmount.trim() !== "" &&
         parseNumber(formData.additionalFeeAmount) !==
           parseNumber(originalData.additionalFeeAmount));
 
@@ -266,7 +266,7 @@ const EditDayTour: React.FC = () => {
       return;
     }
 
-    if (!window.confirm('Are you sure you want to save changes?')) {
+    if (!window.confirm("Are you sure you want to save changes?")) {
       setIsMutating(false);
       return;
     }
@@ -290,27 +290,27 @@ const EditDayTour: React.FC = () => {
       };
     } else {
       jsonData.additionalFee = {
-        type: 'N/A',
-        description: 'N/A',
+        type: "N/A",
+        description: "N/A",
         amount: 0,
       };
     }
 
-    data.append('data', JSON.stringify(jsonData));
+    data.append("data", JSON.stringify(jsonData));
     if (imageFile) {
-      data.append('file', imageFile);
+      data.append("file", imageFile);
     }
 
     try {
       const response = await fetch(
         `http://localhost:8080/api/services/day-tours/${id}`,
         {
-          method: 'PUT',
+          method: "PUT",
           body: data,
         }
       );
 
-      if (!response.ok) throw new Error('Failed to update day tour');
+      if (!response.ok) throw new Error("Failed to update day tour");
 
       const updatedData = await response.json();
       const updatedImageUrl = updatedData?.data?.dayTour?.imageUrl;
@@ -322,11 +322,11 @@ const EditDayTour: React.FC = () => {
         }));
       }
 
-      alert('Day tour updated successfully!');
-      router.push('/admin/day-tour-activities');
+      alert("Day tour updated successfully!");
+      router.push("/admin/day-tour-activities");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'An unknown error occurred'
+        err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
       setIsMutating(false);
@@ -351,7 +351,7 @@ const EditDayTour: React.FC = () => {
                 type="text"
                 id="name"
                 name="name"
-                value={formData.name || ''}
+                value={formData.name || ""}
                 onChange={handleChange}
                 maxLength={50}
                 required
@@ -366,7 +366,7 @@ const EditDayTour: React.FC = () => {
                 type="text"
                 id="description"
                 name="description"
-                value={formData.description || ''}
+                value={formData.description || ""}
                 onChange={handleChange}
                 maxLength={100}
                 required
@@ -394,7 +394,7 @@ const EditDayTour: React.FC = () => {
                 type="text"
                 id="price"
                 name="price"
-                value={formData.price || ''}
+                value={formData.price || ""}
                 onChange={handleChange}
                 required
               />
@@ -410,7 +410,7 @@ const EditDayTour: React.FC = () => {
                 id="additionalFeeType"
                 name="additionalFeeType"
                 maxLength={50}
-                value={formData.additionalFeeType || ''}
+                value={formData.additionalFeeType || ""}
                 onChange={handleChange}
               />
               {helperText.additionalFeeType && (
@@ -428,7 +428,7 @@ const EditDayTour: React.FC = () => {
                 id="additionalFeeDescription"
                 name="additionalFeeDescription"
                 maxLength={100}
-                value={formData.additionalFeeDescription || ''}
+                value={formData.additionalFeeDescription || ""}
                 onChange={handleChange}
               />
               {helperText.additionalFeeDescription && (
@@ -443,7 +443,7 @@ const EditDayTour: React.FC = () => {
                 type="text"
                 id="additionalFeeAmount"
                 name="additionalFeeAmount"
-                value={formData.additionalFeeAmount || ''}
+                value={formData.additionalFeeAmount || ""}
                 onChange={handleChange}
               />
               {helperText.additionalFeeAmount && (
@@ -461,7 +461,7 @@ const EditDayTour: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => router.push('/admin/content/daytour/dashboard')}
+              onClick={() => router.push("/admin/day-tour-activities")}
             >
               Cancel
             </button>
