@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import styles from "./scheduleselector.module.scss";
 
-const ScheduleSelector: React.FC = () => {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+interface ScheduleSelectorProps {
+  selectedOption: string | null;
+  handleOptionSelect: (option: string) => void;
+}
 
-  const handleOptionSelect = (option: string) => {
-    setSelectedOption(option);
-  };
-
+const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
+  selectedOption,
+  handleOptionSelect,
+}) => {
   return (
     <div className={styles.scheduleSelector}>
       <div className={styles.options}>
