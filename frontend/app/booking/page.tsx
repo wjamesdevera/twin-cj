@@ -9,6 +9,7 @@ import BookingCard from "./../components/BookingCard";
 import Additionals from "./../components/Additionals";
 import GuestInformation from "../components/GuestInformation";
 import { Loading } from "../components/loading";
+import { set } from "zod";
 
 interface AccordionItem {
   title: string;
@@ -44,7 +45,7 @@ const Booking: React.FC = () => {
 
   useEffect(() => {
     if (data) {
-      console.log(data); // Log the response to debug the issue
+      console.log(data);
       if (
         bookingType === "day-tour" &&
         data.data &&
@@ -67,7 +68,10 @@ const Booking: React.FC = () => {
   const handleOptionSelect = (option: string) => {
     setBookingType(option);
     setSelectedOption("");
-    setIsLoading(true);
+    {
+      /* isMutating */
+    }
+    //setIsLoading(true);
   };
 
   if (error) return <div>Failed to load</div>;
