@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import useSWR from "swr";
 import Header from "./../components/Header";
 import Accordion from "./../components/Accordion";
 import ScheduleSelector from "./../components/ScheduleSelector";
 import BookingCard from "./../components/BookingCard";
 import Additionals from "./../components/Additionals";
 import GuestInformation from "../components/GuestInformation";
+import { Loading } from "../components/loading";
 
 interface AccordionItem {
   title: string;
@@ -14,27 +16,64 @@ interface AccordionItem {
   required?: boolean;
 }
 
+interface BookingCardData {
+  name: string;
+  description: string;
+  price: number;
+  additionalFee: string | null;
+  imageUrl: string;
+}
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 const Booking: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string>("");
-  const [selectedAdditionals, setSelectedAdditionals] = useState<string[]>([]);
   const [bookingType, setBookingType] = useState<string>("day-tour");
+  const [bookingCards, setBookingCards] = useState<BookingCardData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const handleAdditionalSelect = (title: string) => {
-    setSelectedAdditionals((prevSelected) => {
-      if (prevSelected.includes(title)) {
-        return prevSelected.filter((item) => item !== title);
+  const { data, error } = useSWR<{
+    status: string;
+    data: { dayTours?: BookingCardData[]; cabins?: BookingCardData[] };
+  }>(
+    `http://localhost:8080/api/services/${
+      bookingType === "day-tour" ? "day-tours" : "cabins"
+    }`,
+    fetcher
+  );
+
+  useEffect(() => {
+    if (data) {
+      console.log(data); // Log the response to debug the issue
+      if (
+        bookingType === "day-tour" &&
+        data.data &&
+        Array.isArray(data.data.dayTours)
+      ) {
+        setBookingCards(data.data.dayTours);
+      } else if (
+        bookingType === "overnight" &&
+        data.data &&
+        Array.isArray(data.data.cabins)
+      ) {
+        setBookingCards(data.data.cabins);
       } else {
-        return [...prevSelected, title];
+        setBookingCards([]);
       }
-    });
-  };
+      setIsLoading(false);
+    }
+  }, [data, bookingType]);
 
   const handleOptionSelect = (option: string) => {
     setBookingType(option);
     setSelectedOption("");
+    setIsLoading(true);
   };
 
-  const accordionItems = [
+  if (error) return <div>Failed to load</div>;
+  if (isLoading) return <Loading />;
+
+  const accordionItems: AccordionItem[] = [
     {
       title: "Resort Schedule",
       content: (
@@ -58,16 +97,18 @@ const Booking: React.FC = () => {
               >
                 Choose one Package Type (required)
               </p>
-
-              <BookingCard
-                title="River Day Tour"
-                description="Enjoy a relaxing escape with our River Day Tour, offering serene views of the Norzagaray and Angat Rivers."
-                price="₱300"
-                additionalPrice="+ ₱ 20 per head"
-                imageSrc="./assets/mini-cabin.png"
-                isSelected={selectedOption === "river-day-tour"}
-                onSelect={() => setSelectedOption("river-day-tour")}
-              />
+              {bookingCards.map((card) => (
+                <BookingCard
+                  key={card.name}
+                  title={card.name}
+                  description={card.description}
+                  price={`₱${card.price}`}
+                  additionalPrice={card.additionalFee || ""}
+                  imageSrc={card.imageUrl}
+                  isSelected={selectedOption === card.name}
+                  onSelect={() => setSelectedOption(card.name)}
+                />
+              ))}
             </div>
           ),
         }
@@ -86,15 +127,18 @@ const Booking: React.FC = () => {
               >
                 Choose one cabin (required)
               </p>
-              <BookingCard
-                title="Mini Cabin"
-                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at neque egestas turpis varius pellentesque vitae sed est."
-                price="₱2,000"
-                additionalPrice="for 2 pax"
-                imageSrc="./assets/mini-cabin.png"
-                isSelected={selectedOption === "mini-cabin"}
-                onSelect={() => setSelectedOption("mini-cabin")}
-              />
+              {bookingCards.map((card) => (
+                <BookingCard
+                  key={card.name}
+                  title={card.name}
+                  description={card.description}
+                  price={`₱${card.price}`}
+                  additionalPrice={card.additionalFee || ""}
+                  imageSrc={card.imageUrl}
+                  isSelected={selectedOption === card.name}
+                  onSelect={() => setSelectedOption(card.name)}
+                />
+              ))}
             </div>
           ),
         }
@@ -103,7 +147,7 @@ const Booking: React.FC = () => {
       title: "Booking Details",
       content: <GuestInformation />,
     },
-  ].filter((item): item is AccordionItem => item !== null) as AccordionItem[];
+  ].filter((item): item is AccordionItem => item !== null);
 
   return (
     <div>
