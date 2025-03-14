@@ -72,8 +72,7 @@ const CabinDashboard = () => {
   );
 
   const handleDeletCabin = async (id: number) => {
-    // NOTE: Add a modal before running the trigger for delete
-    await trigger(id);
+    // NOTE: Add a modal before running the trigger for deleteawait trigger(id);
 
     mutate("getCabins");
     alert("Cabin deleted successfully!");
