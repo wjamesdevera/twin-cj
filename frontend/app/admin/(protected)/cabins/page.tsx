@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { deleteCabin, getCabins, multiDeleteCabin } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
@@ -73,7 +73,13 @@ const CabinDashboard = () => {
 
   const handleDeletCabin = async (id: number) => {
     // NOTE: Add a modal before running the trigger for delete
-    trigger(id);
+
+    await trigger(id);
+
+    // NOTE: Add a modal for successful deletion
+    alert("Cabin deleted successfully!");
+
+    mutate("getCabins");
   };
 
   const deleteSelectedCabins = async () => {
