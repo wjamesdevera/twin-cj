@@ -7,6 +7,7 @@ import BackBtn from "../components/backButton";
 import PaymentContainer from "../components/paymentDetailsContainer";
 import SelectPayment from "../components/selectPayment";
 import PricingContainer from "../components/pricingContainer";
+import BookingButton from "../components/BookingButton";
 
 export default function PaymentDetails() {
   const [isMediumScreen, setIsMediumScreen] = useState(false);
@@ -84,6 +85,7 @@ export default function PaymentDetails() {
             }
           />
         </div>
+        <BookingButton text="CONFIRM BOOKING" onClick={() => {}} />
       </div>
     </div>
   );
