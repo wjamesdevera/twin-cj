@@ -153,16 +153,6 @@ export default function UpdateCabin() {
           ? ""
           : Number(value)
         : value;
-      
-      if (typeof newValue === "number") {
-        if (name === "minCapacity") {
-          if (newValue < 1 || newValue > 99) return;
-        }
-  
-        if (name === "maxCapacity") {
-          if (newValue <= formData.cabin.minCapacity || newValue > 99) return;
-        }
-      }
 
       setFormData((prev) => ({
         ...prev,
@@ -425,7 +415,6 @@ export default function UpdateCabin() {
             value={formData.cabin.minCapacity || ""}
             min="1"
             onChange={handleChange}
-            max={formData.cabin.maxCapacity - 1 || 1}
             onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
@@ -441,7 +430,6 @@ export default function UpdateCabin() {
             value={formData.cabin.maxCapacity || ""}
             min={formData.cabin.minCapacity}
             onChange={handleChange}
-            max={30}
             onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
@@ -529,7 +517,7 @@ export default function UpdateCabin() {
             type="submit"
             disabled={isFormInvalid}
             style={{
-              opacity: isFormInvalid ? 0.5 : 1,
+              opacity: isFormInvalid ? 0.9 : 1,
               cursor: isFormInvalid ? "not-allowed" : "pointer",
             }}
           >
