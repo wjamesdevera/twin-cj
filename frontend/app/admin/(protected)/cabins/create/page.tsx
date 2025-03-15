@@ -106,6 +106,16 @@ export default function CreateCabin() {
           : Number(value)
         : value;
 
+      if (typeof newValue === "number") {
+        if (name === "minCapacity") {
+          if (newValue < 1 || newValue > 99) return;
+        }
+  
+        if (name === "maxCapacity") {
+          if (newValue <= formData.cabin.minCapacity || newValue > 99) return;
+        }
+      }
+
       setFormData((prev) => ({
         ...prev,
         [section]: { ...prev[section], [name]: newValue },
@@ -308,6 +318,7 @@ export default function CreateCabin() {
             value={formData.cabin.minCapacity || ""}
             onChange={handleChange}
             max={formData.cabin.maxCapacity - 1 || 1}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.minCapacity}
@@ -324,6 +335,7 @@ export default function CreateCabin() {
             value={formData.cabin.maxCapacity || ""}
             onChange={handleChange}
             max={30}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.maxCapacity}
