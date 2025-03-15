@@ -43,10 +43,16 @@ export const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
-export const changePasswordSchema = z.object({
-  oldPassword: passwordSchema,
-  newPassword: passwordSchema,
-});
+export const changePasswordSchema = z
+  .object({
+    oldPassword: passwordSchema,
+    newPassword: passwordSchema,
+    confirmPassword: passwordSchema,
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export const idSchema = z.string().uuid().trim();
 

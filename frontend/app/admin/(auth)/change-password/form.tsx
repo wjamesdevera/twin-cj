@@ -77,7 +77,11 @@ export function ChangePasswordForm() {
     Object.values(passwordValidations).every(Boolean);
 
   const handleChangePassword = async () => {
-    await trigger({ oldPassword, newPassword });
+    try {
+      await trigger({ oldPassword, newPassword });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return isMutating ? (

@@ -48,6 +48,7 @@ type ChangePasswordParams = {
   userId: string;
   oldPassword: string;
   newPassword: string;
+  confirmPassword: string;
 };
 
 export const createAccount = async (data: CreateAccountParams) => {
@@ -348,6 +349,7 @@ export const changePassword = async ({
   userId,
   oldPassword,
   newPassword,
+  confirmPassword,
 }: ChangePasswordParams) => {
   const user = await prisma.userAccount.findFirst({
     where: {
