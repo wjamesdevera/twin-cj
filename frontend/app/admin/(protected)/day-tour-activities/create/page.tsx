@@ -61,7 +61,9 @@ function Page() {
       parseFloat(formData.price) > 0;
 
     const isImageValid =
-      formData.image !== null &&
+      formData.image &&
+      typeof formData.image === "object" &&
+      "size" in formData.image &&
       formData.image.size <= 1024 * 1024 &&
       ["image/jpeg", "image/png", "image/jpg"].includes(formData.image.type);
 
@@ -89,7 +91,7 @@ function Page() {
       isImageValid &&
       isAdditionalFeeValid;
 
-    setIsFormValid(isValid);
+    setIsFormValid(Boolean(isValid));
   }, [formData]);
 
   useEffect(() => {
