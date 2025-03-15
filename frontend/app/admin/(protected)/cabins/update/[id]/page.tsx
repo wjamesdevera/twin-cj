@@ -381,6 +381,7 @@ export default function UpdateCabin() {
             data-section="service"
             value={formData.service.name}
             onChange={handleChange}
+            maxLength={50}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.name}
@@ -396,6 +397,7 @@ export default function UpdateCabin() {
             rows={3}
             cols={30}
             style={{ resize: "vertical" }}
+            maxLength={100}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.description}
@@ -468,6 +470,7 @@ export default function UpdateCabin() {
             data-section="additionalFee"
             value={formData.additionalFee.type}
             onChange={handleChange}
+            maxLength={50}
           />
           <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           <br />
@@ -480,6 +483,7 @@ export default function UpdateCabin() {
             onChange={handleChange}
             rows={3}
             cols={30}
+            maxLength={100}
           />
           <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           <br />
