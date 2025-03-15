@@ -54,6 +54,15 @@ export default function CreateCabin() {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
 
+    if (["name", "type"].includes(name)) {
+      const sanitizedValue = value.replace(/[^a-zA-Z0-9\s]/g, ""); // Remove special characters
+      setFormData((prev) => ({
+        ...prev,
+        [section]: { ...prev[section], [name]: sanitizedValue },
+      }));
+      return;
+    }
+
     if (files && files[0]) {
       const file = files[0];
       const validFormats = ["image/jpeg", "image/jpg", "image/png"];
@@ -267,6 +276,7 @@ export default function CreateCabin() {
             data-section="service"
             onChange={handleChange}
             maxLength={50}
+            value={formData.service.name}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.name}
@@ -362,6 +372,7 @@ export default function CreateCabin() {
             data-section="additionalFee"
             onChange={handleChange}
             maxLength={50}
+            value={formData.additionalFee.type}
           />
           <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           <br />
