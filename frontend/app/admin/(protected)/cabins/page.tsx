@@ -83,7 +83,7 @@ const CabinDashboard = () => {
     if (!confirmed) {
       return;
     }
-
+    await trigger(id);
     mutate("getCabins");
     alert("Cabin deleted successfully!");
   };
