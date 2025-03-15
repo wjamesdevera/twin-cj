@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import styles from "./dashboard.module.scss";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
+import { options } from "@/app/api";
+import Image from "next/image";
 
 interface DayTour {
   id: number;
@@ -40,7 +42,7 @@ const DayTourView = () => {
     const fetchDayTours = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8080/api/services/day-tours",
+          `${options.baseURL}/api/services/day-tours`,
           {
             method: "GET",
             headers: {
@@ -114,7 +116,7 @@ const DayTourView = () => {
       if (id) {
         // Single delete
         const response = await fetch(
-          `http://localhost:8080/api/services/day-tours/${id}`,
+          `${options.baseURL}/api/services/day-tours/${id}`,
           {
             method: "DELETE",
             headers: {
@@ -131,7 +133,7 @@ const DayTourView = () => {
         await Promise.all(
           selectedIds.map(async (id) => {
             const response = await fetch(
-              `http://localhost:8080/api/services/day-tours/${id}`,
+              `${options.baseURL}/services/day-tours/${id}`,
               {
                 method: "DELETE",
                 headers: {
@@ -228,11 +230,11 @@ const DayTourView = () => {
               <td>{dayTour.name}</td>
               <td>
                 {dayTour.imageUrl ? (
-                  <img
+                  <Image
                     src={
                       dayTour.imageUrl.startsWith("http")
                         ? dayTour.imageUrl
-                        : `http://localhost:8080/uploads/${dayTour.imageUrl}`
+                        : `${options.baseURL}/uploads/${dayTour.imageUrl}`
                     }
                     alt={dayTour.name}
                     width="100"

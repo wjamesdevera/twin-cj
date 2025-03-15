@@ -1,8 +1,8 @@
-import { prisma } from "../config/db";
-import path from "path";
-import fs from "fs";
-import appAssert from "../utils/appAssert";
-import { NOT_FOUND } from "../constants/http";
+import { prisma } from '../config/db';
+import path from 'path';
+import fs from 'fs';
+import appAssert from '../utils/appAssert';
+import { NOT_FOUND } from '../constants/http';
 
 interface CreateDayTourParams {
   name: string;
@@ -94,7 +94,7 @@ export const getDayTourById = async (id: number) => {
     },
   });
 
-  appAssert(service, NOT_FOUND, "Service Not Found");
+  appAssert(service, NOT_FOUND, 'Service Not Found');
 
   return {
     id: service.id,
@@ -133,6 +133,9 @@ export const updateDayTour = async ({ id, data }: UpdateDayTourParams) => {
 
   appAssert(existingDayTour, NOT_FOUND, `Day tour with ID ${id} not found`);
 
+  // Old Image URL
+  const oldImageUrl = existingDayTour.imageUrl;
+
   const updatedDayTour = await prisma.service.update({
     where: { id },
     data: {
@@ -147,8 +150,8 @@ export const updateDayTour = async ({ id, data }: UpdateDayTourParams) => {
                 additionalFee: {
                   upsert: {
                     create: {
-                      type: data.additionalFee.type ?? "default-type",
-                      description: data.additionalFee.description ?? "",
+                      type: data.additionalFee.type ?? 'default-type',
+                      description: data.additionalFee.description ?? '',
                       amount: data.additionalFee.amount ?? 0,
                     },
                     update: {
@@ -173,6 +176,22 @@ export const updateDayTour = async ({ id, data }: UpdateDayTourParams) => {
   });
 
   appAssert(updateDayTour, NOT_FOUND, `Day tour with ID ${id} not found`);
+
+  // Replaces and Updates the Image URL
+  if (data.imageUrl && oldImageUrl && oldImageUrl !== data.imageUrl) {
+    const oldImagePath = path.join(
+      __dirname,
+      '../../uploads',
+      path.basename(oldImageUrl)
+    );
+
+    if (fs.existsSync(oldImagePath)) {
+      fs.unlinkSync(oldImagePath);
+      console.log(`Deleted old image file: ${oldImagePath}`);
+    } else {
+      console.warn(`Old image file not found: ${oldImagePath}`);
+    }
+  }
 
   return {
     id: updatedDayTour.id,
@@ -210,7 +229,7 @@ export const deleteDayTour = async (id: number) => {
   if (deletedDayTour.imageUrl) {
     const imagePath = path.join(
       __dirname,
-      "../../uploads",
+      '../../uploads',
       path.basename(deletedDayTour.imageUrl)
     );
 
@@ -233,7 +252,7 @@ export const deleteMultipleDayTour = async (ids: number[]) => {
     if (service.imageUrl) {
       const imagePath = path.join(
         __dirname,
-        "../../uploads",
+        '../../uploads',
         path.basename(service.imageUrl)
       );
 
@@ -264,7 +283,7 @@ export const getCabinById = async (id: number) => {
     },
   });
 
-  appAssert(service, NOT_FOUND, "Service Not Found");
+  appAssert(service, NOT_FOUND, 'Service Not Found');
 
   return {
     id: service.id,
@@ -373,7 +392,7 @@ export const deleteMultipleCabin = async (ids: number[]) => {
     if (service.imageUrl) {
       const imagePath = path.join(
         __dirname,
-        "../../uploads",
+        '../../uploads',
         path.basename(service.imageUrl)
       );
 
@@ -416,7 +435,7 @@ export const deleteCabin = async (id: number) => {
   if (deletedCabin.imageUrl) {
     const imagePath = path.join(
       __dirname,
-      "../../uploads",
+      '../../uploads',
       path.basename(deletedCabin.imageUrl)
     );
 
@@ -453,7 +472,7 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
     },
   });
 
-  appAssert(existingCabin, NOT_FOUND, `Day tour with ID ${id} not found`);
+  appAssert(existingCabin, NOT_FOUND, `Cabin with ID ${id} not found`);
 
   const updatedCabin = await prisma.service.update({
     where: { id },
@@ -471,8 +490,8 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
                 additionalFee: {
                   upsert: {
                     create: {
-                      type: data.additionalFee.type ?? "default-type",
-                      description: data.additionalFee.description ?? "",
+                      type: data.additionalFee.type ?? 'default-type',
+                      description: data.additionalFee.description ?? '',
                       amount: data.additionalFee.amount ?? 0,
                     },
                     update: {
@@ -496,7 +515,7 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
     },
   });
 
-  appAssert(updatedCabin, NOT_FOUND, `Day tour with ID ${id} not found`);
+  appAssert(updatedCabin, NOT_FOUND, `Cabin with ID ${id} not found`);
 
   return {
     id: updatedCabin.id,
