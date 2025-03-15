@@ -95,6 +95,15 @@ export default function UpdateCabin() {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
 
+    if (["name", "type"].includes(name)) {
+      const sanitizedValue = value.replace(/[^a-zA-Z0-9\s]/g, ""); // Remove special characters
+      setFormData((prev) => ({
+        ...prev,
+        [section]: { ...prev[section], [name]: sanitizedValue },
+      }));
+      return;
+    }
+
     if (files && files[0]) {
       const file = files[0];
       const validFormats = ["image/jpeg", "image/jpg", "image/png"];
