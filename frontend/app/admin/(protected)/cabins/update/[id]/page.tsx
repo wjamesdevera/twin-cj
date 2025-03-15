@@ -182,10 +182,9 @@ export default function UpdateCabin() {
 
         const { type, description, amount } = updatedAdditionalFee;
 
-        if (
-          (type || description || amount) &&
-          (!type || !description || amount <= 0)
-        ) {
+        if (type && description && amount > 0) {
+          setAdditionalFeeWarning("");
+        } else if (type || description || amount > 0) {
           setAdditionalFeeWarning(
             "Please complete all additional fee fields or leave them empty."
           );
@@ -508,7 +507,9 @@ export default function UpdateCabin() {
             onChange={handleChange}
             maxLength={50}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          {!formData.additionalFee.type && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
           <br />
           Description
           <br />
@@ -521,7 +522,9 @@ export default function UpdateCabin() {
             cols={30}
             maxLength={100}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          {!formData.additionalFee.description && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
           <br />
           Amount
           <br />
@@ -534,7 +537,9 @@ export default function UpdateCabin() {
             step="0.01"
             onChange={handleChange}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          {!(formData.additionalFee.amount > 0) && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
           <br />
           <button
             type="submit"
