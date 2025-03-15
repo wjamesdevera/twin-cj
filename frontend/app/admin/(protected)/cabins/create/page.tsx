@@ -142,13 +142,13 @@ export default function CreateCabin() {
         const { type, description, amount } = updatedAdditionalFee;
 
         if (type && description && amount > 0) {
-          setAdditionalFeeWarning(""); // Hide warning when all fields are filled
+          setAdditionalFeeWarning("");
         } else if (type || description || amount > 0) {
           setAdditionalFeeWarning(
             "Please complete all additional fee fields or leave them empty."
           );
         } else {
-          setAdditionalFeeWarning(""); // No warning when all are empty
+          setAdditionalFeeWarning("");
         }
       }
     }
