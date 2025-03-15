@@ -297,6 +297,7 @@ export default function CreateCabin() {
             min="1"
             value={formData.cabin.minCapacity || ""}
             onChange={handleChange}
+            max={formData.cabin.maxCapacity - 1 || 1}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.minCapacity}
@@ -312,6 +313,7 @@ export default function CreateCabin() {
             min={formData.cabin.minCapacity}
             value={formData.cabin.maxCapacity || ""}
             onChange={handleChange}
+            max={30}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.maxCapacity}
