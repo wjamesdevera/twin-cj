@@ -71,7 +71,7 @@ const CabinDashboard = () => {
     (key, { arg }: { arg: number }) => deleteCabin(arg)
   );
 
-  const handleDeletCabin = async (id: number) => {
+  const handleDeleteCabin = async (id: number) => {
     // NOTE: Add a modal before running the trigger for deleteawait trigger(id);
     const confirmed = window.confirm(
       "Are you sure you want to delete the selected cabin/s?"
@@ -174,7 +174,7 @@ const CabinDashboard = () => {
                   >
                     Edit
                   </button>
-                  <button onClick={() => handleDeletCabin(cabin.id)}>
+                  <button onClick={() => handleDeleteCabin(cabin.id)}>
                     Delete
                   </button>
                 </td>
