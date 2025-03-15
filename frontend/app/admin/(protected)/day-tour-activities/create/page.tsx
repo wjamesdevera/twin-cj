@@ -101,13 +101,29 @@ function Page() {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, files } = e.target as HTMLInputElement;
+      const trimmedValue = value.trim();
+      const formattedValue = ["price", "additionalFeeAmount"].includes(name)
+        ? trimmedValue.replace(/[^0-9.]/g, "")
+        : trimmedValue;
 
-      const trimmedValue = value.replace(/^\s+/, "");
+      if (name === "image") {
+        if (files?.length) {
+          const file = files[0];
 
-      const formattedValue =
-        name === "price" || name === "additionalFeeAmount"
-          ? trimmedValue.replace(/[^0-9]/g, "") //
-          : trimmedValue;
+          if (file.size > 1024 * 1024) {
+            setHelperText((prev) => ({ ...prev, image: true }));
+            setFormData((prevData) => ({ ...prevData, image: null }));
+            e.target.value = "";
+          } else {
+            setHelperText((prev) => ({ ...prev, image: false }));
+            setFormData((prevData) => ({ ...prevData, image: file }));
+          }
+        } else {
+          setFormData((prevData) => ({ ...prevData, image: null }));
+          e.target.value = "";
+        }
+        return;
+      }
 
       setFormData((prevData) => ({
         ...prevData,
@@ -235,6 +251,12 @@ function Page() {
                 name="image"
                 onChange={handleChange}
               />
+              {helperText.image && (
+                <small>
+                  <br />
+                  Image must be less than 1MB
+                </small>
+              )}
             </div>
             <div>
               <label>Rate:</label>
@@ -245,7 +267,7 @@ function Page() {
                 onChange={handleChange}
               />
               {helperText.price && (
-                <small>Rate must be a positive number only</small>
+                <small> Rate must be a positive number only</small>
               )}
             </div>
             <div>
