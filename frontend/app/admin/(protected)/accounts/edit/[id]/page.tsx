@@ -24,6 +24,7 @@ const EditAdminAccountPage = () => {
           <h1 className={styles.title}>Edit Admin Details</h1>
         </div>
         <Form
+          id={id}
           firstName={userData ? userData.data.user.firstName : ""}
           lastName={userData ? userData.data.user.lastName : ""}
           phoneNumber={userData ? userData.data.user.phoneNumber : ""}
