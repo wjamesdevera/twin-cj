@@ -104,8 +104,6 @@ const CabinDashboard = () => {
     <Loading />
   ) : (
     <div>
-      <div style={{ marginTop: "80px" }}></div>
-
       <button onClick={() => router.push("/admin/cabins/create")}>
         Add Cabin
       </button>
