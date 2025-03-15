@@ -259,8 +259,6 @@ export default function CreateCabin() {
         <Loading />
       ) : (
         <form onSubmit={handleSubmit}>
-          <div style={{ marginTop: "80px" }}></div>
-
           <label>Title</label>
           <br />
           <input
@@ -405,8 +403,6 @@ export default function CreateCabin() {
           <button type="button" onClick={() => router.push("/admin/cabins")}>
             Cancel
           </button>
-
-          <div style={{ marginBottom: "80px" }}></div>
         </form>
       )}
     </div>
