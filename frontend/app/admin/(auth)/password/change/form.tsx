@@ -27,7 +27,7 @@ const Form = () => {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordMatch, setIsPasswordMatch] = useState(true);
+  const [isPasswordMatch, setIsPasswordMatch] = useState(false);
   const [passwordValidations, setPasswordValidations] = useState({
     length: false,
     lowercase: false,
@@ -43,8 +43,10 @@ const Form = () => {
 
   const isFieldsEmpty = () => {
     return (
-      (newPassword === null && confirmPassword === null) ||
-      (newPassword === "" && confirmPassword === "")
+      newPassword === null ||
+      confirmPassword === null ||
+      newPassword === "" ||
+      confirmPassword === ""
     );
   };
 
@@ -66,15 +68,24 @@ const Form = () => {
   const handleConfirmPasswordChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setIsPasswordMatch(newPassword === confirmPassword || !isFieldsEmpty);
-    setConfirmPassword(e.target.value);
+    const newConfirmPassword = e.target.value;
+    setConfirmPassword(newConfirmPassword);
+    console.log(
+      `${newPassword} === ${e.target.value} : ${newPassword === e.target.value}`
+    );
+
+    setIsPasswordMatch(newPassword === e.target.value);
   };
 
   const handleResetPassword = async () => {
     const password = confirmPassword;
-    return verificationCode
-      ? await trigger({ verificationCode, password })
-      : null;
+    try {
+      if (verificationCode) {
+        await trigger({ verificationCode, password });
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return isMutating ? (
@@ -193,7 +204,7 @@ const Form = () => {
               </button>
             )}
           </label>
-          {!isPasswordMatch && confirmPassword.length > 0 && (
+          {!isPasswordMatch && (
             <small className={styles["error-message"]}>
               Passwords do not match
             </small>
