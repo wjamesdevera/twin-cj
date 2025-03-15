@@ -1,6 +1,7 @@
 import config from "../config/config";
 import { prisma } from "../config/db";
 import {
+  BAD_REQUEST,
   CONFLICT,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
@@ -284,13 +285,18 @@ export const sendPasswordResetEmail = async (email: string) => {
 
 type ResetPasswordParams = {
   password: string;
+  confirmPassword: string;
   verificationCode: string;
 };
 
 export const resetPassword = async ({
   verificationCode,
   password,
+  confirmPassword,
 }: ResetPasswordParams) => {
+  console.log(password);
+  console.log(confirmPassword);
+  appAssert(password === confirmPassword, BAD_REQUEST, "Password do not match");
   const validCode = await prisma.passwordResetToken.findFirst({
     where: {
       id: verificationCode,

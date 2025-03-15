@@ -16,8 +16,18 @@ const Form = () => {
   const verificationCode = searchParams.get("code");
   const { trigger, isMutating } = useSWRMutation(
     "resetpassword",
-    (key, { arg }: { arg: { verificationCode: string; password: string } }) =>
-      resetPassword(arg),
+    (
+      key,
+      {
+        arg,
+      }: {
+        arg: {
+          verificationCode: string;
+          password: string;
+          confirmPassword: string;
+        };
+      }
+    ) => resetPassword(arg),
     {
       onSuccess: () => {
         router.push("/admin/login");
@@ -40,15 +50,6 @@ const Form = () => {
     new: false,
     confirm: false,
   });
-
-  const isFieldsEmpty = () => {
-    return (
-      newPassword === null ||
-      confirmPassword === null ||
-      newPassword === "" ||
-      confirmPassword === ""
-    );
-  };
 
   const validatePassword = (password: string) => {
     setPasswordValidations({
@@ -78,10 +79,13 @@ const Form = () => {
   };
 
   const handleResetPassword = async () => {
-    const password = confirmPassword;
     try {
       if (verificationCode) {
-        await trigger({ verificationCode, password });
+        await trigger({
+          verificationCode,
+          password: newPassword,
+          confirmPassword: confirmPassword,
+        });
       }
     } catch (error) {
       console.error(error);
