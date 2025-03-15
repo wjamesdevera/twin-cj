@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
+import { options } from "@/app/api";
 
 function Page() {
   const router = useRouter();
@@ -167,7 +168,7 @@ function Page() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/api/services/day-tours/",
+        `${options.baseURL}/api/services/day-tours/`,
         {
           method: "POST",
           body: data,

@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Loading } from "@/app/components/loading";
 import useSWR from "swr";
 import { getCabin } from "@/app/lib/api";
+import { options } from "@/app/api";
 
 export default function UpdateCabin() {
   const router = useRouter();
@@ -247,7 +248,7 @@ export default function UpdateCabin() {
       imageFormData.append("file", formData.service.image);
 
       try {
-        const uploadResponse = await fetch("http://localhost:8080/api/upload", {
+        const uploadResponse = await fetch(`${options.baseURL}/api/upload`, {
           method: "POST",
           body: imageFormData,
         });

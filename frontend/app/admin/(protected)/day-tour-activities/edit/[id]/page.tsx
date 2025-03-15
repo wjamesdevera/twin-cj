@@ -9,6 +9,7 @@ import React, {
 import { useRouter, useParams } from "next/navigation";
 import styles from "../edit.module.scss";
 import { Loading } from "@/app/components/loading";
+import { options } from "@/app/api";
 
 interface DayTour {
   id: number;
@@ -62,7 +63,7 @@ const EditDayTour: React.FC = () => {
     const fetchDayTour = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/services/day-tours/${id}`,
+          `${options.baseURL}/api/services/day-tours/${id}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
@@ -83,7 +84,7 @@ const EditDayTour: React.FC = () => {
             name: dayTour.name || "",
             description: dayTour.description || "",
             imageUrl: dayTour?.imageUrl
-              ? `http://localhost:8080/uploads/${dayTour.imageUrl}`
+              ? `${options.baseURL}/uploads/${dayTour.imageUrl}`
               : "",
             price: dayTour.price.toString() || "",
             additionalFeeType: additionalFee.type || "",
