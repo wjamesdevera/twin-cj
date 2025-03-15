@@ -347,6 +347,7 @@ export default function CreateCabin() {
             step="0.01"
             value={formData.service.price || ""}
             onChange={handleChange}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.price}

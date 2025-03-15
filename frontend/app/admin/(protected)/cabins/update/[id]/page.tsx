@@ -472,6 +472,7 @@ export default function UpdateCabin() {
             value={formData.service.price || ""}
             min="1"
             onChange={handleChange}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.price}
