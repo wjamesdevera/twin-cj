@@ -226,65 +226,60 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
 };
 
 export const sendPasswordResetEmail = async (email: string) => {
-  try {
-    const user = await prisma.personalDetail.findFirst({
-      where: {
-        email: email,
+  const user = await prisma.personalDetail.findFirst({
+    where: {
+      email: email,
+    },
+    include: {
+      userAccount: true,
+    },
+  });
+
+  appAssert(user, NOT_FOUND, "User not found");
+
+  const fiveMinAgo = fiveMinutesAgo();
+  const count = await prisma.verificationCode.count({
+    where: {
+      userAccountId: user.userAccount?.id,
+      createdAt: {
+        gt: fiveMinAgo,
       },
-      include: {
-        userAccount: true,
-      },
-    });
+    },
+  });
 
-    appAssert(user, NOT_FOUND, "User not found");
+  appAssert(
+    count <= 1,
+    TOO_MANY_REQUESTS,
+    "Too many requests, please try again later"
+  );
 
-    const fiveMinAgo = fiveMinutesAgo();
-    const count = await prisma.verificationCode.count({
-      where: {
-        userAccountId: user.userAccount?.id,
-        createdAt: {
-          gt: fiveMinAgo,
-        },
-      },
-    });
+  const expiresAt = oneHourFromNow();
+  const passwordResetToken = await prisma.passwordResetToken.create({
+    data: {
+      userAccountId: user.userAccount?.id,
+      expiresAt: expiresAt,
+    },
+  });
 
-    appAssert(
-      count <= 1,
-      TOO_MANY_REQUESTS,
-      "Too many requests, please try again later"
-    );
+  const url = `${config.appOrigin}/admin/password/change?code=${
+    passwordResetToken.id
+  }&exp=${expiresAt.getTime()}`;
 
-    const expiresAt = oneHourFromNow();
-    const passwordResetToken = await prisma.passwordResetToken.create({
-      data: {
-        userAccountId: user.userAccount?.id,
-        expiresAt: expiresAt,
-      },
-    });
+  const { data, error } = await sendMail({
+    to: email,
+    ...getPasswordResetTemplate(url),
+  });
 
-    const url = `${config.appOrigin}/admin/password/change?code=${
-      passwordResetToken.id
-    }&exp=${expiresAt.getTime()}`;
+  appAssert(
+    data?.id,
+    INTERNAL_SERVER_ERROR,
+    `${error?.name} - ${error?.message}`
+  );
 
-    const { data, error } = await sendMail({
-      to: email,
-      ...getPasswordResetTemplate(url),
-    });
-
-    appAssert(
-      data?.id,
-      INTERNAL_SERVER_ERROR,
-      `${error?.name} - ${error?.message}`
-    );
-
-    return {
-      url,
-      emailId: data.id,
-    };
-  } catch (error: any) {
-    console.log("SendPasswordResetError:", error.message);
-    return {};
-  }
+  return {
+    url,
+    emailId: data.id,
+  };
 };
 
 type ResetPasswordParams = {
