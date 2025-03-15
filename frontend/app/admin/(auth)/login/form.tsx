@@ -29,7 +29,7 @@ export function LoginForm() {
 
   const handleLogin = async () => {
     try {
-      await trigger({ email: "user@example.com", password: "password123" });
+      await trigger({ email, password });
       console.log("Login successful");
     } catch (error) {
       console.log(error);
