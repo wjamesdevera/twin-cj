@@ -141,15 +141,14 @@ export default function CreateCabin() {
 
         const { type, description, amount } = updatedAdditionalFee;
 
-        if (
-          (type || description || amount) &&
-          (!type || !description || amount <= 0)
-        ) {
+        if (type && description && amount > 0) {
+          setAdditionalFeeWarning(""); // Hide warning when all fields are filled
+        } else if (type || description || amount > 0) {
           setAdditionalFeeWarning(
             "Please complete all additional fee fields or leave them empty."
           );
         } else {
-          setAdditionalFeeWarning("");
+          setAdditionalFeeWarning(""); // No warning when all are empty
         }
       }
     }
@@ -399,7 +398,9 @@ export default function CreateCabin() {
             maxLength={50}
             value={formData.additionalFee.type}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          {!formData.additionalFee.type && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
           <br />
 
           <label>Description</label>
@@ -412,7 +413,9 @@ export default function CreateCabin() {
             cols={30}
             maxLength={100}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          {!formData.additionalFee.description && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
           <br />
 
           <label>Amount</label>
@@ -426,7 +429,9 @@ export default function CreateCabin() {
             step="0.01"
             onChange={handleChange}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          {!(formData.additionalFee.amount > 0) && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
           <br />
 
           <button
