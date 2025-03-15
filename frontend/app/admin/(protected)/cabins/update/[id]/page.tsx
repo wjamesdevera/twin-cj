@@ -510,7 +510,7 @@ export default function UpdateCabin() {
           {!formData.additionalFee.type && additionalFeeWarning && (
             <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           )}
-          <br />
+          <br /><br />
           Description
           <br />
           <textarea
@@ -525,7 +525,7 @@ export default function UpdateCabin() {
           {!formData.additionalFee.description && additionalFeeWarning && (
             <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           )}
-          <br />
+          <br /><br />
           Amount
           <br />
           <input
@@ -536,11 +536,12 @@ export default function UpdateCabin() {
             min="0"
             step="0.01"
             onChange={handleChange}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           {!(formData.additionalFee.amount > 0) && additionalFeeWarning && (
             <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           )}
-          <br />
+          <br /><br />
           <button
             type="submit"
             disabled={isFormInvalid}
