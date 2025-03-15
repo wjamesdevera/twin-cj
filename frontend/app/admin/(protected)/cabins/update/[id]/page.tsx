@@ -377,24 +377,6 @@ export default function UpdateCabin() {
     additionalFeeWarning !== "" ||
     JSON.stringify(formData) === JSON.stringify(initialData);
 
-  const handleClear = () => {
-    if (initialData) {
-      setFormData(initialData);
-      setErrors({
-        name: "",
-        description: "",
-        minCapacity: "",
-        maxCapacity: "",
-        price: "",
-        image: "",
-      });
-      setAdditionalFeeWarning("");
-      document.querySelectorAll("input, textarea").forEach((input) => {
-        (input as HTMLInputElement | HTMLTextAreaElement).value = "";
-      });
-    }
-  };
-
   // if (loading) return <p>Loading cabin details...</p>;
   // if (error) return <p className="text-red-500">{error}</p>;
 
@@ -551,9 +533,6 @@ export default function UpdateCabin() {
             }}
           >
             Update Cabin
-          </button>
-          <button type="button" onClick={handleClear}>
-            Reset
           </button>
           <button type="button" onClick={() => router.push("/admin/cabins")}>
             Cancel
