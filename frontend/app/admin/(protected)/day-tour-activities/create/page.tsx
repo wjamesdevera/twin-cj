@@ -120,7 +120,7 @@ function Page() {
             : name === "name"
             ? formattedValue.length >= 50
             : name === "description"
-            ? formattedValue.length > 100
+            ? formattedValue.length >= 100
             : name === "price"
             ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
             : name === "additionalFeeType"

@@ -151,62 +151,47 @@ const EditDayTour: React.FC = () => {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, files } = e.target as HTMLInputElement;
-      const trimmedValue = value.trim();
+      const trimmedValue = value.replace(/^\s+/, "");
+
+      const formattedValue =
+        name === "price" || name === "additionalFeeAmount"
+          ? trimmedValue.replace(/[^0-9]/g, "")
+          : trimmedValue;
 
       setFormData((prevData) => ({
         ...prevData,
-        [name]: files ? files[0] : value,
+        [name]: files ? files[0] : formattedValue,
       }));
 
-      const isFilled = (val: string) => val.trim().length > 0;
-
-      setHelperText((prev) => ({
-        ...prev,
-        name:
-          name === "name" &&
-          (trimmedValue.length === 0 || trimmedValue.length > 50)
-            ? "Name must not be empty or exceed 50 characters"
-            : prev.name,
-        description:
-          name === "description" &&
-          (trimmedValue.length === 0 || trimmedValue.length > 100)
-            ? "Description must not be empty or exceed 100 characters"
-            : prev.description,
-        price:
-          name === "price" &&
-          (!/^\d+(\.\d{1,2})?$/.test(trimmedValue) ||
-            isNaN(parseFloat(trimmedValue)) ||
-            parseFloat(trimmedValue) <= 0)
-            ? "Rate must be a positive number only"
-            : prev.price,
-
-        additionalFeeType:
-          name === "additionalFeeType" &&
-          (isFilled(formData.additionalFeeDescription) ||
-            isFilled(formData.additionalFeeAmount)) &&
-          !isFilled(trimmedValue)
-            ? "Additional Fee Type is required"
-            : prev.additionalFeeType,
-
-        additionalFeeDescription:
-          name === "additionalFeeDescription" &&
-          isFilled(formData.additionalFeeType) &&
-          !isFilled(trimmedValue)
-            ? "Additional Fee Description is required"
-            : prev.additionalFeeDescription,
-
-        additionalFeeAmount:
-          name === "additionalFeeAmount" &&
-          isFilled(formData.additionalFeeType) &&
-          (!/^\d+(\.\d{1,2})?$/.test(trimmedValue) ||
-            parseFloat(trimmedValue) <= 0)
-            ? "Additional Fee Amount must be a positive number only"
-            : prev.additionalFeeAmount,
+      setHelperText((prevHelperText) => ({
+        ...prevHelperText,
+        [name]:
+          formattedValue.length === 0
+            ? ""
+            : name === "name"
+            ? formattedValue.length >= 50
+              ? "Name must not exceed 50 characters"
+              : ""
+            : name === "description"
+            ? formattedValue.length >= 100
+              ? "Description must not exceed 100 characters"
+              : ""
+            : name === "price"
+            ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
+              ? "Rate must be a positive number only"
+              : ""
+            : name === "additionalFeeType"
+            ? ""
+            : name === "additionalFeeDescription"
+            ? ""
+            : name === "additionalFeeAmount"
+            ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
+              ? "Additional Fee Amount must be a positive number only"
+              : ""
+            : prevHelperText[name],
       }));
-
-      validateForm();
     },
-    [formData, validateForm]
+    []
   );
 
   const hasChanges = () => {

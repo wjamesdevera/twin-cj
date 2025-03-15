@@ -28,6 +28,9 @@ const formatDate = (isoString?: string) => {
         month: "2-digit",
         day: "2-digit",
         year: "numeric",
+        minute: "2-digit",
+        hour: "2-digit",
+        second: "2-digit",
       });
 };
 
