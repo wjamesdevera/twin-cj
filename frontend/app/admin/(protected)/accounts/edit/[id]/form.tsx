@@ -28,17 +28,27 @@ const Form: React.FC = () => {
     phoneNumber: "",
   });
 
-  const validateName = (name: string) => name.trim().length >= 2;
+  const validateName = (name: string) =>
+    name ? name.trim().length >= 2 : null;
 
   const [initialData, setInitialData] = useState<EditUserArg | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
 
   const { data: userData, isLoading } = useSWR(id, getUserById, {
-    onSuccess: (data) => {
-      if (data?.data) {
-        setInitialData(data.data);
-        setFormData(data.data);
-      }
+    onSuccess: () => {
+      console.log(userData);
+      setInitialData({
+        firstName: userData?.data.user.firstName,
+        lastName: userData?.data.user.lastName,
+        email: userData?.data.user.email,
+        phoneNumber: userData?.data.user.phoneNumber,
+      });
+      setFormData({
+        firstName: userData?.data.user.firstName,
+        lastName: userData?.data.user.lastName,
+        email: userData?.data.user.email,
+        phoneNumber: userData?.data.user.phoneNumber,
+      });
     },
   });
 
@@ -91,16 +101,33 @@ const Form: React.FC = () => {
 
   const handleCancel = () => {
     if (isFormTouched) {
-      openModal("Are you sure you want to cancel? Unsaved changes will be lost.", () => {
-        router.push("/admin/accounts");
-        closeModal();
-      });
+      openModal(
+        "Are you sure you want to cancel? Unsaved changes will be lost.",
+        () => {
+          router.push("/admin/accounts");
+          closeModal();
+        }
+      );
     } else {
       router.push("/admin/accounts");
     }
   };
 
   useEffect(() => {
+    if (userData?.data) {
+      setInitialData({
+        firstName: userData.data.user.firstName || "",
+        lastName: userData.data.user.lastName || "",
+        email: userData.data.user.email || "",
+        phoneNumber: userData.data.user.phoneNumber || "",
+      });
+      setFormData({
+        firstName: userData.data.user.firstName || "",
+        lastName: userData.data.user.lastName || "",
+        email: userData.data.user.email || "",
+        phoneNumber: userData.data.user.phoneNumber || "",
+      });
+    }
     const handleBackButton = (event: PopStateEvent) => {
       if (isFormTouched) {
         event.preventDefault();
@@ -127,7 +154,7 @@ const Form: React.FC = () => {
     return () => {
       window.removeEventListener("popstate", handleBackButton);
     };
-  }, [router, isFormTouched]);
+  }, [router, isFormTouched, userData?.data]);
 
   const [errors, setErrors] = useState({
     firstName: false,
@@ -135,7 +162,6 @@ const Form: React.FC = () => {
     email: false,
     phoneNumber: false,
   });
-  
 
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -143,45 +169,46 @@ const Form: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let updatedValue = value;
-  
+
     if (name === "phoneNumber") {
-      updatedValue = value.replace(/\D/g, "").slice(0, 11); 
+      updatedValue = value.replace(/\D/g, "").slice(0, 11);
     }
-  
+
     if (name === "firstName" || name === "lastName") {
       updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50);
     }
-  
+
     setFormData((prev) => ({
       ...prev,
       [name]: updatedValue,
     }));
-  
+
     setErrors((prev) => ({
       ...prev,
       firstName: name === "firstName" && !validateName(updatedValue),
       lastName: name === "lastName" && !validateName(updatedValue),
-      email: name === "email" && updatedValue !== "" && !validateEmail(updatedValue),
-      phoneNumber: name === "phoneNumber" && updatedValue.length !== 11, 
+      email:
+        name === "email" && updatedValue !== "" && !validateEmail(updatedValue),
+      phoneNumber: name === "phoneNumber" && updatedValue.length !== 11,
     }));
-  
+
     setIsFormTouched(true);
   };
-  
- useEffect(() => {
-  if (initialData) {
-    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialData);
-    const isValid =
-      validateName(formData.firstName) &&
-      validateName(formData.lastName) &&
-      validateEmail(formData.email) &&
-      formData.phoneNumber.length === 11 &&
-      hasChanges;
 
-    setIsFormValid(isValid);
-  }
-}, [formData, initialData]);
+  useEffect(() => {
+    if (initialData) {
+      const hasChanges =
+        JSON.stringify(formData) !== JSON.stringify(initialData);
+      const isValid =
+        validateName(formData.firstName) &&
+        validateName(formData.lastName) &&
+        validateEmail(formData.email) &&
+        formData.phoneNumber.length === 11 &&
+        hasChanges;
 
+      setIsFormValid(isValid);
+    }
+  }, [formData, initialData]);
 
   return isLoading ? (
     <Loading />
