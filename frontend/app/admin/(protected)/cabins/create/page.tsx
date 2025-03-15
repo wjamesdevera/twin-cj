@@ -401,7 +401,7 @@ export default function CreateCabin() {
           {!formData.additionalFee.type && additionalFeeWarning && (
             <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           )}
-          <br />
+          <br /><br />
 
           <label>Description</label>
           <br />
@@ -416,7 +416,7 @@ export default function CreateCabin() {
           {!formData.additionalFee.description && additionalFeeWarning && (
             <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           )}
-          <br />
+          <br /><br />
 
           <label>Amount</label>
           <br />
@@ -428,11 +428,12 @@ export default function CreateCabin() {
             min="0"
             step="0.01"
             onChange={handleChange}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           {!(formData.additionalFee.amount > 0) && additionalFeeWarning && (
             <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           )}
-          <br />
+          <br /><br />
 
           <button
             type="submit"
