@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import { editUser } from "@/app/lib/api";
-import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
 import ConfirmModal from "@/app/components/confirm_modal";
 
@@ -43,12 +42,6 @@ const Form: React.FC<EditUserFormArg> = ({
   const validateName = (name: string) =>
     name ? name.trim().length >= 2 : null;
 
-  const [initialData, setInitialData] = useState<EditUserArg | null>({
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    phoneNumber: phoneNumber,
-  });
   const [isFormValid, setIsFormValid] = useState(false);
 
   const { trigger } = useSWRMutation(
@@ -170,23 +163,9 @@ const Form: React.FC<EditUserFormArg> = ({
       phoneNumber: name === "phoneNumber" && updatedValue.length !== 11,
     }));
 
+    setIsFormValid(Object.values(errors).some((error) => error));
     setIsFormTouched(true);
   };
-
-  useEffect(() => {
-    if (initialData) {
-      const hasChanges =
-        JSON.stringify(formData) !== JSON.stringify(initialData);
-      const isValid =
-        validateName(formData.firstName) &&
-        validateName(formData.lastName) &&
-        validateEmail(formData.email) &&
-        formData.phoneNumber.length === 11 &&
-        hasChanges;
-
-      setIsFormValid(isValid);
-    }
-  }, [formData, initialData]);
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
