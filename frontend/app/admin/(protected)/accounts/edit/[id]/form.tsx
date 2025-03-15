@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
-import useSWR from "swr";
-import { editUser, getUserById } from "@/app/lib/api";
+import { editUser } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
 import ConfirmModal from "@/app/components/confirm_modal";
@@ -17,52 +16,36 @@ interface EditUserArg {
   phoneNumber: string;
 }
 
-const Form: React.FC = () => {
+const Form: React.FC<EditUserArg> = ({
+  firstName,
+  lastName,
+  email,
+  phoneNumber,
+}) => {
   const router = useRouter();
-  const { id } = useParams<{ id: string }>();
   const [isFormTouched, setIsFormTouched] = useState(false);
   const [formData, setFormData] = useState<EditUserArg>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phoneNumber: phoneNumber,
   });
 
   const validateName = (name: string) =>
     name ? name.trim().length >= 2 : null;
 
-  const [initialData, setInitialData] = useState<EditUserArg | null>(null);
-  const [isFormValid, setIsFormValid] = useState(false);
-
-  const { data: userData, isLoading } = useSWR(id, getUserById, {
-    onSuccess: () => {
-      console.log(userData);
-      setInitialData({
-        firstName: userData?.data.user.firstName,
-        lastName: userData?.data.user.lastName,
-        email: userData?.data.user.email,
-        phoneNumber: userData?.data.user.phoneNumber,
-      });
-      setFormData({
-        firstName: userData?.data.user.firstName,
-        lastName: userData?.data.user.lastName,
-        email: userData?.data.user.email,
-        phoneNumber: userData?.data.user.phoneNumber,
-      });
-    },
+  const [initialData, setInitialData] = useState<EditUserArg | null>({
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phoneNumber: phoneNumber,
   });
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const { trigger } = useSWRMutation(
     "edit",
     (key, { arg }: { arg: EditUserArg }) => editUser(id, arg)
   );
-
-  useEffect(() => {
-    if (userData?.data) {
-      setInitialData(userData.data);
-      setFormData(userData.data);
-    }
-  }, [userData]);
 
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
@@ -114,20 +97,6 @@ const Form: React.FC = () => {
   };
 
   useEffect(() => {
-    if (userData?.data) {
-      setInitialData({
-        firstName: userData.data.user.firstName || "",
-        lastName: userData.data.user.lastName || "",
-        email: userData.data.user.email || "",
-        phoneNumber: userData.data.user.phoneNumber || "",
-      });
-      setFormData({
-        firstName: userData.data.user.firstName || "",
-        lastName: userData.data.user.lastName || "",
-        email: userData.data.user.email || "",
-        phoneNumber: userData.data.user.phoneNumber || "",
-      });
-    }
     const handleBackButton = (event: PopStateEvent) => {
       if (isFormTouched) {
         event.preventDefault();
@@ -154,7 +123,7 @@ const Form: React.FC = () => {
     return () => {
       window.removeEventListener("popstate", handleBackButton);
     };
-  }, [router, isFormTouched, userData?.data]);
+  }, [router, isFormTouched]);
 
   const [errors, setErrors] = useState({
     firstName: false,
@@ -210,9 +179,7 @@ const Form: React.FC = () => {
     }
   }, [formData, initialData]);
 
-  return isLoading ? (
-    <Loading />
-  ) : (
+  return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.form_group}>
         <label>First Name</label>
