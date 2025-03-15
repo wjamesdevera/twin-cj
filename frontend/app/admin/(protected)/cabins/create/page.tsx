@@ -252,38 +252,6 @@ export default function CreateCabin() {
     Object.values(errors).some((error) => error !== "") ||
     additionalFeeWarning !== "";
 
-  const handleClear = () => {
-    setFormData({
-      service: {
-        name: "",
-        description: "",
-        image: null,
-        price: 1,
-      },
-      cabin: {
-        minCapacity: 1,
-        maxCapacity: 1,
-      },
-      additionalFee: {
-        type: "",
-        description: "",
-        amount: 0,
-      },
-    });
-    setErrors({
-      name: "",
-      description: "",
-      minCapacity: "",
-      maxCapacity: "",
-      image: "",
-      price: "",
-    });
-    setAdditionalFeeWarning("");
-    document.querySelectorAll("input, textarea").forEach((input) => {
-      (input as HTMLInputElement | HTMLTextAreaElement).value = "";
-    });
-  };
-
   return (
     <div>
       {isMutating ? (
@@ -444,9 +412,6 @@ export default function CreateCabin() {
             }}
           >
             Add Cabin
-          </button>
-          <button type="button" onClick={handleClear}>
-            Clear
           </button>
           <button type="button" onClick={() => router.push("/admin/cabins")}>
             Cancel
