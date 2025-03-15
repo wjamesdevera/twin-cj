@@ -16,7 +16,16 @@ interface EditUserArg {
   phoneNumber: string;
 }
 
-const Form: React.FC<EditUserArg> = ({
+interface EditUserFormArg {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+}
+
+const Form: React.FC<EditUserFormArg> = ({
+  id,
   firstName,
   lastName,
   email,
