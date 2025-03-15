@@ -266,6 +266,7 @@ export default function CreateCabin() {
             name="name"
             data-section="service"
             onChange={handleChange}
+            maxLength={50}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.name}
@@ -280,6 +281,7 @@ export default function CreateCabin() {
             onChange={handleChange}
             rows={3}
             cols={30}
+            maxLength={100}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.description}
@@ -357,6 +359,7 @@ export default function CreateCabin() {
             name="type"
             data-section="additionalFee"
             onChange={handleChange}
+            maxLength={50}
           />
           <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           <br />
@@ -369,6 +372,7 @@ export default function CreateCabin() {
             onChange={handleChange}
             rows={3}
             cols={30}
+            maxLength={100}
           />
           <p style={{ color: "red" }}>{additionalFeeWarning}</p>
           <br />
