@@ -55,11 +55,18 @@ export default function CreateCabin() {
     const section = dataset.section as "service" | "cabin" | "additionalFee";
 
     if (["name", "type"].includes(name)) {
-      const sanitizedValue = value.replace(/[^a-zA-Z0-9\s]/g, ""); // Remove special characters
+      const sanitizedValue = value.replace(/^\s+|[^a-zA-Z0-9\s]/g, "");
+      
       setFormData((prev) => ({
         ...prev,
         [section]: { ...prev[section], [name]: sanitizedValue },
       }));
+      
+      setErrors((prev) => ({
+        ...prev,
+        [name]: sanitizedValue ? "" : prev[name as keyof typeof prev],
+      }));
+  
       return;
     }
 
@@ -149,6 +156,12 @@ export default function CreateCabin() {
   };
 
   const validateField = (name: string, value: any) => {
+    if (typeof value === "string" && value.trim() === "") {
+      if (["name", "description", "price"].includes(name)) {
+        return "This field cannot be empty or contain only spaces.";
+      }
+    }
+
     if (value === "" || value === null || value === undefined) {
       if (
         ["name", "description", "price", "minCapacity", "maxCapacity"].includes(
