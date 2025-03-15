@@ -115,16 +115,18 @@ function Page() {
       setHelperText((prevHelperText) => ({
         ...prevHelperText,
         [name]:
-          name === "name"
-            ? formattedValue.length === 0 || formattedValue.length > 50
+          formattedValue.length === 0
+            ? false
+            : name === "name"
+            ? formattedValue.length >= 50
             : name === "description"
-            ? formattedValue.length === 0 || formattedValue.length > 100
+            ? formattedValue.length > 100
             : name === "price"
             ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
             : name === "additionalFeeType"
-            ? formattedValue.length === 0
+            ? false
             : name === "additionalFeeDescription"
-            ? formattedValue.length === 0
+            ? false
             : name === "additionalFeeAmount"
             ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
             : false,
