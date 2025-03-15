@@ -36,6 +36,7 @@ const DayTourView = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectAll, setSelectAll] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -133,7 +134,7 @@ const DayTourView = () => {
         await Promise.all(
           selectedIds.map(async (id) => {
             const response = await fetch(
-              `${options.baseURL}/services/day-tours/${id}`,
+              `${options.baseURL}/api/services/day-tours/${id}`,
               {
                 method: "DELETE",
                 headers: {
@@ -159,6 +160,15 @@ const DayTourView = () => {
         err instanceof Error ? err.message : "An unknown error occurred"
       );
     }
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(dayTours.map((tour) => tour.id));
+    }
+    setSelectAll(!selectAll);
   };
 
   const handleCheckboxChange = (id: number) => {
@@ -191,7 +201,13 @@ const DayTourView = () => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th>Select</th>
+            <th>
+              <input
+                type="checkbox"
+                checked={selectAll}
+                onChange={handleSelectAll}
+              />
+            </th>
             <th>Actions</th>
             <th>ID</th>
             <th>Name</th>

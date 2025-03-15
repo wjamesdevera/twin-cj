@@ -282,7 +282,7 @@ function Page() {
               )}
             </div>
             <button type="submit" disabled={!isFormValid}>
-              Submit
+              Create Day Tour
             </button>
             <button
               type="button"
