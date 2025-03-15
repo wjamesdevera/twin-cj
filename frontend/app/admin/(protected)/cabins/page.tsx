@@ -73,7 +73,6 @@ const CabinDashboard = () => {
 
   const handleDeletCabin = async (id: number) => {
     // NOTE: Add a modal before running the trigger for deleteawait trigger(id);
-
     const confirmed = window.confirm(
       "Are you sure you want to delete the selected cabin/s?"
     );
@@ -90,7 +89,15 @@ const CabinDashboard = () => {
       alert("No cabins selected.");
       return;
     }
+
     // NOTE: ADD modal before deletion
+    const confirmed = window.confirm(
+      "Are you sure you want to delete the selected cabin/s?"
+    );
+    if (!confirmed) {
+      return;
+    }
+
     multiDeleteCabin(selectedCabins.join(","));
     setSelectedCabins([]);
     setSelectAll(false);
