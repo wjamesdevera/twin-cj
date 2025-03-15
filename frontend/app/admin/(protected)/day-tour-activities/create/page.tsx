@@ -106,8 +106,6 @@ function Page() {
         [name]: files ? files[0] : value,
       }));
 
-      const isFilled = (val: string) => val.trim().length > 0;
-
       setHelperText((prevHelperText) => ({
         ...prevHelperText,
         [name]:

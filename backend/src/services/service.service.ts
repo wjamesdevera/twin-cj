@@ -1,8 +1,8 @@
-import { prisma } from '../config/db';
-import path from 'path';
-import fs from 'fs';
-import appAssert from '../utils/appAssert';
-import { NOT_FOUND } from '../constants/http';
+import { prisma } from "../config/db";
+import path from "path";
+import fs from "fs";
+import appAssert from "../utils/appAssert";
+import { NOT_FOUND } from "../constants/http";
 
 interface CreateDayTourParams {
   name: string;
@@ -94,7 +94,7 @@ export const getDayTourById = async (id: number) => {
     },
   });
 
-  appAssert(service, NOT_FOUND, 'Service Not Found');
+  appAssert(service, NOT_FOUND, "Service Not Found");
 
   return {
     id: service.id,
@@ -150,8 +150,8 @@ export const updateDayTour = async ({ id, data }: UpdateDayTourParams) => {
                 additionalFee: {
                   upsert: {
                     create: {
-                      type: data.additionalFee.type ?? 'default-type',
-                      description: data.additionalFee.description ?? '',
+                      type: data.additionalFee.type ?? "default-type",
+                      description: data.additionalFee.description ?? "",
                       amount: data.additionalFee.amount ?? 0,
                     },
                     update: {
@@ -181,7 +181,7 @@ export const updateDayTour = async ({ id, data }: UpdateDayTourParams) => {
   if (data.imageUrl && oldImageUrl && oldImageUrl !== data.imageUrl) {
     const oldImagePath = path.join(
       __dirname,
-      '../../uploads',
+      "../../uploads",
       path.basename(oldImageUrl)
     );
 
@@ -211,9 +211,24 @@ export const deleteDayTour = async (id: number) => {
     where: {
       id,
     },
+    include: {
+      dayTourActivity: {
+        include: {
+          additionalFee: true,
+        },
+      },
+    },
   });
 
   appAssert(existingDayTour, NOT_FOUND, `Day tour with ID ${id} not found`);
+
+  if (existingDayTour.dayTourActivity?.additionalFee) {
+    await prisma.additionalFee.deleteMany({
+      where: {
+        id: existingDayTour.dayTourActivity.additionalFee.id,
+      },
+    });
+  }
 
   const deletedDayTour = await prisma.service.delete({
     where: { id },
@@ -229,7 +244,7 @@ export const deleteDayTour = async (id: number) => {
   if (deletedDayTour.imageUrl) {
     const imagePath = path.join(
       __dirname,
-      '../../uploads',
+      "../../uploads",
       path.basename(deletedDayTour.imageUrl)
     );
 
@@ -245,14 +260,33 @@ export const deleteDayTour = async (id: number) => {
 export const deleteMultipleDayTour = async (ids: number[]) => {
   const services = await prisma.service.findMany({
     where: { id: { in: ids } },
-    select: { imageUrl: true },
+    include: {
+      dayTourActivity: {
+        include: {
+          additionalFee: true,
+        },
+      },
+    },
   });
+
+  // Delete additional fees
+  const additionalFeeIds = services
+    .map((service) => service.dayTourActivity?.additionalFee?.id)
+    .filter((id): id is number => id !== undefined);
+
+  if (additionalFeeIds.length > 0) {
+    await prisma.additionalFee.deleteMany({
+      where: {
+        id: { in: additionalFeeIds },
+      },
+    });
+  }
 
   services.forEach((service) => {
     if (service.imageUrl) {
       const imagePath = path.join(
         __dirname,
-        '../../uploads',
+        "../../uploads",
         path.basename(service.imageUrl)
       );
 
@@ -283,7 +317,7 @@ export const getCabinById = async (id: number) => {
     },
   });
 
-  appAssert(service, NOT_FOUND, 'Service Not Found');
+  appAssert(service, NOT_FOUND, "Service Not Found");
 
   return {
     id: service.id,
@@ -392,7 +426,7 @@ export const deleteMultipleCabin = async (ids: number[]) => {
     if (service.imageUrl) {
       const imagePath = path.join(
         __dirname,
-        '../../uploads',
+        "../../uploads",
         path.basename(service.imageUrl)
       );
 
@@ -435,7 +469,7 @@ export const deleteCabin = async (id: number) => {
   if (deletedCabin.imageUrl) {
     const imagePath = path.join(
       __dirname,
-      '../../uploads',
+      "../../uploads",
       path.basename(deletedCabin.imageUrl)
     );
 
@@ -490,8 +524,8 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
                 additionalFee: {
                   upsert: {
                     create: {
-                      type: data.additionalFee.type ?? 'default-type',
-                      description: data.additionalFee.description ?? '',
+                      type: data.additionalFee.type ?? "default-type",
+                      description: data.additionalFee.description ?? "",
                       amount: data.additionalFee.amount ?? 0,
                     },
                     update: {
