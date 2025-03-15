@@ -349,32 +349,28 @@ export const changePassword = async ({
   oldPassword,
   newPassword,
 }: ChangePasswordParams) => {
-  try {
-    const user = await prisma.userAccount.findFirst({
-      where: {
-        id: userId,
-      },
-    });
+  const user = await prisma.userAccount.findFirst({
+    where: {
+      id: userId,
+    },
+  });
 
-    appAssert(user, UNAUTHORIZED, "User not found");
+  appAssert(user, UNAUTHORIZED, "User not found");
 
-    const isOldPasswordValid = verifyPassword(oldPassword, user.password);
+  const isOldPasswordValid = await verifyPassword(oldPassword, user.password);
 
-    appAssert(isOldPasswordValid, UNAUTHORIZED, "Invalid password");
+  appAssert(isOldPasswordValid, UNAUTHORIZED, "Invalid password");
 
-    const updatedUser = await prisma.userAccount.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        password: await hashPassword(newPassword),
-      },
-    });
+  const updatedUser = await prisma.userAccount.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      password: await hashPassword(newPassword),
+    },
+  });
 
-    return updatedUser;
-  } catch (error: Error | any) {
-    console.error(error.message);
-  }
+  return updatedUser;
 };
 
 export const verifyEmail = async (code: string) => {
