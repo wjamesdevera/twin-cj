@@ -21,14 +21,19 @@ export function LoginForm() {
       onSuccess: () => {
         router.replace("/admin");
       },
-      onError: () => {
-        console.log("ERROR");
+      onError: (error) => {
+        console.log(error);
       },
     }
   );
 
   const handleLogin = async () => {
-    await trigger({ email, password });
+    try {
+      await trigger({ email: "user@example.com", password: "password123" });
+      console.log("Login successful");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
