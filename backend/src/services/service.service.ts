@@ -283,6 +283,8 @@ export const getCabinById = async (id: number) => {
     },
   });
 
+  console.log("Fetched service data:", service);
+
   appAssert(service, NOT_FOUND, "Service Not Found");
 
   return {
@@ -292,6 +294,8 @@ export const getCabinById = async (id: number) => {
     price: service.price,
     imageUrl: service.imageUrl,
     additionalFee: service.cabin?.additionalFee,
+    minCapacity: service.cabin?.minCapacity ?? 1,
+    maxCapacity: service.cabin?.maxCapacity ?? 1,
     createdAt: service.createdAt,
     updatedAt: service.updatedAt,
   };
