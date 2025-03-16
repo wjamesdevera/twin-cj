@@ -98,6 +98,7 @@ const Booking: React.FC = () => {
     //setIsLoading(true);
   };
 
+  // Check Availability then shows the Accordion
   const handleCheckAvailability = (details: {
     checkInDate: Date | null;
     checkOutDate: Date | null;
@@ -110,6 +111,7 @@ const Booking: React.FC = () => {
     setShowAccordian(true);
   };
 
+  // Confirm Booking then redirects to Payment Details page
   const handleConfirmBooking = (bookingDetails: any) => {
     const bookingData = {
       selectedOption,
@@ -121,7 +123,7 @@ const Booking: React.FC = () => {
       ...bookingDetails,
     };
     sessionStorage.setItem("bookingData", JSON.stringify(bookingData));
-    // router.push("/payment_details");
+    router.push("/payment_details");
   };
 
   if (error) return <div>Failed to load</div>;

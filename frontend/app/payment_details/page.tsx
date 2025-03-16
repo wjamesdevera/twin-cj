@@ -9,6 +9,13 @@ import SelectPayment from "../components/selectPayment";
 import PricingContainer from "../components/pricingContainer";
 import BookingButton from "../components/BookingButton";
 
+interface BookingCardData {
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+}
+
 export default function PaymentDetails() {
   const [isMediumScreen, setIsMediumScreen] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
@@ -35,6 +42,10 @@ export default function PaymentDetails() {
     };
   }, []);
 
+  const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
+    (card: BookingCardData) => card.name === bookingData.selectedOption
+  );
+
   return (
     <div className={styles.paymentContainer}>
       <PaymentDetailsHeader />
@@ -44,9 +55,24 @@ export default function PaymentDetails() {
         <div className={styles.paymentContainers}>
           <PricingContainer
             className={`${styles.rightContainer} ${styles.container1}`}
-            numberOfGuests="6 guest(s)"
-            type="Overnight"
-            cabinType="Maxi Cabin"
+            imageSrc={
+              (bookingData.bookingCards as BookingCardData[]).find(
+                (card: BookingCardData) =>
+                  card.name === bookingData.selectedOption
+              )?.imageUrl || ""
+            }
+            numberOfGuests={`${
+              bookingData.guestCounts.adults + bookingData.guestCounts.children
+            } guest(s)`}
+            type={
+              bookingData.bookingType === "day-tour" ? "Day Tour" : "Overnight"
+            }
+            packageType={bookingData.selectedOption}
+            packagePrice={selectedCard?.price || 0}
+            totalAmount={selectedCard?.price || 0}
+            bookingType={
+              bookingData.bookingType === "day-tour" ? "Day Tour" : "Overnight"
+            }
           />
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container2}`}
