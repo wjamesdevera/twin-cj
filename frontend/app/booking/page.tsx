@@ -120,6 +120,7 @@ const Booking: React.FC = () => {
       checkInDate,
       checkOutDate,
       guestCounts,
+      specialRequests: bookingDetails.specialRequests,
       ...bookingDetails,
     };
     sessionStorage.setItem("bookingData", JSON.stringify(bookingData));

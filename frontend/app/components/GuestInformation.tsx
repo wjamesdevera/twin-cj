@@ -22,6 +22,7 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
   const [contactNumber, setContactNumber] = useState("");
   const [email, setEmail] = useState("");
   const [retypeEmail, setRetypeEmail] = useState("");
+  const [specialRequest, setSpecialRequest] = useState("");
 
   // State for validation messages
   const [firstNameError, setFirstNameError] = useState("");
@@ -105,6 +106,7 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
       lastName,
       contactNumber,
       email,
+      specialRequest,
     };
     onConfirmBooking(bookingDetails);
   };
@@ -198,6 +200,16 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
               <p className={styles.errorText}>{retypeEmailError}</p>
             )}
           </div>
+        </div>
+        <div className={styles.field}>
+          <label>Special Request</label>
+          <input
+            type="text"
+            placeholder="Type your Special Request"
+            value={specialRequest}
+            onChange={(e) => setSpecialRequest(e.target.value)}
+            className={emailError ? styles.errorInput : ""}
+          />
         </div>
         <div className={styles.checkboxRow}>
           <label>
