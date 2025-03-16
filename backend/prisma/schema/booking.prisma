@@ -10,13 +10,13 @@ model Booking {
 
     // Relations
    customer            Customer            @relation(fields: [customerId], references: [id])
-  customerId          Int                 @map("customer_id")
+   customerId          Int                 @map("customer_id")
 
-  bookingStatus       BookingStatus       @relation(fields: [bookingStatusId], references: [id])
-  bookingStatusId     Int                 @map("booking_status_id")
+   bookingStatus       BookingStatus       @relation(fields: [bookingStatusId], references: [id])
+   bookingStatusId     Int                 @map("booking_status_id")
 
-  transaction         Transaction?        @relation("BookingTransaction")
-  transactionId       String?             @unique @map("transaction_id")
+     transactionId   Int?         @unique @map("transaction_id") 
+    transaction     Transaction? @relation(fields: [transactionId], references: [id])
 
     @@map("bookings")
 }
