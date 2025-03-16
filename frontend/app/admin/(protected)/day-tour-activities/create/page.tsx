@@ -6,6 +6,7 @@ import React, {
   useCallback,
   ChangeEvent,
   FormEvent,
+  useRef,
 } from "react";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
@@ -213,6 +214,26 @@ function Page() {
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const initialFormState: DayTourFormData = {
+    name: "",
+    description: "",
+    image: null,
+    price: "",
+    additionalFeeType: "",
+    additionalFeeDescription: "",
+    additionalFeeAmount: "",
+  };
+
+  const handleClear = () => {
+    setFormData(initialFormState);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };  
+
   return (
     <div>
       {isMutating ? (
@@ -255,6 +276,7 @@ function Page() {
                 accept=".jpg,.png,.jpeg"
                 name="image"
                 onChange={handleChange}
+                ref={fileInputRef}
               />
               {helperText.image && (
                 <small>
@@ -316,6 +338,9 @@ function Page() {
             </div>
             <button type="submit" disabled={!isFormValid}>
               Create Day Tour
+            </button>
+            <button type="button" onClick={handleClear}>
+              Clear
             </button>
             <button
               type="button"
