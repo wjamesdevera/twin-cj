@@ -397,7 +397,7 @@ export default function UpdateCabin() {
 
   const isFormInvalid =
     Object.values(helperText).some((error) => error !== "") ||
-    JSON.stringify(formData) === JSON.stringify(originalData);
+    (JSON.stringify(formData) === JSON.stringify(originalData) && !imageFile);
 
   if (loading) return <Loading />;
   if (error) return <div>Error: {error}</div>;
