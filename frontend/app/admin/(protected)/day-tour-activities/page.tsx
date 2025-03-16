@@ -257,10 +257,17 @@ const DayTourView = () => {
                 )}
               </td>
               <td>{dayTour.description}</td>
-              <td>₱{dayTour.rate}</td>
+              <td>
+                ₱{Number(parseFloat(dayTour.rate).toFixed(2)).toLocaleString()}
+              </td>
               <td>{dayTour.additionalFeeType}</td>
               <td>{dayTour.additionalFeeDescription}</td>
-              <td>₱{dayTour.additionalFeeAmount}</td>
+              <td>
+                ₱
+                {Number(
+                  parseFloat(dayTour.additionalFeeAmount).toFixed(2)
+                ).toLocaleString()}
+              </td>
               <td>{formatDate(dayTour.createdAt)}</td>
               <td>{formatDate(dayTour.updatedAt)}</td>
             </tr>
