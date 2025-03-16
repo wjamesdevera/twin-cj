@@ -175,7 +175,7 @@ export const updateDayTour = async ({ id, data }: UpdateDayTourParams) => {
     },
   });
 
-  appAssert(updateDayTour, NOT_FOUND, `Day tour with ID ${id} not found`);
+  appAssert(updatedDayTour, NOT_FOUND, `Day tour with ID ${id} not found`);
 
   // Replaces and Updates the Image URL
   if (data.imageUrl && oldImageUrl && oldImageUrl !== data.imageUrl) {
