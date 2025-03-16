@@ -60,7 +60,7 @@ const CabinDashboard = () => {
 
   const { data, isLoading } = useSWR("getCabins", getCabins);
 
-  const { cabins } = data?.data || [];
+  const cabins = data?.data?.cabins || [];
 
   const toggleSelection = (id: number) => {
     setSelectedCabins((prev) =>
@@ -84,7 +84,7 @@ const CabinDashboard = () => {
       return;
     }
     await trigger(id);
-    mutate("getCabins");
+    mutate("getCabins", true);
     alert("Cabin deleted successfully!");
   };
 
