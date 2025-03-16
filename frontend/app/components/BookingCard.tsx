@@ -5,7 +5,7 @@ interface BookingCardProps {
   title: string;
   description: string;
   price: string;
-  additionalPrice: string;
+  // additionalPrice: string;
   imageSrc: string;
   isSelected: boolean;
   onSelect: () => void;
@@ -15,7 +15,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
   title,
   description,
   price,
-  additionalPrice,
+  // additionalPrice,
   imageSrc,
   isSelected,
   onSelect,
@@ -37,7 +37,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
           <div className={styles.description}>{description}</div>
           <div className={styles.priceDetails}>
             <span className={styles.price}>{price}</span>
-            <span className={styles.additionalPrice}>{additionalPrice}</span>
+            {/* <span className={styles.additionalPrice}>{additionalPrice}</span> */}
           </div>
         </div>
         <div className={styles.imageContainer}>

@@ -6,23 +6,22 @@ import Header from "./../components/Header";
 import Accordion from "./../components/Accordion";
 import ScheduleSelector from "./../components/ScheduleSelector";
 import BookingCard from "./../components/BookingCard";
-import Additionals from "./../components/Additionals";
 import GuestInformation from "../components/GuestInformation";
 import { Loading } from "../components/loading";
-import { set } from "zod";
 
 interface AccordionItem {
   title: string;
   content: React.JSX.Element;
   required?: boolean;
+  // additionalFee?: string;
 }
 
 interface BookingCardData {
   name: string;
   description: string;
   price: number;
-  additionalFee: string | null;
   imageUrl: string;
+  // additionalFee?: string;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -32,6 +31,7 @@ const Booking: React.FC = () => {
   const [bookingType, setBookingType] = useState<string>("day-tour");
   const [bookingCards, setBookingCards] = useState<BookingCardData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showAccordian, setShowAccordian] = useState<boolean>(false);
 
   const { data, error } = useSWR<{
     status: string;
@@ -45,19 +45,32 @@ const Booking: React.FC = () => {
 
   useEffect(() => {
     if (data) {
-      console.log(data);
       if (
         bookingType === "day-tour" &&
         data.data &&
         Array.isArray(data.data.dayTours)
       ) {
-        setBookingCards(data.data.dayTours);
+        setBookingCards(
+          data.data.dayTours.map(({ name, description, price, imageUrl }) => ({
+            name,
+            description,
+            price,
+            imageUrl,
+          }))
+        );
       } else if (
         bookingType === "overnight" &&
         data.data &&
         Array.isArray(data.data.cabins)
       ) {
-        setBookingCards(data.data.cabins);
+        setBookingCards(
+          data.data.cabins.map(({ name, description, price, imageUrl }) => ({
+            name,
+            description,
+            price,
+            imageUrl,
+          }))
+        );
       } else {
         setBookingCards([]);
       }
@@ -72,6 +85,12 @@ const Booking: React.FC = () => {
       /* isMutating */
     }
     //setIsLoading(true);
+  };
+
+  const handleCheckAvailability = () => {
+    // NOTE: this is temporary, will be replaced with actual checking of availability
+
+    setShowAccordian(true);
   };
 
   if (error) return <div>Failed to load</div>;
@@ -107,7 +126,7 @@ const Booking: React.FC = () => {
                   title={card.name}
                   description={card.description}
                   price={`₱${card.price}`}
-                  additionalPrice={card.additionalFee || ""}
+                  // additionalPrice={card.additionalFee || ""}
                   imageSrc={card.imageUrl}
                   isSelected={selectedOption === card.name}
                   onSelect={() => setSelectedOption(card.name)}
@@ -137,7 +156,7 @@ const Booking: React.FC = () => {
                   title={card.name}
                   description={card.description}
                   price={`₱${card.price}`}
-                  additionalPrice={card.additionalFee || ""}
+                  // additionalPrice={card.additionalFee || ""}
                   imageSrc={card.imageUrl}
                   isSelected={selectedOption === card.name}
                   onSelect={() => setSelectedOption(card.name)}
@@ -155,10 +174,12 @@ const Booking: React.FC = () => {
 
   return (
     <div>
-      <Header />
-      <main style={{ padding: "1rem" }}>
-        <Accordion items={accordionItems} />
-      </main>
+      <Header onCheckAvailability={handleCheckAvailability} />
+      {showAccordian && (
+        <main style={{ padding: "1rem" }}>
+          <Accordion items={accordionItems} />
+        </main>
+      )}
     </div>
   );
 };

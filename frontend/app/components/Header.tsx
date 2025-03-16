@@ -114,7 +114,11 @@ const GuestsDropdown: React.FC<{
   );
 };
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onCheckAvailability: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
   const [guestCounts, setGuestCounts] = useState({
     adults: 1,
     children: 0,
@@ -122,6 +126,7 @@ const Header: React.FC = () => {
 
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
+  const [showAccordian, setShowAccordian] = useState(false);
 
   const handleApplyGuests = (counts: { adults: number; children: number }) => {
     setGuestCounts(counts);
@@ -175,7 +180,10 @@ const Header: React.FC = () => {
               onApply={handleApplyGuests}
             />
           </div>
-          <button className={styles["check-availability-btn"]}>
+          <button
+            className={styles["check-availability-btn"]}
+            onClick={onCheckAvailability}
+          >
             CHECK AVAILABILITY
           </button>
         </div>
