@@ -2,8 +2,20 @@ import React, { useState } from "react";
 import styles from "./guestinformation.module.scss";
 import BookingButton from "./BookingButton";
 import TermsAndConditions from "./TermsandConditions";
+import { on } from "events";
 
-const GuestInformation: React.FC = () => {
+interface GuestInformationProps {
+  onConfirmBooking: (bookingDetails: {
+    firstName: string;
+    lastName: string;
+    contactNumber: string;
+    email: string;
+  }) => void;
+}
+
+const GuestInformation: React.FC<GuestInformationProps> = ({
+  onConfirmBooking,
+}) => {
   // State for form fields
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -86,6 +98,16 @@ const GuestInformation: React.FC = () => {
     !contactNumberError &&
     !emailError &&
     !retypeEmailError;
+
+  const handleConfirmBookingClick = () => {
+    const bookingDetails = {
+      firstName,
+      lastName,
+      contactNumber,
+      email,
+    };
+    onConfirmBooking(bookingDetails);
+  };
 
   return (
     <div className={styles.guestInfoContainer}>
@@ -212,7 +234,7 @@ const GuestInformation: React.FC = () => {
       {/* Disable the button unless all fields are filled and both checkboxes are checked */}
       <BookingButton
         text="Proceed to Payment"
-        onClick={() => {}}
+        onClick={handleConfirmBookingClick}
         disabled={!isFormValid}
       />
     </div>

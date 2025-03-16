@@ -15,6 +15,8 @@ export default function PaymentDetails() {
   const [isMobileScreen, setIsMobileScreen] = useState(false);
   const [isTabletScreen, setIsTabletScreen] = useState(false);
 
+  const bookingData = JSON.parse(sessionStorage.getItem("bookingData") || "{}");
+
   // Responsiveness for the cancellation policy container
 
   useEffect(() => {

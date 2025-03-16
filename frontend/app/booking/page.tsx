@@ -8,6 +8,7 @@ import ScheduleSelector from "./../components/ScheduleSelector";
 import BookingCard from "./../components/BookingCard";
 import GuestInformation from "../components/GuestInformation";
 import { Loading } from "../components/loading";
+import { useRouter } from "next/navigation";
 
 interface AccordionItem {
   title: string;
@@ -27,11 +28,21 @@ interface BookingCardData {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const Booking: React.FC = () => {
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [bookingType, setBookingType] = useState<string>("day-tour");
   const [bookingCards, setBookingCards] = useState<BookingCardData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showAccordian, setShowAccordian] = useState<boolean>(false);
+  const [checkInDate, setCheckInDate] = useState<Date | null>(null);
+  const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
+  const [guestCounts, setGuestCounts] = useState<{
+    adults: number;
+    children: number;
+  }>({
+    adults: 1,
+    children: 0,
+  });
 
   const { data, error } = useSWR<{
     status: string;
@@ -87,10 +98,30 @@ const Booking: React.FC = () => {
     //setIsLoading(true);
   };
 
-  const handleCheckAvailability = () => {
+  const handleCheckAvailability = (details: {
+    checkInDate: Date | null;
+    checkOutDate: Date | null;
+    guestCounts: { adults: number; children: number };
+  }) => {
     // NOTE: this is temporary, will be replaced with actual checking of availability
-
+    setCheckInDate(details.checkInDate);
+    setCheckOutDate(details.checkOutDate);
+    setGuestCounts(details.guestCounts);
     setShowAccordian(true);
+  };
+
+  const handleConfirmBooking = (bookingDetails: any) => {
+    const bookingData = {
+      selectedOption,
+      bookingType,
+      bookingCards,
+      checkInDate,
+      checkOutDate,
+      guestCounts,
+      ...bookingDetails,
+    };
+    sessionStorage.setItem("bookingData", JSON.stringify(bookingData));
+    // router.push("/payment_details");
   };
 
   if (error) return <div>Failed to load</div>;
@@ -168,7 +199,7 @@ const Booking: React.FC = () => {
       : null,
     {
       title: "Booking Details",
-      content: <GuestInformation />,
+      content: <GuestInformation onConfirmBooking={handleConfirmBooking} />,
     },
   ].filter((item): item is AccordionItem => item !== null);
 
