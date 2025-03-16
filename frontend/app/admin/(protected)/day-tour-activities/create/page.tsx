@@ -102,9 +102,14 @@ function Page() {
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, files } = e.target as HTMLInputElement;
       const trimmedValue = value.replace(/^\s+/, "");
-      const formattedValue = ["price", "additionalFeeAmount"].includes(name)
-        ? trimmedValue.replace(/[^0-9.]/g, "")
-        : trimmedValue;
+
+      let formattedValue = trimmedValue;
+
+      if (["name", "additionalFeeType"].includes(name)) {
+        formattedValue = trimmedValue.replace(/[^a-zA-Z0-9 ]/g, "");
+      } else if (["price", "additionalFeeAmount"].includes(name)) {
+        formattedValue = trimmedValue.replace(/[^0-9.]/g, "");
+      }
 
       if (name === "image") {
         if (files?.length) {
