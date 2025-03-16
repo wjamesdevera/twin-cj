@@ -37,6 +37,18 @@
     font-weight: bold;
 }
 
+.danger {
+    border: 1px solid #A80000;
+    background: white;
+    color: #A80000;
+}
+
+.danger:hover,
+.danger:active {
+    background: #A80000;
+    color: white;
+}
+
 .disabled {
     background: #c5c5c5 !important;
     color: #666666 !important;
