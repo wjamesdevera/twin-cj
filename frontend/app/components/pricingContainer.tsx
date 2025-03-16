@@ -43,7 +43,7 @@ const PricingContainer: React.FC<PricingContainerProps> = ({
           <h3 className={styles.pricingText}>{bookingType}</h3>
         </div>
         <div className={styles.rightContainer}>
-          <h3 className={styles.prices}> ₱ {packagePrice}</h3>
+          <h3 className={styles.prices}> ₱ {packagePrice.toLocaleString()}</h3>
         </div>
       </div>
 
