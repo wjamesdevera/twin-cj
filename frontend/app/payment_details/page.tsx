@@ -8,6 +8,7 @@ import PaymentContainer from "../components/paymentDetailsContainer";
 import SelectPayment from "../components/selectPayment";
 import PricingContainer from "../components/pricingContainer";
 import BookingButton from "../components/BookingButton";
+import { options } from "@/app/api";
 
 interface BookingCardData {
   name: string;
@@ -22,7 +23,12 @@ export default function PaymentDetails() {
   const [isMobileScreen, setIsMobileScreen] = useState(false);
   const [isTabletScreen, setIsTabletScreen] = useState(false);
 
-  const bookingData = JSON.parse(sessionStorage.getItem("bookingData") || "{}");
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [proofOfPayment, setProofOfPayment] = useState<File | null>(null);
+  const [error, setError] = useState<string>("");
+
+  const storedBookingData = sessionStorage.getItem("bookingData");
+  const bookingData = storedBookingData ? JSON.parse(storedBookingData) : null;
 
   // Responsiveness for the cancellation policy container
   useEffect(() => {
@@ -46,24 +52,52 @@ export default function PaymentDetails() {
   );
 
   const handleConfirmBooking = async () => {
+    if (!paymentMethod) {
+      setError("Please select a payment method.");
+      return;
+    }
+
+    if (!proofOfPayment) {
+      setError("Please upload your proof of payment.");
+      return;
+    }
+
+    if (!bookingData || !bookingData.bookingType) {
+      console.error("Booking data is missing or incomplete:", bookingData);
+      alert("Please select a booking type before proceeding.");
+      return null; // Prevent rendering the component
+    }
+
+    console.log("Booking data to be sent:", bookingData);
+    console.log("Payment method:", paymentMethod);
+    console.log("Proof of payment:", proofOfPayment);
+
     try {
-      const response = await fetch("/api/bookings", {
+      const formData = new FormData();
+      formData.append("bookingData", JSON.stringify(bookingData));
+      formData.append("paymentMethodId", paymentMethod);
+      if (proofOfPayment) {
+        formData.append("proofOfPayment", proofOfPayment);
+      }
+
+      const response = await fetch(`${options.baseURL}/api/bookings`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookingData),
+        body: formData,
       });
 
       if (!response.ok) {
-        throw new Error("Failed to confirm booking");
+        const errorText = await response.text();
+        console.error("Failed to confirm booking:", response.status, errorText);
+        throw new Error(
+          `Failed to confirm booking: ${response.status} ${errorText}`
+        );
       }
 
       const result = await response.json();
       console.log("Booking confirmed:", result);
       alert("Booking confirmed!");
     } catch (error) {
-      console.error("Error confirming booking:", error);
+      console.error("Failed to confirm booking:", error);
     }
   };
 
@@ -80,7 +114,7 @@ export default function PaymentDetails() {
               (bookingData.bookingCards as BookingCardData[]).find(
                 (card: BookingCardData) =>
                   card.name === bookingData.selectedOption
-              )?.imageUrl || ""
+              )?.imageUrl || undefined
             }
             numberOfGuests={`${
               bookingData.guestCounts.adults + bookingData.guestCounts.children
@@ -107,6 +141,12 @@ export default function PaymentDetails() {
           />
           <SelectPayment
             className={`${styles.leftContainer} ${styles.container4}`}
+            paymentMethod={paymentMethod}
+            proofOfPayment={proofOfPayment}
+            setPaymentMethod={setPaymentMethod}
+            setProofOfPayment={setProofOfPayment}
+            error={error}
+            setError={setError}
           />
           <PaymentContainer
             className={`${styles.rightContainer} ${styles.container5}`}
@@ -134,7 +174,7 @@ export default function PaymentDetails() {
             }
           />
         </div>
-        <BookingButton text="CONFIRM BOOKING" onClick={() => {}} />
+        <BookingButton text="CONFIRM BOOKING" onClick={handleConfirmBooking} />
       </div>
     </div>
   );

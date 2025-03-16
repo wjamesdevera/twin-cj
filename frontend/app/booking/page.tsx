@@ -54,6 +54,8 @@ const Booking: React.FC = () => {
     fetcher
   );
 
+  //NOTE: Add a validation where the user is required to select a booking type first before proceeding
+
   useEffect(() => {
     if (data) {
       if (

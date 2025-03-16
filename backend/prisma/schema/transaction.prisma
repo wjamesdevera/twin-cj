@@ -1,6 +1,6 @@
 model Transaction {
      id                    Int       @id @default(autoincrement()) @map("transaction_id") 
-    proofOfPaymentImageUrl String   @map("proof_of_payment_image_url")
+    proofOfPaymentImageUrl String?   @map("proof_of_payment_image_url")
     amount                 Float    @map("amount")
     createdAt              DateTime @default(now()) @map("created_at")
     updatedAt              DateTime @updatedAt @map("updated_at")

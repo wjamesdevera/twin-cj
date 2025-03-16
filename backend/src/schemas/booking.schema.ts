@@ -8,4 +8,5 @@ export const bookingSchema = z.object({
   customerId: z.number(),
   bookingStatusId: z.number(),
   totalPax: z.number(),
+  amount: z.number(),
 });

@@ -4,6 +4,6 @@ import { createBookingHandler } from "../controllers/booking.controller";
 
 const router = Router();
 
-router.post("/bookings", createBookingHandler);
+router.post("/", upload.single("proofOfPayment"), createBookingHandler);
 
 export default router;

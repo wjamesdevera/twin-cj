@@ -1,12 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./selectPayment.module.scss";
 
 interface SelectPaymentProps {
   className?: string;
   style?: React.CSSProperties;
+  paymentMethod: string;
+  proofOfPayment: File | null;
+  setPaymentMethod: (method: string) => void;
+  setProofOfPayment: (file: File | null) => void;
+  error: string;
+  setError: (error: string) => void;
 }
 
-const SelectPayment: React.FC<SelectPaymentProps> = ({ style, className }) => {
+const SelectPayment: React.FC<SelectPaymentProps> = ({
+  style,
+  className,
+  paymentMethod,
+  proofOfPayment,
+  setPaymentMethod,
+  setProofOfPayment,
+  error,
+  setError,
+}) => {
+  const handlePaymentMethodChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setPaymentMethod(event.target.value);
+    setError("");
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    setProofOfPayment(file);
+    setError("");
+  };
+
   return (
     <div className={`${styles.paymentContainer} ${className}`} style={style}>
       <h2 className={styles.heading}>
@@ -14,9 +42,10 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({ style, className }) => {
       </h2>
       <select
         className={styles.paymentOptions}
-        defaultValue={"Select Payment Method"}
+        value={paymentMethod}
+        onChange={handlePaymentMethodChange}
       >
-        <option value="Select Payment Method" disabled>
+        <option value="" disabled>
           Select Payment Method
         </option>
         <option value="GCash">GCash</option>
@@ -27,7 +56,7 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({ style, className }) => {
         <span className={styles.required}>*</span>
       </h3>
       <label className={styles.fileUpload}>
-        <input type="file" accept=".jpg,.jpeg" />
+        <input type="file" accept=".jpg,.jpeg" onChange={handleFileChange} />
         <span className={styles.uploadText}>
           <svg
             className={styles.uploadIcon}
@@ -45,8 +74,9 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({ style, className }) => {
           Upload
         </span>
       </label>
-      <br></br>
+      <br />
       <h5 className={styles.uploadSubtext}>Max file size accepted is 1 MB.</h5>
+      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 };
