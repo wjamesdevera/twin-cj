@@ -102,7 +102,7 @@ const CabinDashboard = () => {
       return;
     }
 
-    multiDeleteCabin(selectedCabins.join(","));
+    await multiDeleteCabin(selectedCabins.join(","));
     setSelectedCabins([]);
     setSelectAll(false);
 
