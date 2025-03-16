@@ -317,6 +317,8 @@ export const getCabinById = async (id: number) => {
     },
   });
 
+  console.log("Fetched service data:", service);
+
   appAssert(service, NOT_FOUND, "Service Not Found");
 
   return {
@@ -326,6 +328,8 @@ export const getCabinById = async (id: number) => {
     price: service.price,
     imageUrl: service.imageUrl,
     additionalFee: service.cabin?.additionalFee,
+    minCapacity: service.cabin?.minCapacity ?? 1,
+    maxCapacity: service.cabin?.maxCapacity ?? 1,
     createdAt: service.createdAt,
     updatedAt: service.updatedAt,
   };
@@ -451,13 +455,36 @@ export const deleteCabin = async (id: number) => {
     where: {
       id,
     },
+    include: {
+      cabin: {
+        include: {
+          additionalFee: true,
+        },
+      },
+    },
   });
 
   appAssert(existingCabin, NOT_FOUND, `Cabin with ID ${id} not found`);
 
+  if (existingCabin.cabin?.additionalFee) {
+    await prisma.additionalFee.deleteMany({
+      where: {
+        cabin: { id: existingCabin.cabin.id },
+      },
+    });
+    console.log(
+      `Deleted additional fees for cabin ID: ${existingCabin.cabin.id}`
+    );
+  }
+
   const deletedCabin = await prisma.service.delete({
     where: { id },
     include: {
+      cabin: {
+        include: {
+          additionalFee: true,
+        },
+      },
       dayTourActivity: {
         include: {
           additionalFee: true,
@@ -480,6 +507,19 @@ export const deleteCabin = async (id: number) => {
       console.warn(`Image file not found: ${imagePath}`);
     }
   }
+
+  return {
+    id: deletedCabin.id,
+    name: deletedCabin.name,
+    description: deletedCabin.description,
+    price: deletedCabin.price,
+    imageUrl: deletedCabin.imageUrl,
+    additionalFee: deletedCabin.cabin?.additionalFee,
+    minCapacity: deletedCabin.cabin?.minCapacity,
+    maxCapacity: deletedCabin.cabin?.maxCapacity,
+    createdAt: deletedCabin.createdAt,
+    updatedAt: deletedCabin.updatedAt,
+  };
 };
 
 interface UpdateCabinParams {
@@ -507,6 +547,8 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
   });
 
   appAssert(existingCabin, NOT_FOUND, `Cabin with ID ${id} not found`);
+
+  const oldImageUrl = existingCabin.imageUrl;
 
   const updatedCabin = await prisma.service.update({
     where: { id },
@@ -550,6 +592,22 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
   });
 
   appAssert(updatedCabin, NOT_FOUND, `Cabin with ID ${id} not found`);
+
+  // Replaces and Updates the Image URL
+  if (data.imageUrl && oldImageUrl && oldImageUrl !== data.imageUrl) {
+    const oldImagePath = path.join(
+      __dirname,
+      "../../uploads",
+      path.basename(oldImageUrl)
+    );
+
+    if (fs.existsSync(oldImagePath)) {
+      fs.unlinkSync(oldImagePath);
+      console.log(`Deleted old image file: ${oldImagePath}`);
+    } else {
+      console.warn(`Old image file not found: ${oldImagePath}`);
+    }
+  }
 
   return {
     id: updatedCabin.id,

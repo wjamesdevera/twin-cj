@@ -54,6 +54,22 @@ export default function CreateCabin() {
     const { name, value, dataset, files } = e.target as HTMLInputElement;
     const section = dataset.section as "service" | "cabin" | "additionalFee";
 
+    if (["name", "type"].includes(name)) {
+      const sanitizedValue = value.replace(/^\s+|[^a-zA-Z0-9\s]/g, "");
+      
+      setFormData((prev) => ({
+        ...prev,
+        [section]: { ...prev[section], [name]: sanitizedValue },
+      }));
+      
+      setErrors((prev) => ({
+        ...prev,
+        [name]: sanitizedValue ? "" : prev[name as keyof typeof prev],
+      }));
+  
+      return;
+    }
+
     if (files && files[0]) {
       const file = files[0];
       const validFormats = ["image/jpeg", "image/jpg", "image/png"];
@@ -115,10 +131,9 @@ export default function CreateCabin() {
 
         const { type, description, amount } = updatedAdditionalFee;
 
-        if (
-          (type || description || amount) &&
-          (!type || !description || amount <= 0)
-        ) {
+        if (type && description && amount > 0) {
+          setAdditionalFeeWarning("");
+        } else if (type || description || amount > 0) {
           setAdditionalFeeWarning(
             "Please complete all additional fee fields or leave them empty."
           );
@@ -130,6 +145,12 @@ export default function CreateCabin() {
   };
 
   const validateField = (name: string, value: any) => {
+    if (typeof value === "string" && value.trim() === "") {
+      if (["name", "description", "price"].includes(name)) {
+        return "This field cannot be empty or contain only spaces.";
+      }
+    }
+
     if (value === "" || value === null || value === undefined) {
       if (
         ["name", "description", "price", "minCapacity", "maxCapacity"].includes(
@@ -221,46 +242,12 @@ export default function CreateCabin() {
     Object.values(errors).some((error) => error !== "") ||
     additionalFeeWarning !== "";
 
-  const handleClear = () => {
-    setFormData({
-      service: {
-        name: "",
-        description: "",
-        image: null,
-        price: 1,
-      },
-      cabin: {
-        minCapacity: 1,
-        maxCapacity: 1,
-      },
-      additionalFee: {
-        type: "",
-        description: "",
-        amount: 0,
-      },
-    });
-    setErrors({
-      name: "",
-      description: "",
-      minCapacity: "",
-      maxCapacity: "",
-      image: "",
-      price: "",
-    });
-    setAdditionalFeeWarning("");
-    document.querySelectorAll("input, textarea").forEach((input) => {
-      (input as HTMLInputElement | HTMLTextAreaElement).value = "";
-    });
-  };
-
   return (
     <div>
       {isMutating ? (
         <Loading />
       ) : (
         <form onSubmit={handleSubmit}>
-          <div style={{ marginTop: "80px" }}></div>
-
           <label>Title</label>
           <br />
           <input
@@ -268,6 +255,8 @@ export default function CreateCabin() {
             name="name"
             data-section="service"
             onChange={handleChange}
+            maxLength={50}
+            value={formData.service.name}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.name}
@@ -282,6 +271,7 @@ export default function CreateCabin() {
             onChange={handleChange}
             rows={3}
             cols={30}
+            maxLength={100}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.description}
@@ -297,6 +287,7 @@ export default function CreateCabin() {
             min="1"
             value={formData.cabin.minCapacity || ""}
             onChange={handleChange}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.minCapacity}
@@ -312,6 +303,7 @@ export default function CreateCabin() {
             min={formData.cabin.minCapacity}
             value={formData.cabin.maxCapacity || ""}
             onChange={handleChange}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.maxCapacity}
@@ -343,6 +335,7 @@ export default function CreateCabin() {
             step="0.01"
             value={formData.service.price || ""}
             onChange={handleChange}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
           <p className="error" style={{ color: "red" }}>
             {errors.price}
@@ -359,9 +352,13 @@ export default function CreateCabin() {
             name="type"
             data-section="additionalFee"
             onChange={handleChange}
+            maxLength={50}
+            value={formData.additionalFee.type}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-          <br />
+          {!formData.additionalFee.type && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
+          <br /><br />
 
           <label>Description</label>
           <br />
@@ -371,9 +368,12 @@ export default function CreateCabin() {
             onChange={handleChange}
             rows={3}
             cols={30}
+            maxLength={100}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-          <br />
+          {!formData.additionalFee.description && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
+          <br /><br />
 
           <label>Amount</label>
           <br />
@@ -385,9 +385,12 @@ export default function CreateCabin() {
             min="0"
             step="0.01"
             onChange={handleChange}
+            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
           />
-          <p style={{ color: "red" }}>{additionalFeeWarning}</p>
-          <br />
+          {!(formData.additionalFee.amount > 0) && additionalFeeWarning && (
+            <p style={{ color: "red" }}>{additionalFeeWarning}</p>
+          )}
+          <br /><br />
 
           <button
             type="submit"
@@ -399,14 +402,9 @@ export default function CreateCabin() {
           >
             Add Cabin
           </button>
-          <button type="button" onClick={handleClear}>
-            Clear
-          </button>
           <button type="button" onClick={() => router.push("/admin/cabins")}>
             Cancel
           </button>
-
-          <div style={{ marginBottom: "80px" }}></div>
         </form>
       )}
     </div>

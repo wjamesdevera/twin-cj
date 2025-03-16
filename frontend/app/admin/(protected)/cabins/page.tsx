@@ -45,6 +45,10 @@ const formatDate = (isoString?: string) => {
     month: "2-digit",
     day: "2-digit",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
   });
 };
 
@@ -56,7 +60,7 @@ const CabinDashboard = () => {
 
   const { data, isLoading } = useSWR("getCabins", getCabins);
 
-  const { cabins } = data?.data || [];
+  const cabins = data?.data?.cabins || [];
 
   const toggleSelection = (id: number) => {
     setSelectedCabins((prev) =>
@@ -71,10 +75,16 @@ const CabinDashboard = () => {
     (key, { arg }: { arg: number }) => deleteCabin(arg)
   );
 
-  const handleDeletCabin = async (id: number) => {
+  const handleDeleteCabin = async (id: number) => {
     // NOTE: Add a modal before running the trigger for deleteawait trigger(id);
-
-    mutate("getCabins");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete the selected cabin/s?"
+    );
+    if (!confirmed) {
+      return;
+    }
+    await trigger(id);
+    mutate("getCabins", true);
     alert("Cabin deleted successfully!");
   };
 
@@ -83,11 +93,20 @@ const CabinDashboard = () => {
       alert("No cabins selected.");
       return;
     }
+
     // NOTE: ADD modal before deletion
-    multiDeleteCabin(selectedCabins.join(","));
+    const confirmed = window.confirm(
+      "Are you sure you want to delete the selected cabin/s?"
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    await multiDeleteCabin(selectedCabins.join(","));
     setSelectedCabins([]);
     setSelectAll(false);
 
+    mutate("getCabins", true);
     alert("Selected cabin/s deleted successfully!");
   };
 
@@ -104,8 +123,6 @@ const CabinDashboard = () => {
     <Loading />
   ) : (
     <div>
-      <div style={{ marginTop: "80px" }}></div>
-
       <button onClick={() => router.push("/admin/cabins/create")}>
         Add Cabin
       </button>
@@ -162,7 +179,7 @@ const CabinDashboard = () => {
                   >
                     Edit
                   </button>
-                  <button onClick={() => handleDeletCabin(cabin.id)}>
+                  <button onClick={() => handleDeleteCabin(cabin.id)}>
                     Delete
                   </button>
                 </td>
