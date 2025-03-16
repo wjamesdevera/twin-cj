@@ -62,15 +62,28 @@ export default function PaymentDetails() {
       return;
     }
 
+    // Number of Guest calculation
+    const totalPax =
+      bookingData.guestCounts.adults + bookingData.guestCounts.children;
+    bookingData.totalPax = totalPax;
+
+    const amount = selectedCard?.price || 0;
+    bookingData.amount = amount;
+
     if (!bookingData || !bookingData.bookingType) {
       console.error("Booking data is missing or incomplete:", bookingData);
       alert("Please select a booking type before proceeding.");
-      return null; // Prevent rendering the component
+      return null;
     }
 
-    console.log("Booking data to be sent:", bookingData);
-    console.log("Payment method:", paymentMethod);
-    console.log("Proof of payment:", proofOfPayment);
+    const requiredFields = ["totalPax", "amount"];
+    for (const field of requiredFields) {
+      if (!bookingData[field]) {
+        console.error(`Missing required field: ${field}`);
+        alert(`Missing required field: ${field}`);
+        return;
+      }
+    }
 
     try {
       const formData = new FormData();
@@ -94,7 +107,6 @@ export default function PaymentDetails() {
       }
 
       const result = await response.json();
-      console.log("Booking confirmed:", result);
       alert("Booking confirmed!");
     } catch (error) {
       console.error("Failed to confirm booking:", error);
