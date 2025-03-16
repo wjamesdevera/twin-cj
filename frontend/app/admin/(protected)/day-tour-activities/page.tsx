@@ -147,6 +147,7 @@ const DayTourView = () => {
           prevTours.filter((tour) => !selectedIds.includes(tour.id))
         );
         setSelectedIds([]);
+        setSelectAll(false);
         alert("Selected day tours deleted successfully!");
       }
     } catch (err) {
