@@ -306,9 +306,11 @@ export default function UpdateCabin() {
       !formData.additionalFee.description.trim() &&
       formData.additionalFee.amount === 0;
 
-    return (
-      requiredFieldsChanged || additionalFeeChanged || additionalFeeRemoved
-    );
+    const capacityChanged =
+      formData.cabin.minCapacity !== originalData.cabin.minCapacity ||
+      formData.cabin.maxCapacity !== originalData.cabin.maxCapacity;
+    
+    return requiredFieldsChanged || capacityChanged || additionalFeeChanged || additionalFeeRemoved;    
   };
 
   const handleSubmit = async (e: FormEvent) => {
