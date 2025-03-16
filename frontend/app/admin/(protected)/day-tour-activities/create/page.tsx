@@ -101,7 +101,7 @@ function Page() {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, files } = e.target as HTMLInputElement;
-      const trimmedValue = value.trim();
+      const trimmedValue = value.replace(/^\s+/, "");
       const formattedValue = ["price", "additionalFeeAmount"].includes(name)
         ? trimmedValue.replace(/[^0-9.]/g, "")
         : trimmedValue;
