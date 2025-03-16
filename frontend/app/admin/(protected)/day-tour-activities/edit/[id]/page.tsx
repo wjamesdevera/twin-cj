@@ -153,10 +153,13 @@ const EditDayTour: React.FC = () => {
       const { name, value, files } = e.target as HTMLInputElement;
       const trimmedValue = value.replace(/^\s+/, "");
 
-      const formattedValue =
-        name === "price" || name === "additionalFeeAmount"
-          ? trimmedValue.replace(/[^0-9]/g, "")
-          : trimmedValue;
+      let formattedValue = trimmedValue;
+
+      if (["name", "additionalFeeType"].includes(name)) {
+        formattedValue = trimmedValue.replace(/[^a-zA-Z0-9 ]/g, "");
+      } else if (["price", "additionalFeeAmount"].includes(name)) {
+        formattedValue = trimmedValue.replace(/[^0-9.]/g, "");
+      }
 
       setFormData((prevData) => ({
         ...prevData,
