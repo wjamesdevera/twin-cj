@@ -106,6 +106,7 @@ const CabinDashboard = () => {
     setSelectedCabins([]);
     setSelectAll(false);
 
+    mutate("getCabins", true);
     alert("Selected cabin/s deleted successfully!");
   };
 
