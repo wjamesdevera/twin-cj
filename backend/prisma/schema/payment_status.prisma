@@ -5,7 +5,7 @@ model PaymentStatus {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
-    transactions Transaction[]
+    transactions Transaction[]  @relation("TransactionPaymentStatus")
 
     @@map("payment_statuses")
 }

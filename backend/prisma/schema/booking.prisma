@@ -8,12 +8,15 @@ model Booking {
     createdAt           DateTime            @default(now())               @map("created_at")
     updatedAt           DateTime            @updatedAt                    @map("updated_at")
 
-    //Relations
-    customer            Customer            @relation(fields: [customerId], references: [id])
-    customerId          Int                 @unique                       @map("customer_id")
+    // Relations
+   customer            Customer            @relation(fields: [customerId], references: [id])
+  customerId          Int                 @map("customer_id")
 
-    bookingStatus       BookingStatus       @relation(fields: [bookingStatusId], references: [id])
-    bookingStatusId     Int                 @unique                       @map("booking_status_id")
-    
+  bookingStatus       BookingStatus       @relation(fields: [bookingStatusId], references: [id])
+  bookingStatusId     Int                 @map("booking_status_id")
+
+  transaction         Transaction?        @relation("BookingTransaction")
+  transactionId       String?             @unique @map("transaction_id")
+
     @@map("bookings")
 }
