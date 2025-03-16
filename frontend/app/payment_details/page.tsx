@@ -25,7 +25,6 @@ export default function PaymentDetails() {
   const bookingData = JSON.parse(sessionStorage.getItem("bookingData") || "{}");
 
   // Responsiveness for the cancellation policy container
-
   useEffect(() => {
     const handleResize = () => {
       setIsMediumScreen(window.innerWidth <= 1550);
@@ -45,6 +44,28 @@ export default function PaymentDetails() {
   const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
     (card: BookingCardData) => card.name === bookingData.selectedOption
   );
+
+  const handleConfirmBooking = async () => {
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to confirm booking");
+      }
+
+      const result = await response.json();
+      console.log("Booking confirmed:", result);
+      alert("Booking confirmed!");
+    } catch (error) {
+      console.error("Error confirming booking:", error);
+    }
+  };
 
   return (
     <div className={styles.paymentContainer}>

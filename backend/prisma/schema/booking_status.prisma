@@ -5,6 +5,7 @@ model BookingStatus {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
+     bookings        Booking[]    
 
     @@map("booking_statuses")
 }
