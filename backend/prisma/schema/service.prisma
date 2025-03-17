@@ -1,17 +1,20 @@
 model Service {
-    id          Int      @id @default(autoincrement()) @map("service_id")
-    name        String   @map("name")
-    description String   @map("description")
-    imageUrl    String   @map("image_url")
-    price       Float    @map("price")
-    createdAt   DateTime @default(now()) @map("created_at")
-    updatedAt   DateTime @updatedAt @map("updated_at")
+    id                Int                 @id @default(autoincrement()) @map("service_id")
+    name              String              @map("name")
+    description       String              @map("description")
+    imageUrl          String              @map("image_url")
+    price             Float               @map("price")
+    createdAt         DateTime            @default(now()) @map("created_at")
+    updatedAt         DateTime            @updatedAt @map("updated_at")
 
-    // Relation
-    dayTourActivity DayTourActivities?
-    cabin           Cabin?
+    // Relations
+    serviceCategoryId Int
+    serviceCategory   ServiceCategory @relation(fields: [serviceCategoryId], references: [id])
 
-    bookings BookingService[]
+    bookings         BookingService[]
+
+    cabins          Cabin[]
+    dayTourActivities DayTourActivities[]
 
     @@map("services")
 }

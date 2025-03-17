@@ -1,0 +1,10 @@
+model ServiceCategory {
+    id  Int @id @default(autoincrement())
+
+    // Relations
+    services   Service[]
+    categoryId Int
+    category   Category  @relation(fields: [categoryId], references: [id])
+
+    @@map("service_categories")
+}
