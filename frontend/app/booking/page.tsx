@@ -14,7 +14,6 @@ interface AccordionItem {
   title: string;
   content: React.JSX.Element;
   required?: boolean;
-  // additionalFee?: string;
 }
 
 interface BookingCardData {
@@ -22,7 +21,6 @@ interface BookingCardData {
   description: string;
   price: number;
   imageUrl: string;
-  // additionalFee?: string;
 }
 
 interface BookingTypeData {
@@ -33,74 +31,50 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const Booking: React.FC = () => {
   const router = useRouter();
-  const [selectedOption, setSelectedOption] = useState<string>("");
-  const [bookingType, setBookingType] = useState<string | null>(null);
-  const [bookingCards, setBookingCards] = useState<BookingCardData[]>([]);
-  //const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [showAccordian, setShowAccordian] = useState<boolean>(false);
-  const [checkInDate, setCheckInDate] = useState<Date | null>(null);
-  const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
-
-  const [type, setType] = useState<string>("");
-  const [guestCounts, setGuestCounts] = useState<{
-    adults: number;
-    children: number;
-  }>({
-    adults: 1,
-    children: 0,
+  const [bookingData, setBookingData] = useState({
+    selectedOption: "",
+    bookingType: null as string | null,
+    bookingCards: [] as BookingCardData[],
+    checkInDate: null as Date | null,
+    checkOutDate: null as Date | null,
+    guestCounts: { adults: 1, children: 0 },
   });
+  const [showAccordian, setShowAccordian] = useState(false);
 
   const { data, error } = useSWR<{
     status: string;
     data: Record<string, BookingTypeData>;
   }>(
-    bookingType
-      ? `http://localhost:8080/api/bookings?type=${bookingType}`
+    bookingData.bookingType
+      ? `http://localhost:8080/api/bookings?type=${bookingData.bookingType}`
       : null,
     fetcher
   );
 
   useEffect(() => {
-    if (data && data.status === "success" && bookingType) {
-      setBookingCards(data.data[bookingType]?.services || []);
+    if (data?.status === "success" && bookingData.bookingType) {
+      setBookingData((prev) => ({
+        ...prev,
+        bookingCards: bookingData.bookingType
+          ? data.data[bookingData.bookingType]?.services || []
+          : [],
+      }));
     }
-  }, [data, bookingType]);
+  }, [data, bookingData.bookingType]);
 
-  const handleOptionSelect = (option: string) => {
-    setBookingType(option);
-    setSelectedOption("");
-    {
-      /* isMutating */
-    }
-    // setIsLoading(true);
+  const handleChange = (key: string, value: any) => {
+    setBookingData((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Check Availability then shows the Accordion
-  const handleCheckAvailability = (details: {
-    checkInDate: Date | null;
-    checkOutDate: Date | null;
-    guestCounts: { adults: number; children: number };
-  }) => {
-    // NOTE: this is temporary, will be replaced with actual checking of availability
-    setCheckInDate(details.checkInDate);
-    setCheckOutDate(details.checkOutDate);
-    setGuestCounts(details.guestCounts);
-    setShowAccordian(true);
-  };
-
-  // Confirm Booking then redirects to Payment Details page
   const handleConfirmBooking = (bookingDetails: any) => {
-    const bookingData = {
-      selectedOption,
-      bookingType,
-      bookingCards,
-      checkInDate,
-      checkOutDate,
-      guestCounts,
-      specialRequests: bookingDetails.specialRequests,
-      ...bookingDetails,
+    const bookingPayload = {
+      ...bookingData,
+      bookingCards: bookingData.bookingCards.filter(
+        (card) => card.name === bookingData.selectedOption
+      ),
     };
-    sessionStorage.setItem("bookingData", JSON.stringify(bookingData));
+
+    sessionStorage.setItem("bookingData", JSON.stringify(bookingPayload));
     router.push("/payment_details");
   };
 
@@ -112,12 +86,12 @@ const Booking: React.FC = () => {
       title: "Resort Schedule",
       content: (
         <ScheduleSelector
-          selectedOption={bookingType}
-          handleOptionSelect={handleOptionSelect}
+          selectedOption={bookingData.bookingType}
+          handleOptionSelect={(option) => handleChange("bookingType", option)}
         />
       ),
     },
-    bookingType === "day-tour"
+    bookingData.bookingType === "day-tour"
       ? {
           title: "Day Tour Packages",
           content: (
@@ -131,22 +105,22 @@ const Booking: React.FC = () => {
               >
                 Choose one Package Type (required)
               </p>
-              {bookingCards.map((card) => (
+              {bookingData.bookingCards.map((card) => (
                 <BookingCard
                   key={card.name}
                   title={card.name}
                   description={card.description}
                   price={`₱${card.price}`}
                   imageSrc={card.imageUrl}
-                  isSelected={selectedOption === card.name}
-                  onSelect={() => setSelectedOption(card.name)}
+                  isSelected={bookingData.selectedOption === card.name}
+                  onSelect={() => handleChange("selectedOption", card.name)}
                 />
               ))}
             </div>
           ),
         }
       : null,
-    bookingType === "cabins"
+    bookingData.bookingType === "cabins"
       ? {
           title: "Overnight",
           content: (
@@ -160,15 +134,15 @@ const Booking: React.FC = () => {
               >
                 Choose one cabin (required)
               </p>
-              {bookingCards.map((card) => (
+              {bookingData.bookingCards.map((card) => (
                 <BookingCard
                   key={card.name}
                   title={card.name}
                   description={card.description}
                   price={`₱${card.price}`}
                   imageSrc={card.imageUrl}
-                  isSelected={selectedOption === card.name}
-                  onSelect={() => setSelectedOption(card.name)}
+                  isSelected={bookingData.selectedOption === card.name}
+                  onSelect={() => handleChange("selectedOption", card.name)}
                 />
               ))}
             </div>
@@ -183,7 +157,14 @@ const Booking: React.FC = () => {
 
   return (
     <div>
-      <Header onCheckAvailability={handleCheckAvailability} />
+      <Header
+        onCheckAvailability={(details) => {
+          handleChange("checkInDate", details.checkInDate);
+          handleChange("checkOutDate", details.checkOutDate);
+          handleChange("showAccordian", true);
+          setShowAccordian(true);
+        }}
+      />
       {showAccordian && (
         <main style={{ padding: "1rem" }}>
           <Accordion items={accordionItems} />

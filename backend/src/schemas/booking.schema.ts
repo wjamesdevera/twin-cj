@@ -1,18 +1,27 @@
 import { z } from "zod";
 
 export const bookingSchema = z.object({
-  referenceCode: z.string(),
-  checkInDate: z.string(),
-  checkOutDate: z.string(),
-  customerId: z.number(),
-  bookingStatusId: z.number(),
-  totalPax: z.number(),
-  amount: z.number(),
-  notes: z.string().optional(),
+  personalDetailId: z.string(),
   firstName: z.string(),
   lastName: z.string(),
-  contactNumber: z.string(),
   email: z.string().email(),
+  phoneNumber: z.string(),
+  checkInDate: z.string(),
+  checkOutDate: z.string(),
+  totalPax: z.number(),
+  selectedServices: z.array(z.number()).optional(),
+  paymentDetails: z.object({
+    paymentMethodId: z.number(),
+    paymentMethodName: z.string(),
+    paymentMethodType: z.string(),
+    amount: z.number(),
+    proofOfPaymentImageUrl: z.string().optional(),
+    paymentStatusId: z.number(),
+    accountName: z.string(),
+    accountNumber: z.string(),
+  }),
+  notes: z.string().optional(),
+  bookingStatusId: z.number(),
 });
 
 export const personalDetailSchema = z.object({

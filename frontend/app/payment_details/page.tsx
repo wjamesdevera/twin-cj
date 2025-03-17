@@ -11,6 +11,7 @@ import BookingButton from "../components/BookingButton";
 import { options } from "@/app/api";
 
 interface BookingCardData {
+  id: number;
   name: string;
   description: string;
   price: number;
@@ -28,7 +29,7 @@ export default function PaymentDetails() {
   const [error, setError] = useState<string>("");
 
   const storedBookingData = sessionStorage.getItem("bookingData");
-  const bookingData = storedBookingData ? JSON.parse(storedBookingData) : null;
+  const bookingData = storedBookingData ? JSON.parse(storedBookingData) : {};
 
   // Responsiveness for the cancellation policy container
   useEffect(() => {
@@ -52,64 +53,51 @@ export default function PaymentDetails() {
   );
 
   const handleConfirmBooking = async () => {
-    if (!paymentMethod) {
-      setError("Please select a payment method.");
-      return;
-    }
-
-    if (!proofOfPayment) {
-      setError("Please upload your proof of payment.");
-      return;
-    }
-
-    // Number of Guest calculation
-    const totalPax =
-      bookingData.guestCounts.adults + bookingData.guestCounts.children;
-    bookingData.totalPax = totalPax;
-
-    const amount = selectedCard?.price || 0;
-    bookingData.amount = amount;
-
-    if (!bookingData || !bookingData.bookingType) {
-      console.error("Booking data is missing or incomplete:", bookingData);
-      alert("Please select a booking type before proceeding.");
-      return null;
-    }
-
-    const requiredFields = ["totalPax", "amount"];
-    for (const field of requiredFields) {
-      if (!bookingData[field]) {
-        console.error(`Missing required field: ${field}`);
-        alert(`Missing required field: ${field}`);
+    try {
+      // Retrieve session storage data
+      const storedData = sessionStorage.getItem("bookingData");
+      if (!storedData) {
+        alert("No booking data found. Please try again.");
         return;
       }
-    }
 
-    try {
-      const formData = new FormData();
-      formData.append("bookingData", JSON.stringify(bookingData));
-      formData.append("paymentMethodId", paymentMethod);
-      if (proofOfPayment) {
-        formData.append("proofOfPayment", proofOfPayment);
-      }
+      let bookingData = JSON.parse(storedData);
 
+      // Add paymentMethod to bookingData
+      bookingData = {
+        ...bookingData,
+        paymentMethod,
+      };
+
+      // Send request to backend
       const response = await fetch(`${options.baseURL}/api/bookings`, {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
       });
 
+      const text = await response.text();
+
+      console.log("Raw response:", text);
+
+      const result = JSON.parse(text);
+
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Failed to confirm booking:", response.status, errorText);
-        throw new Error(
-          `Failed to confirm booking: ${response.status} ${errorText}`
-        );
+        throw new Error(result.message || "Failed to confirm booking");
       }
 
-      const result = await response.json();
-      alert("Booking confirmed!");
+      // Handle success
+      console.log("Booking confirmed!", result);
+      alert("Booking successful!");
+
+      // Optionally clear sessionStorage and redirect
+      sessionStorage.removeItem("bookingData");
+      // window.location.href = "/confirmation"; // Redirect to confirmation page
     } catch (error) {
-      console.error("Failed to confirm booking:", error);
+      console.error("Error confirming booking:", error);
+      alert("Failed to confirm booking. Please try again.");
     }
   };
 

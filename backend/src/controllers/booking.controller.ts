@@ -9,16 +9,18 @@ import {
   OK,
 } from "../constants/http";
 import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
-import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import { ROOT_STATIC_URL } from "../constants/url";
-import { getServicesByCategory } from "../services/booking.service";
+import {
+  getServicesByCategory,
+  createBooking,
+} from "../services/booking.service";
 import AppError from "../utils/AppError";
 
 export const getBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { type } = req.query;
+    const file = req.file;
 
-    // Ensure 'type' query parameter is provided
     if (!type) {
       return res.status(BAD_REQUEST).json({
         status: "error",
@@ -26,7 +28,6 @@ export const getBookingHandler = catchErrors(
       });
     }
 
-    // Get categorized bookings by the type parameter
     const categorizedBookings = await getServicesByCategory(type as string);
 
     appAssert(categorizedBookings, BAD_REQUEST, "No bookings available");
@@ -37,3 +38,15 @@ export const getBookingHandler = catchErrors(
     });
   }
 );
+
+export const createBookingHandler = async (req: Request, res: Response) => {
+  try {
+    console.log("Received booking data:", req.body);
+    const result = await createBooking(req);
+    res
+      .status(CREATED)
+      .json({ message: "Booking created successfully", result });
+  } catch (error) {
+    res.status(BAD_REQUEST).json({ error: error });
+  }
+};
