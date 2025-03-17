@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  images: {
+    domains: ["localhost"], // Allow images from localhost
+  },
   async rewrites() {
     return [
       // rewrites all api request to your express server

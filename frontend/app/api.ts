@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const options = {
+export const options = {
   baseURL: process.env.API_ORIGIN || "http://localhost:8080",
   withCredentials: true,
 };
@@ -11,7 +11,7 @@ API.interceptors.response.use(
   (response) => response.data,
   (error) => {
     const { status, data } = error.response;
-    return Promise.reject({ status, data });
+    return Promise.reject({ status, ...data });
   }
 );
 

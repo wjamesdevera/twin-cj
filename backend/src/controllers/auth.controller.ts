@@ -4,7 +4,8 @@ import {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
-} from "../schemas/auth.schems";
+  verificationCodeSchema,
+} from "../schemas/auth.schema";
 import catchErrors from "../utils/catchErrors";
 import {
   changePassword,
@@ -13,6 +14,7 @@ import {
   refreshUserAccessToken,
   resetPassword,
   sendPasswordResetEmail,
+  verifyEmail,
 } from "../services/auth.service";
 import { Request, response, Response } from "express";
 import {
@@ -33,20 +35,27 @@ export const registerHandler = catchErrors(
       userAgent: request.headers["user-agent"],
     });
 
-    const { user, accessToken, refreshToken } = await createAccount(
-      requestBody
-    );
+    const { user } = await createAccount(requestBody);
 
-    setAuthCookies({ response, accessToken, refreshToken })
-      .status(CREATED)
-      .json({
-        status: "success",
-        data: {
-          user: {
-            email: user.email,
-          },
+    return response.status(CREATED).json({
+      status: "success",
+      data: {
+        user: {
+          email: user.email,
         },
-      });
+      },
+    });
+
+    // setAuthCookies({ response, accessToken, refreshToken })
+    //   .status(CREATED)
+    //   .json({
+    //     status: "success",
+    //     data: {
+    //       user: {
+    //         email: user.email,
+    //       },
+    //     },
+    //   });
   }
 );
 
@@ -158,12 +167,11 @@ export const passwordResetHandler = catchErrors(
 
 export const changePasswordHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const { oldPassword, newPassword } = changePasswordSchema.parse(
-      request.body
-    );
+    const { oldPassword, newPassword, confirmPassword } =
+      changePasswordSchema.parse(request.body);
     const userId = request.userId;
 
-    await changePassword({ userId, oldPassword, newPassword });
+    await changePassword({ userId, oldPassword, newPassword, confirmPassword });
     return response.status(OK).json({
       status: "success",
       data: {
@@ -172,3 +180,11 @@ export const changePasswordHandler = catchErrors(
     });
   }
 );
+
+export const verifyEmailHandler = catchErrors(async (req, res) => {
+  const verificationCode = verificationCodeSchema.parse(req.params.code);
+
+  await verifyEmail(verificationCode);
+
+  return res.status(OK).json({ message: "Email was successfully verified" });
+});

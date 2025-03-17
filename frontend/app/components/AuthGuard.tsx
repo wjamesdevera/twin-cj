@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 import { Loading } from "./loading";
 import { useRouter } from "next/navigation";
@@ -9,14 +9,20 @@ export default function AuthGuard({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuth({
+    onError: () => {
+      console.log(user);
+    },
+  });
   const router = useRouter();
 
-  if (isLoading) return <Loading />;
-  if (!user) {
-    router.push("/admin/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!isLoading && !user) {
+      window.location.replace("/admin/login");
+    }
+  }, [isLoading, user, router]);
 
-  return <>{children}</>;
+  if (isLoading) return <Loading />;
+
+  return user ? <>{children}</> : null;
 }

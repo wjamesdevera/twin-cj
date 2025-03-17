@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
 import { OK } from "../constants/http";
-import { sendFeedbackSchema } from "../schemas/feedback.schemas";
+import { sendFeedbackSchema } from "../schemas/feedback.schema";
 import { sendFeedback } from "../services/feedback.service";
 
 export const sendFeedbackHandler = catchErrors(

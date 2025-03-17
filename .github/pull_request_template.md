@@ -1,47 +1,35 @@
-# Pull Request Title
+# 🚀 Pull Request Template
 
-<!-- A concise title that summarizes the changes -->
+## 📋 Summary
 
-## Description
+<!-- Provide a brief summary of the changes. -->
 
-<!-- Clearly and briefly explain what this PR is for. Include the problem being solved and why these changes are necessary. -->
+## ✨ Description
 
-## Changes Made
+<!-- Clearly explain what this PR is for, including any relevant context or motivation. -->
 
-<!-- A detailed list of changes made in the PR, including modified files and their purpose. -->
+## 🔧 Changes
 
-- Updated `<file-name>` to add `<specific-feature>`.
-- Refactored `<module>` for better performance.
-- Fixed bug `<bug-ID>` in `<component>`.
+<!-- List the key changes made in this PR. -->
+- 
 
-## Related Issues
+## 🔗 Related Issue
 
-<!-- Link to the issue(s) this PR addresses, using keywords like 'Closes', 'Fixes', or 'Resolves'. -->
+<!-- Link to the issue(s) this PR addresses. Use keywords like "Closes", "Fixes", or "Resolves" followed by the issue number. -->
+Closes #
 
-Closes #123  
-Fixes #456
+## ✅ Checklist
 
-## Checklist
+<!-- Ensure these items are checked off before submitting the PR. -->
+- [ ] 🧹 Code follows the project's coding standards.
+- [ ] 📚 Documentation has been updated (if necessary).
+- [ ] 🧪 Tests have been written or updated (if applicable).
+- [ ] ✅ All tests pass successfully.
 
-<!-- Ensure these items are checked off before marking this PR ready for review. -->
+## 💬 Additional Notes
 
-- [ ] Code follows the project’s coding standards and style guides.
-- [ ] Relevant documentation has been updated (e.g., README, API docs).
-- [ ] All new and existing tests pass.
-- [ ] Changes have been tested in relevant environments.
-- [ ] Linting and formatting checks are passing.
+<!-- Include any additional notes, screenshots, or context for reviewers. -->
 
-## Screenshots or Demo
-
-<!-- Include screenshots or a video demo if visual changes are involved. -->
-
-## Testing Instructions
-
-<!-- Provide clear instructions on how to test the changes. Include environment setup if needed. -->
-
-1. Go to `<path>`.
-2. Run `<command>` to start the application.
-3. Verify `<expected-outcome>`.
 
 ## Notes for Reviewers
 

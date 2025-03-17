@@ -1,6 +1,7 @@
 import config from "../config/config";
 import { prisma } from "../config/db";
 import {
+  BAD_REQUEST,
   CONFLICT,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
@@ -29,6 +30,8 @@ import { hashPassword, verifyPassword } from "../utils/password";
 import { sendMail } from "../utils/sendMail";
 
 type CreateAccountParams = {
+  firstName: string | null;
+  lastName: string | null;
   email: string;
   password: string;
   phoneNumber: string;
@@ -45,6 +48,7 @@ type ChangePasswordParams = {
   userId: string;
   oldPassword: string;
   newPassword: string;
+  confirmPassword: string;
 };
 
 export const createAccount = async (data: CreateAccountParams) => {
@@ -66,6 +70,8 @@ export const createAccount = async (data: CreateAccountParams) => {
 
   const createUser = await prisma.personalDetail.create({
     data: {
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email,
       phoneNumber: data.phoneNumber,
       userAccount: {
@@ -80,8 +86,6 @@ export const createAccount = async (data: CreateAccountParams) => {
   });
 
   const userAccountId = createUser.userAccount?.id;
-
-  const oneYear = oneYearFromNow();
 
   const verificationCode = await prisma.verificationCode.create({
     data: {
@@ -101,22 +105,22 @@ export const createAccount = async (data: CreateAccountParams) => {
   //ignore email errors for now
   if (error) console.log(error);
 
-  const session = await prisma.session.create({
-    data: {
-      userAccountId: userAccountId,
-      userAgent: data.userAgent,
-      expiresAt: thirtyDaysFromNow(),
-    },
-  });
+  // const session = await prisma.session.create({
+  //   data: {
+  //     userAccountId: userAccountId,
+  //     userAgent: data.userAgent,
+  //     expiresAt: thirtyDaysFromNow(),
+  //   },
+  // });
 
-  const refreshToken = signToken({
-    sessionId: session.id,
-  });
+  // const refreshToken = signToken({
+  //   sessionId: session.id,
+  // });
 
-  const accessToken = signToken({
-    userId: userAccountId,
-    sessionId: session.id,
-  });
+  // const accessToken = signToken({
+  //   userId: userAccountId,
+  //   sessionId: session.id,
+  // });
 
   return {
     user: {
@@ -125,8 +129,8 @@ export const createAccount = async (data: CreateAccountParams) => {
       phoneNumber: createUser.phoneNumber,
       email: createUser.email,
     },
-    accessToken: accessToken,
-    refreshToken: refreshToken,
+    // accessToken: accessToken,
+    // refreshToken: refreshToken,
   };
 };
 
@@ -224,76 +228,76 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
 };
 
 export const sendPasswordResetEmail = async (email: string) => {
-  try {
-    const user = await prisma.personalDetail.findFirst({
-      where: {
-        email: email,
+  const user = await prisma.personalDetail.findFirst({
+    where: {
+      email: email,
+    },
+    include: {
+      userAccount: true,
+    },
+  });
+
+  appAssert(user, NOT_FOUND, "User not found");
+
+  const fiveMinAgo = fiveMinutesAgo();
+  const count = await prisma.verificationCode.count({
+    where: {
+      userAccountId: user.userAccount?.id,
+      createdAt: {
+        gt: fiveMinAgo,
       },
-      include: {
-        userAccount: true,
-      },
-    });
+    },
+  });
 
-    appAssert(user, NOT_FOUND, "User not found");
+  appAssert(
+    count <= 1,
+    TOO_MANY_REQUESTS,
+    "Too many requests, please try again later"
+  );
 
-    const fiveMinAgo = fiveMinutesAgo();
-    const count = await prisma.verificationCode.count({
-      where: {
-        userAccountId: user.userAccount?.id,
-        createdAt: {
-          gt: fiveMinAgo,
-        },
-      },
-    });
+  const expiresAt = oneHourFromNow();
+  const passwordResetToken = await prisma.passwordResetToken.create({
+    data: {
+      userAccountId: user.userAccount?.id,
+      expiresAt: expiresAt,
+    },
+  });
 
-    appAssert(
-      count <= 1,
-      TOO_MANY_REQUESTS,
-      "Too many requests, please try again later"
-    );
+  const url = `${config.appOrigin}/admin/password/change?code=${
+    passwordResetToken.id
+  }&exp=${expiresAt.getTime()}`;
 
-    const expiresAt = oneHourFromNow();
-    const passwordResetToken = await prisma.passwordResetToken.create({
-      data: {
-        userAccountId: user.userAccount?.id,
-        expiresAt: expiresAt,
-      },
-    });
+  const { data, error } = await sendMail({
+    to: email,
+    ...getPasswordResetTemplate(url),
+  });
 
-    const url = `${config.appOrigin}/admin/password/change?code=${
-      passwordResetToken.id
-    }&exp=${expiresAt.getTime()}`;
+  appAssert(
+    data?.id,
+    INTERNAL_SERVER_ERROR,
+    `${error?.name} - ${error?.message}`
+  );
 
-    const { data, error } = await sendMail({
-      to: email,
-      ...getPasswordResetTemplate(url),
-    });
-
-    appAssert(
-      data?.id,
-      INTERNAL_SERVER_ERROR,
-      `${error?.name} - ${error?.message}`
-    );
-
-    return {
-      url,
-      emailId: data.id,
-    };
-  } catch (error: any) {
-    console.log("SendPasswordResetError:", error.message);
-    return {};
-  }
+  return {
+    url,
+    emailId: data.id,
+  };
 };
 
 type ResetPasswordParams = {
   password: string;
+  confirmPassword: string;
   verificationCode: string;
 };
 
 export const resetPassword = async ({
   verificationCode,
   password,
+  confirmPassword,
 }: ResetPasswordParams) => {
+  console.log(password);
+  console.log(confirmPassword);
+  appAssert(password === confirmPassword, BAD_REQUEST, "Password do not match");
   const validCode = await prisma.passwordResetToken.findFirst({
     where: {
       id: verificationCode,
@@ -345,31 +349,70 @@ export const changePassword = async ({
   userId,
   oldPassword,
   newPassword,
+  confirmPassword,
 }: ChangePasswordParams) => {
-  try {
-    const user = await prisma.userAccount.findFirst({
-      where: {
-        id: userId,
-      },
-    });
+  const user = await prisma.userAccount.findFirst({
+    where: {
+      id: userId,
+    },
+  });
 
-    appAssert(user, UNAUTHORIZED, "User not found");
+  appAssert(user, UNAUTHORIZED, "User not found");
 
-    const isOldPasswordValid = verifyPassword(oldPassword, user.password);
+  const isOldPasswordValid = await verifyPassword(oldPassword, user.password);
 
-    appAssert(isOldPasswordValid, UNAUTHORIZED, "Invalid password");
+  appAssert(isOldPasswordValid, UNAUTHORIZED, "Invalid password");
 
-    const updatedUser = await prisma.userAccount.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        password: await hashPassword(newPassword),
-      },
-    });
+  const updatedUser = await prisma.userAccount.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      password: await hashPassword(newPassword),
+    },
+  });
 
-    return updatedUser;
-  } catch (error: Error | any) {
-    console.error(error.message);
-  }
+  return updatedUser;
+};
+
+export const verifyEmail = async (code: string) => {
+  const validCode = await prisma.verificationCode.findFirst({
+    where: {
+      id: code,
+    },
+    include: {
+      userAccount: true,
+    },
+  });
+  appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
+
+  const updatedUser = await prisma.userAccount.update({
+    where: {
+      id: validCode.userAccountId,
+    },
+    data: {
+      isVerified: true,
+    },
+    include: {
+      personalDetail: true,
+    },
+  });
+
+  appAssert(updatedUser, INTERNAL_SERVER_ERROR, "Failed to verify email");
+
+  await prisma.verificationCode.delete({
+    where: {
+      id: validCode.id,
+    },
+  });
+
+  return {
+    user: {
+      firstName: updatedUser.personalDetail.firstName,
+      lastName: updatedUser.personalDetail.lastName,
+      phoneNumber: updatedUser.personalDetail.phoneNumber,
+      email: updatedUser.personalDetail.email,
+      isVerified: updatedUser.isVerified,
+    },
+  };
 };

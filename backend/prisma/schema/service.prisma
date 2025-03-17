@@ -3,13 +3,13 @@ model Service {
     name        String   @map("name")
     description String   @map("description")
     imageUrl    String   @map("image_url")
-    quantity    Int      @map("quantity")
     price       Float    @map("price")
     createdAt   DateTime @default(now()) @map("created_at")
     updatedAt   DateTime @updatedAt @map("updated_at")
 
     // Relation
     dayTourActivity DayTourActivities?
+    cabin Cabin?
 
     @@map("services")
 }

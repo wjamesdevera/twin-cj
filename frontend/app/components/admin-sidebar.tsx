@@ -9,12 +9,14 @@ import { FaAngleDown, FaAngleUp, FaRegPenToSquare } from "react-icons/fa6";
 import { LuCalendarDays } from "react-icons/lu";
 import { TbArrowBarToLeft, TbArrowBarToRight } from "react-icons/tb";
 import twinCJLogo from "@/public/assets/admin-logo.svg";
+import { usePathname } from "next/navigation";
 
 interface NavItemProps {
   href: string;
   icon?: JSX.Element;
   label: string;
   collapsed: boolean;
+  isActive?: boolean;
 }
 
 interface NavListProps {
@@ -25,10 +27,21 @@ interface NavDropdownProps {
   collapsed: boolean;
 }
 
-const NavItem = ({ label, href, icon, collapsed }: NavItemProps) => {
+const NavItem = ({
+  label,
+  href,
+  icon,
+  collapsed,
+  isActive = false,
+}: NavItemProps) => {
   return (
     <li>
-      <Link href={href} className={styles["navitem-container"]}>
+      <Link
+        href={href}
+        className={`${styles["navitem-container"]} ${
+          isActive ? styles.active : ""
+        }`}
+      >
         <div className={styles["navitem-wrapper"]}>
           {icon}
           <p className={collapsed ? styles.hidden : ""}>{label}</p>
@@ -78,18 +91,21 @@ const NavDropdown = ({ collapsed }: NavDropdownProps) => {
 };
 
 const NavList = ({ collapsed }: NavListProps) => {
+  const pathname = usePathname();
   return (
     <ul className={styles["navlist"]}>
       <NavItem
         href="/admin"
         label="Dashboard"
         icon={<FaHome />}
+        isActive={pathname === "/admin"}
         collapsed={collapsed}
       />
       <NavItem
         href="/admin/bookings"
         label="Booking & Transactions"
         collapsed={collapsed}
+        isActive={pathname === "/admin/bookings"}
         icon={<LuCalendarDays />}
       />
       <NavDropdown collapsed={collapsed} />
@@ -97,6 +113,7 @@ const NavList = ({ collapsed }: NavListProps) => {
         href="/admin/accounts"
         label="Admin Accounts"
         collapsed={collapsed}
+        isActive={pathname.startsWith("/admin/accounts")} 
         icon={<FaRegUser />}
       />
     </ul>

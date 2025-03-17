@@ -7,6 +7,7 @@ import {
   passwordResetHandler,
   refreshHandler,
   registerHandler,
+  verifyEmailHandler,
 } from "../controllers/auth.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 
@@ -18,6 +19,7 @@ router.post("/login", loginHandler);
 router.get("/refresh", refreshHandler);
 router.get("/logout", logoutHandler);
 router.post("/password/forgot", forgotPasswordHandler);
+router.get("/email/verify/:code", verifyEmailHandler);
 router.post("/password/reset", passwordResetHandler);
 router.post("/password/change", authenticate, changePasswordHandler);
 
