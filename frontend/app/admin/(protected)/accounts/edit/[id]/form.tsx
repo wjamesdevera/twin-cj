@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
-import useSWR from "swr";
-import { editUser, getUserById } from "@/app/lib/api";
-import { Loading } from "@/app/components/loading";
+import { editUser } from "@/app/lib/api";
 import useSWRMutation from "swr/mutation";
 import ConfirmModal from "@/app/components/confirm_modal";
 
@@ -17,42 +15,39 @@ interface EditUserArg {
   phoneNumber: string;
 }
 
-const Form: React.FC = () => {
+interface EditUserFormArg {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+}
+
+const Form: React.FC<EditUserFormArg> = ({
+  id,
+  firstName,
+  lastName,
+  email,
+  phoneNumber,
+}) => {
   const router = useRouter();
-  const { id } = useParams<{ id: string }>();
   const [isFormTouched, setIsFormTouched] = useState(false);
   const [formData, setFormData] = useState<EditUserArg>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phoneNumber: phoneNumber,
   });
 
-  const validateName = (name: string) => name.trim().length >= 2;
+  const validateName = (name: string) =>
+    name ? name.trim().length >= 2 : null;
 
-  const [initialData, setInitialData] = useState<EditUserArg | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
-
-  const { data: userData, isLoading } = useSWR(id, getUserById, {
-    onSuccess: (data) => {
-      if (data?.data) {
-        setInitialData(data.data);
-        setFormData(data.data);
-      }
-    },
-  });
 
   const { trigger } = useSWRMutation(
     "edit",
     (key, { arg }: { arg: EditUserArg }) => editUser(id, arg)
   );
-
-  useEffect(() => {
-    if (userData?.data) {
-      setInitialData(userData.data);
-      setFormData(userData.data);
-    }
-  }, [userData]);
 
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
@@ -91,10 +86,13 @@ const Form: React.FC = () => {
 
   const handleCancel = () => {
     if (isFormTouched) {
-      openModal("Are you sure you want to cancel? Unsaved changes will be lost.", () => {
-        router.push("/admin/accounts");
-        closeModal();
-      });
+      openModal(
+        "Are you sure you want to cancel? Unsaved changes will be lost.",
+        () => {
+          router.push("/admin/accounts");
+          closeModal();
+        }
+      );
     } else {
       router.push("/admin/accounts");
     }
@@ -135,7 +133,6 @@ const Form: React.FC = () => {
     email: false,
     phoneNumber: false,
   });
-  
 
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -143,49 +140,34 @@ const Form: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let updatedValue = value;
-  
+
     if (name === "phoneNumber") {
-      updatedValue = value.replace(/\D/g, "").slice(0, 11); 
+      updatedValue = value.replace(/\D/g, "").slice(0, 11);
     }
-  
+
     if (name === "firstName" || name === "lastName") {
       updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50);
     }
-  
+
     setFormData((prev) => ({
       ...prev,
       [name]: updatedValue,
     }));
-  
+
     setErrors((prev) => ({
       ...prev,
       firstName: name === "firstName" && !validateName(updatedValue),
       lastName: name === "lastName" && !validateName(updatedValue),
-      email: name === "email" && updatedValue !== "" && !validateEmail(updatedValue),
-      phoneNumber: name === "phoneNumber" && updatedValue.length !== 11, 
+      email:
+        name === "email" && updatedValue !== "" && !validateEmail(updatedValue),
+      phoneNumber: name === "phoneNumber" && updatedValue.length !== 11,
     }));
-  
+
+    setIsFormValid(Object.values(errors).some((error) => error));
     setIsFormTouched(true);
   };
-  
- useEffect(() => {
-  if (initialData) {
-    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialData);
-    const isValid =
-      validateName(formData.firstName) &&
-      validateName(formData.lastName) &&
-      validateEmail(formData.email) &&
-      formData.phoneNumber.length === 11 &&
-      hasChanges;
 
-    setIsFormValid(isValid);
-  }
-}, [formData, initialData]);
-
-
-  return isLoading ? (
-    <Loading />
-  ) : (
+  return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.form_group}>
         <label>First Name</label>

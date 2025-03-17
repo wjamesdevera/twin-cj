@@ -28,7 +28,7 @@ router.use("/feedbacks", feedbackRoutes);
 router.use("/services", serviceRoutes);
 router.use("/bookings", bookingRoutes);
 
-router.post("/upload-test", upload.single("file"), (req, res) => {
+router.post("/upload", upload.single("file"), (req, res) => {
   res.json({
     file: req.file,
     body: req.body,

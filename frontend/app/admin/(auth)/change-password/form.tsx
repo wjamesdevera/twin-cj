@@ -15,8 +15,18 @@ export function ChangePasswordForm() {
 
   const { trigger, isMutating, error } = useSWRMutation(
     "change-password",
-    (key, { arg }: { arg: { oldPassword: string; newPassword: string } }) =>
-      changePassword(arg),
+    (
+      key,
+      {
+        arg,
+      }: {
+        arg: {
+          oldPassword: string;
+          newPassword: string;
+          confirmPassword: string;
+        };
+      }
+    ) => changePassword(arg),
     {
       onSuccess: () => {
         router.push("/admin");
@@ -77,7 +87,11 @@ export function ChangePasswordForm() {
     Object.values(passwordValidations).every(Boolean);
 
   const handleChangePassword = async () => {
-    await trigger({ oldPassword, newPassword });
+    try {
+      await trigger({ oldPassword, newPassword, confirmPassword });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return isMutating ? (

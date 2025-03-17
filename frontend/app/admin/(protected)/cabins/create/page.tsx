@@ -402,7 +402,7 @@ export default function CreateCabin() {
           <button type="button" onClick={handleClear}>
             Clear
           </button>
-          <button type="button" onClick={() => router.push("/cabin")}>
+          <button type="button" onClick={() => router.push("/admin/cabins")}>
             Cancel
           </button>
 

@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Loading } from "@/app/components/loading";
 import useSWR from "swr";
 import { getCabin } from "@/app/lib/api";
+import { options } from "@/app/api";
 
 export default function UpdateCabin() {
   const router = useRouter();
@@ -244,10 +245,10 @@ export default function UpdateCabin() {
 
     if (formData.service.image) {
       const imageFormData = new FormData();
-      imageFormData.append("image", formData.service.image);
+      imageFormData.append("file", formData.service.image);
 
       try {
-        const uploadResponse = await fetch("http://localhost:8080/api/upload", {
+        const uploadResponse = await fetch(`${options.baseURL}/api/upload`, {
           method: "POST",
           body: imageFormData,
         });
@@ -263,23 +264,54 @@ export default function UpdateCabin() {
       }
     }
 
-    const requestBody = {
-      service: {
-        name: formData.service.name,
-        description: formData.service.description,
-        imageUrl: imageUrl,
-        price: formData.service.price,
-      },
-      cabin: {
-        minCapacity: formData.cabin.minCapacity,
-        maxCapacity: formData.cabin.maxCapacity,
-      },
-      additionalFee:
-        formData.additionalFee.type ||
-        formData.additionalFee.description ||
-        formData.additionalFee.amount > 0
-          ? { ...formData.additionalFee }
-          : null,
+    // const requestBody = {
+    //   service: {
+    //     name: formData.service.name,
+    //     description: formData.service.description,
+    //     imageUrl: imageUrl,
+    //     price: formData.service.price,
+    //   },
+    //   cabin: {
+    //     minCapacity: formData.cabin.minCapacity,
+    //     maxCapacity: formData.cabin.maxCapacity,
+    //   },
+    //   additionalFee:
+    //     formData.additionalFee.type ||
+    //     formData.additionalFee.description ||
+    //     formData.additionalFee.amount > 0
+    //       ? { ...formData.additionalFee }
+    //       : null,
+    // };
+
+    const requestBody: any = {
+      name: formData.service.name,
+      description: formData.service.description,
+      price: Number(formData.service.price),
+      imageUrl: imageUrl,
+      minCapacity: formData.cabin.minCapacity,
+      maxCapacity: formData.cabin.maxCapacity,
+    };
+
+    if (
+      formData.additionalFee.type &&
+      formData.additionalFee.description &&
+      formData.additionalFee.amount
+    ) {
+      requestBody.additionalFee = {
+        type: formData.additionalFee.type,
+        description: formData.additionalFee.description,
+        amount: Number(formData.additionalFee.amount),
+      };
+    } else {
+      requestBody.additionalFee = {
+        type: "",
+        description: "",
+        amount: 0,
+      };
+    }
+
+    const jsonData = {
+      data: JSON.stringify(requestBody),
     };
 
     try {
@@ -292,13 +324,13 @@ export default function UpdateCabin() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(jsonData),
         }
       );
 
       if (response.ok) {
         alert("Cabin updated successfully!");
-        router.push("/cabin");
+        router.push("/admin/cabins");
       } else {
         throw new Error("Failed to update cabin.");
       }
@@ -478,7 +510,7 @@ export default function UpdateCabin() {
           <button type="button" onClick={handleClear}>
             Reset
           </button>
-          <button type="button" onClick={() => router.push("/cabin")}>
+          <button type="button" onClick={() => router.push("/admin/cabins")}>
             Cancel
           </button>
           <div style={{ marginBottom: "80px" }}></div>

@@ -1,0 +1,12 @@
+model BookingService {
+    id Int @id @default(autoincrement()) @map("booking_service_id")
+
+    // Relations
+    booking   Booking @relation(fields: [bookingId], references: [id])
+    bookingId Int     @map("booking_id")
+
+    service   Service @relation(fields: [serviceId], references: [id])
+    serviceId Int     @map("service_id")
+
+    @@map("booking_services")
+}

@@ -19,9 +19,9 @@ export const cabinSchema = serviceSchema
     maxCapacity: z.number().int(),
     additionalFee: z
       .object({
-        type: z.string().min(1, "Fee type is required"),
+        type: z.string().optional(),
         description: z.string().optional(),
-        amount: z.number().positive("Amount must be greater than 0"),
+        amount: z.number().optional(),
       })
       .optional(),
   })
