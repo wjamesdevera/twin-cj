@@ -1,5 +1,5 @@
 model ServiceCategory {
-    id  Int @id @default(autoincrement())
+    id    Int    @id @default(autoincrement())
 
     // Relations
     services   Service[]

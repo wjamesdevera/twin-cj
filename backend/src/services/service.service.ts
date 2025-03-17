@@ -472,12 +472,10 @@ type CreateCabinParams = {
 };
 
 export const createCabin = async (data: CreateCabinParams) => {
-  // Create Category for Cabins
   const category = await prisma.category.create({
     data: { name: "cabins" },
   });
 
-  // Create Service Category linked to the newly created Category
   const serviceCategory = await prisma.serviceCategory.create({
     data: {
       categoryId: category.id,
