@@ -25,17 +25,23 @@ interface BookingCardData {
   // additionalFee?: string;
 }
 
+interface BookingTypeData {
+  services: BookingCardData[];
+}
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const Booking: React.FC = () => {
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<string>("");
-  const [bookingType, setBookingType] = useState<string>("day-tour");
+  const [bookingType, setBookingType] = useState<string | null>(null);
   const [bookingCards, setBookingCards] = useState<BookingCardData[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  //const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showAccordian, setShowAccordian] = useState<boolean>(false);
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
+
+  const [type, setType] = useState<string>("");
   const [guestCounts, setGuestCounts] = useState<{
     adults: number;
     children: number;
@@ -46,48 +52,17 @@ const Booking: React.FC = () => {
 
   const { data, error } = useSWR<{
     status: string;
-    data: { dayTours?: BookingCardData[]; cabins?: BookingCardData[] };
+    data: Record<string, BookingTypeData>;
   }>(
-    `http://localhost:8080/api/services/${
-      bookingType === "day-tour" ? "day-tours" : "cabins"
-    }`,
+    bookingType
+      ? `http://localhost:8080/api/bookings?type=${bookingType}`
+      : null,
     fetcher
   );
 
-  //NOTE: Add a validation where the user is required to select a booking type first before proceeding
-
   useEffect(() => {
-    if (data) {
-      if (
-        bookingType === "day-tour" &&
-        data.data &&
-        Array.isArray(data.data.dayTours)
-      ) {
-        setBookingCards(
-          data.data.dayTours.map(({ name, description, price, imageUrl }) => ({
-            name,
-            description,
-            price,
-            imageUrl,
-          }))
-        );
-      } else if (
-        bookingType === "overnight" &&
-        data.data &&
-        Array.isArray(data.data.cabins)
-      ) {
-        setBookingCards(
-          data.data.cabins.map(({ name, description, price, imageUrl }) => ({
-            name,
-            description,
-            price,
-            imageUrl,
-          }))
-        );
-      } else {
-        setBookingCards([]);
-      }
-      setIsLoading(false);
+    if (data && data.status === "success" && bookingType) {
+      setBookingCards(data.data[bookingType]?.services || []);
     }
   }, [data, bookingType]);
 
@@ -97,7 +72,7 @@ const Booking: React.FC = () => {
     {
       /* isMutating */
     }
-    setIsLoading(true);
+    // setIsLoading(true);
   };
 
   // Check Availability then shows the Accordion
@@ -130,7 +105,7 @@ const Booking: React.FC = () => {
   };
 
   if (error) return <div>Failed to load</div>;
-  if (isLoading) return <Loading />;
+  // if (isLoading) return <Loading />;
 
   const accordionItems: AccordionItem[] = [
     {
@@ -162,7 +137,6 @@ const Booking: React.FC = () => {
                   title={card.name}
                   description={card.description}
                   price={`₱${card.price}`}
-                  // additionalPrice={card.additionalFee || ""}
                   imageSrc={card.imageUrl}
                   isSelected={selectedOption === card.name}
                   onSelect={() => setSelectedOption(card.name)}
@@ -192,7 +166,6 @@ const Booking: React.FC = () => {
                   title={card.name}
                   description={card.description}
                   price={`₱${card.price}`}
-                  // additionalPrice={card.additionalFee || ""}
                   imageSrc={card.imageUrl}
                   isSelected={selectedOption === card.name}
                   onSelect={() => setSelectedOption(card.name)}

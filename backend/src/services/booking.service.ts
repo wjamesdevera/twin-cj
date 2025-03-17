@@ -1,139 +1,86 @@
-// import { request } from "http";
-// import { prisma } from "../config/db";
-// import { generateReferenceCode } from "../utils/referenceCodeGenerator";
+import { request } from "http";
+import { prisma } from "../config/db";
+import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 
-// export const getServicesByType = async (type: "day-tour" | "cabin") => {
-//   try {
-//     const services = await prisma.bookingService.findMany({
-//       include: {
-//         service: true,
-//       },
-//     });
+interface ServiceCategory {
+  id: number;
+  name: string;
+}
 
-//     return services
-//       .filter((bookingService) => bookingService.service.type === type)
-//       .map((bookingService) => ({
-//         id: bookingService.id,
-//         name: bookingService.service.name,
-//         description: bookingService.service.description,
-//         price: bookingService.service.price,
-//         imageUrl: bookingService.service.imageUrl,
-//       }));
-//   } catch (error) {
-//     console.error("Error fetching services:", error);
-//     throw new Error("Failed to fetch services. Please try again.");
-//   }
-// };
+interface Service {
+  id: number;
+  serviceCategoryId: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  price: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-// export const createBooking = async (
-//   validatedData: {
-//     checkInDate: string;
-//     checkOutDate: string;
-//     notes?: string;
-//     firstName: string;
-//     lastName: string;
-//     contactNumber: string;
-//     email: string;
-//     bookingStatusId: number;
-//     totalPax: number;
-//     customerId: number;
-//   },
-//   proofOfPaymentImageUrl: string,
-//   paymentMethodType: "GCash" | "Credit Card",
-//   amount: number
-// ) => {
-//   try {
-//     const {
-//       checkInDate,
-//       checkOutDate,
-//       notes,
-//       firstName,
-//       lastName,
-//       contactNumber,
-//       email,
-//       bookingStatusId,
-//       totalPax,
-//       customerId,
-//     } = validatedData;
+export const getServicesByCategory = async (type: string) => {
+  try {
+    // Fetch all services with associated categories
+    const services = await prisma.service.findMany({
+      include: {
+        serviceCategory: {
+          include: {
+            category: true,
+          },
+        },
+      },
+    });
 
-//     return await prisma.$transaction(async (prisma) => {
-//       console.log("Validated Data:", validatedData);
+    // Filter services by the provided category type
+    const filteredServices = services.filter(
+      (service) => service.serviceCategory?.category?.name === type
+    );
 
-//       let personalDetail = await prisma.personalDetail.findUnique({
-//         where: { email },
-//       });
+    console.log(
+      `Filtered Services for ${type}:`,
+      JSON.stringify(filteredServices, null, 2)
+    );
 
-//       if (!personalDetail) {
-//         personalDetail = await prisma.personalDetail.create({
-//           data: {
-//             firstName,
-//             lastName,
-//             phoneNumber: contactNumber,
-//             email,
-//           },
-//         });
-//       }
-//       console.log("Personal Detail ID:", personalDetail.id);
+    // Organize services by service category
+    const categorizedServices: Record<
+      string,
+      { services: Service[]; category: ServiceCategory }
+    > = {};
 
-//       let customer = await prisma.customer.findUnique({
-//         where: { id: customerId },
-//       });
+    filteredServices.forEach((service) => {
+      if (!service.serviceCategory?.category) {
+        console.warn("Service missing category:", service);
+        return;
+      }
 
-//       if (!customer) {
-//         customer = await prisma.customer.create({
-//           data: {
-//             personalDetailId: personalDetail.id,
-//           },
-//         });
-//       }
-//       console.log("Customer ID:", customer.id);
+      const categoryName = service.serviceCategory.category.name;
+      const categoryDetails: ServiceCategory = {
+        id: service.serviceCategory.category.id,
+        name: service.serviceCategory.category.name,
+      };
 
-//       const referenceCode = await generateReferenceCode();
-//       if (!referenceCode) throw new Error("Reference code generation failed.");
-//       if (!customer?.id) throw new Error("Customer ID is undefined.");
-//       if (!bookingStatusId) throw new Error("Booking Status ID is missing.");
+      if (!categorizedServices[categoryName]) {
+        categorizedServices[categoryName] = {
+          services: [],
+          category: categoryDetails,
+        };
+      }
 
-//       const paymentMethod = await prisma.paymentMethod.findFirst({
-//         where: { type: paymentMethodType },
-//       });
+      categorizedServices[categoryName].services.push({
+        id: service.id,
+        serviceCategoryId: service.serviceCategory.id,
+        name: service.name,
+        description: service.description,
+        imageUrl: service.imageUrl,
+        price: service.price,
+        createdAt: service.createdAt,
+        updatedAt: service.updatedAt,
+      });
+    });
 
-//       if (!paymentMethod) {
-//         throw new Error(`Payment method '${paymentMethodType}' not found.`);
-//       }
-
-//       console.log("Payment Method ID:", paymentMethod.id);
-
-//       // const newTransaction = paymentMethod
-//       //   ? await prisma.transaction.create({
-//       //       data: {
-//       //         paymentMethodId: paymentMethod.id,
-//       //         proofOfPaymentImageUrl,
-//       //         amount,
-//       //       },
-//       //     })
-//       //   : null;
-
-//       // console.log("Transaction Created:", newTransaction?.id || "No Payment");
-
-//       // Create booking
-//       const newBooking = await prisma.booking.create({
-//         data: {
-//           checkIn: new Date(checkInDate),
-//           checkOut: new Date(checkOutDate),
-//           notes,
-//           referenceCode,
-//           bookingStatusId,
-//           totalPax,
-//           customerId,
-//           // transactionId: newTransaction?.id || undefined,
-//         },
-//       });
-
-//       console.log("Booking Created:", newBooking);
-//       return newBooking;
-//     });
-//   } catch (error) {
-//     console.error("Error in createBooking:", error);
-//     throw new Error("Booking creation failed. Please try again.");
-//   }
-// };
+    return categorizedServices;
+  } catch (error) {
+    console.error("Error fetching services by category:", error);
+    throw new Error("Failed to fetch services by category");
+  }
+};

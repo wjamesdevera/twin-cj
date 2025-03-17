@@ -1,12 +1,9 @@
 import { Router } from "express";
 import { upload } from "../middlewares/upload";
-// import {
-//   createBookingHandler,
-//   getServicesByTypeHandler,
-// } from "../controllers/booking.controller";
+import { getBookingHandler } from "../controllers/booking.controller";
 
 const router = Router();
 
-// router.post("/", upload.single("proofOfPayment"), createBookingHandler);
+router.get("/", getBookingHandler);
 
 export default router;

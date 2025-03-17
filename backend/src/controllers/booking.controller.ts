@@ -1,119 +1,39 @@
-// import { prisma } from "../config/db";
-// import { Request, Response } from "express";
-// import catchErrors from "../utils/catchErrors";
-// import appAssert from "../utils/appAssert";
-// import {
-//   BAD_REQUEST,
-//   CREATED,
-//   INTERNAL_SERVER_ERROR,
-//   OK,
-// } from "../constants/http";
-// import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
-// import { generateReferenceCode } from "../utils/referenceCodeGenerator";
-// import { ROOT_STATIC_URL } from "../constants/url";
-// import { createBooking, getServicesByType } from "../services/booking.service";
-// import AppError from "../utils/AppError";
+import { prisma } from "../config/db";
+import { Request, Response } from "express";
+import catchErrors from "../utils/catchErrors";
+import appAssert from "../utils/appAssert";
+import {
+  BAD_REQUEST,
+  CREATED,
+  INTERNAL_SERVER_ERROR,
+  OK,
+} from "../constants/http";
+import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
+import { generateReferenceCode } from "../utils/referenceCodeGenerator";
+import { ROOT_STATIC_URL } from "../constants/url";
+import { getServicesByCategory } from "../services/booking.service";
+import AppError from "../utils/AppError";
 
-// export const getServicesByTypeHandler = async (req: Request, res: Response) => {
-//   const { type } = req.params;
-//   if (type !== "day-tour" && type !== "cabin") {
-//     return res
-//       .status(BAD_REQUEST)
-//       .json({ status: "error", message: "Invalid service type" });
-//   }
+export const getBookingHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { type } = req.query;
 
-//   try {
-//     const services = await getServicesByType(type);
-//     res.status(OK).json({
-//       status: "success",
-//       data: { services },
-//     });
-//   } catch (error) {
-//     console.error("Error fetching services:", error);
-//     res
-//       .status(INTERNAL_SERVER_ERROR)
-//       .json({ status: "error", message: "Failed to fetch services" });
-//   }
-// };
+    // Ensure 'type' query parameter is provided
+    if (!type) {
+      return res.status(BAD_REQUEST).json({
+        status: "error",
+        message: "'type' query parameter is required",
+      });
+    }
 
-// export const createBookingHandler = catchErrors(
-//   async (request: Request, response: Response) => {
-//     try {
-//       appAssert(request.file, BAD_REQUEST, "Proof of payment is required");
-//       const proofOfPayment = `${ROOT_STATIC_URL}/${request.file.filename}`;
+    // Get categorized bookings by the type parameter
+    const categorizedBookings = await getServicesByCategory(type as string);
 
-//       appAssert(
-//         request.body.bookingData,
-//         BAD_REQUEST,
-//         "Booking data is required"
-//       );
+    appAssert(categorizedBookings, BAD_REQUEST, "No bookings available");
 
-//       let parsedJsonData;
-//       try {
-//         parsedJsonData = JSON.parse(request.body.bookingData);
-//       } catch (error) {
-//         throw new AppError(BAD_REQUEST, "Invalid JSON format in bookingData");
-//       }
-
-//       console.log("Parsed booking data:", parsedJsonData);
-
-//       const referenceCode = await generateReferenceCode();
-
-//       const personalDetails = personalDetailSchema.parse({
-//         firstName: parsedJsonData.firstName,
-//         lastName: parsedJsonData.lastName,
-//         phoneNumber: parsedJsonData.contactNumber,
-//         email: parsedJsonData.email,
-//       });
-
-//       let personalDetail = await prisma.personalDetail.findUnique({
-//         where: { email: personalDetails.email },
-//       });
-
-//       if (!personalDetail) {
-//         personalDetail = await prisma.personalDetail.create({
-//           data: personalDetails,
-//         });
-//       }
-
-//       let customer = await prisma.customer.findUnique({
-//         where: { personalDetailId: personalDetail.id },
-//       });
-
-//       if (!customer) {
-//         customer = await prisma.customer.create({
-//           data: { personalDetailId: personalDetail.id },
-//         });
-//       }
-
-//       const customerId = customer?.id;
-//       if (!customerId) {
-//         throw new AppError(BAD_REQUEST, "Invalid customer ID");
-//       }
-
-//       const bookingData = bookingSchema.parse({
-//         ...parsedJsonData,
-//         referenceCode,
-//         bookingStatusId: parsedJsonData.bookingStatusId ?? 1,
-//         customerId: customerId,
-//       });
-
-//       const newBooking = await createBooking(
-//         bookingData,
-//         proofOfPayment,
-//         request.body.paymentMethodId,
-//         bookingData.amount
-//       );
-
-//       response.status(CREATED).json({
-//         status: "success",
-//         data: { booking: newBooking },
-//       });
-//     } catch (error) {
-//       console.error("Error creating booking:", error);
-//       response
-//         .status(INTERNAL_SERVER_ERROR)
-//         .json({ status: "error", message: "Failed to create booking" });
-//     }
-//   }
-// );
+    return res.status(OK).json({
+      status: "success",
+      data: categorizedBookings,
+    });
+  }
+);
