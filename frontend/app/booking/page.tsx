@@ -119,7 +119,7 @@ const Booking: React.FC = () => {
     },
     bookingType === "day-tour"
       ? {
-          title: "Package Type",
+          title: "Day Tour Packages",
           content: (
             <div style={{ display: "grid", gap: "1rem" }}>
               <p
@@ -146,9 +146,9 @@ const Booking: React.FC = () => {
           ),
         }
       : null,
-    bookingType === "overnight"
+    bookingType === "cabins"
       ? {
-          title: "Cabins",
+          title: "Overnight",
           content: (
             <div style={{ display: "grid", gap: "1rem" }}>
               <p

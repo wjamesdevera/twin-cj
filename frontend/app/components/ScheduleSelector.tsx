@@ -36,16 +36,16 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
           className={`${styles.option} ${
             selectedOption === "overnight" ? styles.active : ""
           }`}
-          onClick={() => handleOptionSelect("overnight")}
+          onClick={() => handleOptionSelect("cabins")}
         >
           <input
             type="radio"
             name="schedule"
             id="overnight"
-            checked={selectedOption === "overnight"}
-            onChange={() => handleOptionSelect("overnight")}
+            checked={selectedOption === "cabins"}
+            onChange={() => handleOptionSelect("cabins")}
           />
-          <label htmlFor="overnight">
+          <label htmlFor="cabins">
             Overnight <span>(4:00 PM - 12:00 NN)</span>
           </label>
         </div>
