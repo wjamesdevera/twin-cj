@@ -97,7 +97,7 @@ const Booking: React.FC = () => {
     {
       /* isMutating */
     }
-    //setIsLoading(true);
+    setIsLoading(true);
   };
 
   // Check Availability then shows the Accordion

@@ -8,7 +8,7 @@ model PaymentMethod {
     // Relations
     transactions   Transaction[]    @relation("TransactionPaymentMethod")
 
-  paymentAccounts PaymentAccount[] @relation("PaymentMethodPaymentAccount")
+    paymentAccounts PaymentAccount[] @relation("PaymentMethodPaymentAccount")
 
     @@map("payment_methods")
 }

@@ -14,7 +14,6 @@ export const generateReferenceCode = async (): Promise<string> => {
 
     referenceCode = `B${year}${month}${day}-${randomChar}${random}`;
 
-    // Check if the reference code already exists in the database
     const existingBooking = await prisma.booking.findUnique({
       where: { referenceCode },
     });

@@ -10,6 +10,8 @@ interface SelectPaymentProps {
   setProofOfPayment: (file: File | null) => void;
   error: string;
   setError: (error: string) => void;
+  selectId?: number;
+  fileInputId?: number;
 }
 
 const SelectPayment: React.FC<SelectPaymentProps> = ({
@@ -21,6 +23,8 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({
   setProofOfPayment,
   error,
   setError,
+  selectId,
+  fileInputId,
 }) => {
   const handlePaymentMethodChange = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -41,6 +45,7 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({
         Select Payment Method <span className={styles.required}>*</span>
       </h2>
       <select
+        id={selectId ? `payment-method-${selectId}` : undefined}
         className={styles.paymentOptions}
         value={paymentMethod}
         onChange={handlePaymentMethodChange}
@@ -56,7 +61,12 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({
         <span className={styles.required}>*</span>
       </h3>
       <label className={styles.fileUpload}>
-        <input type="file" accept=".jpg,.jpeg" onChange={handleFileChange} />
+        <input
+          id={fileInputId !== undefined ? fileInputId.toString() : undefined}
+          type="file"
+          accept=".jpg,.jpeg"
+          onChange={handleFileChange}
+        />
         <span className={styles.uploadText}>
           <svg
             className={styles.uploadIcon}

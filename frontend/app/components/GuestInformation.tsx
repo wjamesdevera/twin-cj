@@ -217,6 +217,7 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
               type="checkbox"
               checked={isTermsChecked}
               disabled={!isTermsChecked}
+              className={styles.checkbox}
               readOnly // prevents the user to uncheck the checkbox
             />{" "}
             I have read and agree to the{" "}
