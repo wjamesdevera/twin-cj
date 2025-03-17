@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 import { Loading } from "./loading";
 import { useRouter } from "next/navigation";
-import { getRefreshToken } from "../lib/api";
 
 export default function AuthGuard({
   children,
@@ -13,7 +12,6 @@ export default function AuthGuard({
   const { user, isLoading } = useAuth({
     onError: () => {
       console.log(user);
-      getRefreshToken();
     },
   });
   const router = useRouter();
