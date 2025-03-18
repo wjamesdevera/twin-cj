@@ -80,10 +80,6 @@ export const getServicesByCategory = async (type: string) => {
 export const createBooking = async (req: Request) => {
   try {
     const referenceCode = await generateReferenceCode();
-    console.log("Creating booking with:");
-    console.log("Reference Code:", referenceCode);
-    console.log("Check-In:", req.body.checkInDate);
-    console.log("Check-Out:", req.body.checkOutDate);
 
     const safeParse = (data: any, fallback: any) => {
       try {
@@ -93,12 +89,10 @@ export const createBooking = async (req: Request) => {
       }
     };
 
-    // Calculate totalPax
     const totalPax =
       (req.body.guestCounts?.adults || 0) +
       (req.body.guestCounts?.children || 0);
 
-    // Step 1: Get or Create Personal Detail
     let personalDetail = await prisma.personalDetail.findUnique({
       where: { phoneNumber: req.body.contactNumber || "" },
     });
@@ -114,7 +108,6 @@ export const createBooking = async (req: Request) => {
       });
     }
 
-    // Step 2: Get or Create Customer
     let customer = await prisma.customer.findUnique({
       where: { personalDetailId: personalDetail.id },
     });
@@ -130,13 +123,29 @@ export const createBooking = async (req: Request) => {
     });
 
     if (!pendingStatus) {
-      console.log("⚠️ 'Pending' status not found. Creating it...");
       pendingStatus = await prisma.bookingStatus.create({
         data: { name: "Pending" },
       });
     }
 
-    // Step 4: Create Booking
+    let pendingPaymentStatus = await prisma.paymentStatus.findFirst({
+      where: { name: "Pending" },
+    });
+
+    if (!pendingPaymentStatus) {
+      pendingPaymentStatus = await prisma.paymentStatus.create({
+        data: { name: "Pending" },
+      });
+    }
+
+    const transaction = await prisma.transaction.create({
+      data: {
+        amount: req.body.amount || 0,
+        proofOfPaymentImageUrl: req.body.proofOfPaymentImageUrl || "",
+        paymentStatusId: pendingPaymentStatus.id,
+      },
+    });
+
     const booking = await prisma.booking.create({
       data: {
         referenceCode,
@@ -144,37 +153,11 @@ export const createBooking = async (req: Request) => {
         checkOut: req.body.checkOutDate,
         totalPax,
         notes: req.body.specialRequest || "",
-        customerId: customer.id, // ✅ Now included
+        customerId: customer.id,
         bookingStatusId: pendingStatus.id,
+        transactionId: transaction.id,
       },
     });
-
-    console.log("✅ Booking Created:", booking.id);
-
-    // Step 5: Create Transaction (Ensure payment details exist)
-    const paymentDetails = safeParse(req.body.paymentDetails, {});
-    let pendingPaymentStatus = await prisma.paymentStatus.findFirst({
-      where: { name: "Pending" },
-    });
-
-    if (!pendingPaymentStatus) {
-      console.log("⚠️ 'Pending' payment status not found. Creating it...");
-      pendingPaymentStatus = await prisma.paymentStatus.create({
-        data: { name: "Pending" },
-      });
-    }
-
-    // Step 6: Create Transaction
-    const transaction = await prisma.transaction.create({
-      data: {
-        amount: req.body.amount || 0,
-        proofOfPaymentImageUrl: req.body.proofOfPaymentImageUrl || "",
-        paymentStatusId: pendingPaymentStatus.id, // Use the correct 'Pending' payment status ID
-        booking: { connect: { id: booking.id } },
-      },
-    });
-
-    console.log("✅ Transaction Created:", transaction.id);
 
     return { referenceCode, booking, transaction };
   } catch (error) {
