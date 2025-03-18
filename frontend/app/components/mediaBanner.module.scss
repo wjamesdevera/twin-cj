@@ -1,0 +1,16 @@
+.mediaBanner {
+  width: 100vw;
+  height: 400px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  .video,
+  .image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}

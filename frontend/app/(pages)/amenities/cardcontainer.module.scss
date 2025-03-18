@@ -1,0 +1,132 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
+
+.cardContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  justify-content: center;
+  align-items: stretch;
+  padding: 70px;
+}
+
+.card {
+  font-family: "Poppins", sans-serif;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  max-width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .cardImage {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    position: relative;
+    overflow: hidden;
+
+    h3 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px;
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+      transition: background 0.4s ease-in-out;
+    }
+  }
+
+  &:hover .cardImage img {
+    transform: scale(1.05);
+    transition: transform 0.4s ease-in-out;
+  }
+
+  &:hover .cardImage h3 {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent);
+  }
+
+  .cardContent {
+    flex-grow: 1;
+    padding: 1rem;
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    ul {
+      padding-left: 40px;
+      margin: 0 0 10px;
+      list-style-type: disc;
+    }
+
+    ul li {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      list-style-type: disc;
+    }
+  }
+
+  .buttons {
+    display: flex;
+    gap: 10px;
+    padding: 1rem;
+    margin-top: auto;
+
+    .morePhotos,
+    .bookNow {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .morePhotos {
+      background: #c29462;
+      border: none;
+      color: white;
+
+      &:hover {
+        background: #9c764c;
+        transform: scale(1.05);
+      }
+    }
+
+    .bookNow {
+      background: #e1bd96;
+      border: none;
+      color: white;
+
+      &:hover {
+        background: #b69979;
+        transform: scale(1.05);
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .cardContainer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .cardContainer {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
