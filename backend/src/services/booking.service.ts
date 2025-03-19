@@ -86,12 +86,28 @@ export const createBooking = async (req: Request) => {
       email,
       checkInDate,
       checkOutDate,
-      amount,
+      bookingCards,
     } = req.body;
 
     if (!contactNumber) throw new Error("Contact number is required");
 
     const referenceCode = await generateReferenceCode();
+
+    const totalGuest =
+      (req.body.guestCounts?.adults || 0) +
+      (req.body.guestCounts?.children || 0);
+
+    const amount = bookingCards.reduce(
+      (total: number, card: { price: string }) => {
+        // Ensure price is a valid number before adding it
+        const cardPrice = parseFloat(card.price);
+        if (!isNaN(cardPrice)) {
+          return total + cardPrice;
+        }
+        return total; // If price is invalid, do not add it to total
+      },
+      0
+    );
 
     // Find Personal Detail
     let personalDetail = await prisma.personalDetail.findUnique({
@@ -136,7 +152,7 @@ export const createBooking = async (req: Request) => {
     // Create Transaction
     const transaction = await prisma.transaction.create({
       data: {
-        amount: req.body.amount || 0,
+        amount: amount,
         proofOfPaymentImageUrl: req.body.proofOfPaymentImageUrl || "",
       },
     });
@@ -147,9 +163,7 @@ export const createBooking = async (req: Request) => {
         referenceCode,
         checkIn: new Date(checkInDate),
         checkOut: new Date(checkOutDate),
-        totalPax:
-          (req.body.guestCounts?.adults || 0) +
-          (req.body.guestCounts?.children || 0),
+        totalPax: totalGuest,
         notes: req.body.specialRequest || "",
         customerId: customer.id,
         bookingStatusId: pendingBookingStatus.id,
