@@ -186,11 +186,10 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
     const isAdditionalFeeComplete = type && description && amount > 0;
 
     if (isAdditionalFeeFilled && !isAdditionalFeeComplete) {
-      setAdditionalFeeWarning(
-        "Please complete all additional fee fields or leave them empty."
-      );
+      setAdditionalFeeWarning("Please complete all additional fee fields or leave them empty.");
       return;
     }
+    
 
     // const isConfirmed = window.confirm(
     //   "Are you sure you want to add this cabin?"
@@ -209,10 +208,16 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
 
     setErrors(newErrors);
 
+    if (!formData.service.image) {
+        setImageError("Please upload an image before submitting.");
+      }
+      
+
     if (Object.values(newErrors).some((error) => error !== "")) {
       return;
     }
 
+    
     const data = new FormData();
     const jsonData = {
       name: formData.service.name,
@@ -277,6 +282,8 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
             });
             setAdditionalFeeWarning("");
             setImagePreview(null); 
+            setImageError(""); 
+            
             document.querySelectorAll("input, textarea").forEach((input) => {
             (input as HTMLInputElement | HTMLTextAreaElement).value = "";
             });
@@ -427,7 +434,7 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
       {/* Buttons */}
       <div className={styles.full_width}>
           <div className={styles.button_container}>
-            <CustomButton type="submit" label="Add Cabin" disabled={isFormInvalid} />
+            <CustomButton type="submit" label="Add Cabin" />
             <CustomButton type="button" label="Clear" variant="secondary" onClick={handleClear} />
             <CustomButton type="button" label="Cancel" variant="danger" onClick={() => router.push("/admin/cabins")} />
           </div>
