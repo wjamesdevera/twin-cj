@@ -79,80 +79,80 @@ export const getServicesByCategory = async (type: string) => {
 
 export const createBooking = async (req: Request) => {
   try {
+    const {
+      firstName,
+      lastName,
+      contactNumber,
+      email,
+      checkInDate,
+      checkOutDate,
+      amount,
+      specialRequest,
+    } = req.body;
+
+    if (!contactNumber) throw new Error("Contact number is required");
+
     const referenceCode = await generateReferenceCode();
 
-    const safeParse = (data: any, fallback: any) => {
-      try {
-        return typeof data === "string" ? JSON.parse(data) : data;
-      } catch {
-        return fallback;
-      }
-    };
-
-    const totalPax =
-      (req.body.guestCounts?.adults || 0) +
-      (req.body.guestCounts?.children || 0);
-
-    let personalDetail = await prisma.personalDetail.findUnique({
-      where: { phoneNumber: req.body.contactNumber || "" },
+    // Find Personal Detail
+    const personalDetail = await prisma.personalDetail.findUnique({
+      where: { phoneNumber: contactNumber },
     });
 
     if (!personalDetail) {
-      personalDetail = await prisma.personalDetail.create({
-        data: {
-          firstName: req.body.firstName || "",
-          lastName: req.body.lastName || "",
-          phoneNumber: req.body.contactNumber || "",
-          email: req.body.email || "",
-        },
-      });
+      throw new Error("Customer not found. Please register first.");
     }
 
-    let customer = await prisma.customer.findUnique({
+    // Find Customer
+    const customer = await prisma.customer.findUnique({
       where: { personalDetailId: personalDetail.id },
     });
 
     if (!customer) {
-      customer = await prisma.customer.create({
-        data: { personalDetailId: personalDetail.id },
-      });
+      throw new Error("Customer record is missing. Please contact support.");
     }
 
-    let pendingStatus = await prisma.bookingStatus.findFirst({
+    // Fetch Existing Booking Status
+    const pendingStatus = await prisma.bookingStatus.findFirst({
       where: { name: "Pending" },
     });
 
     if (!pendingStatus) {
-      pendingStatus = await prisma.bookingStatus.create({
-        data: { name: "Pending" },
-      });
+      throw new Error(
+        "Booking status 'Pending' is not configured. Please contact an admin."
+      );
     }
 
-    let pendingPaymentStatus = await prisma.paymentStatus.findFirst({
+    // Fetch Existing Payment Status
+    const pendingPaymentStatus = await prisma.paymentStatus.findFirst({
       where: { name: "Pending" },
     });
 
     if (!pendingPaymentStatus) {
-      pendingPaymentStatus = await prisma.paymentStatus.create({
-        data: { name: "Pending" },
-      });
+      throw new Error(
+        "Payment status 'Pending' is not configured. Please contact an admin."
+      );
     }
 
+    // Create Transaction
     const transaction = await prisma.transaction.create({
       data: {
-        amount: req.body.amount || 0,
+        amount: amount || 0,
         proofOfPaymentImageUrl: req.body.proofOfPaymentImageUrl || "",
         paymentStatusId: pendingPaymentStatus.id,
       },
     });
 
+    // Create Booking
     const booking = await prisma.booking.create({
       data: {
         referenceCode,
-        checkIn: req.body.checkInDate,
-        checkOut: req.body.checkOutDate,
-        totalPax,
-        notes: req.body.specialRequest || "",
+        checkIn: new Date(checkInDate),
+        checkOut: new Date(checkOutDate),
+        totalPax:
+          (req.body.guestCounts?.adults || 0) +
+          (req.body.guestCounts?.children || 0),
+        notes: specialRequest || "",
         customerId: customer.id,
         bookingStatusId: pendingStatus.id,
         transactionId: transaction.id,

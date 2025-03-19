@@ -9,12 +9,17 @@ export const generateReferenceCode = async (): Promise<string> => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    const random = Math.floor(1000 + Math.random() * 9000);
-    const randomChar = String.fromCharCode(65 + Math.floor(Math.random() * 26));
 
-    referenceCode = `B${year}${month}${day}-${randomChar}${random}`;
+     const randomString = Array.from({ length: 5 }, () =>
+       "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".charAt(
+         Math.floor(Math.random() * 36)
+       )
+     ).join("");
 
-    const existingBooking = await prisma.booking.findUnique({
+    referenceCode = `B${year}${month}${day}-${randomString}`;
+    
+    // Check if the referenceCode already exists
+    const existingBooking = await prisma.booking.findFirst({
       where: { referenceCode },
     });
 
