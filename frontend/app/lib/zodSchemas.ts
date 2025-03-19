@@ -6,7 +6,8 @@ export const nameSchema = z
   .trim()
   .min(2, "Name must be at least 2 characters")
   .max(50, "Name must be at most 50 characters long")
-  .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces");
+  .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces")
+  .transform((val) => val.replace(/\s+/g, " ").trim());
 export const phoneNumberSchema = z
   .string()
   .regex(
