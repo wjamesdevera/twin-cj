@@ -130,7 +130,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
-  const [showAccordian, setShowAccordian] = useState(false);
 
   const handleApplyGuests = (counts: { adults: number; children: number }) => {
     setGuestCounts(counts);

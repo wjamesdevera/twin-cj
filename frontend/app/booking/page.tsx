@@ -39,6 +39,7 @@ const Booking: React.FC = () => {
     checkOutDate: null as Date | null,
     guestCounts: { adults: 1, children: 0 },
   });
+
   const [showAccordian, setShowAccordian] = useState(false);
 
   const { data, error } = useSWR<{
@@ -69,11 +70,16 @@ const Booking: React.FC = () => {
   const handleConfirmBooking = (bookingDetails: any) => {
     const bookingPayload = {
       ...bookingData,
+      guestCounts: bookingDetails.guestCounts || bookingData.guestCounts,
+      contactNumber: bookingDetails.contactNumber,
+      specialRequest: bookingDetails.specialRequest,
+      email: bookingDetails.email,
+      firstName: bookingDetails.firstName,
+      lastName: bookingDetails.lastName,
       bookingCards: bookingData.bookingCards.filter(
         (card) => card.name === bookingData.selectedOption
       ),
     };
-
     sessionStorage.setItem("bookingData", JSON.stringify(bookingPayload));
     router.push("/payment_details");
   };
@@ -161,7 +167,7 @@ const Booking: React.FC = () => {
         onCheckAvailability={(details) => {
           handleChange("checkInDate", details.checkInDate);
           handleChange("checkOutDate", details.checkOutDate);
-          handleChange("showAccordian", true);
+          handleChange("guestCounts", details.guestCounts);
           setShowAccordian(true);
         }}
       />

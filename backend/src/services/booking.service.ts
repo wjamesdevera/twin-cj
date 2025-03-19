@@ -87,7 +87,6 @@ export const createBooking = async (req: Request) => {
       checkInDate,
       checkOutDate,
       amount,
-      specialRequest,
     } = req.body;
 
     if (!contactNumber) throw new Error("Contact number is required");
@@ -95,51 +94,50 @@ export const createBooking = async (req: Request) => {
     const referenceCode = await generateReferenceCode();
 
     // Find Personal Detail
-    const personalDetail = await prisma.personalDetail.findUnique({
-      where: { phoneNumber: contactNumber },
+    let personalDetail = await prisma.personalDetail.findUnique({
+      where: { email: req.body.email },
     });
 
     if (!personalDetail) {
-      throw new Error("Customer not found. Please register first.");
+      personalDetail = await prisma.personalDetail.create({
+        data: {
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          phoneNumber: req.body.contactNumber,
+          email: req.body.email,
+        },
+      });
     }
 
     // Find Customer
-    const customer = await prisma.customer.findUnique({
+    let customer = await prisma.customer.findUnique({
       where: { personalDetailId: personalDetail.id },
     });
 
     if (!customer) {
-      throw new Error("Customer record is missing. Please contact support.");
+      customer = await prisma.customer.create({
+        data: {
+          personalDetailId: personalDetail.id,
+        },
+      });
     }
 
-    // Fetch Existing Booking Status
-    const pendingStatus = await prisma.bookingStatus.findFirst({
+    // Find or Create Booking Status
+    let pendingBookingStatus = await prisma.bookingStatus.findUnique({
       where: { name: "Pending" },
     });
 
-    if (!pendingStatus) {
-      throw new Error(
-        "Booking status 'Pending' is not configured. Please contact an admin."
-      );
-    }
-
-    // Fetch Existing Payment Status
-    const pendingPaymentStatus = await prisma.paymentStatus.findFirst({
-      where: { name: "Pending" },
-    });
-
-    if (!pendingPaymentStatus) {
-      throw new Error(
-        "Payment status 'Pending' is not configured. Please contact an admin."
-      );
+    if (!pendingBookingStatus) {
+      pendingBookingStatus = await prisma.bookingStatus.create({
+        data: { name: "Pending" },
+      });
     }
 
     // Create Transaction
     const transaction = await prisma.transaction.create({
       data: {
-        amount: amount || 0,
+        amount: req.body.amount || 0,
         proofOfPaymentImageUrl: req.body.proofOfPaymentImageUrl || "",
-        paymentStatusId: pendingPaymentStatus.id,
       },
     });
 
@@ -152,9 +150,9 @@ export const createBooking = async (req: Request) => {
         totalPax:
           (req.body.guestCounts?.adults || 0) +
           (req.body.guestCounts?.children || 0),
-        notes: specialRequest || "",
+        notes: req.body.specialRequest || "",
         customerId: customer.id,
-        bookingStatusId: pendingStatus.id,
+        bookingStatusId: pendingBookingStatus.id,
         transactionId: transaction.id,
       },
     });
