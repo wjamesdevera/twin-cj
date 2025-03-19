@@ -4,7 +4,9 @@ export const emailSchema = z.string().email("Invalid Email").trim();
 export const nameSchema = z
   .string()
   .trim()
-  .min(3, "Name must be at least 3 characters");
+  .min(2, "Name must be at least 2 characters")
+  .max(50, "Name must be at most 50 characters long")
+  .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces");
 export const phoneNumberSchema = z
   .string()
   .regex(
