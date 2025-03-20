@@ -7,7 +7,7 @@ import useSWRMutation from "swr/mutation";
 import { forgotPasword } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react"; 
+import { ArrowLeft } from "lucide-react";
 
 const Timer = ({ trigger }: { trigger: () => void }) => {
   const Ref = useRef<NodeJS.Timeout | null>(null);
@@ -106,59 +106,61 @@ export function PasswordResetForm() {
         <Loading />
       ) : (
         <div className={styles["right-container"]}>
-        <ArrowLeft className={styles["back-arrow"]} onClick={() => router.push("/admin/login")} />
-        <div className={styles["login-form-container"]}>
-          <div className={styles["login-form-wrapper"]}>
-            <div className={styles["form-title"]}>
-              <Image
-                src={twinCJLogo}
-                alt="Twin CJ Logo"
-                className={styles["login-logo"]}
-                objectFit="contain"
-              />
-              {!isSuccess ? (
-                <p className={styles["welcome-text"]}>
-                  Enter the email, phone number, or username associated with
-                  your account to change your password.
-                </p>
-              ) : (
-                <div className={styles["success-container"]}>
-                  <p className={styles["success-message"]}>
-                    {`A password reset email has been sent to ${email}`}
+          <ArrowLeft
+            className={styles["back-arrow"]}
+            onClick={() => router.push("/admin/login")}
+          />
+          <div className={styles["login-form-container"]}>
+            <div className={styles["login-form-wrapper"]}>
+              <div className={styles["form-title"]}>
+                <Image
+                  src={twinCJLogo}
+                  alt="Twin CJ Logo"
+                  className={styles["login-logo"]}
+                  objectFit="contain"
+                />
+                {!isSuccess ? (
+                  <p className={styles["welcome-text"]}>
+                    Enter the email associated with your account to change your
+                    password.
                   </p>
-                  <Timer trigger={handleForgotPassword} />
+                ) : (
+                  <div className={styles["success-container"]}>
+                    <p className={styles["success-message"]}>
+                      {`A password reset email has been sent to ${email}`}
+                    </p>
+                    <Timer trigger={handleForgotPassword} />
+                  </div>
+                )}
+              </div>
+              {!isSuccess && (
+                <div className={styles["form-control"]}>
+                  <input
+                    type="text"
+                    placeholder="Email Address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  {error && (
+                    <small className={styles["error-message"]}>
+                      We couldn&apos;t find an account with that email address.
+                      Please check the email you entered
+                    </small>
+                  )}
+                  <div>
+                    <button
+                      disabled={isMutating}
+                      className={styles["login-button"]}
+                      type="submit"
+                      onClick={handleForgotPassword}
+                    >
+                      Send Verification
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-            {!isSuccess && (
-              <div className={styles["form-control"]}>
-                <input
-                  type="text"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                {error && (
-                  <small className={styles["error-message"]}>
-                    We couldn&apos;t find an account with that email address.
-                    Please check the email you entered or sign up for a new
-                    account.
-                  </small>
-                )}
-                <div>
-                  <button
-                    disabled={isMutating}
-                    className={styles["login-button"]}
-                    type="submit"
-                    onClick={handleForgotPassword}
-                  >
-                    Send Verification
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
-        </div>
         </div>
       )}
     </>

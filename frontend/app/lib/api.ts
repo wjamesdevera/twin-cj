@@ -91,3 +91,4 @@ export const updateCabin = async ({ id, data }: UpdateCabinData) =>
   API.post(`/api/services/cabins/${id}`, data);
 export const getCabin = async (id: number) =>
   API.get(`/api/services/cabins/${id}`);
+export const getRefreshToken = async () => API.get("/api/auth/refresh");
