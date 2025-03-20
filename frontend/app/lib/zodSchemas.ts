@@ -33,3 +33,9 @@ export const passwordSchema = z
     /[\W_]/,
     "Password must contain at least one special character (!@#$%^&*)"
   );
+
+export const messageSchema = z
+  .string()
+  .min(1, "Message is required")
+  .max(500, "Message should not exceed 500 characters")
+  .refine((val) => val.trim().length > 0, "Message cannot be just spaces");
