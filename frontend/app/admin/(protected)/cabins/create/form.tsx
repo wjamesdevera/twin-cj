@@ -392,7 +392,7 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
             )}
             </div>
             {formData.service.image && !imageError && (
-            <p className={`${styles.message} ${styles.success}`}>File uploaded successfully</p>
+            <p className={`${styles.message} ${styles.success}`}>Image uploaded successfully!</p>
             )}
 
             {imageError && (

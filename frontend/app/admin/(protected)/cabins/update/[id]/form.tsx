@@ -196,9 +196,11 @@ export default function CabinForm({
                 </div>
             )}
             </div>
-            {formData.service.image && !imageError && (
-            <p className={`${styles.message} ${styles.success}`}>File uploaded successfully</p>
+            {imagePreview && !imageError && (
+            <p className={`${styles.message} ${styles.success}`}>Image uploaded successfully!</p>
             )}
+
+
 
             {imageError && (
             <p className={`${styles.message} ${styles.error}`}>{imageError}</p>
