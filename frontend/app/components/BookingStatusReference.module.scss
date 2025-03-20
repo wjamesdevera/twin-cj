@@ -1,0 +1,121 @@
+/* booking status intro section */
+
+.booking-status-intro-section {
+  text-align: center;
+  font-family: "Open Sans", sans-serif;
+  padding: 0 10%;
+  margin-bottom: 65px;
+}
+
+.booking-status-intro-section h2 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #d9ad7c;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+
+.booking-status-intro-section hr {
+  width: 183px;
+  margin: auto auto;
+  border-top: 1px solid;
+  margin-bottom: 18px;
+}
+
+.booking-status-intro-section p {
+  line-height: 1.8;
+}
+
+/* booking status reference section */
+
+.booking-status-reference-section {
+  text-align: center;
+  font-family: "Open Sans", sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 0 10%;
+  margin-bottom: 26px;
+}
+
+.booking-status-reference-section div {
+  width: 100%;
+  max-width: 964px;
+  height: 242px;
+  border: 1px solid #c8c5c5;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.booking-status-reference-section p {
+  color: #757575;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.booking-status-reference-section input {
+  border: 1px solid #c8c5c5;
+  width: 100%;
+  max-width: 512px;
+  height: 48px;
+  border-radius: 10px;
+  text-align: center;
+  margin-bottom: 20px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.booking-status-reference-section input:focus {
+  border-color: #d9ad7c;
+  outline: none;
+  box-shadow: 0 0 10px rgba(217, 173, 124, 0.5);
+}
+
+.booking-status-reference-section input::placeholder {
+  color: #d0cccc;
+}
+
+.booking-status-reference-section input:focus::placeholder {
+  color: transparent;
+}
+
+.booking-status-reference-section button {
+  width: 327px;
+  height: 43px;
+  border-radius: 10px;
+  border: 0;
+  background-color: #d9ad7c;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.1cm;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease-in-out,
+    box-shadow 0.3s ease;
+  font-size: 14px;
+}
+
+.booking-status-reference-section button:hover {
+  background-color: #c8965e;
+}
+
+.booking-status-reference-section button:active {
+  background-color: #a77c4e;
+}
+
+.booking-status-reference-section button:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(217, 173, 124, 0.5);
+}
+
+@media (max-width: 768px) {
+  .booking-status-reference-section input {
+    width: 85%;
+  }
+
+  .booking-status-reference-section button {
+    width: 70%;
+  }
+}

@@ -1,0 +1,129 @@
+.booking-status-details-section {
+    font-family: 'Open Sans', sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 0 10%;
+    margin-bottom: 26px;
+}
+
+.booking-status-details-container {
+    width: 100%;
+    max-width: 964px;
+    border: 1px solid #C8C5C5;
+    border-radius: 10px;
+    padding-bottom: 28px;
+}
+
+.booking-status-details-container-heading {
+    padding: 30px;
+    padding-bottom: 20px;
+}
+
+.booking-status-details-container-heading h3 {
+    font-size: 25px;
+    color: #D9AD7C;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 10px;
+}
+
+.booking-status-details-container-heading h4 {
+    font-size: 16px;
+    font-style: italic;
+    font-weight: 350;
+    line-height: 1.4;
+    display: inline;
+    line-height: 2 !important;
+}
+
+.booking-status-details-section hr {
+    height: 0;
+    border: 0;
+    border-top: 1px solid #C8C5C5;
+    margin-left: 31px;
+    margin-right: 31px;
+    margin-bottom: 26px;
+}
+
+.booking-status-details-container-sub {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 31px;
+    padding-right: 31px;
+}
+
+.booking-status-details-left {
+    width: 50%;
+}
+
+.booking-status-details-left p {
+    line-height: 2;
+}
+
+.booking-status-details-right {
+    width: 50%;
+    line-height: 2;
+}
+
+.booking-status-details-container-sub b {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 2.4;
+}
+
+.booking-status-details-right ol {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.booking-status-details-container-divider {
+    width: 1px;
+    background-color: #C8C5C5;
+    margin: 0 20px
+}
+
+@media (max-width: 768px) {
+    .booking-status-details-container-sub {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .booking-status-details-left {
+        width: 100%;
+        border-bottom: 1px solid #C8C5C5;
+        padding-bottom: 18px;
+        border-top: 1px solid #C8C5C5;
+        padding-top: 18px;
+    }
+
+    .booking-status-details-right {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .booking-status-details-section hr {
+        display: none;
+    }
+
+    .booking-status-details-container-vertical-divider {
+        display: none;
+    }
+
+    .booking-status-details-section hr {
+        margin-top: 10px;
+        margin-bottom: 0px;
+    }
+
+    .booking-status-details-container {
+        padding-bottom: 14px;
+    }
+
+    .booking-status-details-container-heading {
+        padding-bottom: 10px;
+    }
+
+    .booking-status-details-container-sub {
+        padding-top: 10px;
+        padding-bottom: 15px;
+    }
+}
