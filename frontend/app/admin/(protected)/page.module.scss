@@ -1,8 +1,67 @@
 .main {
   display: flex;
+  height: 100vh;
+  overflow: hidden;
 
   section {
     margin-top: 4rem;
     width: 100%;
+    overflow-y: auto;
+    height: 100vh;
   }
+}
+
+.dashboardContainer {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f4f4f4;
+  overflow: hidden;
+}
+
+.dashboardTitle {
+  color: var(--Sunset-Orange, #a45f14);
+  font-family: Open Sans;
+  font-size: 1.8rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  padding: 0 0 15px 0;
+
+  @media (max-width: 1440px) {
+    padding: 0 0 15px 15px;
+  }
+}
+
+.dashboardContent {
+  display: flex;
+  flex-direction: column;
+  max-width: 1500px;
+  width: 100%;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.statsAndChart {
+  display: flex;
+  gap: 16px;
+}
+
+.statsAndChart > * {
+  flex: 1;
+}
+
+@media (max-width: 1024px) {
+  .statsAndChart {
+    flex-direction: column;
+  }
+}
+
+.bookingTable {
+  width: 100%;
+  margin-top: 16px;
+  overflow-y: auto;
+  max-height: 400px;
 }

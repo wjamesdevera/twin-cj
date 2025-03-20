@@ -148,7 +148,8 @@ $side-bar-close-width: 3rem;
 
 .logo {
   transition: height 0.3s ease, width 0.3s ease;
-  width: 100%;
+  width: 60%;
+  margin: 0 40px;
   aspect-ratio: 3/2;
   object-fit: contain;
 }
