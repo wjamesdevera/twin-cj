@@ -8,12 +8,18 @@ import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
 import CabinTable from "./CabinTable"; 
 import CustomButton from "@/app/components/custom_button"; 
+import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
 import styles from "./page.module.scss"; 
 
 const CabinDashboard = () => {
   const router = useRouter();
   const [selectedCabins, setSelectedCabins] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<number | number[] | null>(null);
+  const [notification, setNotification] = useState({ isOpen: false, message: "", type: "success" });
+
   const { data, isLoading } = useSWR("getCabins", getCabins);
   const cabins = data?.data?.cabins || [];
 
@@ -25,28 +31,46 @@ const CabinDashboard = () => {
 
   const { trigger, isMutating } = useSWRMutation("deleteCabin", (key, { arg }: { arg: number }) => deleteCabin(arg));
 
-  const handleDeleteCabin = async (id: number) => {
-    const confirmed = window.confirm("Are you sure you want to delete the selected cabin/s?");
-    if (!confirmed) return;
-    await trigger(id);
-    mutate("getCabins", true);
-    alert("Cabin deleted successfully!");
+  const handleDeleteCabin = (id: number) => {
+    setDeleteTarget(id);
+    setIsModalOpen(true);
   };
 
-  const deleteSelectedCabins = async () => {
+  const deleteSelectedCabins = () => {
     if (selectedCabins.length === 0) {
-      alert("No cabins selected.");
+      setNotification({ isOpen: true, message: "No cabins selected.", type: "error" });
       return;
     }
+    setDeleteTarget(selectedCabins);
+    setIsModalOpen(true);
+  };
 
-    const confirmed = window.confirm("Are you sure you want to delete the selected cabin/s?");
-    if (!confirmed) return;
+  const confirmDelete = async () => {
+    try {
+      if (Array.isArray(deleteTarget)) {
+        await multiDeleteCabin(deleteTarget.join(","));
+        setSelectedCabins([]);
+        setSelectAll(false);
+      } else if (deleteTarget !== null) {
+        await trigger(deleteTarget);
+      }
 
-    await multiDeleteCabin(selectedCabins.join(","));
-    setSelectedCabins([]);
-    setSelectAll(false);
-    mutate("getCabins", true);
-    alert("Selected cabin/s deleted successfully!");
+      mutate("getCabins", true);
+      setIsModalOpen(false);
+      setNotification({
+        isOpen: true,
+        message: Array.isArray(deleteTarget)
+          ? "Selected cabins deleted successfully!"
+          : "Cabin deleted successfully!",
+        type: "success",
+      });
+    } catch (error) {
+      setNotification({
+        isOpen: true,
+        message: "An error occurred while deleting the cabin.",
+        type: "error",
+      });
+    }
   };
 
   const toggleSelectAll = () => {
@@ -62,17 +86,10 @@ const CabinDashboard = () => {
     <Loading />
   ) : (
     <div className={styles.page_container}>
-      {/* Header Section */}
       <div className={styles.page_header}>
         <h1 className={styles.title}>Cabins</h1>
-        <div className={styles.view_page_container}>
-          <span className={styles.view_page_link} onClick={() => router.push("/admin/cabins/view")}>
-            View Page
-          </span>
-        </div>
       </div>
 
-     {/* Subheader Section */}
       <div className={styles.subheader_container}>
         <h2 className={styles.subheader}>Select a Cabin to modify in the Booking Page</h2>
         <div className={styles.button_container}>
@@ -90,7 +107,6 @@ const CabinDashboard = () => {
         </div>
       </div>
 
-      {/* Cabin Table */}
       <CabinTable
         cabins={cabins}
         selectedCabins={selectedCabins}
@@ -98,6 +114,24 @@ const CabinDashboard = () => {
         toggleSelectAll={toggleSelectAll}
         selectAll={selectAll}
         handleDeleteCabin={handleDeleteCabin}
+      />
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Are you sure you want to delete the selected cabin/s?"
+        confirmText="Yes, Delete"
+        confirmColor= "#A80000"
+        cancelText="Cancel"
+        cancelColor="gray"
+      />
+
+       <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
+        message={notification.message}
+        type={notification.type as "success" | "error"}
       />
     </div>
   );
