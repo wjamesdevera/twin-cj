@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { generateReferenceCode } from "../utils/referenceCodeGenerator";
+import appAssert from "../utils/appAssert";
+import { NOT_FOUND } from "../constants/http";
 
 interface ServiceCategory {
   id: number;
@@ -177,3 +179,70 @@ export const createBooking = async (req: Request) => {
     throw new Error("Failed to create booking");
   }
 };
+
+export const getBookingStatus = async (referenceCode: string) => {
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { referenceCode },
+      include: {
+        customer: true,
+        bookingStatus: true,
+        services: {
+          include: {
+            service: true,
+          },
+        },
+        transaction: true,
+      }
+    });
+    
+    appAssert(booking, NOT_FOUND, "Booking not found");
+
+    return {
+      id: booking.id,
+      referenceCode: booking.referenceCode,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      totalPax: booking.totalPax,
+      notes: booking.notes,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      customerId: booking.customerId,
+      bookingStatusId: booking.bookingStatusId,
+      transactionId: booking.transactionId,
+      customer: booking.customer ? {
+        id: booking.customer.id,
+        personalDetailId: booking.customer.personalDetailId,
+        createdAt: booking.customer.createdAt,
+        updatedAt: booking.customer.updatedAt,
+      } : null,
+      bookingStatus: booking.bookingStatus ? {
+        id: booking.bookingStatus.id,
+        name: booking.bookingStatus.name,
+        createdAt: booking.bookingStatus.createdAt,
+        updatedAt: booking.bookingStatus.updatedAt,
+      } : null,
+      services: booking.services.map(booking => ({
+        id: booking.service.id,
+        name: booking.service.name,
+        description: booking.service.description,
+        imageUrl: booking.service.imageUrl,
+        price: booking.service.price,
+        serviceCategoryId: booking.service.serviceCategoryId,
+        createdAt: booking.service.createdAt,
+        updatedAt: booking.service.updatedAt,
+      })),
+      transaction: booking.transaction ? {
+        id: booking.transaction.id,
+        proofOfPaymentImageUrl: booking.transaction.proofOfPaymentImageUrl,
+        amount: booking.transaction.amount,
+        createdAt: booking.transaction.createdAt,
+        updatedAt: booking.transaction.updatedAt,
+        paymentAccountId: booking.transaction.paymentAccountId,
+        paymentStatusId: booking.transaction.paymentStatusId,
+      } : null,
+    };
+  } catch (error) {
+    
+  }
+}
