@@ -311,10 +311,15 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
 
             <div className={styles.form_group}>
               <label>Description <span className={styles.required}>*</span></label>
-              <textarea name="description" data-section="service" value={formData.service.description} onChange={handleChange} className={errors.description ? styles.invalid_input : ""}></textarea>
+              <textarea 
+              name="description" 
+              data-section="service" 
+              value={formData.service.description} 
+              onChange={handleChange} 
+              className={errors.description ? styles.invalid_input : ""}
+              />
               {errors.description && <span className={styles.error}>{errors.description}</span>}
             </div>
-
           </div>
 
          {/* Right Column */}
@@ -322,18 +327,30 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
          <div className={styles.capacityRateContainer}>
             <div className={styles.form_group}>
                 <label>Min Capacity <span className={styles.required}>*</span></label>
-                <input type="number" name="minCapacity" data-section="cabin" value={formData.cabin.minCapacity} onChange={handleChange} className={errors.minCapacity ? styles.invalid_input : ""} />
+                <input type="number" 
+                name="minCapacity" 
+                data-section="cabin" 
+                value={formData.cabin.minCapacity} 
+                onChange={handleChange} 
+                className={errors.minCapacity ? styles.invalid_input : ""} />
                 {errors.minCapacity && <span className={styles.error}>{errors.minCapacity}</span>}
             </div>
 
             <div className={styles.form_group}>
                 <label>Max Capacity <span className={styles.required}>*</span></label>
-                <input type="number" name="maxCapacity" data-section="cabin" value={formData.cabin.maxCapacity} onChange={handleChange} className={errors.maxCapacity ? styles.invalid_input : ""} />
+                <input 
+                type="number" 
+                name="maxCapacity" 
+                data-section="cabin" 
+                value={formData.cabin.maxCapacity} 
+                onChange={handleChange} className={errors.maxCapacity ? styles.invalid_input : ""} />
                 {errors.maxCapacity && <span className={styles.error}>{errors.maxCapacity}</span>}
             </div>
 
         <div className={styles.form_group}>
-            <label>Rate <span className={styles.required}>*</span></label>
+            <label>Rate 
+              <span className={styles.required}>*</span>
+            </label>
             <input 
             type="number" 
             name="price"   
@@ -343,11 +360,11 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
             step="0.01" 
             value={formData.service.price} 
             onChange={handleChange} 
-            className={`${errors.price ? styles.invalid_input : styles.peso_input}`}
+            className={errors.price ? styles.invalid_input : ""}
             />
             {errors.price && <span className={styles.error}>{errors.price}</span>}
         </div>
-        </div>
+      </div>
 
 
         <div className={styles.form_group}>
@@ -383,7 +400,7 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
             )}
 
         </div>
-        </div>
+      </div>
 
       {/* Additional Fees Section */}
         <div className={styles.full_width}>
@@ -392,20 +409,33 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
             <div className={styles.additional_fees_left}>
             <div className={styles.form_group}>
                 <label>Type</label>
-                <input type="text" name="type" data-section="additionalFee" 
-                onChange={handleChange} value={formData.additionalFee.type} maxLength={50} />
+                <input 
+                  type="text" 
+                  name="type" 
+                  data-section="additionalFee" 
+                  onChange={handleChange} 
+                  value={formData.additionalFee.type} 
+                  maxLength={50} 
+                />
                 {!formData.additionalFee.type && additionalFeeWarning && 
                 <p className={styles.error}>{additionalFeeWarning}</p>}
             </div>
 
             <div className={styles.form_group}>
                 <label>Description</label>
-                <textarea name="description" data-section="additionalFee" onChange={handleChange} rows={3} 
-                maxLength={100} value={formData.additionalFee.description} />
+                <textarea 
+                  name="description" 
+                  data-section="additionalFee" 
+                  onChange={handleChange} 
+                  rows={3} 
+                  cols={30}
+                  maxLength={100} 
+                  value={formData.additionalFee.description} 
+                />
                 {!formData.additionalFee.description && additionalFeeWarning && 
                 <p className={styles.error}>{additionalFeeWarning}</p>}
             </div>
-            </div>
+          </div>
 
             <div className={styles.additional_fees_right}>
             <div className={styles.form_group}>
@@ -420,16 +450,16 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
                     onChange={handleChange} 
                     value={formData.additionalFee.amount} 
                     onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()} 
-                    className={`${styles.peso_input} ${styles.short_input}`}
+                    className={styles.short_input}
 
                 />
         {!(formData.additionalFee.amount > 0) && additionalFeeWarning && 
             <p className={styles.error}>{additionalFeeWarning}</p>}
         </div>
 
-            </div>
-        </div>
-        </div>
+      </div>
+    </div>
+  </div>
 
       {/* Buttons */}
       <div className={styles.full_width}>

@@ -7,11 +7,15 @@ import React, {
   ChangeEvent,
   FormEvent,
 } from "react";
+
 import { useRouter, useParams } from "next/navigation";
-import { Loading } from "@/app/components/loading";
-import { options } from "@/app/api";
 import useSWR from "swr";
 import { getCabin } from "@/app/lib/api";
+import CabinForm from "./form"; 
+import { Loading } from "@/app/components/loading";
+import { options } from "@/app/api";
+import { IoArrowBack } from "react-icons/io5";
+import styles from "./page.module.scss";
 
 interface Service {
   id: number;
@@ -397,177 +401,30 @@ export default function UpdateCabin() {
     }
   };
 
-  const isFormInvalid =
-    Object.values(helperText).some((error) => error !== "") ||
+
+  const isFormInvalid = Object.values(helperText).some((error) => error !== "") ||
     (JSON.stringify(formData) === JSON.stringify(originalData) && !imageFile);
 
-  if (loading) return <Loading />;
+  if (isLoading) return <Loading />;
   if (error) return <div>Error: {error}</div>;
-  if (!formData) return <div>No data found</div>;
 
   return (
-    <div>
-      {isMutating ? (
-        <Loading />
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <label>Title</label>
-          <br />
-          <input
-            type="text"
-            name="name"
-            data-section="service"
-            value={formData.service.name}
-            onChange={handleChange}
-            maxLength={50}
-            required
-          />
-          {helperText.name && <small>{helperText.name}</small>}
-          <br />
-          <label>Description</label>
-          <br />
-          <textarea
-            name="description"
-            data-section="service"
-            value={formData.service.description}
-            onChange={handleChange}
-            rows={3}
-            cols={30}
-            maxLength={100}
-            required
-          />
-          {helperText.description && <small>{helperText.description}</small>}
-          <br />
-          <label>Minimum Capacity</label>
-          <br />
-          <input
-            type="number"
-            name="minCapacity"
-            data-section="cabin"
-            value={formData.cabin.minCapacity || ""}
-            min="1"
-            onChange={handleChange}
-            required
-            onKeyDown={(e) =>
-              ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()
-            }
-          />
-          {helperText.minCapacity && <small>{helperText.minCapacity}</small>}
-          <br />
-          <label>Maximum Capacity</label>
-          <br />
-          <input
-            type="number"
-            name="maxCapacity"
-            data-section="cabin"
-            value={formData.cabin.maxCapacity || ""}
-            min={formData.cabin.minCapacity}
-            onChange={handleChange}
-            required
-            onKeyDown={(e) =>
-              ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()
-            }
-          />
-          {helperText.maxCapacity && <small>{helperText.maxCapacity}</small>}
-          <br />
-          <label>New Image (Optional)</label>
-          <br />
-          <input
-            type="file"
-            name="image"
-            data-section="service"
-            accept="image/jpeg, image/jpg, image/png, image/gif"
-            onChange={handleChange}
-          />
-          {helperText.image && (
-            <small>
-              <br />
-              {helperText.image}
-            </small>
-          )}
-          <br />
-          <label>Rate</label>
-          <br />
-          <input
-            type="number"
-            name="price"
-            placeholder="₱"
-            data-section="service"
-            step="0.01"
-            value={formData.service.price || ""}
-            min="1"
-            onChange={handleChange}
-            required
-            onKeyDown={(e) =>
-              ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()
-            }
-          />
-          {helperText.price && <small>{helperText.price}</small>}
-          <br />
-          <h1>Additional Fees (Optional)</h1>
-          <br />
-          <label>Type</label>
-          <br />
-          <input
-            type="text"
-            name="type"
-            data-section="additionalFee"
-            value={formData.additionalFee.type}
-            onChange={handleChange}
-            maxLength={50}
-          />
-          {helperText.additionalFeeType && (
-            <small>{helperText.additionalFeeType}</small>
-          )}
-          <br />
-          <label>Description</label>
-          <br />
-          <textarea
-            name="description"
-            data-section="additionalFee"
-            value={formData.additionalFee.description}
-            onChange={handleChange}
-            rows={3}
-            cols={30}
-            maxLength={100}
-          />
-          {helperText.additionalFeeDescription && (
-            <small>{helperText.additionalFeeDescription}</small>
-          )}
-          <br />
-          <label>Amount</label>
-          <br />
-          <input
-            type="number"
-            name="amount"
-            data-section="additionalFee"
-            value={formData.additionalFee.amount}
-            min="0"
-            step="0.01"
-            onChange={handleChange}
-            onKeyDown={(e) =>
-              ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()
-            }
-          />
-          {helperText.additionalFeeAmount && (
-            <small>{helperText.additionalFeeAmount}</small>
-          )}
-          <br />
-          <button
-            type="submit"
-            disabled={isFormInvalid}
-            style={{
-              opacity: isFormInvalid ? 0.9 : 1,
-              cursor: isFormInvalid ? "not-allowed" : "pointer",
-            }}
-          >
-            Update Cabin
-          </button>
-          <button type="button" onClick={() => router.push("/admin/cabins")}>
-            Cancel
-          </button>
-        </form>
-      )}
+    <div className={styles.page_container}>
+      <div className={styles.page_header}>
+        <div className={styles.back_arrow} onClick={() => router.back()}>
+          <IoArrowBack />
+        </div>
+        <h1 className={styles.title}>Edit Cabin</h1>
+      </div>
+      <CabinForm
+        formData={formData}
+        setFormData={setFormData}
+        helperText={helperText}
+        isMutating={isMutating}
+        isFormInvalid={isFormInvalid}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+      />
     </div>
   );
 }
