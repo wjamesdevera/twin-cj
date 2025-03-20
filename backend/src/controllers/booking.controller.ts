@@ -13,6 +13,7 @@ import { ROOT_STATIC_URL } from "../constants/url";
 import {
   getServicesByCategory,
   createBooking,
+  getBookingStatus,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -50,3 +51,13 @@ export const createBookingHandler = async (req: Request, res: Response) => {
     res.status(BAD_REQUEST).json({ error: error });
   }
 };
+
+export const getBookingStatusHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { referenceCode } = req.params;
+
+    const bookingStatus = await getBookingStatus(referenceCode);
+    
+    res.json(bookingStatus);
+  }
+);
