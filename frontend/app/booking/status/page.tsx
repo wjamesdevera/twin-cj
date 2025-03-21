@@ -29,10 +29,10 @@ export default function Home() {
   console.log(bookingData)
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={{ marginBottom: "65px" }}>
       <Hero imageURL="/assets/view-booking-status-hero.png" height="335px" marginBottom="65px" />
       <BookingStatusReference onBookingFetched={setBookingData} />
-
+      
       {bookingData && (
         <BookingStatusDetails
           status={bookingData.bookingStatus?.name}
@@ -44,11 +44,19 @@ export default function Home() {
           checkOut={bookingData.checkOut}
         />
       )}
-      
-      {/*
-      <BookingStatusPrintButton />
-      <BookingStatusDetailsReupload />
-      */}
+
+      {bookingData?.bookingStatus?.name == "Approved" ? (
+        <BookingStatusPrintButton />
+      ) : (
+        null
+      )}
+
+
+      {bookingData?.bookingStatus?.name == "Reupload" ? (
+        <BookingStatusDetailsReupload />
+      ) : (
+        null
+      )}
     </div>
   );
 }
