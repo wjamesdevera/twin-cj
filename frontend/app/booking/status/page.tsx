@@ -63,6 +63,12 @@ export default function Home() {
         null
       )}
 
+      {bookingData?.bookingStatus?.name == "Invalid" ? (
+        <BookingStatusDetails status="Invalid" />
+      ) : (
+        null
+      )}
+
       {bookingData?.bookingStatus?.name == "Approved" ? (
         <BookingStatusPrintButton />
       ) : (
