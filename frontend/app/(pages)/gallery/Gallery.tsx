@@ -3,7 +3,11 @@ import Image from "next/image";
 import styles from "./gallery.module.scss";
 
 interface GalleryProps {
-  images: { src: string; type: "square" | "landscape" | "portrait" }[];
+  images: {
+    src: string;
+    type: "square" | "landscape" | "portrait";
+    name: string;
+  }[];
 }
 
 const Gallery: React.FC<GalleryProps> = ({ images }) => {
@@ -21,6 +25,10 @@ const Gallery: React.FC<GalleryProps> = ({ images }) => {
               layout="fill"
               objectFit="cover"
             />
+
+            <div className={styles.overlay}>
+              <span className={styles.imageName}>{image.name}</span>
+            </div>
           </div>
         ))}
       </div>
