@@ -3,6 +3,7 @@ import { prisma } from "../config/db";
 import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST } from "../constants/http";
+import { parse } from "path";
 
 interface ServiceCategory {
   id: number;
@@ -108,8 +109,8 @@ export const createBooking = async (req: Request) => {
     const referenceCode = await generateReferenceCode();
 
     const totalGuest =
-      (req.body.guestCounts?.adults || 0) +
-      (req.body.guestCounts?.children || 0);
+      (parsedBookingData.guestCounts?.adults || 0) +
+      (parsedBookingData.guestCounts?.children || 0);
 
     const amount = (bookingCards ?? []).reduce(
       (total: number, card: { price: string }) => {
@@ -127,10 +128,10 @@ export const createBooking = async (req: Request) => {
     if (!personalDetail) {
       personalDetail = await prisma.personalDetail.create({
         data: {
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          phoneNumber: req.body.contactNumber,
-          email: req.body.email,
+          firstName: firstName,
+          lastName: lastName,
+          phoneNumber: contactNumber,
+          email: email,
         },
       });
     }
@@ -174,7 +175,7 @@ export const createBooking = async (req: Request) => {
         checkIn: new Date(checkInDate),
         checkOut: new Date(checkOutDate),
         totalPax: totalGuest,
-        notes: req.body.specialRequest || "",
+        notes: parsedBookingData.specialRequest || "",
         customerId: customer.id,
         bookingStatusId: pendingBookingStatus.id,
         transactionId: transaction.id,
