@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
-import { NOT_FOUND } from "../constants/http";
+import { BAD_REQUEST, NOT_FOUND } from "../constants/http";
+import { ROOT_STATIC_URL } from "../constants/url";
+import path from "path";
+import fs from "fs";
 
 interface ServiceCategory {
   id: number;
@@ -246,3 +249,43 @@ export const getBookingStatus = async (referenceCode: string) => {
     
   }
 }
+
+export const reuploadPaymentImage = async (referenceCode: string, file: Express.Multer.File) => {
+  appAssert(file, BAD_REQUEST, "No file uploaded");
+
+  const booking = await prisma.booking.findUnique({
+    where: { referenceCode },
+    include: { transaction: true },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not found");
+  appAssert(booking.transaction, NOT_FOUND, "Transaction not found");
+
+  const oldImageUrl = booking.transaction.proofOfPaymentImageUrl;
+  const proofOfPaymentImageUrl = `${ROOT_STATIC_URL}/${file.filename}`;
+
+  await prisma.transaction.update({
+    where: { id: booking.transactionId },
+    data: { proofOfPaymentImageUrl },
+  });
+
+  const pendingStatus = await prisma.bookingStatus.findUnique({
+    where: { name: "Pending" },
+  });
+
+  appAssert(pendingStatus, NOT_FOUND, "Pending status not found");
+
+  await prisma.booking.update({
+    where: { referenceCode },
+    data: { bookingStatusId: pendingStatus.id },
+  });
+  
+  if (oldImageUrl) {
+    const oldImagePath = path.join(__dirname, "../../uploads", path.basename(oldImageUrl));
+    if (fs.existsSync(oldImagePath)) {
+      fs.unlinkSync(oldImagePath);
+    }
+  }
+
+  return proofOfPaymentImageUrl;
+};
