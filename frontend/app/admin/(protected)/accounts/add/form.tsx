@@ -1,45 +1,69 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./form.module.scss";
-import CustomButton from "../../../../components/custom_button";
+import CustomButton from "@/app/components/custom_button";
 import useSWRMutation from "swr/mutation";
-import { register } from "@/app/lib/api";
 import { useRouter } from "next/navigation";
-import ConfirmModal from "../../../../components/confirm_modal";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import ConfirmModal from "@/app/components/confirm_modal";
+import {
+  emailSchema,
+  nameSchema,
+  passwordSchema,
+  phoneNumberSchema,
+} from "@/app/lib/zodSchemas";
+import { registerAccount } from "@/app/lib/api";
+import { Loading } from "@/app/components/loading";
 
-type RegisterUserArg = {
+interface RegisterUserArg {
+  confirmPassword: string;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
-  phoneNumber: string;
   password: string;
-  confirmPassword: string;
-};
+  phoneNumber: string;
+}
+
+const formSchema = z
+  .object({
+    firstName: nameSchema,
+    lastName: nameSchema,
+    email: emailSchema,
+    phoneNumber: phoneNumberSchema,
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password do not match",
+    path: ["confirmPassword"],
+  });
+
+type FormData = z.infer<typeof formSchema>;
 
 const Form: React.FC = () => {
   const router = useRouter();
-  const { trigger } = useSWRMutation(
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors, isDirty },
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const { trigger, isMutating } = useSWRMutation(
     "register",
-    (key, { arg }: { arg: RegisterUserArg }) => register(arg),
+    (key, { arg }: { arg: RegisterUserArg }) => registerAccount(arg),
     {
       onSuccess: () => {
-        localStorage.setItem("adminAdded", "true"); 
-        router.push("/admin/accounts"); 
+        router.push("/admin/accounts");
       },
     }
   );
-  
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const [isFormTouched, setIsFormTouched] = useState(false);
 
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
@@ -63,194 +87,71 @@ const Form: React.FC = () => {
     setModalConfig({ isOpen: false, title: "", onConfirm: null });
   };
 
-
   const handleClearFields = (e: React.MouseEvent) => {
     e.preventDefault();
-  
+
     openModal("Are you sure you want to clear all fields?", () => {
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        password: "",
-        confirmPassword: "",
-      });
-  
-      setErrors({
-        firstName: false,
-        lastName: false,
-        email: false,
-        phoneNumber: false,
-        password: false,
-        confirmPassword: false,
-      });
-  
-      setPasswordValidations({
-        length: false,
-        lowercase: false,
-        uppercase: false,
-        number: false,
-        special: false,
-      });
-  
-      setPasswordMatch(true);
-      setIsEmailValid(true);
-      setIsConfirmPasswordActive(false);
-      setHasTypedConfirmPassword(false);
-      setIsFormTouched(false);
-  
-      window.history.replaceState(null, "", window.location.href);
-  
       closeModal();
+      reset();
     });
   };
-  
-  const [errors, setErrors] = useState({
-    firstName: false,
-    lastName: false,
-    email: false,
-    phoneNumber: false,
-    password: false,
-    confirmPassword: false,
-  });
 
-  const [passwordValidations, setPasswordValidations] = useState({
-    length: false,
-    lowercase: false,
-    uppercase: false,
-    number: false,
-    special: false,
-  });
+  const handleBackButton = useCallback(() => {
+    if (isDirty) {
+      openModal("Going back will lose your progress. Continue?", () => {
+        closeModal();
+        router.push("/admin/accounts");
+      });
 
-  const [passwordMatch, setPasswordMatch] = useState(true);
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-  const [isEmailValid, setIsEmailValid] = useState(true);
-  const [isConfirmPasswordActive, setIsConfirmPasswordActive] = useState(false);
-  const [hasTypedConfirmPassword, setHasTypedConfirmPassword] = useState(false);
-
-  const validateEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const validatePassword = (password: string) => {
-    const validations = {
-      length: password.length >= 8,
-      lowercase: /[a-z]/.test(password),
-      uppercase: /[A-Z]/.test(password),
-      number: /[0-9]/.test(password),
-      special: /[!@#$%^&*]/.test(password),
-    };
-
-    setPasswordValidations(validations);
-
-    setIsConfirmPasswordActive(Object.values(validations).every(Boolean));
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    let updatedValue = value;
-
-    if (name === "phoneNumber") {
-        updatedValue = value.replace(/\D/g, "").slice(0, 11); 
-    } else if (name === "firstName" || name === "lastName") {
-        updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50); 
-    }
-
-    setFormData((prev) => {
-        if (prev[name as keyof typeof formData] === updatedValue) return prev;
-
-        const updatedFormData = { ...prev, [name]: updatedValue };
-
-        if (!isFormTouched) setIsFormTouched(true);
-
-        if (name === "password") {
-            validatePassword(updatedValue);
-            setPasswordMatch(updatedValue === updatedFormData.confirmPassword);
-
-            if (updatedValue === "") {
-                updatedFormData.confirmPassword = "";
-                setIsConfirmPasswordActive(false);
-                setHasTypedConfirmPassword(false);
-            }
-        }
-
-        if (name === "confirmPassword") {
-            setPasswordMatch(updatedValue === updatedFormData.password);
-            setHasTypedConfirmPassword(updatedValue.length > 0);
-        }
-
-        if (name === "email") {
-            setIsEmailValid(validateEmail(updatedValue));
-        }
-
-        return updatedFormData;
-    });
-
-    setErrors((prev) => ({
-        ...prev,
-        firstName: name === "firstName" && !/^[A-Za-z\s]{2,}$/.test(updatedValue),
-        lastName: name === "lastName" && !/^[A-Za-z\s]{2,}$/.test(updatedValue),
-        email: name === "email" && !validateEmail(updatedValue),
-        phoneNumber: name === "phoneNumber" && updatedValue.length > 0 && updatedValue.length !== 11,
-        password:
-            name === "password" &&
-            !Object.values(passwordValidations).every(Boolean),
-        confirmPassword: name === "confirmPassword" && updatedValue !== formData.password,
-    }));
-};
-
-  const isFormValid = () => {
-    return (
-      formData.firstName &&
-      formData.lastName &&
-      formData.email &&
-      isEmailValid &&
-      formData.phoneNumber.length === 11 &&
-      Object.values(passwordValidations).every(Boolean) &&
-      passwordMatch &&
-      !Object.values(errors).includes(true)
-    );
-  };
-
-  useEffect(() => {
-    const handleBackButton = () => {
-      if (isFormTouched) {
-        openModal("Going back will lose your progress. Continue?", () => {
-          closeModal(); 
-          router.push("/admin/accounts"); 
-        });
-  
-        window.history.pushState(null, "", window.location.href);
-      }
-    };
-  
-    if (isFormTouched) {
       window.history.pushState(null, "", window.location.href);
     }
-  
+  }, [isDirty, router]);
+
+  useEffect(() => {
+    if (isDirty) {
+      window.history.pushState(null, "", window.location.href);
+    }
+
     window.addEventListener("popstate", handleBackButton);
-  
+
     return () => {
       window.removeEventListener("popstate", handleBackButton);
     };
-  }, [router, isFormTouched]);
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-  
-    if (!isFormValid()) {
-      alert("Please fill out all required fields correctly.");
-      return;
-    }
-  
-    openModal("Are you sure you want to add this Admin?", () => {
-      trigger(formData);
-      closeModal();
+  }, [isDirty, handleBackButton]);
+
+  const onSubmit = (data: FormData) => {
+    console.log("Submitting...");
+    openModal("Are you sure you want to add this Admin?", async () => {
+      try {
+        await trigger(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (error.message === "Email already in use") {
+          setError(
+            "email",
+            { type: "focus", message: error.message },
+            { shouldFocus: true }
+          );
+        } else if (error.message === "Phone number already in use") {
+          setError(
+            "phoneNumber",
+            {
+              type: "focus",
+              message: error.message,
+            },
+            { shouldFocus: true }
+          );
+        }
+      } finally {
+        closeModal();
+      }
     });
   };
-  
-  return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+
+  return isMutating ? (
+    <Loading />
+  ) : (
+    <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       {/* First Name */}
       <div className={styles.form_group}>
         <label>
@@ -258,14 +159,12 @@ const Form: React.FC = () => {
         </label>
         <input
           type="text"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
+          {...register("firstName")}
           required
           className={errors.firstName ? styles.invalid_input : ""}
         />
         {errors.firstName && (
-          <span className={styles.error}>Must be at least 2 letters.</span>
+          <span className={styles.error}>{errors.firstName.message}</span>
         )}
       </div>
 
@@ -276,14 +175,12 @@ const Form: React.FC = () => {
         </label>
         <input
           type="text"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
+          {...register("lastName")}
           required
           className={errors.lastName ? styles.invalid_input : ""}
         />
         {errors.lastName && (
-          <span className={styles.error}>Must be at least 2 letters.</span>
+          <span className={styles.error}>{errors.lastName.message}</span>
         )}
       </div>
 
@@ -294,14 +191,12 @@ const Form: React.FC = () => {
         </label>
         <input
           type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
+          {...register("email")}
           required
           className={errors.email ? styles.invalid_input : ""}
         />
-        {!isEmailValid && (
-          <span className={styles.error}>Invalid email address</span>
+        {errors.email && (
+          <span className={styles.error}>{errors.email.message}</span>
         )}
       </div>
 
@@ -310,16 +205,14 @@ const Form: React.FC = () => {
         <label>
           Phone Number <span className={styles.required}>*</span>
         </label>
-          <input
-            type="tel"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            required
-            className={errors.phoneNumber ? styles.invalid_input : ""}
-          />
+        <input
+          type="tel"
+          {...register("phoneNumber")}
+          required
+          className={errors.phoneNumber ? styles.invalid_input : ""}
+        />
         {errors.phoneNumber && (
-          <span className={styles.error}>Must be 11 digits only.</span>
+          <span className={styles.error}>{errors.phoneNumber.message}</span>
         )}
       </div>
 
@@ -328,58 +221,9 @@ const Form: React.FC = () => {
         <label>
           Password <span className={styles.required}>*</span>
         </label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          onFocus={() => setIsPasswordFocused(true)}
-          onBlur={() => setIsPasswordFocused(false)}
-          required
-        />
-        {isPasswordFocused && (
-          <div className={styles.password_requirements}>
-            <p>
-              <strong>Your password must contain:</strong>
-            </p>
-            <ul>
-              <li
-                className={
-                  passwordValidations.length ? styles.valid : styles.invalid
-                }
-              >
-                ✔ At least 8 characters
-              </li>
-              <li
-                className={
-                  passwordValidations.lowercase ? styles.valid : styles.invalid
-                }
-              >
-                ✔ Lowercase letter (a-z)
-              </li>
-              <li
-                className={
-                  passwordValidations.uppercase ? styles.valid : styles.invalid
-                }
-              >
-                ✔ Uppercase letter (A-Z)
-              </li>
-              <li
-                className={
-                  passwordValidations.number ? styles.valid : styles.invalid
-                }
-              >
-                ✔ Number (0-9)
-              </li>
-              <li
-                className={
-                  passwordValidations.special ? styles.valid : styles.invalid
-                }
-              >
-                ✔ Special character (!@#$%^&*)
-              </li>
-            </ul>
-          </div>
+        <input type="password" {...register("password")} required />
+        {errors.password && (
+          <span className={styles.error}>{errors.password.message}</span>
         )}
       </div>
 
@@ -388,16 +232,9 @@ const Form: React.FC = () => {
         <label>
           Confirm Password <span className={styles.required}>*</span>
         </label>
-        <input
-          type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-          disabled={!isConfirmPasswordActive}
-        />
-        {hasTypedConfirmPassword && !passwordMatch && (
-          <span className={styles.error}>Passwords do not match.</span>
+        <input type="password" {...register("confirmPassword")} required />
+        {errors.confirmPassword && (
+          <span className={styles.error}>{errors.confirmPassword.message}</span>
         )}
       </div>
 
@@ -425,21 +262,17 @@ const Form: React.FC = () => {
             label="Add Admin"
             variant="primary"
             size="small"
-            disabled={!isFormValid()}
-            onClick={handleSubmit}
+            type="submit"
           />
           <CustomButton
             label="Clear"
             variant="secondary"
             size="small"
-            onClick={(e) => handleClearFields(e)} 
-            disabled={!isFormTouched}
+            onClick={(e) => handleClearFields(e)}
           />
-
         </div>
       </div>
     </form>
-    
   );
 };
 

@@ -163,9 +163,12 @@ export const loginAccount = async (data: LoginAccountParams) => {
     },
   });
 
-  const refreshToken = signToken({
-    sessionId: session.id,
-  });
+  const refreshToken = signToken(
+    {
+      sessionId: session.id,
+    },
+    refreshTokenSignOptions
+  );
 
   const accessToken = signToken({
     userId: userAccountId,
@@ -197,7 +200,7 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
   });
   const now = Date.now();
   appAssert(
-    session && session.expiresAt.getDate() > now,
+    session && session.expiresAt.getTime() > now,
     UNAUTHORIZED,
     "Session expired"
   );

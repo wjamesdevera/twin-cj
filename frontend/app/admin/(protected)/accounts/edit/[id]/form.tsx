@@ -5,8 +5,16 @@ import { useRouter } from "next/navigation";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import { editUser } from "@/app/lib/api";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import useSWRMutation from "swr/mutation";
 import ConfirmModal from "@/app/components/confirm_modal";
+import { useForm } from "react-hook-form";
+import {
+  emailSchema,
+  nameSchema,
+  phoneNumberSchema,
+} from "@/app/lib/zodSchemas";
 
 interface EditUserArg {
   firstName: string;
@@ -23,6 +31,15 @@ interface EditUserFormArg {
   phoneNumber: string;
 }
 
+const formSchema = z.object({
+  firstName: nameSchema,
+  lastName: nameSchema,
+  email: emailSchema,
+  phoneNumber: phoneNumberSchema,
+});
+
+type FormData = z.infer<typeof formSchema>;
+
 const Form: React.FC<EditUserFormArg> = ({
   id,
   firstName,
@@ -31,18 +48,20 @@ const Form: React.FC<EditUserFormArg> = ({
   phoneNumber,
 }) => {
   const router = useRouter();
-  const [isFormTouched, setIsFormTouched] = useState(false);
-  const [formData, setFormData] = useState<EditUserArg>({
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    phoneNumber: phoneNumber,
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty },
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      phoneNumber: phoneNumber,
+    },
   });
-
-  const validateName = (name: string) =>
-    name ? name.trim().length >= 2 : null;
-
-  const [isFormValid, setIsFormValid] = useState(false);
 
   const { trigger } = useSWRMutation(
     "edit",
@@ -67,14 +86,10 @@ const Form: React.FC<EditUserFormArg> = ({
     setModalConfig({ isOpen: false, title: "", onConfirm: null });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isFormValid) return;
-
+  const onSubmit = async (data: FormData) => {
     openModal("Are you sure you want to save changes?", async () => {
       try {
-        await trigger(formData);
+        await trigger(data);
         localStorage.setItem("adminUpdated", "true");
         router.push("/admin/accounts");
       } catch (error) {
@@ -85,7 +100,7 @@ const Form: React.FC<EditUserFormArg> = ({
   };
 
   const handleCancel = () => {
-    if (isFormTouched) {
+    if (isDirty) {
       openModal(
         "Are you sure you want to cancel? Unsaved changes will be lost.",
         () => {
@@ -100,10 +115,9 @@ const Form: React.FC<EditUserFormArg> = ({
 
   useEffect(() => {
     const handleBackButton = (event: PopStateEvent) => {
-      if (isFormTouched) {
+      if (isDirty) {
         event.preventDefault();
         openModal("Going back will lose your progress. Continue?", () => {
-          setIsFormTouched(false);
           closeModal();
           window.removeEventListener("popstate", handleBackButton);
           router.back();
@@ -116,7 +130,7 @@ const Form: React.FC<EditUserFormArg> = ({
       }
     };
 
-    if (isFormTouched) {
+    if (isDirty) {
       window.history.pushState(null, "", window.location.href);
     }
 
@@ -125,61 +139,19 @@ const Form: React.FC<EditUserFormArg> = ({
     return () => {
       window.removeEventListener("popstate", handleBackButton);
     };
-  }, [router, isFormTouched]);
-
-  const [errors, setErrors] = useState({
-    firstName: false,
-    lastName: false,
-    email: false,
-    phoneNumber: false,
-  });
-
-  const validateEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    let updatedValue = value;
-
-    if (name === "phoneNumber") {
-      updatedValue = value.replace(/\D/g, "").slice(0, 11);
-    }
-
-    if (name === "firstName" || name === "lastName") {
-      updatedValue = value.replace(/[^a-zA-Z\s]/g, "").slice(0, 50);
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: updatedValue,
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      firstName: name === "firstName" && !validateName(updatedValue),
-      lastName: name === "lastName" && !validateName(updatedValue),
-      email:
-        name === "email" && updatedValue !== "" && !validateEmail(updatedValue),
-      phoneNumber: name === "phoneNumber" && updatedValue.length !== 11,
-    }));
-
-    setIsFormValid(Object.values(errors).some((error) => error));
-    setIsFormTouched(true);
-  };
+  }, [router, isDirty]);
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       <div className={styles.form_group}>
         <label>First Name</label>
         <input
           type="text"
-          name="firstName"
-          value={formData.firstName}
-          onChange={handleChange}
+          {...register("firstName")}
           className={errors.firstName ? styles.invalid_input : ""}
         />
         {errors.firstName && (
-          <span className={styles.error}>Must be at least 2 letters.</span>
+          <span className={styles.error}>{errors.firstName.message}</span>
         )}
       </div>
 
@@ -188,13 +160,11 @@ const Form: React.FC<EditUserFormArg> = ({
         <label>Last Name</label>
         <input
           type="text"
-          name="lastName"
-          value={formData.lastName}
-          onChange={handleChange}
+          {...register("lastName")}
           className={errors.lastName ? styles.invalid_input : ""}
         />
         {errors.lastName && (
-          <span className={styles.error}>Must be at least 2 letters.</span>
+          <span className={styles.error}>{errors.lastName.message}</span>
         )}
       </div>
 
@@ -203,13 +173,11 @@ const Form: React.FC<EditUserFormArg> = ({
         <label>Email</label>
         <input
           type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
+          {...register("email")}
           className={errors.email ? styles.invalid_input : ""}
         />
         {errors.email && (
-          <span className={styles.error}>Invalid email address</span>
+          <span className={styles.error}>{errors.email.message}</span>
         )}
       </div>
 
@@ -218,13 +186,11 @@ const Form: React.FC<EditUserFormArg> = ({
         <label>Phone Number</label>
         <input
           type="tel"
-          name="phoneNumber"
-          value={formData.phoneNumber}
-          onChange={handleChange}
+          {...register("phoneNumber")}
           className={errors.phoneNumber ? styles.invalid_input : ""}
         />
         {errors.phoneNumber && (
-          <span className={styles.error}>Must be 11 digits only.</span>
+          <span className={styles.error}>{errors.phoneNumber.message}</span>
         )}
       </div>
 
@@ -248,7 +214,6 @@ const Form: React.FC<EditUserFormArg> = ({
             variant="primary"
             size="small"
             type="submit"
-            disabled={!isFormValid}
           />
           <CustomButton
             label="Cancel"
