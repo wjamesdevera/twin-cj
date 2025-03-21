@@ -8,6 +8,9 @@ import { FaHome, FaRegUser } from "react-icons/fa";
 import { FaAngleDown, FaAngleUp, FaRegPenToSquare } from "react-icons/fa6";
 import { LuCalendarDays } from "react-icons/lu";
 import { TbArrowBarToLeft, TbArrowBarToRight } from "react-icons/tb";
+import { FaCampground } from "react-icons/fa"; 
+import { FaSun } from "react-icons/fa";
+
 import twinCJLogo from "@/public/assets/admin-logo.svg";
 import { usePathname } from "next/navigation";
 
@@ -82,13 +85,20 @@ const NavDropdown = ({ collapsed }: NavDropdownProps) => {
         <NavItem
           href="/admin/day-tour-activities"
           label="Day Tour Activities"
-          collapsed={false}
+          icon={<FaSun/>}
+          collapsed={collapsed}
         />
-        <NavItem href="/admin/cabins" label="Cabins" collapsed={false} />
+        <NavItem
+          href="/admin/cabins"
+          label="Cabins"
+          icon={<FaCampground />}
+          collapsed={collapsed}
+        />
       </div>
     </>
   );
 };
+
 
 const NavList = ({ collapsed }: NavListProps) => {
   const pathname = usePathname();
