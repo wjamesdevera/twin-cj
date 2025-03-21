@@ -80,6 +80,44 @@ export const getServicesByCategory = async (type: string) => {
   }
 };
 
+export const checkAvailability = async (
+  checkInDate: string,
+  checkOutDate: string
+): Promise<Service[]> => {
+  try {
+    if (!checkInDate || !checkOutDate) {
+      throw new Error("Invalid dates provided");
+    }
+
+    // Get all services
+    const allServices = await prisma.service.findMany();
+
+    // Get booked services in the given date range
+    const bookedServices = await prisma.bookingService.findMany({
+      where: {
+        booking: {
+          checkIn: { lte: new Date(checkOutDate) },
+          checkOut: { gte: new Date(checkInDate) },
+        },
+      },
+      select: { serviceId: true },
+    });
+
+    // Extract booked service IDs
+    const bookedServiceIds = new Set(bookedServices.map((bs) => bs.serviceId));
+
+    // Filter available services
+    const availableServices = allServices.filter(
+      (service) => !bookedServiceIds.has(service.id)
+    );
+
+    return availableServices;
+  } catch (error: any) {
+    console.error("Error checking availability:", error.message);
+    throw new Error("Failed to check availability");
+  }
+};
+
 export const createBooking = async (req: Request) => {
   try {
     const parsedBookingData = JSON.parse(req.body.bookingData || "{}");

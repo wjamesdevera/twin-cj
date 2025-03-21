@@ -130,18 +130,50 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleApplyGuests = (counts: { adults: number; children: number }) => {
     setGuestCounts(counts);
   };
 
-  const handleCheckAvailability = () => {
-    if (checkInDate && checkOutDate) {
-      onCheckAvailability({
-        checkInDate,
-        checkOutDate,
-        guestCounts,
+  const handleCheckAvailability = async () => {
+    if (!checkInDate || !checkOutDate) {
+      alert("Please select both check-in and check-out dates.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    const queryParams = new URLSearchParams({
+      checkInDate: new Date(checkInDate).toISOString(),
+      checkOutDate: new Date(checkOutDate).toISOString(),
+    }).toString();
+    const url = `http://localhost:8080/api/bookings/check-availability?${queryParams}`;
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       });
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Error: ${data.error}`);
+        return;
+      }
+
+      console.log("Available:", data);
+
+      if (checkInDate && checkOutDate) {
+        onCheckAvailability({
+          checkInDate,
+          checkOutDate,
+          guestCounts,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching availability:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -183,7 +215,11 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
               placeholderText="Select check-out date"
               className={styles["date-input"]}
               dateFormat="MMMM d, yyyy"
-              minDate={checkInDate || new Date()} // Disable dates before check-in
+              minDate={
+                checkInDate
+                  ? new Date(checkInDate.getTime() + 86400000)
+                  : new Date()
+              }
             />
           </div>
           <div className={styles["form-field"]}>
@@ -206,3 +242,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 };
 
 export default Header;
+function setIsLoading(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}

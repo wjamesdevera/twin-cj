@@ -39,8 +39,6 @@ export default function PaymentDetails() {
     console.error("No booking data found in session storage.");
   } else {
     const parsedData = JSON.parse(storedBookingData);
-    console.log("Parsed Booking Data:", parsedData);
-    console.log("Contact Number:", parsedData.contactNumber); // Debugging
   }
 
   const {

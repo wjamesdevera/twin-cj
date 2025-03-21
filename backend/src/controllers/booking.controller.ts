@@ -13,6 +13,7 @@ import { ROOT_STATIC_URL } from "../constants/url";
 import {
   getServicesByCategory,
   createBooking,
+  checkAvailability,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -39,9 +40,34 @@ export const getBookingHandler = catchErrors(
   }
 );
 
+export const checkAvailabilityHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { checkInDate, checkOutDate } = req.query as {
+      checkInDate?: string;
+      checkOutDate?: string;
+    };
+
+    if (!checkInDate || !checkOutDate) {
+      return res.status(BAD_REQUEST).json({
+        status: "error",
+        message: "Missing required query parameters.",
+      });
+    }
+
+    const availableServices = await checkAvailability(
+      checkInDate,
+      checkOutDate
+    );
+
+    return res.status(OK).json({
+      status: "success",
+      data: availableServices,
+    });
+  }
+);
+
 export const createBookingHandler = async (req: Request, res: Response) => {
   try {
-    console.log("Received booking data:", req.body);
     const result = await createBooking(req);
     res
       .status(CREATED)
