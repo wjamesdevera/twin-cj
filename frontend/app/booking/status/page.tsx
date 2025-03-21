@@ -52,7 +52,7 @@ export default function Home() {
       )}
 
       {bookingData?.bookingStatus?.name == "Reupload" ? (
-        <BookingStatusDetailsReupload />
+        <BookingStatusDetailsReupload referenceCode={bookingData.referenceCode} />
       ) : (
         null
       )}
