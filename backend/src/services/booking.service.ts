@@ -21,65 +21,6 @@ interface Service {
   updatedAt: Date;
 }
 
-export const getServicesByCategory = async (type: string) => {
-  try {
-    const services = await prisma.service.findMany({
-      include: {
-        serviceCategory: {
-          include: {
-            category: true,
-          },
-        },
-      },
-    });
-
-    const filteredServices = services.filter(
-      (service) => service.serviceCategory?.category?.name === type
-    );
-
-    const categorizedServices: Record<
-      string,
-      { services: Service[]; category: ServiceCategory }
-    > = {};
-
-    filteredServices.forEach((service) => {
-      if (!service.serviceCategory?.category) {
-        console.warn("Service missing category:", service);
-        return;
-      }
-
-      const categoryName = service.serviceCategory.category.name;
-      const categoryDetails: ServiceCategory = {
-        id: service.serviceCategory.category.id,
-        name: service.serviceCategory.category.name,
-      };
-
-      if (!categorizedServices[categoryName]) {
-        categorizedServices[categoryName] = {
-          services: [],
-          category: categoryDetails,
-        };
-      }
-
-      categorizedServices[categoryName].services.push({
-        id: service.id,
-        serviceCategoryId: service.serviceCategory.id,
-        name: service.name,
-        description: service.description,
-        imageUrl: service.imageUrl,
-        price: service.price,
-        createdAt: service.createdAt,
-        updatedAt: service.updatedAt,
-      });
-    });
-
-    return categorizedServices;
-  } catch (error) {
-    console.error("Error fetching services by category:", error);
-    throw new Error("Failed to fetch services by category");
-  }
-};
-
 export const checkAvailability = async (
   checkInDate: string,
   checkOutDate: string
@@ -92,7 +33,7 @@ export const checkAvailability = async (
     // Get all services
     const allServices = await prisma.service.findMany();
 
-    // Get booked services in the given date range
+    // Get unavailable services
     const bookedServices = await prisma.bookingService.findMany({
       where: {
         booking: {
@@ -103,7 +44,6 @@ export const checkAvailability = async (
       select: { serviceId: true },
     });
 
-    // Extract booked service IDs
     const bookedServiceIds = new Set(bookedServices.map((bs) => bs.serviceId));
 
     // Filter available services
@@ -115,6 +55,120 @@ export const checkAvailability = async (
   } catch (error: any) {
     console.error("Error checking availability:", error.message);
     throw new Error("Failed to check availability");
+  }
+};
+
+export const getServicesByCategory = async (
+  type: string,
+  checkInDate: string,
+  checkOutDate: string
+) => {
+  try {
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+
+    const services = await prisma.service.findMany({
+      where: {
+        serviceCategory: {
+          category: {
+            name: type,
+          },
+        },
+      },
+      select: {
+        id: true,
+        serviceCategoryId: true,
+        name: true,
+        description: true,
+        imageUrl: true,
+        price: true,
+        createdAt: true,
+        updatedAt: true,
+        serviceCategory: {
+          select: {
+            id: true,
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!services || services.length === 0) {
+      console.log(`No services found for category: ${type}`);
+      return {};
+    }
+
+    console.log("Fetched services:", services);
+
+    // Fetch the booked services
+    const bookedServices = await prisma.bookingService.findMany({
+      where: {
+        booking: {
+          checkIn: { lte: checkOut },
+          checkOut: { gte: checkIn },
+        },
+      },
+      select: {
+        serviceId: true,
+      },
+    });
+
+    const bookedServiceIds = bookedServices.map((booking) => booking.serviceId);
+
+    console.log("Booked services IDs:", bookedServiceIds);
+
+    // Filter out booked services from the available services
+    const availableServices = services.filter(
+      (service) => !bookedServiceIds.includes(service.id)
+    );
+
+    console.log("Available services:", availableServices);
+
+    // Categorize available services
+    const categorizedServices: Record<
+      string,
+      { services: typeof availableServices; category: ServiceCategory }
+    > = {};
+
+    availableServices.forEach((service) => {
+      const category = service.serviceCategory?.category;
+      if (!category) {
+        console.warn("Service missing category:", service);
+        return;
+      }
+
+      if (!categorizedServices[category.name]) {
+        categorizedServices[category.name] = {
+          services: [],
+          category: {
+            id: category.id,
+            name: category.name,
+          },
+        };
+      }
+
+      categorizedServices[category.name].services.push({
+        id: service.id,
+        serviceCategoryId: service.serviceCategoryId,
+        name: service.name,
+        description: service.description,
+        imageUrl: service.imageUrl,
+        price: service.price,
+        createdAt: service.createdAt,
+        updatedAt: service.updatedAt,
+        serviceCategory: service.serviceCategory,
+      });
+    });
+
+    return categorizedServices;
+  } catch (error) {
+    console.error("Error fetching services by category:", error);
+    throw new Error("Failed to fetch services by category");
   }
 };
 
@@ -187,7 +241,7 @@ export const createBooking = async (req: Request) => {
       });
     }
 
-    // Find or Create Booking Status
+    // Find Booking Status
     let pendingBookingStatus = await prisma.bookingStatus.findUnique({
       where: { name: "Pending" },
     });

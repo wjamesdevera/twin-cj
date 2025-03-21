@@ -21,6 +21,7 @@ interface BookingCardData {
   description: string;
   price: number;
   imageUrl: string;
+  isBooked?: boolean;
 }
 
 interface BookingTypeData {
@@ -40,32 +41,35 @@ const Booking: React.FC = () => {
     guestCounts: { adults: 1, children: 0 },
   });
 
-  const [showAccordian, setShowAccordian] = useState(false);
+  const [availableServices, setAvailableServices] = useState<string[]>([]);
+  const [showAccordion, setShowAccordion] = useState(false);
 
   const { data, error } = useSWR<{
     status: string;
     data: Record<string, BookingTypeData>;
   }>(
     bookingData.bookingType
-      ? `http://localhost:8080/api/bookings?type=${bookingData.bookingType}`
+      ? `http://localhost:8080/api/bookings?type=${
+          bookingData.bookingType
+        }&checkInDate=${bookingData.checkInDate?.toISOString()}&checkOutDate=${bookingData.checkOutDate?.toISOString()}`
       : null,
     fetcher
   );
 
   useEffect(() => {
     if (data?.status === "success" && bookingData.bookingType) {
+      let services = data.data[bookingData.bookingType]?.services || [];
+
+      // Filter out services that are booked
+      services = services.filter((service) => !service.isBooked);
+
       setBookingData((prev) => ({
         ...prev,
-        bookingCards: bookingData.bookingType
-          ? data.data[bookingData.bookingType]?.services || []
-          : [],
+        bookingCards: services,
       }));
+      setAvailableServices(services.map((service) => service.name));
     }
   }, [data, bookingData.bookingType]);
-
-  const handleChange = (key: string, value: any) => {
-    setBookingData((prev) => ({ ...prev, [key]: value }));
-  };
 
   const handleConfirmBooking = (bookingDetails: any) => {
     const bookingPayload = {
@@ -84,8 +88,14 @@ const Booking: React.FC = () => {
     router.push("/payment_details");
   };
 
+  const handleChange = (key: string, value: any) => {
+    setBookingData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
   if (error) return <div>Failed to load</div>;
-  // if (isLoading) return <Loading />;
 
   const accordionItems: AccordionItem[] = [
     {
@@ -111,17 +121,19 @@ const Booking: React.FC = () => {
               >
                 Choose one Package Type (required)
               </p>
-              {bookingData.bookingCards.map((card) => (
-                <BookingCard
-                  key={card.name}
-                  title={card.name}
-                  description={card.description}
-                  price={`₱${card.price}`}
-                  imageSrc={card.imageUrl}
-                  isSelected={bookingData.selectedOption === card.name}
-                  onSelect={() => handleChange("selectedOption", card.name)}
-                />
-              ))}
+              {bookingData.bookingCards
+                .filter((card) => availableServices.includes(card.name))
+                .map((card) => (
+                  <BookingCard
+                    key={card.name}
+                    title={card.name}
+                    description={card.description}
+                    price={`₱${card.price}`}
+                    imageSrc={card.imageUrl}
+                    isSelected={bookingData.selectedOption === card.name}
+                    onSelect={() => handleChange("selectedOption", card.name)}
+                  />
+                ))}
             </div>
           ),
         }
@@ -140,17 +152,19 @@ const Booking: React.FC = () => {
               >
                 Choose one cabin (required)
               </p>
-              {bookingData.bookingCards.map((card) => (
-                <BookingCard
-                  key={card.name}
-                  title={card.name}
-                  description={card.description}
-                  price={`₱${card.price}`}
-                  imageSrc={card.imageUrl}
-                  isSelected={bookingData.selectedOption === card.name}
-                  onSelect={() => handleChange("selectedOption", card.name)}
-                />
-              ))}
+              {bookingData.bookingCards
+                .filter((card) => availableServices.includes(card.name))
+                .map((card) => (
+                  <BookingCard
+                    key={card.name}
+                    title={card.name}
+                    description={card.description}
+                    price={`₱${card.price}`}
+                    imageSrc={card.imageUrl}
+                    isSelected={bookingData.selectedOption === card.name}
+                    onSelect={() => handleChange("selectedOption", card.name)}
+                  />
+                ))}
             </div>
           ),
         }
@@ -168,10 +182,10 @@ const Booking: React.FC = () => {
           handleChange("checkInDate", details.checkInDate);
           handleChange("checkOutDate", details.checkOutDate);
           handleChange("guestCounts", details.guestCounts);
-          setShowAccordian(true);
+          setShowAccordion(true);
         }}
       />
-      {showAccordian && (
+      {showAccordion && (
         <main style={{ padding: "1rem" }}>
           <Accordion items={accordionItems} />
         </main>

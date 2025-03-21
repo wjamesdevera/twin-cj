@@ -19,17 +19,21 @@ import AppError from "../utils/AppError";
 
 export const getBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
-    const { type } = req.query;
-    const file = req.file;
+    const { type, checkInDate, checkOutDate } = req.query;
 
-    if (!type) {
+    if (!type || !checkInDate || !checkOutDate) {
       return res.status(BAD_REQUEST).json({
         status: "error",
-        message: "'type' query parameter is required",
+        message:
+          "'type', 'checkInDate', and 'checkOutDate' query parameters are required",
       });
     }
 
-    const categorizedBookings = await getServicesByCategory(type as string);
+    const categorizedBookings = await getServicesByCategory(
+      type as string,
+      checkInDate as string,
+      checkOutDate as string
+    );
 
     appAssert(categorizedBookings, BAD_REQUEST, "No bookings available");
 

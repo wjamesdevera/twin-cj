@@ -148,7 +148,8 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       checkInDate: new Date(checkInDate).toISOString(),
       checkOutDate: new Date(checkOutDate).toISOString(),
     }).toString();
-    const url = `http://localhost:8080/api/bookings/check-availability?${queryParams}`;
+    const url = `http://localhost:8080/api/bookings?type=cabins&checkInDate=${checkInDate.toISOString()}&checkOutDate=${checkOutDate.toISOString()}&_=${new Date().getTime()}`;
+
     try {
       const response = await fetch(url, {
         method: "GET",
@@ -160,8 +161,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
         alert(`Error: ${data.error}`);
         return;
       }
-
-      console.log("Available:", data);
 
       if (checkInDate && checkOutDate) {
         onCheckAvailability({
