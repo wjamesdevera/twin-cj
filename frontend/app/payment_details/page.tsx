@@ -81,13 +81,21 @@ export default function PaymentDetails() {
         return;
       }
 
+      if (!data.proofOfPayment) {
+        alert("Please upload your proof of payment.");
+        return;
+      }
+
+      const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
+        (card: BookingCardData) => card.name === bookingData.selectedOption
+      );
+
+      console.log(data.proofOfPayment);
       const formData = new FormData();
       formData.append("bookingData", JSON.stringify(bookingData));
       formData.append("paymentMethod", data.paymentMethod);
       formData.append("contactNumber", bookingData.contactNumber || "");
-      if (data.proofOfPayment) {
-        formData.append("file", data.proofOfPayment);
-      }
+      formData.append("file", data.proofOfPayment);
 
       const response = await fetch(`${options.baseURL}/api/bookings`, {
         method: "POST",
@@ -151,6 +159,7 @@ export default function PaymentDetails() {
               setValue("paymentMethod", method)
             }
             setProofOfPayment={(file: File | null) => {
+              console.log("Proof of Payment file:", file);
               if (file) setValue("proofOfPayment", file);
             }}
             error={errors.proofOfPayment?.message ?? ""}

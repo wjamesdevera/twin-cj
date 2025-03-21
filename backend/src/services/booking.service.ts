@@ -99,11 +99,8 @@ export const getServicesByCategory = async (
     });
 
     if (!services || services.length === 0) {
-      console.log(`No services found for category: ${type}`);
       return {};
     }
-
-    console.log("Fetched services:", services);
 
     // Fetch the booked services
     const bookedServices = await prisma.bookingService.findMany({
@@ -120,14 +117,10 @@ export const getServicesByCategory = async (
 
     const bookedServiceIds = bookedServices.map((booking) => booking.serviceId);
 
-    console.log("Booked services IDs:", bookedServiceIds);
-
     // Filter out booked services from the available services
     const availableServices = services.filter(
       (service) => !bookedServiceIds.includes(service.id)
     );
-
-    console.log("Available services:", availableServices);
 
     // Categorize available services
     const categorizedServices: Record<
@@ -256,7 +249,7 @@ export const createBooking = async (req: Request) => {
     const transaction = await prisma.transaction.create({
       data: {
         amount: amount,
-        proofOfPaymentImageUrl: req.body.proofOfPaymentImageUrl || "",
+        proofOfPaymentImageUrl: req.file?.path,
       },
     });
 
