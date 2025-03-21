@@ -24,7 +24,7 @@ const BookingStatusReference: React.FC<Props> = ({ onBookingFetched }) => {
 
       onBookingFetched(data);
     } catch (error) {
-
+      onBookingFetched({ bookingStatus: { name: "Invalid" } });
     } finally {
       
     }
