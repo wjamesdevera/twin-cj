@@ -1,10 +1,35 @@
+"use client";
+
+import { useState } from "react";
 import styles from "./BookingStatusReference.module.scss";
 
 const BookingStatusReference = () => {
+  const [referenceCode, setReferenceCode] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setReferenceCode(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/bookings/status/${referenceCode}`);
+      
+      const data = await response.json();
+
+      console.log("Booking Status Response:", data);
+    } catch (error) {
+
+    } finally {
+      
+    }
+  };
+  
   return (
     <>
-      {/* Booking Status Intro / Title */}
-      <section className={`${styles["booking-status-intro-section"]}`}>
+      {/* Booking Status Intro */}
+      <section className={styles["booking-status-intro-section"]}>
         <h2>VIEW YOUR BOOKING STATUS HERE</h2>
         <hr />
         <p>
@@ -15,11 +40,20 @@ const BookingStatusReference = () => {
       </section>
 
       {/* Booking Status Reference Input */}
-      <section className={`${styles["booking-status-reference-section"]}`}>
-        <div className={`${styles["booking-status-input-container"]}`}>
+      <section className={styles["booking-status-reference-section"]}>
+        <div className={styles["booking-status-input-container"]}>
           <p>Please Enter Your Reference Number</p>
-          <input type="text" placeholder="Enter Your Reference Number" />
-          <button>CHECK STATUS</button>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              placeholder="Enter Your Reference Number"
+              id="referenceCode"
+              name="referenceCode"
+              onChange={handleChange}
+              value={referenceCode}
+            />
+            <button type="submit">CHECK STATUS</button>
+          </form>
         </div>
       </section>
     </>
