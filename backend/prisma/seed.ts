@@ -16,7 +16,7 @@ async function main() {
       userAccount: {
         create: {
           password: hashedPassword,
-          isVerified: false,
+          isVerified: true,
         },
       },
     },

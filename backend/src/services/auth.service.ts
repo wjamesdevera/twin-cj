@@ -119,6 +119,9 @@ export const loginAccount = async (data: LoginAccountParams) => {
   const user = await prisma.personalDetail.findUnique({
     where: {
       email: data.email,
+      userAccount: {
+        isVerified: true,
+      },
     },
     include: {
       userAccount: true,
