@@ -19,24 +19,20 @@ const Timer = ({
   updateIsDisabled: (isDisabled: boolean) => void;
 }) => {
   const Ref = useRef<NodeJS.Timeout | null>(null);
-  const [time, setTime] = useState<string>("01:00");
+  const [time, setTime] = useState("01:00");
 
-  const getTimeRemaining = (endTime: Date) => {
-    const total =
-      Date.parse(endTime.toString()) - Date.parse(new Date().toString());
-
+  const getTimeRemaining = (endTime: number) => {
+    const total = endTime - Date.now();
     const seconds = Math.floor((total / 1000) % 60);
     const minutes = Math.floor((total / 1000 / 60) % 60);
-    return {
-      total,
-      minutes,
-      seconds,
-    };
+
+    return { total, minutes, seconds };
   };
 
   const startTimer = useCallback(
-    (endTime: Date) => {
+    (endTime: number) => {
       const { total, minutes, seconds } = getTimeRemaining(endTime);
+
       if (total >= 0) {
         setTime(
           `${minutes.toString().padStart(2, "0")}:${seconds
@@ -44,31 +40,30 @@ const Timer = ({
             .padStart(2, "0")}`
         );
       } else {
-        updateIsDisabled(false); // 🔹 Set to false when the timer ends
+        updateIsDisabled(false);
+        localStorage.removeItem("deadline"); // 🔹 Clear deadline
         if (Ref.current) clearInterval(Ref.current);
       }
     },
     [updateIsDisabled]
   );
 
-  const clearTimer = useCallback(
-    (endTime: Date) => {
-      setTime("01:00");
-      if (Ref.current) clearInterval(Ref.current);
-      const id = setInterval(() => startTimer(endTime), 1000);
-      Ref.current = id;
-    },
-    [startTimer]
-  );
+  const clearTimer = useCallback(() => {
+    let deadline = localStorage.getItem("deadline");
 
-  const getDeadTime = (): Date => {
-    const deadline = new Date();
-    deadline.setMinutes(deadline.getMinutes() + 1);
-    return deadline;
-  };
+    if (!deadline) {
+      const newDeadline = Date.now() + 60 * 1000; // 🔹 Set 1-minute timer
+      localStorage.setItem("deadline", newDeadline.toString());
+      deadline = newDeadline.toString();
+    }
+
+    if (Ref.current) clearInterval(Ref.current);
+    startTimer(Number(deadline));
+    Ref.current = setInterval(() => startTimer(Number(deadline)), 1000);
+  }, [startTimer]);
 
   useEffect(() => {
-    clearTimer(getDeadTime());
+    clearTimer();
     return () => {
       if (Ref.current) clearInterval(Ref.current);
     };
@@ -83,6 +78,18 @@ const Timer = ({
   );
 };
 
+const useLocalStorageState = (key: string, defaultValue: string) => {
+  const [state, setState] = useState(() => {
+    return localStorage.getItem(key) || defaultValue;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, state);
+  }, [key, state]);
+
+  return [state, setState] as const;
+};
+
 const loginFormSchema = z.object({
   email: emailSchema,
   password: z.string(),
@@ -95,11 +102,11 @@ export function LoginForm() {
   const { register, handleSubmit } = useForm<FormData>({
     resolver: zodResolver(loginFormSchema),
   });
-  const [attempts, setAttempts] = useState(0);
+  const [attempts, setAttempts] = useLocalStorageState("attempts", "0");
   const [isDisabled, setIsDisabled] = useState(false);
 
   useEffect(() => {
-    if (attempts > 3) {
+    if (Number(attempts) > 3) {
       setIsDisabled(true);
     } else {
       setIsDisabled(false);
@@ -108,7 +115,7 @@ export function LoginForm() {
 
   const updateIsDisabled = (isDisabled: boolean) => {
     setIsDisabled(isDisabled);
-    setAttempts(0);
+    setAttempts("0");
   };
 
   const { trigger, error, isMutating } = useSWRMutation(
@@ -130,7 +137,7 @@ export function LoginForm() {
       console.log("Login successful");
     } catch (error) {
       console.log(error);
-      setAttempts(() => attempts + 1);
+      setAttempts(() => (Number(attempts) + 1).toString());
     }
   };
 
