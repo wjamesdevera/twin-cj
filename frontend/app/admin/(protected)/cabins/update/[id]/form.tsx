@@ -4,8 +4,9 @@ import React, { useState, useCallback, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import { Loading } from "@/app/components/loading";
-import styles from "./form.module.scss"; 
+import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
+import ConfirmModal from "@/app/components/confirm_modal";
 
 interface CabinFormProps {
   formData: any;
@@ -15,19 +16,36 @@ interface CabinFormProps {
   isFormInvalid: boolean;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleSubmit: (e: FormEvent) => void;
+  setIsConfirmModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setConfirmMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export default function CabinForm({
-    formData,
-    setFormData, 
-    helperText,
-    isMutating,
-    isFormInvalid,
-    handleChange,
-    handleSubmit,
-  }: CabinFormProps) {
-  
+  formData,
+  setFormData,
+  helperText,
+  isMutating,
+  isFormInvalid,
+  handleChange,
+  handleSubmit,
+}: CabinFormProps) {
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); 
+  const [confirmMessage, setConfirmMessage] = useState(""); 
   const router = useRouter();
+
+  const handleCancelClick = () => {
+    setConfirmMessage("Are you sure you want to cancel without saving?");
+    setIsConfirmModalOpen(true); 
+  };
+
+  const handleConfirmCancel = () => {
+    router.push("/admin/cabins"); 
+    setIsConfirmModalOpen(false); 
+  };
+
+  const handleCloseModal = () => {
+    setIsConfirmModalOpen(false); 
+  };
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageError, setImageError] = useState<string>("");
@@ -267,7 +285,21 @@ export default function CabinForm({
           <div className={styles.full_width}>
           <div className={styles.button_container}>
           <CustomButton type="submit" label="Update Cabin" />
-          <CustomButton type="button" label="Cancel" variant="danger" onClick={() => router.push("/admin/cabins")} />
+          <CustomButton
+              type="button"
+              label="Cancel"
+              variant="danger"
+              onClick={handleCancelClick} 
+            />
+
+            <ConfirmModal
+              isOpen={isConfirmModalOpen} 
+              title={confirmMessage} 
+              confirmText="Yes"
+              cancelText="No"
+              onClose={handleCloseModal}
+              onConfirm={handleConfirmCancel} 
+          />      
           </div>
         </div>
       </form>

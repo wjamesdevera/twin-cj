@@ -16,6 +16,8 @@ import { Loading } from "@/app/components/loading";
 import { options } from "@/app/api";
 import { IoArrowBack } from "react-icons/io5";
 import styles from "./page.module.scss";
+import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
 
 interface Service {
   id: number;
@@ -81,6 +83,16 @@ export default function UpdateCabin() {
   });
   const [originalData, setOriginalData] = useState<Cabin | null>(null);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
+  const [confirmMessage, setConfirmMessage] = useState<string>("");
+
+
+  const [notification, setNotification] = useState<{ isOpen: boolean, message: string, type: 'success' | 'error' }>({
+    isOpen: false,
+    message: '',
+    type: 'success'
+  });
 
   const { data, isLoading } = useSWR(id, getCabin);
 
@@ -325,11 +337,13 @@ export default function UpdateCabin() {
       return;
     }
 
-    if (!window.confirm("Are you sure you want to save changes?")) {
-      setIsMutating(false);
-      return;
-    }
-
+    setConfirmMessage("Are you sure you want to save the changes?");
+    setIsConfirmModalOpen(true);
+    
+  };
+  
+  
+  const handleConfirm = async () => {
     const data = new FormData();
     const jsonData: any = {
       name: formData.service.name,
@@ -338,7 +352,7 @@ export default function UpdateCabin() {
       minCapacity: formData.cabin.minCapacity,
       maxCapacity: formData.cabin.maxCapacity,
     };
-
+  
     if (
       formData.additionalFee.type &&
       formData.additionalFee.description &&
@@ -356,15 +370,15 @@ export default function UpdateCabin() {
         amount: 0,
       };
     }
-
+  
     data.append("data", JSON.stringify(jsonData));
     if (imageFile) {
       data.append("file", imageFile);
     }
-
+  
     try {
       setIsMutating(true);
-
+  
       const response = await fetch(
         `${options.baseURL}/api/services/cabins/${id}`,
         {
@@ -372,35 +386,39 @@ export default function UpdateCabin() {
           body: data,
         }
       );
-
+  
       if (!response.ok) throw new Error("Failed to update cabin");
-
+  
       const updatedData = await response.json();
       const updatedImageUrl = updatedData?.data?.cabin?.imageUrl;
-
+  
       if (updatedImageUrl) {
         setFormData((prevData) => ({
           ...prevData,
           service: {
             ...prevData.service,
-            imageUrl: `${
-              options.baseURL
-            }/uploads/${updatedImageUrl}?t=${new Date().getTime()}`,
+            imageUrl: `${options.baseURL}/uploads/${updatedImageUrl}?t=${new Date().getTime()}`,
           },
         }));
       }
-
-      alert("Cabin updated successfully!");
+  
+      setNotification({
+        isOpen: true,
+        message: "Cabin updated successfully!",
+        type: "success",
+      });
+  
       router.push("/admin/cabins");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
+      setNotification({
+        isOpen: true,
+        message: err instanceof Error ? err.message : "An unknown error occurred",
+        type: "error",
+      });
     } finally {
       setIsMutating(false);
     }
   };
-
 
   const isFormInvalid = Object.values(helperText).some((error) => error !== "") ||
     (JSON.stringify(formData) === JSON.stringify(originalData) && !imageFile);
@@ -424,6 +442,23 @@ export default function UpdateCabin() {
         isFormInvalid={isFormInvalid}
         handleChange={handleChange}
         handleSubmit={handleSubmit}
+        setIsConfirmModalOpen={setIsConfirmModalOpen}  
+        setConfirmMessage={setConfirmMessage} 
+      />
+    <ConfirmModal 
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirm}
+        title={confirmMessage}
+        confirmText="Yes"
+        cancelText="No"
+      />
+      
+      <NotificationModal
+        isOpen={notification.isOpen}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
       />
     </div>
   );
