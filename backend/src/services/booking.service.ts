@@ -211,7 +211,15 @@ export const getBookingStatus = async (referenceCode: string) => {
         bookingStatus: true,
         services: {
           include: {
-            service: true,
+            service: {
+              include: {
+                serviceCategory: {
+                  include: {
+                    category: true,
+                  },
+                },
+              },
+            },
           },
         },
         transaction: true,
@@ -254,9 +262,21 @@ export const getBookingStatus = async (referenceCode: string) => {
         description: booking.service.description,
         imageUrl: booking.service.imageUrl,
         price: booking.service.price,
-        serviceCategoryId: booking.service.serviceCategoryId,
         createdAt: booking.service.createdAt,
         updatedAt: booking.service.updatedAt,
+        serviceCategoryId: booking.service.serviceCategoryId,
+        serviceCategory: booking.service.serviceCategory
+          ? {
+            id: booking.service.serviceCategory.id,
+            categoryId: booking.service.serviceCategory.categoryId,
+            category: booking.service.serviceCategory.category
+              ? {
+                id: booking.service.serviceCategory.category.id,
+                name: booking.service.serviceCategory.category.name,
+                createdAt: booking.service.serviceCategory.category.createdAt,
+                updatedAt: booking.service.serviceCategory.category.updatedAt,
+              } : null,
+          } : null,
       })),
       transaction: booking.transaction
         ? {
