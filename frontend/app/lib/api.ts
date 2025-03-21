@@ -92,3 +92,5 @@ export const updateCabin = async ({ id, data }: UpdateCabinData) =>
 export const getCabin = async (id: number) =>
   API.get(`/api/services/cabins/${id}`);
 export const getRefreshToken = async () => API.get("/api/auth/refresh");
+export const verifyEmail = async (code: string) =>
+  API.get(`/api/auth/email/verify/${code}`);
