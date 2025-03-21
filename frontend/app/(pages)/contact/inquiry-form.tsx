@@ -28,13 +28,11 @@ const options = [
 const feedbackSchema = z.object({
   fullName: z
     .string()
-    .min(1, "Full name is required")
-    .max(255)
-    .regex(
-      /^[A-Za-z]+(?: [A-Za-z]+)*$/,
-      "Full name should not contain numbers, special characters, or multiple spaces"
-    )
-    .refine((val) => val.trim().length > 0, "Full name cannot be just spaces"),
+    .trim()
+    .min(2, "Full name must be at least 2 characters")
+    .max(50, "Full name must be at most 50 characters long")
+    .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces")
+    .transform((val) => val.replace(/\s+/g, " ").trim()),
   email: emailSchema,
   contactNumber: phoneNumberSchema,
   inquiryType: z.enum(options),
@@ -49,6 +47,7 @@ const InquiryForm: React.FC = () => {
     handleSubmit,
     watch,
     reset,
+    trigger: verifyForm,
     formState: { errors, touchedFields },
   } = useForm<SendFeedbackData>({
     resolver: zodResolver(feedbackSchema),
@@ -162,6 +161,8 @@ const InquiryForm: React.FC = () => {
               id="fullName"
               placeholder="Enter your full name"
               {...register("fullName")}
+              onKeyDown={() => verifyForm("fullName")}
+              onKeyUp={() => verifyForm("fullName")}
               className={`${errors.fullName ? styles["error-input"] : ""} ${
                 !errors.fullName && touchedFields.fullName
                   ? styles["success-input"]
@@ -181,6 +182,8 @@ const InquiryForm: React.FC = () => {
               id="email"
               placeholder="email@email.com"
               {...register("email")}
+              onKeyDown={() => verifyForm("email")}
+              onKeyUp={() => verifyForm("email")}
               className={`${errors.email ? styles["error-input"] : ""} ${
                 !errors.email && touchedFields.email
                   ? styles["success-input"]
@@ -202,6 +205,8 @@ const InquiryForm: React.FC = () => {
               id="contactNumber"
               placeholder="09XXXXXXXXX"
               {...register("contactNumber")}
+              onKeyDown={() => verifyForm("contactNumber")}
+              onKeyUp={() => verifyForm("contactNumber")}
               className={`${
                 errors.contactNumber ? styles["error-input"] : ""
               } ${
@@ -274,6 +279,8 @@ const InquiryForm: React.FC = () => {
             id="message"
             placeholder="Enter your message here"
             {...register("message")}
+            onKeyDown={() => verifyForm("message")}
+            onKeyUp={() => verifyForm("message")}
             className={`${errors.message ? styles["error-input"] : ""} ${
               !errors.message && touchedFields.message
                 ? styles["success-input"]
