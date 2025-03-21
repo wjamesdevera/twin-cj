@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
             </li>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fab fa-facebook`}></i>
-              <a>Twin CJ Riverside Glamping Resort</a>
+              <a href="https://www.facebook.com/twincjriversideresort" target="_blank">Twin CJ Riverside Glamping Resort</a>
             </li>
           </ul>
         </div>
