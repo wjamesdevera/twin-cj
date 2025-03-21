@@ -32,7 +32,7 @@ export default function Home() {
     <div className={styles.page} style={{ marginBottom: "65px" }}>
       <Hero imageURL="/assets/view-booking-status-hero.png" height="335px" marginBottom="65px" />
       <BookingStatusReference onBookingFetched={setBookingData} />
-      
+
       {bookingData && (
         <BookingStatusDetails
           status={bookingData.bookingStatus?.name}
