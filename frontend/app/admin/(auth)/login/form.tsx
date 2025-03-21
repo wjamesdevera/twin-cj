@@ -79,13 +79,18 @@ const Timer = ({
 };
 
 const useLocalStorageState = (key: string, defaultValue: string) => {
+  const isBrowser = typeof window !== "undefined";
+
   const [state, setState] = useState(() => {
+    if (!isBrowser) return defaultValue; // Prevent ReferenceError during SSR
     return localStorage.getItem(key) || defaultValue;
   });
 
   useEffect(() => {
-    localStorage.setItem(key, state);
-  }, [key, state]);
+    if (isBrowser) {
+      localStorage.setItem(key, state);
+    }
+  }, [key, state, isBrowser]);
 
   return [state, setState] as const;
 };
@@ -153,7 +158,6 @@ export function LoginForm() {
                 src={twinCJLogo}
                 alt="Twin CJ Logo"
                 className={styles["login-logo"]}
-                objectFit="contain"
               />
               <p className={styles["welcome-text"]}>
                 Welcome! Please log-in with your admin account.
