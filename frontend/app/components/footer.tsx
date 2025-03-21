@@ -70,7 +70,7 @@ const Footer: React.FC = () => {
             </li>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fas fa-envelope`}></i>
-              <a>twincj.riversideresort@gmail.com</a>
+              <a href="mailto:twincj.riversideresort@gmail.com">twincj.riversideresort@gmail.com</a>
             </li>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fab fa-facebook`}></i>
