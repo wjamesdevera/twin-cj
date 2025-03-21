@@ -24,7 +24,7 @@ const config: AppConfig = {
   serviceName: process.env.SERVICE_NAME || "My Express Service",
   databaseUrl: process.env.DATABASE_URL || "mongodb://localhost:27017/mydb",
   jwtSecret: process.env.JWT_SECRET || "default_secret",
-  jwtRefreshSecret: process.env.JWT_SECRET || "default_secret",
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || "default_secret",
   resendApiKey: process.env.RESEND_KEY || "",
   emailSender: process.env.EMAIL_SENDER || "onboarding@resend.dev",
   feedbackReceiver: process.env.FEEDBACK_RECEIVER || "onboarding@resend.dev",

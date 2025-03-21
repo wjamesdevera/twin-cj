@@ -42,19 +42,19 @@ type SendFeedbackData = {
   message: string;
 };
 
-type CreateCabinData = {
-  minCapacity: number;
-  maxCapacity: number;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  additionalFee?: Partial<{
-    type: string;
-    description: string;
-    amount: number;
-  }> | null;
-};
+// type CreateCabinData = {
+//   minCapacity: number;
+//   maxCapacity: number;
+//   name: string;
+//   description: string;
+//   price: number;
+//   imageUrl: string;
+//   additionalFee?: Partial<{
+//     type: string;
+//     description: string;
+//     amount: number;
+//   }> | null;
+// };
 
 type UpdateCabinData = {
   id: number;
@@ -64,7 +64,7 @@ type UpdateCabinData = {
 export const login = async (data: LoginData) =>
   API.post("/api/auth/login", data);
 export const logout = async () => API.get("/api/auth/logout");
-export const register = async (data: RegisterData) =>
+export const registerAccount = async (data: RegisterData) =>
   API.post("/api/auth/register", data);
 export const forgotPasword = async (data: ForgotPasswordData) =>
   API.post("/api/auth/password/forgot", data);
@@ -92,3 +92,5 @@ export const updateCabin = async ({ id, data }: UpdateCabinData) =>
 export const getCabin = async (id: number) =>
   API.get(`/api/services/cabins/${id}`);
 export const getRefreshToken = async () => API.get("/api/auth/refresh");
+export const verifyEmail = async (code: string) =>
+  API.get(`/api/auth/email/verify/${code}`);

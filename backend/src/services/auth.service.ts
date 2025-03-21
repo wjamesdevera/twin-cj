@@ -105,23 +105,6 @@ export const createAccount = async (data: CreateAccountParams) => {
   //ignore email errors for now
   if (error) console.log(error);
 
-  // const session = await prisma.session.create({
-  //   data: {
-  //     userAccountId: userAccountId,
-  //     userAgent: data.userAgent,
-  //     expiresAt: thirtyDaysFromNow(),
-  //   },
-  // });
-
-  // const refreshToken = signToken({
-  //   sessionId: session.id,
-  // });
-
-  // const accessToken = signToken({
-  //   userId: userAccountId,
-  //   sessionId: session.id,
-  // });
-
   return {
     user: {
       firstName: createUser.firstName,
@@ -129,8 +112,6 @@ export const createAccount = async (data: CreateAccountParams) => {
       phoneNumber: createUser.phoneNumber,
       email: createUser.email,
     },
-    // accessToken: accessToken,
-    // refreshToken: refreshToken,
   };
 };
 
@@ -138,6 +119,9 @@ export const loginAccount = async (data: LoginAccountParams) => {
   const user = await prisma.personalDetail.findUnique({
     where: {
       email: data.email,
+      userAccount: {
+        isVerified: true,
+      },
     },
     include: {
       userAccount: true,
@@ -163,9 +147,12 @@ export const loginAccount = async (data: LoginAccountParams) => {
     },
   });
 
-  const refreshToken = signToken({
-    sessionId: session.id,
-  });
+  const refreshToken = signToken(
+    {
+      sessionId: session.id,
+    },
+    refreshTokenSignOptions
+  );
 
   const accessToken = signToken({
     userId: userAccountId,
@@ -197,7 +184,7 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
   });
   const now = Date.now();
   appAssert(
-    session && session.expiresAt.getDate() > now,
+    session && session.expiresAt.getTime() > now,
     UNAUTHORIZED,
     "Session expired"
   );
