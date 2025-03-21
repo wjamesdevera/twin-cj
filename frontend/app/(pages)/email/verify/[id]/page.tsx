@@ -14,7 +14,9 @@ interface ResultBannerProps {
 const ResultBanner: React.FC<ResultBannerProps> = ({ isSuccess }) => {
   return (
     <div className={isSuccess ? styles.successBanner : styles.failedBanner}>
-      {isSuccess ? "Your email has been verified" : "Email verification failed"}
+      {isSuccess
+        ? "Your email has been verified"
+        : "Verification failed: either verifcation link has been used or verification link has expired"}
     </div>
   );
 };
