@@ -246,7 +246,7 @@ export const getBookingStatus = async (referenceCode: string) => {
       } : null,
     };
   } catch (error) {
-    
+    console.error("Error fetching booking status:", error);
   }
 }
 

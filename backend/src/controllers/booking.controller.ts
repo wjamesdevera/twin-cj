@@ -59,7 +59,7 @@ export const getBookingStatusHandler = catchErrors(
 
     const bookingStatus = await getBookingStatus(referenceCode);
     
-    res.json(bookingStatus);
+    return res.status(OK).json(bookingStatus);
   }
 );
 
@@ -67,6 +67,9 @@ export const reuploadPaymentImageHandler = catchErrors(
   async (request: Request, response: Response) => {
     const { referenceCode } = request.params;
     const file = request.file;
+
+    appAssert(file, BAD_REQUEST, "No file uploaded");
+
     const proofOfPaymentImageUrl = await reuploadPaymentImage(referenceCode, file!);
 
     return response.status(OK).json({
