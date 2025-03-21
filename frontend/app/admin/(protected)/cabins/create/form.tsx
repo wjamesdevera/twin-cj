@@ -6,7 +6,8 @@ import { Loading } from "@/app/components/loading";
 import { useDropzone } from "react-dropzone";
 import styles from "./form.module.scss"; 
 import CustomButton from "@/app/components/custom_button";
-
+import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
 
 interface FormProps {
   trigger: (data: FormData) => void;
@@ -36,6 +37,10 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string>("");
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => () => {});
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const handleFileUpload = (file: File | null) => {
     if (file) {
@@ -178,6 +183,16 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
     return "";
   };
 
+  const [notification, setNotification] = useState<{
+    isOpen: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -218,28 +233,69 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
     }
 
     
-    const data = new FormData();
-    const jsonData = {
-      name: formData.service.name,
-      description: formData.service.description,
-      price: Number(formData.service.price),
-      minCapacity: Number(formData.cabin.minCapacity),
-      maxCapacity: Number(formData.cabin.maxCapacity),
-      additionalFee: formData.additionalFee.type?.trim()
-        ? {
-            type: formData.additionalFee.type,
-            description: formData.additionalFee.description || "",
-            amount: Number(formData.additionalFee.amount),
-          }
-        : undefined,
-    };
+    setConfirmAction(() => () => {
+      const data = new FormData();
+      const jsonData = {
+        name: formData.service.name,
+        description: formData.service.description,
+        price: Number(formData.service.price),
+        minCapacity: Number(formData.cabin.minCapacity),
+        maxCapacity: Number(formData.cabin.maxCapacity),
+        additionalFee: formData.additionalFee.type?.trim()
+          ? {
+              type: formData.additionalFee.type,
+              description: formData.additionalFee.description || "",
+              amount: Number(formData.additionalFee.amount),
+            }
+          : undefined,
+      };
 
-    data.append("data", JSON.stringify(jsonData));
-    if (formData.service.image) {
-      data.append("file", formData.service.image);
-    }
+      data.append("data", JSON.stringify(jsonData));
+      if (formData.service.image) {
+        data.append("file", formData.service.image);
+      }
 
-    trigger(data);
+      trigger(data);
+      setNotification({
+        isOpen: true,
+        message: "Cabin added successfully!",
+        type: "success", 
+      });
+      
+
+      router.push("/admin/cabins");
+    });
+
+    setConfirmMessage("Are you sure you want to add this cabin?");
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleClear = () => {
+    setConfirmAction(() => () => {
+      setFormData({
+        service: { name: "", description: "", image: null, price: 1 },
+        cabin: { minCapacity: 1, maxCapacity: 1 },
+        additionalFee: { type: "", description: "", amount: 0 },
+      });
+
+      setErrors({ name: "", description: "", minCapacity: "", maxCapacity: "", price: "", image: "" });
+      setAdditionalFeeWarning("");
+      setImagePreview(null);
+      setImageError("");
+
+      document.querySelectorAll("input, textarea").forEach((input) => {
+        (input as HTMLInputElement | HTMLTextAreaElement).value = "";
+      });
+    });
+
+    setConfirmMessage("Are you sure you want to clear all the fields?");
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleCancel = () => {
+    setConfirmAction(() => () => router.back());
+    setConfirmMessage("Are you sure you want to cancel?");
+    setIsConfirmModalOpen(true);
   };
 
         const isFormEmpty =
@@ -254,42 +310,7 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
         isFormEmpty ||
         Object.values(errors).some((error) => error !== "") ||
         additionalFeeWarning !== "";
-        const handleClear = () => {
-            setFormData({
-            service: {
-                name: "",
-                description: "",
-                image: null,
-                price: 1,
-            },
-            cabin: {
-                minCapacity: 1,
-                maxCapacity: 1,
-            },
-            additionalFee: {
-                type: "",
-                description: "",
-                amount: 0,
-            },
-            });
-            setErrors({
-            name: "",
-            description: "",
-            minCapacity: "",
-            maxCapacity: "",
-            image: "",
-            price: "",
-            });
-            setAdditionalFeeWarning("");
-            setImagePreview(null); 
-            setImageError(""); 
-            
-            document.querySelectorAll("input, textarea").forEach((input) => {
-            (input as HTMLInputElement | HTMLTextAreaElement).value = "";
-            });
-        };
 
-            
   return (
     <div>
       {isMutating ? (
@@ -464,13 +485,32 @@ export default function CabinForm({ trigger, isMutating }: FormProps) {
       {/* Buttons */}
       <div className={styles.full_width}>
           <div className={styles.button_container}>
-            <CustomButton type="submit" label="Add Cabin" />
-            <CustomButton type="button" label="Clear" variant="secondary" onClick={handleClear} />
-            <CustomButton type="button" label="Cancel" variant="danger" onClick={() => router.push("/admin/cabins")} />
-          </div>
+              <CustomButton type="submit" label="Add Cabin" />
+              <CustomButton type="button" label="Clear" variant="secondary" onClick={handleClear} />
+              <CustomButton type="button" label="Cancel" variant="danger" onClick={handleCancel} />
+            </div>
         </div>
       </form>
       )}
+
+  <ConfirmModal
+    isOpen={isConfirmModalOpen}
+    onClose={() => setIsConfirmModalOpen(false)}
+    onConfirm={() => {
+      confirmAction();
+      setIsConfirmModalOpen(false);
+    }}
+    title={confirmMessage}
+    confirmText="Yes"
+    cancelText="No"
+  />
+
+<NotificationModal
+        isOpen={notification.isOpen}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
+      />
     </div>
   );
 }

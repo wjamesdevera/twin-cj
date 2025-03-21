@@ -1,14 +1,16 @@
+
 .table_container {
     width: 100%;
-    overflow-x: hidden; 
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px; 
 }
-
 .table_wrapper {
     width: 100%;
-    max-height: 66.4vh;
-    margin: 10px;
+    overflow-x: auto; 
+    flex-grow: 1; 
 }
-
 .table {
     width: 100%;
     min-width: 800px;
@@ -30,9 +32,51 @@
     position: sticky;
     top: 0;
     font-weight: bold;
-    background: none;
+    background: #ffffff; 
+    z-index: 10;
 }
 
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background: #fff; 
+    padding: 15px;
+    position: static;  
+    width: 100%;
+    bottom: 0;
+    z-index: 10;
+    margin-bottom: 20px; 
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+
+.page_button {
+    padding: 8px 15px;
+    border: none;
+    background-color: #d67b1d;
+    color: white;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.page_button:hover:not(:disabled) {
+    background-color: #955414; 
+}
+
+.page_button:disabled {
+    background-color: #c5c5c5;
+    cursor: not-allowed;
+}
+
+.page_info {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
 .table tr {
     border-bottom: 1px solid #c5c5c5;
 }
@@ -106,7 +150,6 @@
     padding: 50px 0;
 }
 
-/* Image Styling */
 .image {
     width: 100px;
     height: 100px;
@@ -114,6 +157,14 @@
     border-radius: 10px;
     display: block;
     margin: 0 auto;
+}
+
+.no_data {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #555;
+    padding: 30px 0;
 }
 
 @media (max-width: 1024px) {
@@ -151,6 +202,15 @@
         width: 80px;
         height: 80px;
     }
+    .pagination {
+        gap: 5px;
+        padding: 8px;
+    }
+
+    .page_button {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -180,12 +240,17 @@
         width: 60px;
         height: 60px;
     }
+    .pagination {
+        gap: 3px;
+    }
+
+    .page_button {
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+
+    .page_number {
+        display: none;
+    }
 }
 
-.no_data {
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #555;
-    padding: 30px 0;
-}

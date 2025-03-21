@@ -94,7 +94,7 @@
 
     .button_container {
         width: 100%;
-        justify-content: flex-start;
+        justify-content: right;
     }
 
     .page_header {
@@ -148,19 +148,23 @@
         font-size: 13px;
     }
 
+    .view_page_link {
+        font-size: 13px;
+    }
     .button_container {
-        justify-content: flex-start;
+        flex-direction: column; 
+        gap: 8px;
+        width: 100%;
+        align-items: stretch; 
     }
 
     .button,
     .delete_selected_button {
-        padding: 6px 12px;
-        font-size: 13px;
-        min-width: 100px;
-    }
-
-    .view_page_link {
-        font-size: 13px;
+        width: 100%; 
+        text-align: center;
+        min-width: unset; 
+        max-width: 100%; 
+        padding: 8px; 
     }
 }
 
@@ -179,7 +183,7 @@
 
     .button_container {
         flex-wrap: nowrap;
-        justify-content: flex-start;
+        justify-content: right;
     }
 
     .button,

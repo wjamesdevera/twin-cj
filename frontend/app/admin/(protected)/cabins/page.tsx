@@ -116,16 +116,14 @@ const CabinDashboard = () => {
         handleDeleteCabin={handleDeleteCabin}
       />
 
-      <ConfirmModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={confirmDelete}
-        title="Are you sure you want to delete the selected cabin/s?"
-        confirmText="Yes, Delete"
-        confirmColor= "#A80000"
-        cancelText="Cancel"
-        cancelColor="gray"
-      />
+    <ConfirmModal
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      onConfirm={confirmDelete}
+      title="Are you sure you want to delete the selected cabin(s)?"
+      confirmText="Yes, Delete"
+      cancelText="Cancel"
+    />
 
        <NotificationModal
         isOpen={notification.isOpen}
