@@ -15,13 +15,18 @@ interface BookingStatus {
 interface BookingData {
   bookingStatus?: BookingStatus;
   referenceCode: string;
+  services: Array<{
+    name: string;
+    serviceCategory: {
+      category: {
+        name: string;
+      };
+    };
+  }>;
   totalPax: number;
   checkIn: string;
   checkOut: string;
 }
-
-// missing: package
-// missing: cabin
 
 export default function Home() {
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
@@ -44,16 +49,18 @@ export default function Home() {
       <Hero imageURL="/assets/view-booking-status-hero.png" height="335px" marginBottom="65px" />
       <BookingStatusReference onBookingFetched={setBookingData} />
 
-      {bookingData && (
+      {bookingData && bookingData.services && bookingData.services.length > 0 ? (
         <BookingStatusDetails
           status={bookingData.bookingStatus?.name}
           referenceCode={bookingData.referenceCode}
-          package="TO BE WORKED ON"
-          cabin="TO BE WORKED ON"
+          service={bookingData.services[0]?.name || 'Unavailable'}
+          category={bookingData.services[0]?.serviceCategory?.category.name || 'Unavailable'}
           totalPax={bookingData.totalPax}
           checkIn={bookingData.checkIn}
           checkOut={bookingData.checkOut}
         />
+      ) : (
+        null
       )}
 
       {bookingData?.bookingStatus?.name == "Approved" ? (
