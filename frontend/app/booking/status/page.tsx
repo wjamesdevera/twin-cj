@@ -13,11 +13,11 @@ interface BookingStatus {
 }
 
 interface BookingData {
+  bookingStatus?: BookingStatus;
   referenceCode: string;
   totalPax: number;
   checkIn: string;
   checkOut: string;
-  bookingStatus?: BookingStatus;
 }
 
 // missing: package
@@ -26,14 +26,28 @@ interface BookingData {
 export default function Home() {
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
 
+  console.log(bookingData)
+
   return (
     <div className={styles.page}>
       <Hero imageURL="/assets/view-booking-status-hero.png" height="335px" marginBottom="65px" />
       <BookingStatusReference onBookingFetched={setBookingData} />
 
-      <BookingStatusDetails status="Approved" />
+      {bookingData && (
+        <BookingStatusDetails
+          status={bookingData.bookingStatus?.name}
+          referenceCode={bookingData.referenceCode}
+          package="TO BE WORKED ON"
+          cabin="TO BE WORKED ON"
+          totalPax={bookingData.totalPax}
+          checkIn={bookingData.checkIn}
+          checkOut={bookingData.checkOut}
+        />
+      )}
+
+      {/* <BookingStatusDetails status="Approved" />
       <BookingStatusPrintButton />
-      <BookingStatusDetailsReupload />
+      <BookingStatusDetailsReupload /> */}
     </div>
   );
 }

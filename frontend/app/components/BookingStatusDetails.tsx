@@ -92,32 +92,44 @@ const BookingStatusDetails = (props: any) => {
               <p>
                 <b>Status:&nbsp;</b>
                 <span style={{ color: "orange", fontStyle: "italic" }}>
-                  Pending
+                  {props.status}
                 </span>
               </p>
               <p>
                 <b>Reference Number:&nbsp;</b>
-                <span>000000000</span>
+                <span>
+                  {props.referenceCode}
+                </span>
               </p>
               <p>
                 <b>Package:&nbsp;</b>
-                <span>Overnight</span>
+                <span>
+                  {props.package}
+                </span>
               </p>
               <p>
                 <b>Cabin:&nbsp;</b>
-                <span>Maxi Cabin</span>
+                <span>
+                  {props.cabin}
+                </span>
               </p>
               <p>
                 <b>No. of Guests:&nbsp;</b>
-                <span>6</span>
+                <span>
+                  {props.totalPax}
+                </span>
               </p>
               <p>
                 <b>Check-In:&nbsp;</b>
-                <span>2:00 PM</span>
+                <span>
+                  {props.checkIn}
+                </span>
               </p>
               <p>
                 <b>Check-Out:&nbsp;</b>
-                <span>10:00 AM</span>
+                <span>
+                  {props.checkOut}
+                </span>
               </p>
             </div>
             <div
