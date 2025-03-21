@@ -51,7 +51,6 @@ export default function Home() {
         null
       )}
 
-
       {bookingData?.bookingStatus?.name == "Reupload" ? (
         <BookingStatusDetailsReupload />
       ) : (
