@@ -12,6 +12,7 @@ interface SelectPaymentProps {
   setError: (error: string) => void;
   selectId?: number;
   fileInputId?: number;
+  handleSubmit: () => Promise<void>;
 }
 
 const SelectPayment: React.FC<SelectPaymentProps> = ({

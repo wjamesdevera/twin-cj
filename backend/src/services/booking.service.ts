@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { generateReferenceCode } from "../utils/referenceCodeGenerator";
+import appAssert from "../utils/appAssert";
+import { BAD_REQUEST } from "../constants/http";
 
 interface ServiceCategory {
   id: number;
@@ -79,6 +81,8 @@ export const getServicesByCategory = async (type: string) => {
 
 export const createBooking = async (req: Request) => {
   try {
+    const parsedBookingData = JSON.parse(req.body.bookingData || "{}");
+
     const {
       firstName,
       lastName,
@@ -87,9 +91,19 @@ export const createBooking = async (req: Request) => {
       checkInDate,
       checkOutDate,
       bookingCards,
-    } = req.body;
+    } = parsedBookingData;
 
-    if (!contactNumber) throw new Error("Contact number is required");
+    appAssert(email, BAD_REQUEST, "Email is required.");
+    appAssert(firstName, BAD_REQUEST, "First name is required.");
+    appAssert(lastName, BAD_REQUEST, "Last name is required.");
+    appAssert(contactNumber, BAD_REQUEST, "Contact number is required.");
+    appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
+    appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
+    appAssert(
+      Array.isArray(bookingCards) && bookingCards.length > 0,
+      BAD_REQUEST,
+      "Choose at least one Package."
+    );
 
     const referenceCode = await generateReferenceCode();
 
@@ -97,21 +111,17 @@ export const createBooking = async (req: Request) => {
       (req.body.guestCounts?.adults || 0) +
       (req.body.guestCounts?.children || 0);
 
-    const amount = bookingCards.reduce(
+    const amount = (bookingCards ?? []).reduce(
       (total: number, card: { price: string }) => {
-        // Ensure price is a valid number before adding it
         const cardPrice = parseFloat(card.price);
-        if (!isNaN(cardPrice)) {
-          return total + cardPrice;
-        }
-        return total; // If price is invalid, do not add it to total
+        return isNaN(cardPrice) ? total : total + cardPrice;
       },
       0
     );
 
     // Find Personal Detail
     let personalDetail = await prisma.personalDetail.findUnique({
-      where: { email: req.body.email },
+      where: { email: email },
     });
 
     if (!personalDetail) {
@@ -171,7 +181,18 @@ export const createBooking = async (req: Request) => {
       },
     });
 
-    return { referenceCode, booking, transaction };
+    const bookingServices = await Promise.all(
+      bookingCards.map((card: { id: number }) =>
+        prisma.bookingService.create({
+          data: {
+            bookingId: booking.id,
+            serviceId: card.id,
+          },
+        })
+      )
+    );
+
+    return { referenceCode, booking, transaction, bookingServices };
   } catch (error) {
     console.error("Error creating booking:", error);
     throw new Error("Failed to create booking");

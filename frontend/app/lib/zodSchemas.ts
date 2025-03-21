@@ -39,3 +39,7 @@ export const messageSchema = z
   .min(1, "Message is required")
   .max(500, "Message should not exceed 500 characters")
   .refine((val) => val.trim().length > 0, "Message cannot be just spaces");
+
+export const paymentSchema = z.object({
+  paymentMethod: z.string().nonempty("Payment method is required"),
+});
