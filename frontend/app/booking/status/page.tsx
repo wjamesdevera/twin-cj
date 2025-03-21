@@ -29,16 +29,16 @@ export default function Home() {
   const fetchBookingData = async (referenceCode: string) => {
     try {
       const response = await fetch(`http://localhost:8080/api/bookings/status/${referenceCode}`);
+
+      if (!response.ok) throw new Error("Failed to fetch booking data.");
       
       const data = await response.json();
       setBookingData(data);
     } catch (error) {
-
+      console.error("Error occurred during fetch:", error);
     }
   };
-
-  console.log(bookingData)
-
+  
   return (
     <div className={styles.page} style={{ marginBottom: "65px" }}>
       <Hero imageURL="/assets/view-booking-status-hero.png" height="335px" marginBottom="65px" />

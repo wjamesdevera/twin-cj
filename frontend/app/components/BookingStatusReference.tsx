@@ -17,6 +17,8 @@ const BookingStatusReference: React.FC<Props> = ({ onBookingFetched }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!referenceCode) return;
+
     try {
       const response = await fetch(`http://localhost:8080/api/bookings/status/${referenceCode}`);
       

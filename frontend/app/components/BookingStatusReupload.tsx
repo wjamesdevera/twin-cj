@@ -46,7 +46,7 @@ const BookingStatusReupload: React.FC<Props> = ({ referenceCode, onReuploadSucce
 
       onReuploadSuccess();
     } catch (error) {
-
+      console.error("Error during file upload:", error);
     } finally {
       
     }
