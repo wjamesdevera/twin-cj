@@ -14,6 +14,7 @@ import {
   getServicesByCategory,
   createBooking,
   getBookingStatus,
+  reuploadPaymentImage,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -59,5 +60,18 @@ export const getBookingStatusHandler = catchErrors(
     const bookingStatus = await getBookingStatus(referenceCode);
     
     res.json(bookingStatus);
+  }
+);
+
+export const reuploadPaymentImageHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { referenceCode } = request.params;
+    const file = request.file;
+    const proofOfPaymentImageUrl = await reuploadPaymentImage(referenceCode, file!);
+
+    return response.status(OK).json({
+      status: "success",
+      proofOfPaymentImageUrl,
+    });
   }
 );
