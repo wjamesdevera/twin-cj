@@ -41,18 +41,21 @@ const BookingStatusDetails = (props: any) => {
                   {props.referenceCode}
                 </span>
               </p>
-              <p>
-                <b>Package:&nbsp;</b>
-                <span>
-                  {props.package}
-                </span>
-              </p>
-              <p>
-                <b>Cabin:&nbsp;</b>
-                <span>
-                  {props.cabin}
-                </span>
-              </p>
+              {props.category == "day-tour" ? (
+                <p>
+                  <b>Package:&nbsp;</b>
+                  <span>
+                    {props.service}
+                  </span>
+                </p>
+              ) : (
+                <p>
+                  <b>Cabin:&nbsp;</b>
+                  <span>
+                    {props.service}
+                  </span>
+                </p>
+              )}
               <p>
                 <b>No. of Guests:&nbsp;</b>
                 <span>
@@ -125,18 +128,21 @@ const BookingStatusDetails = (props: any) => {
                   {props.referenceCode}
                 </span>
               </p>
-              <p>
-                <b>Package:&nbsp;</b>
-                <span>
-                  {props.package}
-                </span>
-              </p>
-              <p>
-                <b>Cabin:&nbsp;</b>
-                <span>
-                  {props.cabin}
-                </span>
-              </p>
+              {props.category == "day-tour" ? (
+                <p>
+                  <b>Package:&nbsp;</b>
+                  <span>
+                    {props.service}
+                  </span>
+                </p>
+              ) : (
+                <p>
+                  <b>Cabin:&nbsp;</b>
+                  <span>
+                    {props.service}
+                  </span>
+                </p>
+              )}
               <p>
                 <b>No. of Guests:&nbsp;</b>
                 <span>
