@@ -8,6 +8,10 @@ import { forgotPasword } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { z } from "zod";
+import { emailSchema } from "@/app/lib/zodSchemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const Timer = ({ trigger }: { trigger: () => void }) => {
   const Ref = useRef<NodeJS.Timeout | null>(null);
@@ -81,10 +85,24 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
   );
 };
 
+const resetPasswordSchema = z.object({
+  email: emailSchema,
+});
+
+type FormData = z.infer<typeof resetPasswordSchema>;
+
 export function PasswordResetForm() {
   const [email, setEmail] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(resetPasswordSchema),
+  });
 
   const { trigger, isMutating, error } = useSWRMutation(
     "forgot-password",
@@ -96,8 +114,8 @@ export function PasswordResetForm() {
     }
   );
 
-  const handleForgotPassword = async () => {
-    await trigger({ email });
+  const onPasswordReset = async (data: FormData) => {
+    await trigger(data);
   };
 
   return (
@@ -110,7 +128,10 @@ export function PasswordResetForm() {
             className={styles["back-arrow"]}
             onClick={() => router.push("/admin/login")}
           />
-          <div className={styles["login-form-container"]}>
+          <form
+            className={styles["login-form-container"]}
+            onSubmit={handleSubmit(onPasswordReset)}
+          >
             <div className={styles["login-form-wrapper"]}>
               <div className={styles["form-title"]}>
                 <Image
@@ -129,7 +150,7 @@ export function PasswordResetForm() {
                     <p className={styles["success-message"]}>
                       {`A password reset email has been sent to ${email}`}
                     </p>
-                    <Timer trigger={handleForgotPassword} />
+                    <Timer trigger={} />
                   </div>
                 )}
               </div>
@@ -160,7 +181,7 @@ export function PasswordResetForm() {
                 </div>
               )}
             </div>
-          </div>
+          </form>
         </div>
       )}
     </>
