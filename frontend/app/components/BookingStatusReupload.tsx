@@ -5,9 +5,10 @@ import styles from "./BookingStatusReupload.module.scss";
 
 interface Props {
   referenceCode: string;
+  onReuploadSuccess: () => void;
 }
 
-const BookingStatusReupload: React.FC<Props> = ({ referenceCode }) => {
+const BookingStatusReupload: React.FC<Props> = ({ referenceCode, onReuploadSuccess }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,6 +43,8 @@ const BookingStatusReupload: React.FC<Props> = ({ referenceCode }) => {
       
       alert("Payment proof reuploaded successfully!");
       setSelectedFile(null);
+
+      onReuploadSuccess();
     } catch (error) {
 
     } finally {

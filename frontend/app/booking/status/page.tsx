@@ -26,6 +26,17 @@ interface BookingData {
 export default function Home() {
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
 
+  const fetchBookingData = async (referenceCode: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/bookings/status/${referenceCode}`);
+      
+      const data = await response.json();
+      setBookingData(data);
+    } catch (error) {
+
+    }
+  };
+
   console.log(bookingData)
 
   return (
@@ -52,7 +63,10 @@ export default function Home() {
       )}
 
       {bookingData?.bookingStatus?.name == "Reupload" ? (
-        <BookingStatusDetailsReupload referenceCode={bookingData.referenceCode} />
+        <BookingStatusDetailsReupload
+          referenceCode={bookingData.referenceCode}
+          onReuploadSuccess={() => fetchBookingData(bookingData.referenceCode)}
+        />
       ) : (
         null
       )}
