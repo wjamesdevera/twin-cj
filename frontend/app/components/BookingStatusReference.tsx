@@ -3,7 +3,11 @@
 import { useState } from "react";
 import styles from "./BookingStatusReference.module.scss";
 
-const BookingStatusReference = () => {
+interface Props {
+  onBookingFetched: (data: any) => void;
+}
+
+const BookingStatusReference: React.FC<Props> = ({ onBookingFetched }) => {
   const [referenceCode, setReferenceCode] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,7 +22,7 @@ const BookingStatusReference = () => {
       
       const data = await response.json();
 
-      console.log("Booking Status Response:", data);
+      onBookingFetched(data);
     } catch (error) {
 
     } finally {
