@@ -9,11 +9,34 @@ import Button from "@/app/components/button";
 import useSWRMutation from "swr/mutation";
 import { resetPassword } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
+import { z } from "zod";
+import { passwordSchema } from "@/app/lib/zodSchemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
+const changePasswordFormSchema = z
+  .object({
+    newPassword: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Password do not match",
+  });
+
+type FormData = z.infer<typeof changePasswordFormSchema>;
 const Form = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const verificationCode = searchParams.get("code");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, dirtyFields },
+  } = useForm<FormData>({
+    resolver: zodResolver(changePasswordFormSchema),
+  });
   const { trigger, isMutating } = useSWRMutation(
     "resetpassword",
     (
@@ -35,56 +58,19 @@ const Form = () => {
     }
   );
 
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isPasswordMatch, setIsPasswordMatch] = useState(false);
-  const [passwordValidations, setPasswordValidations] = useState({
-    length: false,
-    lowercase: false,
-    uppercase: false,
-    number: false,
-    special: false,
-  });
   const [passwordVisible, setPasswordVisible] = useState({
-    old: false,
+    oldPassword: false,
     new: false,
     confirm: false,
   });
 
-  const validatePassword = (password: string) => {
-    setPasswordValidations({
-      length: password.length >= 8,
-      lowercase: /[a-z]/.test(password),
-      uppercase: /[A-Z]/.test(password),
-      number: /[0-9]/.test(password),
-      special: /[!@#$%^&*]/.test(password),
-    });
-  };
-
-  const handleNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewPassword(e.target.value);
-    validatePassword(e.target.value);
-  };
-
-  const handleConfirmPasswordChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const newConfirmPassword = e.target.value;
-    setConfirmPassword(newConfirmPassword);
-    console.log(
-      `${newPassword} === ${e.target.value} : ${newPassword === e.target.value}`
-    );
-
-    setIsPasswordMatch(newPassword === e.target.value);
-  };
-
-  const handleResetPassword = async () => {
+  const onPasswordChange = async (data: FormData) => {
     try {
       if (verificationCode) {
         await trigger({
           verificationCode,
-          password: newPassword,
-          confirmPassword: confirmPassword,
+          password: data.newPassword,
+          confirmPassword: data.confirmPassword,
         });
       }
     } catch (error) {
@@ -110,17 +96,18 @@ const Form = () => {
             Enter a new password below to change your password.
           </p>
         </div>
-        <div className={styles["form-control"]}>
+        <form
+          className={styles["form-control"]}
+          onSubmit={handleSubmit(onPasswordChange)}
+        >
           {/* New Password */}
           <label className={styles["password-input-container"]}>
             <input
               type={passwordVisible.new ? "text" : "password"}
-              name="new-password"
               placeholder="New Password"
-              value={newPassword}
-              onChange={handleNewPasswordChange}
+              {...register("newPassword")}
             />
-            {newPassword === "" ? null : (
+            {dirtyFields["newPassword"] && (
               <button
                 type="button"
                 className={styles["eye-icon"]}
@@ -135,61 +122,20 @@ const Form = () => {
               </button>
             )}
           </label>
-
-          {/* Password Requirements */}
-          <div className={styles["password-requirements"]}>
-            <p>Your password must contain:</p>
-            <ul>
-              <li
-                className={
-                  passwordValidations.length ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.length ? "✔" : "✖"} At least 8 characters
-              </li>
-              <li
-                className={
-                  passwordValidations.lowercase ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.lowercase ? "✔" : "✖"} Lower case letters
-                (a-z)
-              </li>
-              <li
-                className={
-                  passwordValidations.uppercase ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.uppercase ? "✔" : "✖"} Upper case letters
-                (A-Z)
-              </li>
-              <li
-                className={
-                  passwordValidations.number ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.number ? "✔" : "✖"} Numbers (0-9)
-              </li>
-              <li
-                className={
-                  passwordValidations.special ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.special ? "✔" : "✖"} Special characters
-                (ex. !@#$%^&*)
-              </li>
-            </ul>
-          </div>
+          {errors.newPassword && (
+            <small className={styles["error-message"]}>
+              {errors.newPassword.message}
+            </small>
+          )}
 
           {/* Confirm Password */}
           <label className={styles["password-input-container"]}>
             <input
               type={passwordVisible.confirm ? "text" : "password"}
               placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={handleConfirmPasswordChange}
+              {...register("confirmPassword")}
             />
-            {confirmPassword === "" ? null : (
+            {dirtyFields["confirmPassword"] && (
               <button
                 type="button"
                 className={styles["eye-icon"]}
@@ -208,16 +154,16 @@ const Form = () => {
               </button>
             )}
           </label>
-          {!isPasswordMatch && (
+          {errors.confirmPassword && (
             <small className={styles["error-message"]}>
-              Passwords do not match
+              {errors.confirmPassword.message}
             </small>
           )}
 
           <div>
-            <Button onClick={handleResetPassword}>Change Password</Button>
+            <Button type="submit">Change Password</Button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
