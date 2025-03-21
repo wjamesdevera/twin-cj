@@ -1,6 +1,18 @@
 import styles from "./BookingStatusDetails.module.scss";
 
 const BookingStatusDetails = (props: any) => {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+  };
+
   if (props.status === "Approved") {
     return (
       <section className={`${styles["booking-status-details-section"]}`}>
@@ -122,13 +134,13 @@ const BookingStatusDetails = (props: any) => {
               <p>
                 <b>Check-In:&nbsp;</b>
                 <span>
-                  {props.checkIn}
+                  {formatDate(props.checkIn)}
                 </span>
               </p>
               <p>
                 <b>Check-Out:&nbsp;</b>
                 <span>
-                  {props.checkOut}
+                  {formatDate(props.checkOut)}
                 </span>
               </p>
             </div>
