@@ -1,6 +1,6 @@
 "use client";
 
-import React, { JSX, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import styles from "./admin-sidebar.module.scss";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { FaHome, FaRegUser } from "react-icons/fa";
 import { FaAngleDown, FaAngleUp, FaRegPenToSquare } from "react-icons/fa6";
 import { LuCalendarDays } from "react-icons/lu";
 import { TbArrowBarToLeft, TbArrowBarToRight } from "react-icons/tb";
-import { FaCampground } from "react-icons/fa"; 
+import { FaCampground } from "react-icons/fa";
 import { FaSun } from "react-icons/fa";
 
 import twinCJLogo from "@/public/assets/admin-logo.svg";
@@ -56,6 +56,11 @@ const NavItem = ({
 
 const NavDropdown = ({ collapsed }: NavDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    if (collapsed) {
+      setIsOpen(false);
+    }
+  }, [collapsed]);
 
   return (
     <>
@@ -85,7 +90,7 @@ const NavDropdown = ({ collapsed }: NavDropdownProps) => {
         <NavItem
           href="/admin/day-tour-activities"
           label="Day Tour Activities"
-          icon={<FaSun/>}
+          icon={<FaSun />}
           collapsed={collapsed}
         />
         <NavItem
@@ -98,7 +103,6 @@ const NavDropdown = ({ collapsed }: NavDropdownProps) => {
     </>
   );
 };
-
 
 const NavList = ({ collapsed }: NavListProps) => {
   const pathname = usePathname();
@@ -123,7 +127,7 @@ const NavList = ({ collapsed }: NavListProps) => {
         href="/admin/accounts"
         label="Admin Accounts"
         collapsed={collapsed}
-        isActive={pathname.startsWith("/admin/accounts")} 
+        isActive={pathname.startsWith("/admin/accounts")}
         icon={<FaRegUser />}
       />
     </ul>
