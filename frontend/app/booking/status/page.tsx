@@ -44,10 +44,11 @@ export default function Home() {
           checkOut={bookingData.checkOut}
         />
       )}
-
-      {/* <BookingStatusDetails status="Approved" />
+      
+      {/*
       <BookingStatusPrintButton />
-      <BookingStatusDetailsReupload /> */}
+      <BookingStatusDetailsReupload />
+      */}
     </div>
   );
 }
