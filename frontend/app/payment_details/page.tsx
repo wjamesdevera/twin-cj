@@ -9,6 +9,14 @@ import SelectPayment from "../components/selectPayment";
 import PricingContainer from "../components/pricingContainer";
 import BookingButton from "../components/BookingButton";
 import { options } from "@/app/api";
+import { useForm } from "react-hook-form";
+import { paymentSchema } from "../lib/zodSchemas";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+type PaymentFormData = z.infer<typeof paymentSchema> & {
+  proofOfPayment: File | null;
+};
 
 interface BookingCardData {
   id: number;
@@ -24,14 +32,33 @@ export default function PaymentDetails() {
   const [isMobileScreen, setIsMobileScreen] = useState(false);
   const [isTabletScreen, setIsTabletScreen] = useState(false);
 
-  const [paymentMethod, setPaymentMethod] = useState<string>("");
-  const [proofOfPayment, setProofOfPayment] = useState<File | null>(null);
-  const [error, setError] = useState<string>("");
-
   const storedBookingData = sessionStorage.getItem("bookingData");
   const bookingData = storedBookingData ? JSON.parse(storedBookingData) : {};
 
-  // Responsiveness for the cancellation policy container
+  if (!storedBookingData) {
+    console.error("No booking data found in session storage.");
+  } else {
+    const parsedData = JSON.parse(storedBookingData);
+    console.log("Parsed Booking Data:", parsedData);
+    console.log("Contact Number:", parsedData.contactNumber); // Debugging
+  }
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<PaymentFormData>({
+    defaultValues: {
+      paymentMethod: bookingData?.paymentMethod || "",
+      proofOfPayment: null,
+    },
+  });
+
+  const paymentMethod = watch("paymentMethod");
+  const proofOfPayment = watch("proofOfPayment");
+
   useEffect(() => {
     const handleResize = () => {
       setIsMediumScreen(window.innerWidth <= 1550);
@@ -42,59 +69,37 @@ export default function PaymentDetails() {
 
     handleResize();
     window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
     (card: BookingCardData) => card.name === bookingData.selectedOption
   );
 
-  const handleConfirmBooking = async () => {
+  const onSubmit = async (data: PaymentFormData) => {
     try {
-      // Retrieve session storage data
-      const storedData = sessionStorage.getItem("bookingData");
-      if (!storedData) {
+      if (!bookingData) {
         alert("No booking data found. Please try again.");
         return;
       }
 
-      let bookingData = JSON.parse(storedData);
-
-      // Add paymentMethod to bookingData
-      bookingData = {
-        ...bookingData,
-        paymentMethod,
-      };
-
-      // Send request to backend
-      const response = await fetch(`${options.baseURL}/api/bookings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookingData),
-      });
-
-      const text = await response.text();
-
-      console.log("Raw response:", text);
-
-      const result = JSON.parse(text);
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to confirm booking");
+      const formData = new FormData();
+      formData.append("bookingData", JSON.stringify(bookingData));
+      formData.append("paymentMethod", data.paymentMethod);
+      formData.append("contactNumber", bookingData.contactNumber || "");
+      if (data.proofOfPayment) {
+        formData.append("file", data.proofOfPayment);
       }
 
-      // Handle success
-      console.log("Booking confirmed!", result);
-      alert("Booking successful!");
+      const response = await fetch(`${options.baseURL}/api/bookings`, {
+        method: "POST",
+        body: formData,
+      });
 
-      // Optionally clear sessionStorage and redirect
+      if (!response.ok) throw new Error("Failed to confirm booking");
+
+      alert("Booking successful!");
       sessionStorage.removeItem("bookingData");
-      // window.location.href = "/confirmation"; // Redirect to confirmation page
     } catch (error) {
       console.error("Error confirming booking:", error);
       alert("Failed to confirm booking. Please try again.");
@@ -142,11 +147,16 @@ export default function PaymentDetails() {
           <SelectPayment
             className={`${styles.leftContainer} ${styles.container4}`}
             paymentMethod={paymentMethod}
-            proofOfPayment={proofOfPayment}
-            setPaymentMethod={setPaymentMethod}
-            setProofOfPayment={setProofOfPayment}
-            error={error}
-            setError={setError}
+            proofOfPayment={proofOfPayment ?? null}
+            handleSubmit={handleSubmit(onSubmit)}
+            setPaymentMethod={(method: string) =>
+              setValue("paymentMethod", method)
+            }
+            setProofOfPayment={(file: File | null) => {
+              if (file) setValue("proofOfPayment", file);
+            }}
+            error={errors.proofOfPayment?.message ?? ""}
+            setError={() => {}}
           />
           <PaymentContainer
             className={`${styles.rightContainer} ${styles.container5}`}
@@ -174,7 +184,10 @@ export default function PaymentDetails() {
             }
           />
         </div>
-        <BookingButton text="CONFIRM BOOKING" onClick={handleConfirmBooking} />
+        <BookingButton
+          text="CONFIRM BOOKING"
+          onClick={handleSubmit(onSubmit)}
+        />
       </div>
     </div>
   );

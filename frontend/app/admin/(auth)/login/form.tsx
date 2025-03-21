@@ -8,6 +8,10 @@ import { Loading } from "@/app/components/loading";
 import Image from "next/image";
 import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import Link from "next/link";
+import { emailSchema } from "@/app/lib/zodSchemas";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const Timer = ({
   updateIsDisabled,
@@ -79,10 +83,18 @@ const Timer = ({
   );
 };
 
+const loginFormSchema = z.object({
+  email: emailSchema,
+  password: z.string(),
+});
+
+type FormData = z.infer<typeof loginFormSchema>;
+
 export function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { register, handleSubmit } = useForm<FormData>({
+    resolver: zodResolver(loginFormSchema),
+  });
   const [attempts, setAttempts] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -112,9 +124,9 @@ export function LoginForm() {
     }
   );
 
-  const handleLogin = async () => {
+  const onLogin = async (data: FormData) => {
     try {
-      await trigger({ email, password });
+      await trigger(data);
       console.log("Login successful");
     } catch (error) {
       console.log(error);
@@ -141,20 +153,21 @@ export function LoginForm() {
               </p>
               {isDisabled && <Timer updateIsDisabled={updateIsDisabled} />}
             </div>
-            <div className={styles["form-control"]}>
+            <form
+              className={styles["form-control"]}
+              onSubmit={handleSubmit(onLogin)}
+            >
               {!isDisabled && (
                 <>
                   <input
                     type="text"
                     placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register("email")}
                   />
                   <input
                     type="password"
                     placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password")}
                   />
                   {error && (
                     <small className={styles["error-message"]}>
@@ -173,13 +186,12 @@ export function LoginForm() {
                 <button
                   className={styles["login-button"]}
                   type="submit"
-                  onClick={handleLogin}
                   disabled={isMutating || isDisabled}
                 >
                   {isMutating ? "Logging in..." : "Login"}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}

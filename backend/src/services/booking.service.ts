@@ -84,6 +84,8 @@ export const getServicesByCategory = async (type: string) => {
 
 export const createBooking = async (req: Request) => {
   try {
+    const parsedBookingData = JSON.parse(req.body.bookingData || "{}");
+
     const {
       firstName,
       lastName,
@@ -92,40 +94,46 @@ export const createBooking = async (req: Request) => {
       checkInDate,
       checkOutDate,
       bookingCards,
-    } = req.body;
+    } = parsedBookingData;
 
-    if (!contactNumber) throw new Error("Contact number is required");
+    appAssert(email, BAD_REQUEST, "Email is required.");
+    appAssert(firstName, BAD_REQUEST, "First name is required.");
+    appAssert(lastName, BAD_REQUEST, "Last name is required.");
+    appAssert(contactNumber, BAD_REQUEST, "Contact number is required.");
+    appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
+    appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
+    appAssert(
+      Array.isArray(bookingCards) && bookingCards.length > 0,
+      BAD_REQUEST,
+      "Choose at least one Package."
+    );
 
     const referenceCode = await generateReferenceCode();
 
     const totalGuest =
-      (req.body.guestCounts?.adults || 0) +
-      (req.body.guestCounts?.children || 0);
+      (parsedBookingData.guestCounts?.adults || 0) +
+      (parsedBookingData.guestCounts?.children || 0);
 
-    const amount = bookingCards.reduce(
+    const amount = (bookingCards ?? []).reduce(
       (total: number, card: { price: string }) => {
-        // Ensure price is a valid number before adding it
         const cardPrice = parseFloat(card.price);
-        if (!isNaN(cardPrice)) {
-          return total + cardPrice;
-        }
-        return total; // If price is invalid, do not add it to total
+        return isNaN(cardPrice) ? total : total + cardPrice;
       },
       0
     );
 
     // Find Personal Detail
     let personalDetail = await prisma.personalDetail.findUnique({
-      where: { email: req.body.email },
+      where: { email: email },
     });
 
     if (!personalDetail) {
       personalDetail = await prisma.personalDetail.create({
         data: {
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          phoneNumber: req.body.contactNumber,
-          email: req.body.email,
+          firstName: firstName,
+          lastName: lastName,
+          phoneNumber: contactNumber,
+          email: email,
         },
       });
     }
@@ -169,14 +177,25 @@ export const createBooking = async (req: Request) => {
         checkIn: new Date(checkInDate),
         checkOut: new Date(checkOutDate),
         totalPax: totalGuest,
-        notes: req.body.specialRequest || "",
+        notes: parsedBookingData.specialRequest || "",
         customerId: customer.id,
         bookingStatusId: pendingBookingStatus.id,
         transactionId: transaction.id,
       },
     });
 
-    return { referenceCode, booking, transaction };
+    const bookingServices = await Promise.all(
+      bookingCards.map((card: { id: number }) =>
+        prisma.bookingService.create({
+          data: {
+            bookingId: booking.id,
+            serviceId: card.id,
+          },
+        })
+      )
+    );
+
+    return { referenceCode, booking, transaction, bookingServices };
   } catch (error) {
     console.error("Error creating booking:", error);
     throw new Error("Failed to create booking");
@@ -196,9 +215,9 @@ export const getBookingStatus = async (referenceCode: string) => {
           },
         },
         transaction: true,
-      }
+      },
     });
-    
+
     appAssert(booking, NOT_FOUND, "Booking not found");
 
     return {
@@ -213,19 +232,23 @@ export const getBookingStatus = async (referenceCode: string) => {
       customerId: booking.customerId,
       bookingStatusId: booking.bookingStatusId,
       transactionId: booking.transactionId,
-      customer: booking.customer ? {
-        id: booking.customer.id,
-        personalDetailId: booking.customer.personalDetailId,
-        createdAt: booking.customer.createdAt,
-        updatedAt: booking.customer.updatedAt,
-      } : null,
-      bookingStatus: booking.bookingStatus ? {
-        id: booking.bookingStatus.id,
-        name: booking.bookingStatus.name,
-        createdAt: booking.bookingStatus.createdAt,
-        updatedAt: booking.bookingStatus.updatedAt,
-      } : null,
-      services: booking.services.map(booking => ({
+      customer: booking.customer
+        ? {
+            id: booking.customer.id,
+            personalDetailId: booking.customer.personalDetailId,
+            createdAt: booking.customer.createdAt,
+            updatedAt: booking.customer.updatedAt,
+          }
+        : null,
+      bookingStatus: booking.bookingStatus
+        ? {
+            id: booking.bookingStatus.id,
+            name: booking.bookingStatus.name,
+            createdAt: booking.bookingStatus.createdAt,
+            updatedAt: booking.bookingStatus.updatedAt,
+          }
+        : null,
+      services: booking.services.map((booking) => ({
         id: booking.service.id,
         name: booking.service.name,
         description: booking.service.description,
@@ -235,22 +258,27 @@ export const getBookingStatus = async (referenceCode: string) => {
         createdAt: booking.service.createdAt,
         updatedAt: booking.service.updatedAt,
       })),
-      transaction: booking.transaction ? {
-        id: booking.transaction.id,
-        proofOfPaymentImageUrl: booking.transaction.proofOfPaymentImageUrl,
-        amount: booking.transaction.amount,
-        createdAt: booking.transaction.createdAt,
-        updatedAt: booking.transaction.updatedAt,
-        paymentAccountId: booking.transaction.paymentAccountId,
-        paymentStatusId: booking.transaction.paymentStatusId,
-      } : null,
+      transaction: booking.transaction
+        ? {
+            id: booking.transaction.id,
+            proofOfPaymentImageUrl: booking.transaction.proofOfPaymentImageUrl,
+            amount: booking.transaction.amount,
+            createdAt: booking.transaction.createdAt,
+            updatedAt: booking.transaction.updatedAt,
+            paymentAccountId: booking.transaction.paymentAccountId,
+            paymentStatusId: booking.transaction.paymentStatusId,
+          }
+        : null,
     };
   } catch (error) {
     console.error("Error fetching booking status:", error);
   }
-}
+};
 
-export const reuploadPaymentImage = async (referenceCode: string, file: Express.Multer.File) => {
+export const reuploadPaymentImage = async (
+  referenceCode: string,
+  file: Express.Multer.File
+) => {
   appAssert(file, BAD_REQUEST, "No file uploaded");
 
   const booking = await prisma.booking.findUnique({
@@ -279,9 +307,13 @@ export const reuploadPaymentImage = async (referenceCode: string, file: Express.
     where: { referenceCode },
     data: { bookingStatusId: pendingStatus.id },
   });
-  
+
   if (oldImageUrl) {
-    const oldImagePath = path.join(__dirname, "../../uploads", path.basename(oldImageUrl));
+    const oldImagePath = path.join(
+      __dirname,
+      "../../uploads",
+      path.basename(oldImageUrl)
+    );
     if (fs.existsSync(oldImagePath)) {
       fs.unlinkSync(oldImagePath);
     }

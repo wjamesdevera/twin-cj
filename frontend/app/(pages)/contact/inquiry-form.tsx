@@ -8,6 +8,13 @@ import { sendFeedback } from "../../lib/api";
 import { Loading } from "../../components/loading";
 import { z } from "zod";
 import Swal from "sweetalert2";
+import {
+  emailSchema,
+  messageSchema,
+  phoneNumberSchema,
+} from "@/app/lib/zodSchemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const options = [
   "Feedback",
@@ -15,7 +22,7 @@ const options = [
   "Reservations",
   "Activities",
   "Others",
-];
+] as const;
 
 // Simplified validations using Zod
 const feedbackSchema = z.object({
@@ -28,40 +35,31 @@ const feedbackSchema = z.object({
       "Full name should not contain numbers, special characters, or multiple spaces"
     )
     .refine((val) => val.trim().length > 0, "Full name cannot be just spaces"),
-  email: z.string().email("Invalid email address").trim(),
-  contactNumber: z
-    .string()
-    .min(11, "Contact number must be exactly 11 digits")
-    .max(11, "Contact number must be exactly 11 digits")
-    .regex(/^\d+$/, "Contact number should only contain numbers")
-    .refine((val) => val.startsWith("09"), "Contact number must start with 09"),
-  inquiryType: z.string().min(1, "Inquiry type is required"),
-  message: z
-    .string()
-    .min(1, "Message is required")
-    .max(500, "Message should not exceed 500 characters")
-    .refine((val) => val.trim().length > 0, "Message cannot be just spaces"),
+  email: emailSchema,
+  contactNumber: phoneNumberSchema,
+  inquiryType: z.enum(options),
+  message: messageSchema,
 });
 
 type SendFeedbackData = z.infer<typeof feedbackSchema>;
 
 const InquiryForm: React.FC = () => {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    contactNumber: "",
-    inquiryType: "",
-    message: "",
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, touchedFields },
+  } = useForm<SendFeedbackData>({
+    resolver: zodResolver(feedbackSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      contactNumber: "",
+      message: "",
+    },
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isFormValid, setIsFormValid] = useState(false);
-  const [isTouched, setIsTouched] = useState<Record<string, boolean>>({
-    fullName: false,
-    email: false,
-    contactNumber: false,
-    inquiryType: false,
-    message: false,
-  });
+
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
@@ -74,70 +72,13 @@ const InquiryForm: React.FC = () => {
     return () => clearTimeout(timer);
   }, [showSuccessMessage]);
 
-  // Validate the form data whenever it changes
-  useEffect(() => {
-    const result = feedbackSchema.safeParse(formData);
-    if (result.success) {
-      setErrors({});
-      setIsFormValid(true);
-    } else {
-      const errorMap: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
-        if (isTouched[err.path[0]]) {
-          errorMap[err.path[0]] = err.message;
-        }
-      });
-
-      // Shows an error if all fields are filled out except for inquiry type
-      const isInquiryTypeEmpty =
-        !formData.inquiryType &&
-        formData.fullName &&
-        formData.email &&
-        formData.contactNumber &&
-        formData.message;
-
-      if (isInquiryTypeEmpty) {
-        errorMap.inquiryType = "Inquiry type is required";
-      }
-
-      setErrors(errorMap);
-      setIsFormValid(false);
-    }
-  }, [formData, isTouched]);
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    setIsTouched((prevTouched) => ({ ...prevTouched, [name]: true }));
-  };
-
-  const handleContactNumberChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { value } = e.target;
-    if (value.length <= 11 && /^\d*$/.test(value)) {
-      setFormData({ ...formData, contactNumber: value });
-      setIsTouched((prevTouched) => ({ ...prevTouched, contactNumber: true }));
-    }
-  };
-
-  const handleEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === " ") {
-      e.preventDefault();
-    }
-  };
-
   const { trigger, isMutating } = useSWRMutation(
     "sendFeedback",
     (key, { arg }: { arg: SendFeedbackData }) => sendFeedback(arg),
     {
       onSuccess: () => {
         setShowSuccessMessage(true);
-        clearFormData();
+        reset();
       },
       onError: (error) => {
         console.error("Full error object:", error);
@@ -159,64 +100,36 @@ const InquiryForm: React.FC = () => {
     }
   );
 
-  const clearFormData = () => {
-    setFormData({
-      fullName: "",
-      email: "",
-      contactNumber: "",
-      inquiryType: "",
-      message: "",
-    });
-    setErrors({});
-    setIsFormValid(false);
-    setIsTouched({
-      fullName: false,
-      email: false,
-      contactNumber: false,
-      inquiryType: false,
-      message: false,
-    });
-  };
-
   const handleCancel = () => {
-    clearFormData();
+    reset();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = (data: SendFeedbackData) => {
     // Mark all fields as touched to show errors on submit
-    setIsTouched({
-      fullName: true,
-      email: true,
-      contactNumber: true,
-      inquiryType: true,
-      message: true,
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to submit this inquiry?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, submit it!",
+      customClass: {
+        confirmButton: styles["sweetalert-confirm-button"],
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        trigger(data);
+      }
     });
-
-    if (isFormValid) {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to submit this inquiry?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, submit it!",
-        customClass: {
-          confirmButton: styles["sweetalert-confirm-button"],
-        },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          trigger(formData);
-        }
-      });
-    }
   };
 
   return (
     <div className={styles["form-container"]}>
-      <form className={styles["inquiry-form"]} onSubmit={handleSubmit}>
+      <form
+        className={styles["inquiry-form"]}
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <p className={styles["form-description"]}>
           Welcome to Twin CJ Riverside Glamping Resort! Please fill out the form
           below if you have any concerns, questions, or feedback. We’re here to
@@ -229,7 +142,8 @@ const InquiryForm: React.FC = () => {
                 Thanks for submitting your inquiry!
               </span>
               <br />
-              We've received your message and will process it shortly. Please{" "}
+              We&apos;ve received your message and will process it shortly.
+              Please{" "}
               <span className={styles["emphasized-text"]}>
                 check your email for a confirmation
               </span>{" "}
@@ -246,21 +160,16 @@ const InquiryForm: React.FC = () => {
             <input
               type="text"
               id="fullName"
-              name="fullName"
               placeholder="Enter your full name"
-              value={formData.fullName}
-              onChange={handleChange}
+              {...register("fullName")}
               className={`${errors.fullName ? styles["error-input"] : ""} ${
-                !errors.fullName && isTouched.fullName
+                !errors.fullName && touchedFields.fullName
                   ? styles["success-input"]
                   : ""
               }`}
             />
             {errors.fullName && (
-              <p className={styles["error-text"]}>{errors.fullName}</p>
-            )}
-            {!errors.fullName && isTouched.fullName && (
-              <p className={styles["success-text"]}>Full name is valid</p>
+              <p className={styles["error-text"]}>{errors.fullName.message}</p>
             )}
           </div>
           <div className={styles["form-field"]}>
@@ -270,20 +179,16 @@ const InquiryForm: React.FC = () => {
             <input
               type="email"
               id="email"
-              name="email"
               placeholder="email@email.com"
-              value={formData.email}
-              onChange={handleChange}
-              onKeyDown={handleEmailKeyDown}
+              {...register("email")}
               className={`${errors.email ? styles["error-input"] : ""} ${
-                !errors.email && isTouched.email ? styles["success-input"] : ""
+                !errors.email && touchedFields.email
+                  ? styles["success-input"]
+                  : ""
               }`}
             />
             {errors.email && (
-              <p className={styles["error-text"]}>{errors.email}</p>
-            )}
-            {!errors.email && isTouched.email && (
-              <p className={styles["success-text"]}>Email is valid</p>
+              <p className={styles["error-text"]}>{errors.email.message}</p>
             )}
           </div>
         </div>
@@ -295,24 +200,21 @@ const InquiryForm: React.FC = () => {
             <input
               type="tel"
               id="contactNumber"
-              name="contactNumber"
               placeholder="09XXXXXXXXX"
-              value={formData.contactNumber}
-              onChange={handleContactNumberChange}
+              {...register("contactNumber")}
               className={`${
                 errors.contactNumber ? styles["error-input"] : ""
               } ${
-                !errors.contactNumber && isTouched.contactNumber
+                !errors.contactNumber && touchedFields.contactNumber
                   ? styles["success-input"]
                   : ""
               }`}
               maxLength={11}
             />
             {errors.contactNumber && (
-              <p className={styles["error-text"]}>{errors.contactNumber}</p>
-            )}
-            {!errors.contactNumber && isTouched.contactNumber && (
-              <p className={styles["success-text"]}>Contact Number is valid</p>
+              <p className={styles["error-text"]}>
+                {errors.contactNumber.message}
+              </p>
             )}
           </div>
           <div className={styles["form-field"]}>
@@ -322,19 +224,14 @@ const InquiryForm: React.FC = () => {
             <div className={styles["select-wrapper"]}>
               <select
                 id="inquiryType"
-                name="inquiryType"
-                value={formData.inquiryType}
+                {...register("inquiryType")}
                 className={`${styles["select-field"]} ${
                   errors.inquiryType ? styles["error-input"] : ""
                 } ${
-                  !errors.inquiryType && isTouched.inquiryType
+                  !errors.inquiryType && touchedFields.inquiryType
                     ? styles["success-input"]
                     : ""
                 }`}
-                onChange={handleChange}
-                style={{
-                  color: formData.inquiryType ? "black" : "#ADADAD",
-                }}
               >
                 <option value="" disabled>
                   Select an option
@@ -363,10 +260,9 @@ const InquiryForm: React.FC = () => {
               </span>
             </div>
             {errors.inquiryType && (
-              <p className={styles["error-text"]}>{errors.inquiryType}</p>
-            )}
-            {!errors.inquiryType && isTouched.inquiryType && (
-              <p className={styles["success-text"]}>Inquiry type is valid</p>
+              <p className={styles["error-text"]}>
+                {errors.inquiryType.message}
+              </p>
             )}
           </div>
         </div>
@@ -376,25 +272,20 @@ const InquiryForm: React.FC = () => {
           </label>
           <textarea
             id="message"
-            name="message"
             placeholder="Enter your message here"
-            value={formData.message}
-            onChange={handleChange}
+            {...register("message")}
             className={`${errors.message ? styles["error-input"] : ""} ${
-              !errors.message && isTouched.message
+              !errors.message && touchedFields.message
                 ? styles["success-input"]
                 : ""
             }`}
             maxLength={500}
           />
           {errors.message && (
-            <p className={styles["error-text"]}>{errors.message}</p>
-          )}
-          {!errors.message && isTouched.message && (
-            <p className={styles["success-text"]}>Message is valid</p>
+            <p className={styles["error-text"]}>{errors.message.message}</p>
           )}
           <p className={styles["char-count"]}>
-            {formData.message.length}/500 characters
+            {watch("message").length}/500 characters
           </p>
         </div>
         <div className={styles["button-group"]}>
@@ -409,7 +300,7 @@ const InquiryForm: React.FC = () => {
             <Button
               type="submit"
               className={styles["submit-btn"]}
-              disabled={!isFormValid || isMutating}
+              disabled={isMutating}
             >
               {isMutating ? <Loading /> : "SUBMIT"}
             </Button>
