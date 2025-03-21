@@ -1,6 +1,6 @@
 .section-header {
   color: var(--color-sand-500);
-  margin-bottom: 2rem;
+  margin-top: 6rem;
   text-align: center;
   margin-bottom: 3rem;
 
@@ -22,7 +22,7 @@
     line-height: var(--text-line-height-xl);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 18%;
+    letter-spacing: 0.36rem;
 
     &::after {
       display: block;
