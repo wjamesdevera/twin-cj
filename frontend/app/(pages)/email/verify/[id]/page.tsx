@@ -2,6 +2,8 @@
 import { Loading } from "@/app/components/loading";
 import { verifyEmail } from "@/app/lib/api";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import React, { useState } from "react";
 import useSWR from "swr";
 import styles from "./page.module.scss";
@@ -36,9 +38,30 @@ const Page = () => {
         <Loading />
       ) : (
         <div className={styles.messageContainer}>
+          <div className={styles.verificationTitle}>
+            <Image
+              src={twinCJLogo}
+              alt="Twin CJ Logo"
+              className={styles["login-logo"]}
+              objectFit="contain"
+            />
+            {isSuccess ? (
+              <p className={styles.messageText}>
+                Please use the link below to be able to login to your account.
+              </p>
+            ) : (
+              <p className={styles.messageText}>
+                Please check the verification link or try again. <br />
+                It may have been used or the verification link has expired.
+              </p>
+            )}
+          </div>
+          <ResultBanner isSuccess={isSuccess} />
           <div className={styles.messageWrapper}>
-            <ResultBanner isSuccess={isSuccess} />
-            <Button onClick={() => router.replace("/admin/login")}>
+            <Button
+              className={styles.messageButton}
+              onClick={() => router.replace("/admin/login")}
+            >
               Proceed to Login
             </Button>
           </div>
