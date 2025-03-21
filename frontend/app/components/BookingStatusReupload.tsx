@@ -11,9 +11,14 @@ const BookingStatusReupload: React.FC<Props> = ({ referenceCode }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileInput = event.target;
     const file = event.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      setSelectedFile(null);
+      fileInput.value = "";
+      return;
+    }
 
     setSelectedFile(file);
   };
