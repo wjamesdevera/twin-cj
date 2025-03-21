@@ -34,7 +34,6 @@
   display: flex;
   justify-content: center;
   padding: 0 10%;
-  margin-bottom: 26px;
 }
 
 .booking-status-reference-section div {
@@ -117,5 +116,9 @@
 
   .booking-status-reference-section button {
     width: 70%;
+  }
+
+  .booking-status-reference-section {
+    margin-bottom: 26px;
   }
 }

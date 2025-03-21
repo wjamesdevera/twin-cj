@@ -2,7 +2,7 @@
     font-family: 'Open Sans', sans-serif;
     display: flex;
     justify-content: center;
-    margin-bottom: 75px;
+    margin-top: 24px;
 }
 
 .booking-status-print-button-section button {
@@ -30,4 +30,10 @@
 .booking-status-print-button-section button:focus {
     outline: none;
     box-shadow: 0 0 10px rgba(217, 173, 124, 0.5);
+}
+
+@media (max-width: 768px) {
+    .booking-status-print-button-section {
+        margin-bottom: 26px;
+    }
 }

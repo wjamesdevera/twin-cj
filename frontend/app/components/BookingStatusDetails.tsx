@@ -206,7 +206,7 @@ const BookingStatusDetails = (props: any) => {
                 <b>Reason for Rejection:&nbsp;</b>
               </p>
               <p>
-                The payment screenshot provided is unclear, incomplete, or
+                The payment screenshot that was provided is unclear, incomplete, or
                 incorrect.
               </p>
             </div>
