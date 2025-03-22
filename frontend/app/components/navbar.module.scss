@@ -149,6 +149,14 @@
   line-height: var(--text-line-height-sm);
   font-weight: 500;
   cursor: pointer;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+  border-color: 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.reserveBtn:hover:not(:disabled) {
+  color: var(--color-sunset-orange-300);
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-100);
 }
 
 /* -- RESPONSIVE DESIGN -- */
