@@ -101,7 +101,7 @@ const DayTourView = () => {
   }, []);
 
   const handleAdd = () => {
-    router.push("/admin/day-tour-activities/create");
+    router.push("/admin/day-tour-activities/add");
   };
 
   const handleEdit = (id: number) => {
