@@ -10,12 +10,12 @@
   }
 }
 
-.tabContentContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
+.container {
+  margin: 2rem auto 8rem auto;
   max-width: 1400px;
-  margin: 0 auto;
-  padding: 3rem 0;
+  padding: 0 8rem;
+}
+
+.activities {
+  margin-top: 2rem;
 }
