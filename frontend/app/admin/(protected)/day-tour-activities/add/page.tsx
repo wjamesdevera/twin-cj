@@ -6,6 +6,7 @@ import React, {
   useCallback,
   ChangeEvent,
   FormEvent,
+  useRef,
 } from "react";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
@@ -61,7 +62,9 @@ function Page() {
       parseFloat(formData.price) > 0;
 
     const isImageValid =
-      formData.image !== null &&
+      formData.image &&
+      typeof formData.image === "object" &&
+      "size" in formData.image &&
       formData.image.size <= 1024 * 1024 &&
       ["image/jpeg", "image/png", "image/jpg"].includes(formData.image.type);
 
@@ -89,7 +92,7 @@ function Page() {
       isImageValid &&
       isAdditionalFeeValid;
 
-    setIsFormValid(isValid);
+    setIsFormValid(Boolean(isValid));
   }, [formData]);
 
   useEffect(() => {
@@ -99,32 +102,57 @@ function Page() {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, files } = e.target as HTMLInputElement;
-      const trimmedValue = value.trim();
+      const trimmedValue = value.replace(/^\s+/, "");
+
+      let formattedValue = trimmedValue;
+
+      if (["name", "additionalFeeType"].includes(name)) {
+        formattedValue = trimmedValue.replace(/[^a-zA-Z0-9 ]/g, "");
+      } else if (["price", "additionalFeeAmount"].includes(name)) {
+        formattedValue = trimmedValue.replace(/[^0-9.]/g, "");
+      }
+
+      if (name === "image") {
+        if (files?.length) {
+          const file = files[0];
+
+          if (file.size > 1024 * 1024) {
+            setHelperText((prev) => ({ ...prev, image: true }));
+            setFormData((prevData) => ({ ...prevData, image: null }));
+            e.target.value = "";
+          } else {
+            setHelperText((prev) => ({ ...prev, image: false }));
+            setFormData((prevData) => ({ ...prevData, image: file }));
+          }
+        } else {
+          setFormData((prevData) => ({ ...prevData, image: null }));
+          e.target.value = "";
+        }
+        return;
+      }
 
       setFormData((prevData) => ({
         ...prevData,
-        [name]: files ? files[0] : value,
+        [name]: files ? files[0] : formattedValue,
       }));
-
-      const isFilled = (val: string) => val.trim().length > 0;
 
       setHelperText((prevHelperText) => ({
         ...prevHelperText,
         [name]:
-          name === "name"
-            ? trimmedValue.length === 0 || trimmedValue.length > 50
+          formattedValue.length === 0
+            ? false
+            : name === "name"
+            ? formattedValue.length >= 50
             : name === "description"
-            ? trimmedValue.length === 0 || trimmedValue.length > 100
+            ? formattedValue.length >= 100
             : name === "price"
-            ? !/^\d+(\.\d+)?$/.test(trimmedValue) ||
-              parseFloat(trimmedValue) <= 0
+            ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
             : name === "additionalFeeType"
-            ? trimmedValue.length === 0
+            ? false
             : name === "additionalFeeDescription"
-            ? trimmedValue.length === 0
+            ? false
             : name === "additionalFeeAmount"
-            ? !/^\d+(\.\d+)?$/.test(trimmedValue) ||
-              parseFloat(trimmedValue) <= 0
+            ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
             : false,
       }));
     },
@@ -186,6 +214,26 @@ function Page() {
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const initialFormState: DayTourFormData = {
+    name: "",
+    description: "",
+    image: null,
+    price: "",
+    additionalFeeType: "",
+    additionalFeeDescription: "",
+    additionalFeeAmount: "",
+  };
+
+  const handleClear = () => {
+    setFormData(initialFormState);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };  
+
   return (
     <div>
       {isMutating ? (
@@ -228,7 +276,14 @@ function Page() {
                 accept=".jpg,.png,.jpeg"
                 name="image"
                 onChange={handleChange}
+                ref={fileInputRef}
               />
+              {helperText.image && (
+                <small>
+                  <br />
+                  Image must be less than 1MB
+                </small>
+              )}
             </div>
             <div>
               <label>Rate:</label>
@@ -239,7 +294,7 @@ function Page() {
                 onChange={handleChange}
               />
               {helperText.price && (
-                <small>Rate must be a positive number only</small>
+                <small> Rate must be a positive number only</small>
               )}
             </div>
             <div>
@@ -282,7 +337,10 @@ function Page() {
               )}
             </div>
             <button type="submit" disabled={!isFormValid}>
-              Submit
+              Create Day Tour
+            </button>
+            <button type="button" onClick={handleClear}>
+              Clear
             </button>
             <button
               type="button"
