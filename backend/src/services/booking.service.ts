@@ -206,7 +206,7 @@ export const createBooking = async (req: Request) => {
     );
 
     // Find Personal Detail
-    let personalDetail = await prisma.personalDetail.findUnique({
+    let personalDetail = await prisma.personalDetail.findFirst({
       where: { email: email },
     });
 
@@ -305,7 +305,7 @@ export const getLatestBookings = async () => {
     const latestBookings = await prisma.booking.findMany({
       take: 10,
       orderBy: {
-        checkIn: "desc",
+        createdAt: "desc",
       },
       include: {
         services: {

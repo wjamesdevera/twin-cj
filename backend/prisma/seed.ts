@@ -1,11 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/utils/password";
+import { randomUUID } from "node:crypto";
 const prisma = new PrismaClient();
 async function main() {
   const hashedPassword = await hashPassword("Pa$$w0rd123");
   const adminDetail = await prisma.personalDetail.upsert({
     where: {
-      email: "admin@email.com",
+      id: randomUUID(),
     },
     update: {},
     create: {
