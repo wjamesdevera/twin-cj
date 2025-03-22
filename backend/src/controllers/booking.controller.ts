@@ -14,6 +14,7 @@ import {
   getServicesByCategory,
   createBooking,
   checkAvailability,
+  getLatestBookings,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -78,5 +79,20 @@ export const createBookingHandler = async (req: Request, res: Response) => {
       .json({ message: "Booking created successfully", result });
   } catch (error) {
     res.status(BAD_REQUEST).json({ error: error });
+  }
+};
+
+export const getLatestBookingsHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const latestBookings = await getLatestBookings();
+    res.status(200).json(latestBookings);
+  } catch (error) {
+    res.status(400).json({
+      message: "Failed to fetch latest bookings",
+      error: error,
+    });
   }
 };

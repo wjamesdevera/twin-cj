@@ -284,3 +284,74 @@ export const createBooking = async (req: Request) => {
     throw new Error("Failed to create booking");
   }
 };
+
+interface LatestBookingsResponse {
+  bookings: {
+    referenceNo: string;
+    checkIn: string;
+    checkOut: string;
+    service: string;
+    total: number;
+    customerName: string;
+    email: string;
+    status: string;
+  }[];
+  pendingReservations: number;
+  activeReservations: number;
+}
+
+export const getLatestBookings = async () => {
+  try {
+    const latestBookings = await prisma.booking.findMany({
+      take: 10,
+      orderBy: {
+        checkIn: "desc",
+      },
+      include: {
+        services: {
+          include: {
+            service: true,
+          },
+        },
+        transaction: true,
+        customer: {
+          include: {
+            personalDetail: true,
+          },
+        },
+        bookingStatus: true,
+      },
+    });
+
+    // Format the latest bookings
+    const bookings = latestBookings.map((booking) => ({
+      referenceNo: booking.referenceCode,
+      checkIn: booking.checkIn.toISOString(),
+      checkOut: booking.checkOut.toISOString(),
+      service: booking.services[0]?.service?.name || "N/A",
+      total: booking.transaction?.amount || 0,
+      customerName: `${booking.customer.personalDetail?.firstName ?? ""} ${
+        booking.customer.personalDetail?.lastName ?? ""
+      }`,
+      email: booking.customer.personalDetail?.email || "N/A",
+      status: booking.bookingStatus.name,
+    }));
+
+    // Count the pending and active reservations
+    const pendingReservations = latestBookings.filter(
+      (b) => b.bookingStatus.name === "Pending"
+    ).length;
+    const activeReservations = latestBookings.filter(
+      (b) => b.bookingStatus.name === "Active"
+    ).length;
+
+    return {
+      bookings,
+      pendingReservations,
+      activeReservations,
+    };
+  } catch (error) {
+    console.error("Error fetching latest bookings:", error);
+    throw new Error("Failed to fetch latest bookings");
+  }
+};
