@@ -323,7 +323,6 @@ export const getLatestBookings = async () => {
       },
     });
 
-    // Format the latest bookings
     const bookings = latestBookings.map((booking) => ({
       referenceNo: booking.referenceCode,
       checkIn: booking.checkIn.toISOString(),
@@ -337,7 +336,6 @@ export const getLatestBookings = async () => {
       status: booking.bookingStatus.name,
     }));
 
-    // Count the pending and active reservations
     const pendingReservations = latestBookings.filter(
       (b) => b.bookingStatus.name === "Pending"
     ).length;
