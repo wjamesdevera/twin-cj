@@ -9,6 +9,8 @@
 
 .topContainer {
   display: flex;
+  justify-content: space-between;
+  max-height: 140px;
 }
 
 .leftGroup {
@@ -19,12 +21,16 @@
 .rightGroup {
   display: flex;
   justify-content: end;
+  flex-direction: row;
+  align-items: center;
+  width: 500px;
+  gap: 10px;
 }
 
 .tableTitle {
-  color: #666;
+  color: var(--color-sunset-orange-500);
   font-family: Open Sans, sans-serif;
-  font-size: 1.3rem;
+  font-size: var(--text-size-xl);
   font-weight: 600;
   padding: 15px;
   position: sticky;
@@ -45,14 +51,15 @@
 .tableHead th {
   padding: 12px;
   font-weight: 600;
-  color: var(--Sunset-Orange, #a45f14);
+  color: var(--color-sunset-orange-500);
   background-color: #ffffff;
 }
 
 .table tbody {
   display: block;
-  overflow: auto;
-  max-height: 340px;
+  overflow: hidden;
+  //NOTE: adjust the height when pagination is added
+  max-height: 100vh;
 }
 
 .table thead,
@@ -71,7 +78,7 @@
 }
 
 .statusPending {
-  color: var(--Sunset-Orange, #a45f14);
+  color: var(--color-sunset-orange-500);
   font-weight: 400;
 }
 
@@ -86,7 +93,7 @@
 }
 
 .referenceLink {
-  color: var(--Sunset-Orange, #a45f14);
+  color: var(--color-sunset-orange-500);
   text-decoration: none;
   font-weight: 600;
 

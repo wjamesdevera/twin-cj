@@ -79,8 +79,8 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
         </div>
 
         {/* Status Filter */}
-        <div className={styles.filterContainer}>
-          <div className={styles.rightGroup}>
+        <div className={styles.rightGroup}>
+          <div className={styles.filterForm}>
             <label htmlFor="statusFilter" className={styles.filterLabel}>
               Filter by Status:
             </label>
@@ -98,7 +98,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
           </div>
 
           {/* Service Filter */}
-          <div className={styles.filterContainer}>
+          <div className={styles.filterForm}>
             <label htmlFor="serviceFilter" className={styles.filterLabel}>
               Filter by Service:
             </label>

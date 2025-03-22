@@ -1,82 +1,13 @@
-.tableContainer {
-  padding: 24px;
-  border-radius: 8px;
-  background-color: #ffffff9a;
-  overflow: hidden;
-  max-height: 400px;
-  position: relative;
-}
-
-.tableTitle {
-  color: #666;
-  font-family: Open Sans, sans-serif;
-  font-size: 1.3rem;
-  font-weight: 600;
-  padding: 15px;
-  position: sticky;
-  top: 0;
-  background-color: #ffffff9a;
-  z-index: 3;
-}
-
-.tableHead {
-  text-align: left;
-  position: sticky;
-  top: 50px;
-  z-index: 2;
-  background-color: #ffffff9a;
-  border-bottom: 1px solid #ddd;
-}
-
-.tableHead th {
-  padding: 12px;
-  font-weight: 600;
-  color: var(--Sunset-Orange, #a45f14);
-  background-color: #ffffff;
-}
-
-.table tbody {
-  display: block;
-  overflow: auto;
-  max-height: 340px;
-}
-
-.table thead,
-.table tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-.tableRow {
-  border-bottom: 1px solid #ddd;
-}
-
-.tableCell {
-  padding: 12px;
-}
-
-.statusPending {
-  color: var(--Sunset-Orange, #a45f14);
-  font-weight: 400;
-}
-
-.statusActive {
-  color: #46733b;
-  font-weight: 400;
-}
-
-.statusCompleted {
-  color: #3b6273;
-  font-weight: 400;
-}
-
-.referenceLink {
-  color: var(--Sunset-Orange, #a45f14);
-  text-decoration: none;
-  font-weight: 600;
+.floatingIcon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 61px;
+  height: 57px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
 
   &:hover {
-    text-decoration: underline;
+    transform: scale(1.1);
   }
 }
