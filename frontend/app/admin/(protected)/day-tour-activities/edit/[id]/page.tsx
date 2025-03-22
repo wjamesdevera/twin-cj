@@ -1,4 +1,5 @@
 "use client";
+
 import React, {
   useEffect,
   useState,
@@ -6,10 +7,15 @@ import React, {
   ChangeEvent,
   FormEvent,
 } from "react";
+
 import { useRouter, useParams } from "next/navigation";
-import styles from "../edit.module.scss";
-import { Loading } from "@/app/components/loading";
 import { options } from "@/app/api";
+import { Loading } from "@/app/components/loading";
+import styles from "./page.module.scss";
+import EditDayTour from "./form";
+import { IoArrowBack } from "react-icons/io5";
+import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
 
 interface DayTour {
   id: number;
@@ -22,7 +28,11 @@ interface DayTour {
   additionalFeeAmount: string;
 }
 
-const EditDayTour: React.FC = () => {
+export default function EditDayTourPage() {
+  const router = useRouter();
+  const params = useParams();
+  const id = params.id;
+
   const [formData, setFormData] = useState<DayTour>({
     id: 0,
     name: "",
@@ -38,6 +48,11 @@ const EditDayTour: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isMutating, setIsMutating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [originalData, setOriginalData] = useState<DayTour | null>(null);
+  const [isFormValid, setIsFormValid] = useState<boolean>(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
+  const [confirmMessage, setConfirmMessage] = useState<string>("");
+
   const [helperText, setHelperText] = useState<{ [key: string]: string }>({
     name: "",
     description: "",
@@ -46,12 +61,16 @@ const EditDayTour: React.FC = () => {
     additionalFeeDescription: "",
     additionalFeeAmount: "",
   });
-  const [originalData, setOriginalData] = useState<DayTour | null>(null);
-  const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
-  const router = useRouter();
-  const params = useParams();
-  const id = params.id;
+  const [notification, setNotification] = useState<{
+    isOpen: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
 
   useEffect(() => {
     if (!id) {
@@ -151,48 +170,52 @@ const EditDayTour: React.FC = () => {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, files } = e.target as HTMLInputElement;
-      const trimmedValue = value.replace(/^\s+/, "");
 
-      let formattedValue = trimmedValue;
+      if (name === "image") {
+        setImageFile(files ? files[0] : null);
+      } else {
+        const trimmedValue = value.replace(/^\s+/, "");
+        let formattedValue = trimmedValue;
 
-      if (["name", "additionalFeeType"].includes(name)) {
-        formattedValue = trimmedValue.replace(/[^a-zA-Z0-9 ]/g, "");
-      } else if (["price", "additionalFeeAmount"].includes(name)) {
-        formattedValue = trimmedValue.replace(/[^0-9.]/g, "");
+        if (["name", "additionalFeeType"].includes(name)) {
+          formattedValue = trimmedValue.replace(/[^a-zA-Z0-9 ]/g, "");
+        } else if (["price", "additionalFeeAmount"].includes(name)) {
+          formattedValue = trimmedValue.replace(/[^0-9.]/g, "");
+        }
+
+        setFormData((prevData) => ({
+          ...prevData,
+          [name]: formattedValue,
+        }));
+
+        setHelperText((prevHelperText) => ({
+          ...prevHelperText,
+          [name]:
+            formattedValue.length === 0
+              ? ""
+              : name === "name"
+              ? formattedValue.length >= 50
+                ? "Name must not exceed 50 characters"
+                : ""
+              : name === "description"
+              ? formattedValue.length >= 100
+                ? "Description must not exceed 100 characters"
+                : ""
+              : name === "price"
+              ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
+                ? "Rate must be a positive number only"
+                : ""
+              : name === "additionalFeeType"
+              ? ""
+              : name === "additionalFeeDescription"
+              ? ""
+              : name === "additionalFeeAmount"
+              ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
+                ? "Additional Fee Amount must be a positive number only"
+                : ""
+              : prevHelperText[name],
+        }));
       }
-
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: files ? files[0] : formattedValue,
-      }));
-
-      setHelperText((prevHelperText) => ({
-        ...prevHelperText,
-        [name]:
-          formattedValue.length === 0
-            ? ""
-            : name === "name"
-            ? formattedValue.length >= 50
-              ? "Name must not exceed 50 characters"
-              : ""
-            : name === "description"
-            ? formattedValue.length >= 100
-              ? "Description must not exceed 100 characters"
-              : ""
-            : name === "price"
-            ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
-              ? "Rate must be a positive number only"
-              : ""
-            : name === "additionalFeeType"
-            ? ""
-            : name === "additionalFeeDescription"
-            ? ""
-            : name === "additionalFeeAmount"
-            ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
-              ? "Additional Fee Amount must be a positive number only"
-              : ""
-            : prevHelperText[name],
-      }));
     },
     []
   );
@@ -246,21 +269,24 @@ const EditDayTour: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    hasChanges();
-
-    setIsMutating(true);
-
     if (!hasChanges()) {
       setIsMutating(false);
       return;
     }
 
-    if (!window.confirm("Are you sure you want to save changes?")) {
-      setIsMutating(false);
-      return;
-    }
+    setFormData((prevData) => ({
+      ...prevData,
+      imageUrl: imageFile ? URL.createObjectURL(imageFile) : prevData.imageUrl,
+    }));
 
+    setConfirmMessage("Are you sure you want to save the changes?");
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    setIsMutating(true);
     const data = new FormData();
+
     const jsonData: any = {
       name: formData.name,
       description: formData.description,
@@ -286,6 +312,7 @@ const EditDayTour: React.FC = () => {
     }
 
     data.append("data", JSON.stringify(jsonData));
+
     if (imageFile) {
       data.append("file", imageFile);
     }
@@ -307,158 +334,70 @@ const EditDayTour: React.FC = () => {
       if (updatedImageUrl) {
         setFormData((prevData) => ({
           ...prevData,
-          imageUrl: `http://localhost:8080/${updatedImageUrl}?t=${new Date().getTime()}`,
+          imageUrl: `http://localhost:8080/${updatedImageUrl}?t=${Date.now()}`,
         }));
       }
 
-      alert("Day tour updated successfully!");
+      setNotification({
+        isOpen: true,
+        message: "Day Tour Activity updated successfully!",
+        type: "success",
+      });
+
       router.push("/admin/day-tour-activities");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
+      setNotification({
+        isOpen: true,
+        message:
+          err instanceof Error ? err.message : "An unknown error occurred",
+        type: "error",
+      });
     } finally {
       setIsMutating(false);
     }
   };
+
+  const isFormInvalid =
+    Object.values(helperText).some((error) => error !== "") ||
+    (JSON.stringify(formData) === JSON.stringify(originalData) && !imageFile);
 
   if (loading) return <Loading />;
   if (error) return <div>Error: {error}</div>;
   if (!formData) return <div>No data found</div>;
 
   return (
-    <div className={styles.container}>
-      {isMutating ? (
-        <Loading />
-      ) : (
-        <div>
-          <h1>Edit Day Tour</h1>
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.formGroup}>
-              <label htmlFor="name">Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name || ""}
-                onChange={handleChange}
-                maxLength={50}
-                required
-              />
-              {helperText.name && (
-                <small className={styles.helperText}>{helperText.name}</small>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="description">Description</label>
-              <input
-                type="text"
-                id="description"
-                name="description"
-                value={formData.description || ""}
-                onChange={handleChange}
-                maxLength={100}
-                required
-              />
-              {helperText.description && (
-                <small className={styles.helperText}>
-                  {helperText.description}
-                </small>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="imageUrl">Image</label>
-              <input
-                type="file"
-                accept=".jpg,.png,.jpeg"
-                id="imageUrl"
-                onChange={(e) =>
-                  setImageFile(e.target.files ? e.target.files[0] : null)
-                }
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="price">Rate</label>
-              <input
-                type="text"
-                id="price"
-                name="price"
-                value={formData.price || ""}
-                onChange={handleChange}
-                required
-              />
-              {helperText.price && (
-                <small className={styles.helperText}>{helperText.price}</small>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <h1>Additional Fees (Optional)</h1>
-              <label htmlFor="additionalFeeType">Additional Fee Type</label>
-              <input
-                type="text"
-                id="additionalFeeType"
-                name="additionalFeeType"
-                maxLength={50}
-                value={formData.additionalFeeType || ""}
-                onChange={handleChange}
-              />
-              {helperText.additionalFeeType && (
-                <small className={styles.helperText}>
-                  {helperText.additionalFeeType}
-                </small>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="additionalFeeDescription">
-                Additional Fee Description
-              </label>
-              <input
-                type="text"
-                id="additionalFeeDescription"
-                name="additionalFeeDescription"
-                maxLength={100}
-                value={formData.additionalFeeDescription || ""}
-                onChange={handleChange}
-              />
-              {helperText.additionalFeeDescription && (
-                <small className={styles.helperText}>
-                  {helperText.additionalFeeDescription}
-                </small>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="additionalFeeAmount">Additional Fee Amount</label>
-              <input
-                type="text"
-                id="additionalFeeAmount"
-                name="additionalFeeAmount"
-                value={formData.additionalFeeAmount || ""}
-                onChange={handleChange}
-              />
-              {helperText.additionalFeeAmount && (
-                <small className={styles.helperText}>
-                  {helperText.additionalFeeAmount}
-                </small>
-              )}
-            </div>
-            <button
-              type="submit"
-              className={styles.submitButton}
-              disabled={!isFormValid || !hasChanges()}
-            >
-              Save Changes
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/admin/day-tour-activities")}
-            >
-              Cancel
-            </button>
-          </form>
+    <div className={styles.page_container}>
+      <div className={styles.page_header}>
+        <div className={styles.back_arrow} onClick={() => router.back()}>
+          <IoArrowBack />
         </div>
-      )}
+        <h1 className={styles.title}>Edit Day Tour Activity</h1>
+      </div>
+      <EditDayTour
+        formData={formData}
+        setFormData={setFormData}
+        helperText={helperText}
+        isMutating={isMutating}
+        isFormValid={isFormValid}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        setIsConfirmModalOpen={setIsConfirmModalOpen}
+        setConfirmMessage={setConfirmMessage}
+      />
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirm}
+        title={confirmMessage}
+        confirmText="Yes"
+        cancelText="No"
+      />
+      <NotificationModal
+        isOpen={notification.isOpen}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
+      />
     </div>
   );
-};
-
-export default EditDayTour;
+}

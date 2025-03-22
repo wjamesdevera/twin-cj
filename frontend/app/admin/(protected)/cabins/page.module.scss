@@ -18,25 +18,6 @@
     color: #a45f14;
 }
 
-.view_page_container {
-    text-align: right;
-}
-
-.view_page_link {
-    color: var(--color-neutral-700);
-    text-decoration: underline;
-    font-weight: 500;
-    transition: color 0.2s ease-in-out;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.view_page_link:hover,
-.view_page_link:active {
-    color: var(--color-neutral-900);
-    font-weight: bold;
-}
-
 .subheader_container {
     display: flex;
     justify-content: space-between;
