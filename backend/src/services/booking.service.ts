@@ -285,21 +285,6 @@ export const createBooking = async (req: Request) => {
   }
 };
 
-interface LatestBookingsResponse {
-  bookings: {
-    referenceNo: string;
-    checkIn: string;
-    checkOut: string;
-    service: string;
-    total: number;
-    customerName: string;
-    email: string;
-    status: string;
-  }[];
-  pendingReservations: number;
-  activeReservations: number;
-}
-
 export const getLatestBookings = async () => {
   try {
     const latestBookings = await prisma.booking.findMany({

@@ -43,3 +43,18 @@ export const messageSchema = z
 export const paymentSchema = z.object({
   paymentMethod: z.string().nonempty("Payment method is required"),
 });
+
+export const walkinSchema = z.object({
+  firstName: nameSchema,
+  lastName: z.string().nonempty("Last name is required"),
+  email: emailSchema,
+  contactNumber: phoneNumberSchema,
+  packageType: z.enum(["Day Tour", "Overnight"], {
+    message: "Package type is required",
+  }),
+  selectedPackage: z.string().nonempty("Select a package"),
+  checkInDate: z.string().nonempty("Check-in date is required"),
+  checkOutDate: z.string().optional(),
+  proofOfPayment: z.string().nonempty("Proof of payment is required"),
+  bookingStatus: z.string().nonempty("Booking status is required"),
+});
