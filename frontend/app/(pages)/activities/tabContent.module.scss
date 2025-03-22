@@ -1,0 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;400&display=swap");
+
+.wrapper {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 3rem 0;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #333;
+    font-family: "Poppins", sans-serif;
+  }
+
+  p {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #555;
+    max-width: 900px;
+    font-family: "Poppins", sans-serif;
+    margin: 6px 0;
+  }
+
+  hr {
+    width: 86%;
+    border: none;
+    height: 2px;
+    background: #757474;
+    margin: 1rem 0;
+  }
+
+  .viewOffers {
+    background: transparent;
+    border-radius: 0.3125rem;
+    border: 1px solid var(--Sunset-Orange, #a45f14);
+    padding: 10px 30px;
+    color: var(--Sunset-Orange, #a45f14);
+    font-family: Open Sans;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1.25rem; /* 111.111% */
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 10px 0;
+
+    &:hover {
+      background: var(--Sunset-Orange, #a45f14);
+      color: #fff;
+    }
+  }
+}
