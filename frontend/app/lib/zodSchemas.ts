@@ -31,7 +31,7 @@ export const passwordSchema = z
   .regex(/[0-9]/, "Password must contain at least one number")
   .regex(
     /[\W_]/,
-    "Password must contain at least one special character or underscore (!@#$%^&*_)"
+    "Password must contain at least one special character or underscore"
   );
 
 export const messageSchema = z
