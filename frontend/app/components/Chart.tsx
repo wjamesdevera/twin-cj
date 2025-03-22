@@ -53,18 +53,15 @@ const BookingsChart: React.FC = () => {
 
         const data = await response.json();
 
-        // Log the response data to inspect its structure
         console.log("Fetched data:", data);
 
         if (!data.bookings) {
           throw new Error("Invalid data format");
         }
 
-        // Process the data to create labels and values
         const labels: string[] = [];
         const values: number[] = [];
 
-        // Aggregate the bookings by service
         data.bookings.forEach((booking: any) => {
           const serviceIndex = labels.indexOf(booking.service);
           if (serviceIndex === -1) {
