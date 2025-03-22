@@ -31,7 +31,7 @@ interface DayTourFormProps {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   handleSubmit: (e: FormEvent) => void;
-  setIsConfirmModalOpen: React.Dispatch<React.SetStateAction<boolean>>; // ✅ Add this
+  setIsConfirmModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setConfirmMessage: React.Dispatch<React.SetStateAction<string>>;
 }
 
