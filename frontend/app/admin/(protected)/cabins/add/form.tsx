@@ -93,9 +93,17 @@ export default function CabinForm() {
     reset,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<AddCabinFormData>({
     resolver: zodResolver(cabinFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      price: 0,
+      minCapacity: 0,
+      maxCapacity: 0,
+      additionalFee: undefined,
+    },
   });
 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -123,19 +131,22 @@ export default function CabinForm() {
         price: Number(formData.price),
         minCapacity: Number(formData.minCapacity),
         maxCapacity: Number(formData.maxCapacity),
-        additionalFee: formData.additionalFee
-          ? {
-              type: formData.additionalFee.additionalFeeType,
-              description: formData.additionalFee.description || "",
-              amount: Number(formData.additionalFee.amount),
-            }
-          : undefined,
+        additionalFee:
+          dirtyFields["additionalFee"] && formData.additionalFee
+            ? {
+                type: formData.additionalFee.additionalFeeType || "",
+                description: formData.additionalFee.description || "",
+                amount: Number(formData.additionalFee.amount),
+              }
+            : undefined,
       };
 
       data.append("data", JSON.stringify(jsonData));
       if (formData.file) {
         data.append("file", formData.file);
       }
+
+      console.log(data);
 
       trigger(data);
       setNotification({
@@ -356,7 +367,7 @@ export default function CabinForm() {
           {/* Buttons */}
           <div className={styles.full_width}>
             <div className={styles.button_container}>
-              <CustomButton type="submit" label="Edit Cabin" />
+              <CustomButton type="submit" label="Add Cabin" />
               <CustomButton
                 type="button"
                 label="Clear"
