@@ -1,10 +1,36 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { walkinSchema } from "@/app/lib/zodSchemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import useSWR from "swr";
+
+interface Package {
+  id: string;
+  name: string;
+  price?: number;
+  capacity?: number;
+  description?: string;
+}
+
+type FormFields = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  contactNumber: string;
+  packageType: "Day Tour" | "Overnight";
+  selectedPackage: string;
+  checkInDate: string;
+  checkOutDate: string;
+  paymentAccountName: string;
+  paymentAccountNumber: string;
+  paymentMethod: string;
+  bookingStatus: string;
+  proofOfPayment?: File;
+};
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function WalkinForm() {
   const {
@@ -12,122 +38,150 @@ export default function WalkinForm() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(walkinSchema) });
-
-  const [dayTourPackages, setDayTourPackages] = useState([]);
-  const [cabinOptions, setCabinOptions] = useState([]);
+  } = useForm<FormFields>({ resolver: zodResolver(walkinSchema) });
 
   const packageType = watch("packageType");
   const checkInDate = watch("checkInDate");
   const checkOutDate = watch("checkOutDate");
 
-  useEffect(() => {
-    if (!packageType || !checkInDate || !checkOutDate) return;
+  const formattedCheckInDate = checkInDate
+    ? new Date(checkInDate).toISOString()
+    : "";
 
-    const fetchServices = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/bookings/getServicesByCategory?type=${packageType}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch services");
-        }
+  const formattedCheckOutDate = checkOutDate
+    ? new Date(checkOutDate).toISOString()
+    : "";
 
-        const services = await response.json();
+  const { data, error } = useSWR<{
+    status: string;
+    data: Record<string, Package[]>;
+  }>(
+    packageType && checkInDate
+      ? `http://localhost:8080/api/bookings?type=${encodeURIComponent(
+          packageType
+        )}&checkInDate=${new Date(checkInDate).toISOString().split("T")[0]}${
+          packageType === "Overnight" && checkOutDate
+            ? `&checkOutDate=${
+                new Date(checkOutDate).toISOString().split("T")[0]
+              }`
+            : ""
+        }`
+      : null,
+    fetcher
+  );
 
-        if (packageType === "Day Tour") {
-          setDayTourPackages(services["Day Tour"]?.services || []);
-        } else if (packageType === "Overnight") {
-          setCabinOptions(services["Overnight"]?.services || []);
-        }
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
+  const availablePackages = data?.data?.[packageType] || [];
 
-    fetchServices();
-  }, [packageType, checkInDate, checkOutDate]);
-
-  const onSubmit = async (data: any) => {
-    console.log("Walk-in Booking Data:", data);
-    // Submit data to backend
+  const onSubmit = (formData: FormFields) => {
+    console.log("Walk-in Booking Data:", formData);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <label>First Name:</label>
-      <input {...register("firstName")} />
-      {errors.firstName && <p>{errors.firstName.message}</p>}
+      <div>
+        <label>First Name:</label>
+        <input {...register("firstName")} type="text" />
+        {errors.firstName && <p>{errors.firstName?.message}</p>}
+      </div>
+      <div>
+        <label>Last Name:</label>
+        <input {...register("lastName")} type="text" />
+        {errors.lastName && <p>{errors.lastName?.message}</p>}
+      </div>
+      <div>
+        <label>Email:</label>
+        <input {...register("email")} type="email" />
+        {errors.email && <p>{errors.email?.message}</p>}
+      </div>
+      <div>
+        <label>Contact Number:</label>
+        <input {...register("contactNumber")} type="text" />
+        {errors.contactNumber && <p>{errors.contactNumber?.message}</p>}
+      </div>
+      <div>
+        <label>Check-In Date:</label>
+        <input {...register("checkInDate")} type="date" />
+        {errors.checkInDate && <p>{errors.checkInDate?.message}</p>}
+      </div>
+      <div>
+        <label>Check-Out Date:</label>
+        <input {...register("checkOutDate")} type="date" />
+        {errors.checkOutDate && <p>{errors.checkOutDate?.message}</p>}
+      </div>
+      <div>
+        <label>Payment Account Name:</label>
+        <input {...register("paymentAccountName")} type="text" />
+        {errors.paymentAccountName && (
+          <p>{errors.paymentAccountName?.message}</p>
+        )}
+      </div>
+      <div>
+        <label>Payment Account Number:</label>
+        <input {...register("paymentAccountNumber")} type="text" />
+        {errors.paymentAccountNumber && (
+          <p>{errors.paymentAccountNumber?.message}</p>
+        )}
+      </div>
+      <div>
+        <label>Payment Method:</label>
+        <input {...register("paymentMethod")} type="text" />
+        {errors.paymentMethod && <p>{errors.paymentMethod?.message}</p>}
+      </div>
+      <div>
+        <label>Booking Status:</label>
+        <input {...register("bookingStatus")} type="text" />
+        {errors.bookingStatus && <p>{errors.bookingStatus?.message}</p>}
+      </div>
 
-      <label>Email:</label>
-      <input {...register("email")} />
-      {errors.email && <p>{errors.email.message}</p>}
+      <div>
+        <label>Package Type:</label>
+        <select {...register("packageType")} defaultValue="">
+          <option value="" disabled>
+            Select Package Type
+          </option>
+          <option value="Day Tour">Day Tour</option>
+          <option value="Overnight">Overnight</option>
+        </select>
+        {errors.packageType && <p>{errors.packageType?.message}</p>}
+      </div>
 
-      <label>Contact Number:</label>
-      <input {...register("contactNumber")} />
-      {errors.contactNumber && <p>{errors.contactNumber.message}</p>}
-
-      <label>Package Type:</label>
-      <select {...register("packageType")}>
-        <option value="">Select Package</option>
-        <option value="Day Tour">Day Tour</option>
-        <option value="Overnight">Overnight</option>
-      </select>
-      {errors.packageType && <p>{errors.packageType.message}</p>}
-
-      {packageType === "Day Tour" && dayTourPackages.length > 0 && (
-        <>
-          <label>Day Tour Package:</label>
-          <select {...register("selectedPackage")}>
-            <option value="">Select a Day Tour Package</option>
-            {dayTourPackages.map((pkg: any) => (
-              <option key={pkg.id} value={pkg.id}>
-                {pkg.name}
+      {packageType && (
+        <div>
+          <label>
+            {packageType === "Day Tour"
+              ? "Day Tour Package"
+              : "Cabin Selection"}
+            :
+          </label>
+          <select {...register("selectedPackage")} defaultValue="">
+            <option value="" disabled>
+              Select an Option
+            </option>
+            {availablePackages.length > 0 ? (
+              availablePackages.map((pkg) => (
+                <option key={pkg.id} value={pkg.id}>
+                  {pkg.name}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>
+                No options available!
               </option>
-            ))}
+            )}
           </select>
-          {errors.selectedPackage && <p>{errors.selectedPackage.message}</p>}
-        </>
+          {errors.selectedPackage && <p>{errors.selectedPackage?.message}</p>}
+        </div>
       )}
 
-      {packageType === "Overnight" && cabinOptions.length > 0 && (
-        <>
-          <label>Cabin Selection:</label>
-          <select {...register("selectedPackage")}>
-            <option value="">Select a Cabin</option>
-            {cabinOptions.map((cabin: any) => (
-              <option key={cabin.id} value={cabin.id}>
-                {cabin.name}
-              </option>
-            ))}
-          </select>
-          {errors.selectedPackage && <p>{errors.selectedPackage.message}</p>}
-        </>
-      )}
-
-      <label>Check-in Date:</label>
-      <input type="date" {...register("checkInDate")} />
-      {errors.checkInDate && <p>{errors.checkInDate.message}</p>}
-
-      {packageType === "Overnight" && (
-        <>
-          <label>Check-out Date:</label>
-          <input type="date" {...register("checkOutDate")} />
-          {errors.checkOutDate && <p>{errors.checkOutDate.message}</p>}
-        </>
-      )}
-
-      <label>Proof of Payment:</label>
-      <input type="file" {...register("proofOfPayment")} />
-      {errors.proofOfPayment && <p>{errors.proofOfPayment.message}</p>}
-
-      <label>Booking Status:</label>
-      <select {...register("bookingStatus")}>
-        <option value="">Select Status</option>
-        <option value="Pending">Pending</option>
-        <option value="Confirmed">Confirmed</option>
-      </select>
-      {errors.bookingStatus && <p>{errors.bookingStatus.message}</p>}
+      <div>
+        <label>Proof of Payment:</label>
+        <input
+          type="file"
+          {...register("proofOfPayment")}
+          accept="image/*,application/pdf"
+        />
+        {errors.proofOfPayment && <p>{errors.proofOfPayment?.message}</p>}
+      </div>
 
       <button type="submit">Submit</button>
     </form>

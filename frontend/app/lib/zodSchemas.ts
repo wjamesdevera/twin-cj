@@ -45,16 +45,17 @@ export const paymentSchema = z.object({
 });
 
 export const walkinSchema = z.object({
-  firstName: nameSchema,
-  lastName: z.string().nonempty("Last name is required"),
-  email: emailSchema,
-  contactNumber: phoneNumberSchema,
-  packageType: z.enum(["Day Tour", "Overnight"], {
-    message: "Package type is required",
-  }),
-  selectedPackage: z.string().nonempty("Select a package"),
-  checkInDate: z.string().nonempty("Check-in date is required"),
-  checkOutDate: z.string().optional(),
-  proofOfPayment: z.string().nonempty("Proof of payment is required"),
-  bookingStatus: z.string().nonempty("Booking status is required"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email"),
+  contactNumber: z.string().min(10, "Invalid contact number"),
+  packageType: z.enum(["Day Tour", "Overnight"]),
+  selectedPackage: z.string().min(1, "Package selection is required"),
+  checkInDate: z.string(),
+  checkOutDate: z.string(),
+  paymentAccountName: z.string().min(1, "Payment account name is required"),
+  paymentAccountNumber: z.string().min(1, "Payment account number is required"),
+  paymentMethod: z.string().min(1, "Payment method is required"),
+  bookingStatus: z.string().min(1, "Booking status is required"),
+  proofOfPayment: z.any().optional(),
 });
