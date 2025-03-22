@@ -1,0 +1,138 @@
+.form {
+    display: grid;
+    grid-template-columns: 1fr 0.7fr;
+    gap: 20px;
+    max-width: 1600px;
+    width: 100%;
+    padding: 40px;
+  }
+  
+  .left_column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .right_column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form_group {
+    display: flex;
+    flex-direction: column;
+
+    label {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+  
+    input, textarea {
+      padding: 10px;
+      border: 1px solid #BEBEBE;
+      border-radius: 5px;
+      font-size: 14px;
+      width: 100%;
+    }
+  
+    textarea {
+      resize: vertical;
+      min-height: 200px;
+    }
+  
+    .invalid_input {
+      border: 1px solid red;
+    }
+  
+    .error {
+      color: red;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+  }
+  
+  .peso_input_container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #BEBEBE;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+  }
+  
+  .peso_prefix {
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 5px;
+  }
+  
+  .peso_input {
+    border: none;
+    font-size: 14px;
+    width: 100%;
+  }
+  
+  .small_field input {
+    max-width: 150px;
+  }
+  
+  .right_column .input_container input[type="file"] {
+    max-width: 200px;
+  }
+  
+  .small_field {
+    display: flex;
+  }
+  
+  .image_preview {
+    width: 210px;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  .full_width {
+    grid-column: span 2;
+  }
+  
+  .button_container {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  .required {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .capacity_container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .form {
+      grid-template-columns: 1fr;
+    }
+  
+    .full_width {
+      grid-column: span 1;
+    }
+  
+    .button_container {
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+  
+    .image_preview {
+      width: 320px;
+    }
+  }

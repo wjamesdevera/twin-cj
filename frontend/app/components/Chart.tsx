@@ -1,28 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import styles from "./chart.module.scss";
+import { Loading } from "./loading";
 
 Chart.register(...registerables);
-
-const initialData = {
-  labels: ["January", "February", "March", "April", "May", "June"],
-  datasets: [
-    {
-      label: "Monthly Bookings",
-      data: [60, 70, 80, 75, 65, 40],
-      backgroundColor: [
-        "#8d6e63",
-        "#a1887f",
-        "#bcaaa4",
-        "#d7ccc8",
-        "#cfa792",
-        "#ffccbc",
-      ],
-      borderRadius: 5,
-    },
-  ],
-};
 
 const options = {
   responsive: true,
@@ -31,7 +13,7 @@ const options = {
   scales: {
     x: {
       grid: {
-        display: false,
+        display: true,
       },
     },
     y: {
@@ -50,59 +32,77 @@ const options = {
 };
 
 const BookingsChart: React.FC = () => {
-  const [chartData, setChartData] = useState(initialData);
+  const [chartData, setChartData] = useState<any>(null);
+  const [filter, setFilter] = useState("monthly");
 
-  const handleFilterChange = (filter: string) => {
-    let newData;
-    switch (filter) {
-      case "weekly":
-        newData = {
-          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/bookings/monthly`,
+          {
+            headers: {
+              "Cache-Control": "no-store",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const { monthlyBookingCount } = await response.json();
+
+        console.log("Fetched data:", monthlyBookingCount);
+
+        const newData = {
+          labels: Object.keys(monthlyBookingCount),
           datasets: [
             {
-              ...initialData.datasets[0],
-              data: [20, 30, 25, 35],
-              label: "Weekly Bookings",
+              label: `${
+                filter.charAt(0).toUpperCase() + filter.slice(1)
+              } Bookings`,
+              data: Object.values(monthlyBookingCount),
+              backgroundColor: [
+                "#8d6e63",
+                "#a1887f",
+                "#bcaaa4",
+                "#d7ccc8",
+                "#cfa792",
+                "#ffccbc",
+              ],
+              borderRadius: 5,
             },
           ],
         };
-        break;
-      case "monthly":
-        newData = initialData;
-        break;
-      case "yearly":
-        newData = {
-          labels: ["2023", "2024"],
-          datasets: [
-            {
-              ...initialData.datasets[0],
-              data: [500, 700],
-              label: "Yearly Bookings",
-            },
-          ],
-        };
-        break;
-      default:
-        newData = initialData;
-    }
-    setChartData(newData);
+        setChartData(newData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [filter]);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter(e.target.value);
   };
 
   return (
     <div className={styles.chartContainer}>
       <div className={styles.filterContainer}>
         <select
-          onChange={(e) => handleFilterChange(e.target.value)}
+          value={filter}
+          onChange={handleFilterChange}
           className={styles.filterDropdown}
         >
           <option value="monthly">Monthly</option>
-          <option value="weekly">Weekly</option>
           <option value="yearly">Yearly</option>
         </select>
       </div>
       <div className={styles.chartTitle}>Bookings</div>
       <div className={styles.chartWrapper}>
-        <Bar data={chartData} options={options} />
+        {chartData ? <Bar data={chartData} options={options} /> : <Loading />}
       </div>
     </div>
   );
