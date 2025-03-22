@@ -159,9 +159,15 @@ export function LoginForm() {
                 alt="Twin CJ Logo"
                 className={styles["login-logo"]}
               />
-              <p className={styles["welcome-text"]}>
-                Welcome! Please log-in with your admin account.
-              </p>
+              {!isDisabled ? (
+                <p className={styles["welcome-text"]}>
+                  Welcome! Please log-in with your admin account.
+                </p>
+              ) : (
+                <p className={styles["welcome-text"]}>
+                  Please try again after the timeout has expired.
+                </p>
+              )}
               {isDisabled && <Timer updateIsDisabled={updateIsDisabled} />}
             </div>
             <form
