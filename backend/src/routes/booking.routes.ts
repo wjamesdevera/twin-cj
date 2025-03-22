@@ -13,5 +13,6 @@ router.post("/", upload.single("file"), createBookingHandler);
 router.get("/", getBookingHandler);
 router.get("/check-availability", checkAvailabilityHandler);
 router.get("/latest-bookings", getLatestBookingsHandler);
+router.get("/monthly", getLatestBookingsHandler);
 
 export default router;

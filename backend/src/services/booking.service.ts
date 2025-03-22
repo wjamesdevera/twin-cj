@@ -353,3 +353,57 @@ export const getLatestBookings = async () => {
     throw new Error("Failed to fetch latest bookings");
   }
 };
+
+export const getMonthlyBookings = async (req: Request, res: Response) => {
+  try {
+    const currentDate = new Date();
+    const startOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    const endOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
+
+    // Fetch the bookings for the current month
+    const monthlyBookings = await prisma.booking.findMany({
+      where: {
+        checkIn: {
+          gte: startOfMonth,
+        },
+        checkOut: {
+          lte: endOfMonth,
+        },
+      },
+      select: {
+        checkIn: true,
+      },
+    });
+
+    const labels: string[] = [];
+    const values: number[] = [];
+
+    monthlyBookings.forEach((booking) => {
+      const checkInDate = new Date(booking.checkIn);
+      const formattedDate = checkInDate.toLocaleDateString();
+      const index = labels.indexOf(formattedDate);
+
+      if (index === -1) {
+        labels.push(formattedDate);
+        values.push(1);
+      } else {
+        values[index] += 1;
+      }
+    });
+
+    res.json({
+      labels: labels,
+      values: values,
+    });
+  } catch (error) {
+    console.error("Error fetching monthly bookings:", error);
+  }
+};

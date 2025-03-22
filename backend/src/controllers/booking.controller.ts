@@ -6,6 +6,7 @@ import {
   BAD_REQUEST,
   CREATED,
   INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
   OK,
 } from "../constants/http";
 import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
@@ -15,6 +16,7 @@ import {
   createBooking,
   checkAvailability,
   getLatestBookings,
+  getMonthlyBookings,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -88,11 +90,25 @@ export const getLatestBookingsHandler = async (
 ): Promise<void> => {
   try {
     const latestBookings = await getLatestBookings();
-    res.status(200).json(latestBookings);
+    res.status(OK).json(latestBookings);
   } catch (error) {
-    res.status(400).json({
+    res.status(NOT_FOUND).json({
       message: "Failed to fetch latest bookings",
       error: error,
     });
+  }
+};
+
+export const getMonthlyBookingsController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const bookings = await getMonthlyBookings(req, res);
+
+    res.status(OK).json(bookings);
+  } catch (error) {
+    console.error("Error in getMonthlyBookingsController:", error);
+    res.status(NOT_FOUND).send("Failed to fetch monthly bookings");
   }
 };

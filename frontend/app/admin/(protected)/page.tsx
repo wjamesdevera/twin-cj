@@ -41,16 +41,23 @@ const Page = () => {
         const response = await fetch(
           "http://localhost:8080/api/bookings/latest-bookings"
         );
+
+        const contentType = response.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const errorText = await response.text();
+          throw new Error(`Expected JSON but received HTML: ${errorText}`);
+        }
+
         if (!response.ok) {
           throw new Error("Failed to fetch bookings");
         }
         const data = await response.json();
 
-        // Format dates
         const formattedBookings = data.bookings.map((booking: BookingData) => ({
           ...booking,
           checkIn: formatDate(booking.checkIn),
           checkOut: formatDate(booking.checkOut),
+          total: booking.total.toFixed(2),
         }));
 
         setBookings(formattedBookings);

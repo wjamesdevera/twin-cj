@@ -1,28 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import styles from "./chart.module.scss";
+import { Loading } from "./loading";
 
 Chart.register(...registerables);
-
-const initialData = {
-  labels: ["January", "February", "March", "April", "May", "June"],
-  datasets: [
-    {
-      label: "Monthly Bookings",
-      data: [60, 70, 80, 75, 65, 40],
-      backgroundColor: [
-        "#8d6e63",
-        "#a1887f",
-        "#bcaaa4",
-        "#d7ccc8",
-        "#cfa792",
-        "#ffccbc",
-      ],
-      borderRadius: 5,
-    },
-  ],
-};
 
 const options = {
   responsive: true,
@@ -50,49 +32,88 @@ const options = {
 };
 
 const BookingsChart: React.FC = () => {
-  const [chartData, setChartData] = useState(initialData);
+  const [chartData, setChartData] = useState<any>(null);
+  const [filter, setFilter] = useState("monthly");
 
-  const handleFilterChange = (filter: string) => {
-    let newData;
-    switch (filter) {
-      case "weekly":
-        newData = {
-          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/bookings/${filter}?timestamp=${new Date().getTime()}`,
+          {
+            headers: {
+              "Cache-Control": "no-store",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const data = await response.json();
+
+        // Log the response data to inspect its structure
+        console.log("Fetched data:", data);
+
+        if (!data.bookings) {
+          throw new Error("Invalid data format");
+        }
+
+        // Process the data to create labels and values
+        const labels: string[] = [];
+        const values: number[] = [];
+
+        // Aggregate the bookings by service
+        data.bookings.forEach((booking: any) => {
+          const serviceIndex = labels.indexOf(booking.service);
+          if (serviceIndex === -1) {
+            labels.push(booking.service);
+            values.push(booking.total);
+          } else {
+            values[serviceIndex] += booking.total;
+          }
+        });
+
+        const newData = {
+          labels: labels,
           datasets: [
             {
-              ...initialData.datasets[0],
-              data: [20, 30, 25, 35],
-              label: "Weekly Bookings",
+              label: `${
+                filter.charAt(0).toUpperCase() + filter.slice(1)
+              } Bookings`,
+              data: values,
+              backgroundColor: [
+                "#8d6e63",
+                "#a1887f",
+                "#bcaaa4",
+                "#d7ccc8",
+                "#cfa792",
+                "#ffccbc",
+              ],
+              borderRadius: 5,
             },
           ],
         };
-        break;
-      case "monthly":
-        newData = initialData;
-        break;
-      case "yearly":
-        newData = {
-          labels: ["2023", "2024"],
-          datasets: [
-            {
-              ...initialData.datasets[0],
-              data: [500, 700],
-              label: "Yearly Bookings",
-            },
-          ],
-        };
-        break;
-      default:
-        newData = initialData;
-    }
-    setChartData(newData);
+        setChartData(newData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [filter]);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter(e.target.value);
   };
 
   return (
     <div className={styles.chartContainer}>
       <div className={styles.filterContainer}>
         <select
-          onChange={(e) => handleFilterChange(e.target.value)}
+          value={filter}
+          onChange={handleFilterChange}
           className={styles.filterDropdown}
         >
           <option value="monthly">Monthly</option>
@@ -102,7 +123,7 @@ const BookingsChart: React.FC = () => {
       </div>
       <div className={styles.chartTitle}>Bookings</div>
       <div className={styles.chartWrapper}>
-        <Bar data={chartData} options={options} />
+        {chartData ? <Bar data={chartData} options={options} /> : <Loading />}
       </div>
     </div>
   );
