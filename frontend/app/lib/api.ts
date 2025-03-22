@@ -56,11 +56,6 @@ type SendFeedbackData = {
 //   }> | null;
 // };
 
-type UpdateCabinData = {
-  id: number;
-  data: FormData;
-};
-
 export const login = async (data: LoginData) =>
   API.post("/api/auth/login", data);
 export const logout = async () => API.get("/api/auth/logout");
@@ -87,8 +82,10 @@ export const deleteCabin = async (id: number) =>
   API.delete(`/api/services/cabins/${id}`);
 export const createCabin = async (data: FormData) =>
   API.post("/api/services/cabins", data);
-export const updateCabin = async ({ id, data }: UpdateCabinData) =>
-  API.post(`/api/services/cabins/${id}`, data);
+export const updateCabin = async (id: string, data: FormData) =>
+  API.put(`/api/services/cabins/${id}`, data);
 export const getCabin = async (id: number) =>
   API.get(`/api/services/cabins/${id}`);
 export const getRefreshToken = async () => API.get("/api/auth/refresh");
+export const verifyEmail = async (code: string) =>
+  API.get(`/api/auth/email/verify/${code}`);

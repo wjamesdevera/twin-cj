@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -38,6 +39,8 @@ interface Props {
   handleDeleteCabin: (id: number) => void;
 }
 
+const ITEMS_PER_PAGE = 5; 
+
 const formatPrice = (price: number) => {
   return price.toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -67,6 +70,14 @@ const CabinTable = ({
   handleDeleteCabin,
 }: Props) => {
   const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(cabins.length / ITEMS_PER_PAGE);
+
+  const paginatedCabins = cabins.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className={styles.table_container}>
@@ -93,8 +104,8 @@ const CabinTable = ({
             </tr>
           </thead>
           <tbody>
-            {cabins.length > 0 ? (
-              cabins.map((cabin: Cabin) => (
+            {paginatedCabins.length > 0 ? (
+              paginatedCabins.map((cabin: Cabin) => (
                 <tr key={cabin.id}>
                   <td>
                     <input
@@ -146,6 +157,26 @@ const CabinTable = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className={styles.pagination}>
+        <button
+          className={styles.page_button}
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          Previous
+        </button>
+        <span className={styles.page_info}>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className={styles.page_button}
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
