@@ -413,21 +413,21 @@ export const viewBookings = async (req: Request, res: Response) => {
   try {
     const bookings = await prisma.booking.findMany({
       orderBy: {
-        checkIn: "desc", // Order by check-in date descending
+        checkIn: "desc",
       },
       include: {
         services: {
           include: {
-            service: true, // Include the associated service for each booking
+            service: true,
           },
         },
-        transaction: true, // Include transaction details (if any)
+        transaction: true,
         customer: {
           include: {
-            personalDetail: true, // Include customer's personal details
+            personalDetail: true,
           },
         },
-        bookingStatus: true, // Include the booking status
+        bookingStatus: true,
       },
     });
 
@@ -439,7 +439,6 @@ export const viewBookings = async (req: Request, res: Response) => {
       });
     };
 
-    // Process the booking data
     const bookingData = bookings.map((booking) => ({
       referenceNo: booking.referenceCode,
       checkIn: formatDate(booking.checkIn),

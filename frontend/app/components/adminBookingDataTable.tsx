@@ -26,7 +26,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     endDateFilter: "",
   });
 
-  // Handle all filter changes in one function
   const handleFilterChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {

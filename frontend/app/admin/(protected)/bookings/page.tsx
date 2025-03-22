@@ -74,7 +74,6 @@ export default function Page() {
                 ...booking,
                 checkIn: formatDate(booking.checkIn),
                 checkOut: formatDate(booking.checkOut),
-                // NOTE: decimal places are not displayed properly
                 total: parseFloat(formatAmount(booking.total)),
               })) || []
             }
