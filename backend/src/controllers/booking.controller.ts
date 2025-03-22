@@ -112,3 +112,25 @@ export const getMonthlyBookingsController = async (
     res.status(NOT_FOUND).send("Failed to fetch monthly bookings");
   }
 };
+
+// Admin Side
+export const viewBookingsHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    try {
+      const bookings = await getLatestBookings();
+
+      return res.status(OK).json({
+        status: "success",
+        data: bookings.bookings,
+        pendingReservations: bookings.pendingReservations,
+        activeReservations: bookings.activeReservations,
+      });
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      return res.status(INTERNAL_SERVER_ERROR).json({
+        status: "error",
+        message: "Failed to fetch bookings",
+      });
+    }
+  }
+);

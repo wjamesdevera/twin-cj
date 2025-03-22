@@ -407,3 +407,54 @@ export const getMonthlyBookings = async (req: Request, res: Response) => {
     console.error("Error fetching monthly bookings:", error);
   }
 };
+
+// Admin Side
+export const viewBookings = async (req: Request, res: Response) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      orderBy: {
+        checkIn: "desc", // Order by check-in date descending
+      },
+      include: {
+        services: {
+          include: {
+            service: true, // Include the associated service for each booking
+          },
+        },
+        transaction: true, // Include transaction details (if any)
+        customer: {
+          include: {
+            personalDetail: true, // Include customer's personal details
+          },
+        },
+        bookingStatus: true, // Include the booking status
+      },
+    });
+
+    const formatDate = (date: Date) => {
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    };
+
+    // Process the booking data
+    const bookingData = bookings.map((booking) => ({
+      referenceNo: booking.referenceCode,
+      checkIn: formatDate(booking.checkIn),
+      checkOut: formatDate(booking.checkOut),
+      service: booking.services[0]?.service?.name,
+      total: (booking.transaction?.amount || 0).toFixed(2),
+      customerName: `${booking.customer.personalDetail?.firstName} ${booking.customer.personalDetail?.lastName}`,
+      email: booking.customer.personalDetail?.email,
+      status: booking.bookingStatus.name,
+    }));
+
+    return {
+      bookingData,
+    };
+  } catch (error) {
+    console.error("Error fetching latest bookings:", error);
+  }
+};
