@@ -149,6 +149,7 @@ const Form: React.FC<EditUserFormArg> = ({
           type="text"
           {...register("firstName")}
           className={errors.firstName ? styles.invalid_input : ""}
+          placeholder="Enter your first name"
         />
         {errors.firstName && (
           <span className={styles.error}>{errors.firstName.message}</span>
@@ -162,6 +163,7 @@ const Form: React.FC<EditUserFormArg> = ({
           type="text"
           {...register("lastName")}
           className={errors.lastName ? styles.invalid_input : ""}
+          placeholder="Enter your last name"
         />
         {errors.lastName && (
           <span className={styles.error}>{errors.lastName.message}</span>
@@ -175,6 +177,7 @@ const Form: React.FC<EditUserFormArg> = ({
           type="email"
           {...register("email")}
           className={errors.email ? styles.invalid_input : ""}
+          placeholder="email@email.com"
         />
         {errors.email && (
           <span className={styles.error}>{errors.email.message}</span>
@@ -188,6 +191,7 @@ const Form: React.FC<EditUserFormArg> = ({
           type="tel"
           {...register("phoneNumber")}
           className={errors.phoneNumber ? styles.invalid_input : ""}
+          placeholder="09XXXXXXXXX"
         />
         {errors.phoneNumber && (
           <span className={styles.error}>{errors.phoneNumber.message}</span>
