@@ -13,7 +13,7 @@ const options = {
   scales: {
     x: {
       grid: {
-        display: false,
+        display: true,
       },
     },
     y: {
@@ -39,7 +39,7 @@ const BookingsChart: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/bookings/${filter}?timestamp=${new Date().getTime()}`,
+          `http://localhost:8080/api/bookings/monthly`,
           {
             headers: {
               "Cache-Control": "no-store",
@@ -51,35 +51,18 @@ const BookingsChart: React.FC = () => {
           throw new Error("Failed to fetch data");
         }
 
-        const data = await response.json();
+        const { monthlyBookingCount } = await response.json();
 
-        console.log("Fetched data:", data);
-
-        if (!data.bookings) {
-          throw new Error("Invalid data format");
-        }
-
-        const labels: string[] = [];
-        const values: number[] = [];
-
-        data.bookings.forEach((booking: any) => {
-          const serviceIndex = labels.indexOf(booking.service);
-          if (serviceIndex === -1) {
-            labels.push(booking.service);
-            values.push(booking.total);
-          } else {
-            values[serviceIndex] += booking.total;
-          }
-        });
+        console.log("Fetched data:", monthlyBookingCount);
 
         const newData = {
-          labels: labels,
+          labels: Object.keys(monthlyBookingCount),
           datasets: [
             {
               label: `${
                 filter.charAt(0).toUpperCase() + filter.slice(1)
               } Bookings`,
-              data: values,
+              data: Object.values(monthlyBookingCount),
               backgroundColor: [
                 "#8d6e63",
                 "#a1887f",
@@ -114,7 +97,6 @@ const BookingsChart: React.FC = () => {
           className={styles.filterDropdown}
         >
           <option value="monthly">Monthly</option>
-          <option value="weekly">Weekly</option>
           <option value="yearly">Yearly</option>
         </select>
       </div>

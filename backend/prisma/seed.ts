@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/utils/password";
 import { randomUUID } from "node:crypto";
+import { faker } from "@faker-js/faker";
 const prisma = new PrismaClient();
 async function main() {
   const hashedPassword = await hashPassword("Pa$$w0rd123");
@@ -25,6 +26,84 @@ async function main() {
       userAccount: true,
     },
   });
+
+  const service = await prisma.service.create({
+    data: {
+      name: faker.location.city(),
+      description: faker.location.city(),
+      imageUrl: faker.image.url(),
+      price: faker.number.int(),
+      cabins: {
+        create: {
+          maxCapacity: faker.number.int(),
+          minCapacity: faker.number.int(),
+        },
+      },
+      serviceCategory: {
+        create: {
+          category: {
+            create: {
+              name: "cabin",
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const bookingStatus = await prisma.bookingStatus.create({
+    data: {
+      name: "pending",
+    },
+  });
+
+  const customer = await prisma.customer.create({
+    data: {
+      personalDetailId: adminDetail.id,
+    },
+  });
+
+  const paymentMethod = await prisma.paymentMethod.create({
+    data: {
+      name: faker.finance.accountName(),
+      type: "GCASH",
+    },
+  });
+
+  const paymentAccount = await prisma.paymentAccount.create({
+    data: {
+      accountName: faker.finance.accountName(),
+      accountNumber: 2,
+      paymentMethodId: paymentMethod.id,
+    },
+  });
+
+  for (let i = 0; i < 200; i++) {
+    const transaction = await prisma.transaction.create({
+      data: {
+        proofOfPaymentImageUrl: faker.image.url(),
+        amount: 1000,
+        paymentAccountId: paymentAccount.id,
+      },
+    });
+
+    const checkIn = faker.date.future();
+    const checkOut = new Date(checkIn);
+    checkOut.setDate(checkIn.getDate() + 2);
+
+    await prisma.booking.create({
+      data: {
+        referenceCode: faker.finance.accountNumber(),
+        checkIn,
+        checkOut,
+        totalPax: faker.number.int({ min: 1, max: 10 }),
+        bookingStatusId: bookingStatus.id,
+        services: { create: { serviceId: service.id } },
+        customerId: customer.id,
+        transactionId: transaction.id,
+      },
+    });
+  }
 }
 
 main()

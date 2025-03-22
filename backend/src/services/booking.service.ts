@@ -355,57 +355,100 @@ export const getLatestBookings = async () => {
 };
 
 export const getMonthlyBookings = async (req: Request, res: Response) => {
-  try {
-    const currentDate = new Date();
-    const startOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    const endOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      0
-    );
+  const currentYear = new Date().getFullYear();
+  const shortMonths = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
-    // Fetch the bookings for the current month
-    const monthlyBookings = await prisma.booking.findMany({
-      where: {
-        checkIn: {
-          gte: startOfMonth,
-        },
-        checkOut: {
-          lte: endOfMonth,
-        },
+  const monthlyBookingCount = shortMonths.reduce((acc, month) => {
+    acc[month] = 0;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const yearlyBookings = await prisma.booking.findMany({
+    where: {
+      checkIn: {
+        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`), // Start of the year
+        lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
       },
-      select: {
-        checkIn: true,
-      },
-    });
+    },
+  });
 
-    const labels: string[] = [];
-    const values: number[] = [];
+  yearlyBookings.forEach(({ checkIn }) => {
+    const date = new Date(checkIn);
+    const month = shortMonths[date.getMonth()];
+    console.log(month);
+    if (monthlyBookingCount[month] !== undefined) {
+      monthlyBookingCount[month]++;
+    }
+    return monthlyBookingCount;
+  });
 
-    monthlyBookings.forEach((booking) => {
-      const checkInDate = new Date(booking.checkIn);
-      const formattedDate = checkInDate.toLocaleDateString();
-      const index = labels.indexOf(formattedDate);
+  res.json({
+    monthlyBookingCount,
+  });
 
-      if (index === -1) {
-        labels.push(formattedDate);
-        values.push(1);
-      } else {
-        values[index] += 1;
-      }
-    });
+  // try {
+  //   const currentDate = new Date();
+  //   const startOfMonth = new Date(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth(),
+  //     1
+  //   );
+  //   const endOfMonth = new Date(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth() + 1,
+  //     0
+  //   );
 
-    res.json({
-      labels: labels,
-      values: values,
-    });
-  } catch (error) {
-    console.error("Error fetching monthly bookings:", error);
-  }
+  //   // Fetch the bookings for the current month
+  //   const monthlyBookings = await prisma.booking.findMany({
+  //     where: {
+  //       checkIn: {
+  //         gte: startOfMonth,
+  //       },
+  //       checkOut: {
+  //         lte: endOfMonth,
+  //       },
+  //     },
+  //     select: {
+  //       checkIn: true,
+  //     },
+  //   });
+
+  //   const labels: string[] = [];
+  //   const values: number[] = [];
+
+  //   monthlyBookings.forEach((booking) => {
+  //     const checkInDate = new Date(booking.checkIn);
+  //     const formattedDate = checkInDate.toLocaleDateString();
+  //     const index = labels.indexOf(formattedDate);
+
+  //     if (index === -1) {
+  //       labels.push(formattedDate);
+  //       values.push(1);
+  //     } else {
+  //       values[index] += 1;
+  //     }
+  //   });
+
+  //   res.json({
+  //     ...monthlyBookings,
+  //   });
+  // } catch (error) {
+  //   console.error("Error fetching monthly bookings:", error);
+  // }
 };
 
 // Admin Side

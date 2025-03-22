@@ -125,7 +125,7 @@ const Booking: React.FC = () => {
                 .filter((card) => availableServices.includes(card.name))
                 .map((card) => (
                   <BookingCard
-                    key={card.name}
+                    key={card.id}
                     title={card.name}
                     description={card.description}
                     price={`₱${card.price}`}
