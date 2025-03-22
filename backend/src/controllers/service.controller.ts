@@ -39,6 +39,7 @@ export const createDayTourHandler = catchErrors(
     const requestBody = {
       ...validatedData,
       imageUrl,
+      serviceCategoryId: parsedJsonData.serviceCategoryId,
     };
 
     console.log(requestBody);
@@ -180,6 +181,7 @@ export const createCabinHandler = catchErrors(
     const requestBody = {
       ...validatedData,
       imageUrl,
+      serviceCategoryId: parsedJsonData.serviceCategoryId,
     };
 
     const createdCabin = await createCabin(requestBody);

@@ -6,30 +6,41 @@ import useSWR, { mutate } from "swr";
 import { deleteCabin, getCabins, multiDeleteCabin } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
-import CabinTable from "./CabinTable"; 
-import CustomButton from "@/app/components/custom_button"; 
+import CabinTable from "./CabinTable";
+import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
 import NotificationModal from "@/app/components/notification_modal";
-import styles from "./page.module.scss"; 
+import styles from "./page.module.scss";
 
 const CabinDashboard = () => {
   const router = useRouter();
   const [selectedCabins, setSelectedCabins] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<number | number[] | null>(null);
-  const [notification, setNotification] = useState({ isOpen: false, message: "", type: "success" });
+  const [deleteTarget, setDeleteTarget] = useState<number | number[] | null>(
+    null
+  );
+  const [notification, setNotification] = useState({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
 
   const { data, isLoading } = useSWR("getCabins", getCabins);
   const cabins = data?.data?.cabins || [];
 
   const toggleSelection = (id: number) => {
     setSelectedCabins((prev) =>
-      prev.includes(id) ? prev.filter((cabinId) => cabinId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((cabinId) => cabinId !== id)
+        : [...prev, id]
     );
   };
 
-  const { trigger, isMutating } = useSWRMutation("deleteCabin", (key, { arg }: { arg: number }) => deleteCabin(arg));
+  const { trigger, isMutating } = useSWRMutation(
+    "deleteCabin",
+    (key, { arg }: { arg: number }) => deleteCabin(arg)
+  );
 
   const handleDeleteCabin = (id: number) => {
     setDeleteTarget(id);
@@ -38,7 +49,11 @@ const CabinDashboard = () => {
 
   const deleteSelectedCabins = () => {
     if (selectedCabins.length === 0) {
-      setNotification({ isOpen: true, message: "No cabins selected.", type: "error" });
+      setNotification({
+        isOpen: true,
+        message: "No cabins selected.",
+        type: "error",
+      });
       return;
     }
     setDeleteTarget(selectedCabins);
@@ -91,14 +106,16 @@ const CabinDashboard = () => {
       </div>
 
       <div className={styles.subheader_container}>
-        <h2 className={styles.subheader}>Select a Cabin to modify in the Booking Page</h2>
+        <h2 className={styles.subheader}>
+          Select a Cabin to modify in the Booking Page
+        </h2>
         <div className={styles.button_container}>
-          <CustomButton 
+          <CustomButton
             label="Add Cabin"
-            onClick={() => router.push("/admin/cabins/create")}
+            onClick={() => router.push("/admin/cabins/add")}
             variant="primary"
           />
-          <CustomButton 
+          <CustomButton
             label="Delete Selected"
             onClick={deleteSelectedCabins}
             variant="danger"
@@ -116,16 +133,16 @@ const CabinDashboard = () => {
         handleDeleteCabin={handleDeleteCabin}
       />
 
-    <ConfirmModal
-      isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-      onConfirm={confirmDelete}
-      title="Are you sure you want to delete the selected cabin(s)?"
-      confirmText="Yes, Delete"
-      cancelText="Cancel"
-    />
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Are you sure you want to delete the selected cabin(s)?"
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+      />
 
-       <NotificationModal
+      <NotificationModal
         isOpen={notification.isOpen}
         onClose={() => setNotification({ ...notification, isOpen: false })}
         message={notification.message}
