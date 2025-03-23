@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import styles from "./cabins_table.module.scss";
+import styles from "@/app/table.module.scss";
 
 interface Service {
   id: number;
@@ -129,8 +129,8 @@ const CabinTable = ({
                     <Image
                       src={cabin.imageUrl}
                       alt={cabin.name}
-                      width={135}
-                      height={90}
+                      width={25}
+                      height={25}
                       className={styles.image}
                       unoptimized
                     />
