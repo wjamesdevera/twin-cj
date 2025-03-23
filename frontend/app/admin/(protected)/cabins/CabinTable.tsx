@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import styles from "./cabins_table.module.scss";
@@ -9,13 +8,6 @@ import styles from "./cabins_table.module.scss";
 interface Service {
   id: number;
 }
-
-interface AdditionalFee {
-  type: string;
-  description: string;
-  amount: number;
-}
-
 interface Cabin {
   id: number;
   minCapacity: number;
@@ -25,7 +17,6 @@ interface Cabin {
   price: number;
   imageUrl: string;
   service: Service;
-  additionalFee?: AdditionalFee | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -39,7 +30,7 @@ interface Props {
   handleDeleteCabin: (id: number) => void;
 }
 
-const ITEMS_PER_PAGE = 5; 
+const ITEMS_PER_PAGE = 5;
 
 const formatPrice = (price: number) => {
   return price.toLocaleString("en-US", {
@@ -86,7 +77,11 @@ const CabinTable = ({
           <thead>
             <tr>
               <th>
-                <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} />
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={toggleSelectAll}
+                />
               </th>
               <th>Action</th>
               <th>ID</th>
@@ -96,9 +91,6 @@ const CabinTable = ({
               <th>Rate</th>
               <th>Min Capacity</th>
               <th>Max Capacity</th>
-              <th>Additional Fee Type</th>
-              <th>Additional Fee Description</th>
-              <th>Additional Fee Amount</th>
               <th>Date Created</th>
               <th>Last Updated</th>
             </tr>
@@ -117,7 +109,9 @@ const CabinTable = ({
                   <td className={styles.actions}>
                     <button
                       className={styles.edit_button}
-                      onClick={() => router.push(`/admin/cabins/update/${cabin.id}`)}
+                      onClick={() =>
+                        router.push(`/admin/cabins/edit/${cabin.id}`)
+                      }
                     >
                       <FaEdit />
                     </button>
@@ -131,7 +125,7 @@ const CabinTable = ({
                   <td>{cabin.id}</td>
                   <td>{cabin.name}</td>
                   <td>
-                    <Image
+                    <img
                       src={cabin.imageUrl}
                       alt={cabin.name}
                       width={135}
@@ -143,16 +137,15 @@ const CabinTable = ({
                   <td>₱{formatPrice(cabin.price)}</td>
                   <td>{cabin.minCapacity}</td>
                   <td>{cabin.maxCapacity}</td>
-                  <td>{cabin.additionalFee?.type || "N/A"}</td>
-                  <td>{cabin.additionalFee?.description || "N/A"}</td>
-                  <td>{cabin.additionalFee?.amount ? `₱${formatPrice(cabin.additionalFee.amount)}` : "N/A"}</td>
                   <td>{formatDate(cabin.createdAt)}</td>
                   <td>{formatDate(cabin.updatedAt)}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={14} className={styles.no_data}>No cabins available</td>
+                <td colSpan={14} className={styles.no_data}>
+                  No cabins available
+                </td>
               </tr>
             )}
           </tbody>

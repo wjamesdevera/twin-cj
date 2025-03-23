@@ -1,0 +1,103 @@
+.tableContainer {
+  padding: 24px;
+  border-radius: 8px;
+  background-color: #ffffff9a;
+  overflow: hidden;
+  max-height: 100vh;
+  position: relative;
+}
+
+.topContainer {
+  display: flex;
+  justify-content: space-between;
+  max-height: 140px;
+}
+
+.leftGroup {
+  display: flex;
+  justify-content: start;
+}
+
+.rightGroup {
+  display: flex;
+  justify-content: end;
+  flex-direction: row;
+  align-items: center;
+  width: 500px;
+  gap: 10px;
+}
+
+.tableTitle {
+  color: var(--color-sunset-orange-500);
+  font-family: Open Sans, sans-serif;
+  font-size: var(--text-size-xl);
+  font-weight: 600;
+  padding: 15px;
+  position: sticky;
+  top: 0;
+  background-color: #ffffff9a;
+  z-index: 3;
+}
+
+.tableHead {
+  text-align: left;
+  position: sticky;
+  top: 50px;
+  z-index: 2;
+  background-color: #ffffff9a;
+  border-bottom: 1px solid #ddd;
+}
+
+.tableHead th {
+  padding: 12px;
+  font-weight: 600;
+  color: var(--color-sunset-orange-500);
+  background-color: #ffffff;
+}
+
+.table tbody {
+  display: block;
+  overflow: hidden;
+  //NOTE: adjust the height when pagination is added
+  max-height: 100vh;
+}
+
+.table thead,
+.table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.tableRow {
+  border-bottom: 1px solid #ddd;
+}
+
+.tableCell {
+  padding: 12px;
+}
+
+.statusPending {
+  color: var(--color-sunset-orange-500);
+  font-weight: 400;
+}
+
+.statusActive {
+  color: #46733b;
+  font-weight: 400;
+}
+
+.statusCompleted {
+  color: #3b6273;
+  font-weight: 400;
+}
+
+.referenceLink {
+  color: var(--color-sunset-orange-500);
+  text-decoration: none;
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

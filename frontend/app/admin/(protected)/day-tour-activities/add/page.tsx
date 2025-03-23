@@ -1,358 +1,79 @@
 "use client";
 
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  ChangeEvent,
-  FormEvent,
-  useRef,
-} from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { Loading } from "@/app/components/loading";
+import useSWRMutation from "swr/mutation";
+import { IoArrowBack } from "react-icons/io5";
+import DayTourForm from "./form";
 import { options } from "@/app/api";
-
-function Page() {
+import { Loading } from "@/app/components/loading";
+import styles from "./page.module.scss";
+import NotificationModal from "@/app/components/notification_modal";
+export default function CreateDayTour() {
   const router = useRouter();
 
-  interface DayTourFormData {
-    name: string;
-    description: string;
-    image: File | null;
-    price: string;
-    additionalFeeType: string;
-    additionalFeeDescription: string;
-    additionalFeeAmount: string;
-  }
-
-  const [formData, setFormData] = useState<DayTourFormData>({
-    name: "",
-    description: "",
-    image: null,
-    price: "",
-    additionalFeeType: "",
-    additionalFeeDescription: "",
-    additionalFeeAmount: "",
+  const [notification, setNotification] = React.useState<{
+    isOpen: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    isOpen: false,
+    message: "",
+    type: "success",
   });
 
-  // helper text initial state
-  const [helperText, setHelperText] = useState<{ [key: string]: boolean }>({
-    name: false,
-    description: false,
-    price: false,
-    additionalFeeType: false,
-    additionalFeeDescription: false,
-    additionalFeeAmount: false,
-  });
-
-  const [isMutating, setIsMutating] = useState<boolean>(false);
-  const [isFormValid, setIsFormValid] = useState<boolean>(false);
-
-  // form validations
-  const validateForm = useCallback(() => {
-    const isNameValid =
-      formData.name.trim().length > 0 && formData.name.trim().length <= 50;
-
-    const isDescriptionValid =
-      formData.description.trim().length > 0 &&
-      formData.description.trim().length <= 100;
-
-    const isPriceValid =
-      /^\d+(\.\d+)?$/.test(formData.price.trim()) &&
-      parseFloat(formData.price) > 0;
-
-    const isImageValid =
-      formData.image &&
-      typeof formData.image === "object" &&
-      "size" in formData.image &&
-      formData.image.size <= 1024 * 1024 &&
-      ["image/jpeg", "image/png", "image/jpg"].includes(formData.image.type);
-
-    const isAdditionalFeeTypeTouched =
-      formData.additionalFeeType.trim().length > 0;
-    const isAdditionalFeeDescriptionTouched =
-      formData.additionalFeeDescription.trim().length > 0;
-    const isAdditionalFeeAmountTouched =
-      formData.additionalFeeAmount.trim().length > 0;
-
-    const isAdditionalFeeValid =
-      (!isAdditionalFeeTypeTouched &&
-        !isAdditionalFeeDescriptionTouched &&
-        !isAdditionalFeeAmountTouched) ||
-      (isAdditionalFeeTypeTouched &&
-        isAdditionalFeeDescriptionTouched &&
-        isAdditionalFeeAmountTouched &&
-        /^\d+(\.\d+)?$/.test(formData.additionalFeeAmount.trim()) &&
-        parseFloat(formData.additionalFeeAmount) > 0);
-
-    const isValid =
-      isNameValid &&
-      isDescriptionValid &&
-      isPriceValid &&
-      isImageValid &&
-      isAdditionalFeeValid;
-
-    setIsFormValid(Boolean(isValid));
-  }, [formData]);
-
-  useEffect(() => {
-    validateForm();
-  }, [formData, validateForm]);
-
-  const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value, files } = e.target as HTMLInputElement;
-      const trimmedValue = value.replace(/^\s+/, "");
-
-      let formattedValue = trimmedValue;
-
-      if (["name", "additionalFeeType"].includes(name)) {
-        formattedValue = trimmedValue.replace(/[^a-zA-Z0-9 ]/g, "");
-      } else if (["price", "additionalFeeAmount"].includes(name)) {
-        formattedValue = trimmedValue.replace(/[^0-9.]/g, "");
-      }
-
-      if (name === "image") {
-        if (files?.length) {
-          const file = files[0];
-
-          if (file.size > 1024 * 1024) {
-            setHelperText((prev) => ({ ...prev, image: true }));
-            setFormData((prevData) => ({ ...prevData, image: null }));
-            e.target.value = "";
-          } else {
-            setHelperText((prev) => ({ ...prev, image: false }));
-            setFormData((prevData) => ({ ...prevData, image: file }));
-          }
-        } else {
-          setFormData((prevData) => ({ ...prevData, image: null }));
-          e.target.value = "";
-        }
-        return;
-      }
-
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: files ? files[0] : formattedValue,
-      }));
-
-      setHelperText((prevHelperText) => ({
-        ...prevHelperText,
-        [name]:
-          formattedValue.length === 0
-            ? false
-            : name === "name"
-            ? formattedValue.length >= 50
-            : name === "description"
-            ? formattedValue.length >= 100
-            : name === "price"
-            ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
-            : name === "additionalFeeType"
-            ? false
-            : name === "additionalFeeDescription"
-            ? false
-            : name === "additionalFeeAmount"
-            ? !/^\d+$/.test(formattedValue) || parseFloat(formattedValue) <= 0
-            : false,
-      }));
-    },
-    []
-  );
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    setIsMutating(true);
-
-    if (!window.confirm("Are you sure you want to add this Day tour?")) {
-      setIsMutating(false);
-      return;
-    }
-
-    const data = new FormData();
-    const jsonData: any = {
-      name: formData.name,
-      description: formData.description,
-      price: Number(formData.price),
-    };
-
-    if (
-      formData.additionalFeeType &&
-      formData.additionalFeeDescription &&
-      formData.additionalFeeAmount
-    ) {
-      jsonData.additionalFee = {
-        type: formData.additionalFeeType,
-        description: formData.additionalFeeDescription,
-        amount: Number(formData.additionalFeeAmount),
-      };
-    }
-
-    data.append("data", JSON.stringify(jsonData));
-
-    if (formData.image) {
-      data.append("file", formData.image);
-    }
-
-    try {
-      const response = await fetch(
-        `${options.baseURL}/api/services/day-tours/`,
-        {
-          method: "POST",
-          body: data,
-        }
-      );
+  const { trigger, isMutating } = useSWRMutation(
+    `${options.baseURL}/api/services/day-tours/`,
+    async (key, { arg }: { arg: FormData }) => {
+      const response = await fetch(key, {
+        method: "POST",
+        body: arg,
+      });
 
       if (response.ok) {
-        alert("Day tour created successfully!");
+        setNotification({
+          isOpen: true,
+          message: "Day tour created successfully!",
+          type: "success",
+        });
+
         router.push("/admin/day-tour-activities");
+      } else {
+        setNotification({
+          isOpen: true,
+          message: "Error creating day tour.",
+          type: "error",
+        });
+        throw new Error("Error creating day tour");
       }
-    } catch (error) {
-      console.error("Error creating day tour:", error);
-    } finally {
-      setIsMutating(false);
     }
-  };
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const initialFormState: DayTourFormData = {
-    name: "",
-    description: "",
-    image: null,
-    price: "",
-    additionalFeeType: "",
-    additionalFeeDescription: "",
-    additionalFeeAmount: "",
-  };
-
-  const handleClear = () => {
-    setFormData(initialFormState);
-    
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };  
+  );
 
   return (
-    <div>
-      {isMutating ? (
-        <Loading />
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <div>
-            <div>
-              <h1>Create Day Tour</h1>
+    <div className={styles.page_container}>
+      <div className={styles.page_header}>
+        <div className={styles.back_arrow} onClick={() => router.back()}>
+          <IoArrowBack />
+        </div>
+        <h1 className={styles.title}>Add New Day Tour</h1>
+      </div>
 
-              <label>Title:</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                maxLength={50}
-              />
-              {helperText.name && (
-                <small>Title must not exceed 50 characters</small>
-              )}
-            </div>
-            <div>
-              <label>Description:</label>
-              <input
-                type="text"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                maxLength={100}
-              />
-              {helperText.description && (
-                <small>Description must not exceed 100 characters</small>
-              )}
-            </div>
-            <div>
-              <label>Upload Image:</label>
-              <input
-                type="file"
-                accept=".jpg,.png,.jpeg"
-                name="image"
-                onChange={handleChange}
-                ref={fileInputRef}
-              />
-              {helperText.image && (
-                <small>
-                  <br />
-                  Image must be less than 1MB
-                </small>
-              )}
-            </div>
-            <div>
-              <label>Rate:</label>
-              <input
-                type="text"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-              />
-              {helperText.price && (
-                <small> Rate must be a positive number only</small>
-              )}
-            </div>
-            <div>
-              <h1>Additional Fees (Optional)</h1>
-              <label>Additional Fee Type:</label>
-              <input
-                type="text"
-                name="additionalFeeType"
-                value={formData.additionalFeeType}
-                onChange={handleChange}
-              />
-              {helperText.additionalFeeType && (
-                <small>Additional Fee Type is required</small>
-              )}
-            </div>
-            <div>
-              <label>Additional Fee Description:</label>
-              <input
-                type="text"
-                name="additionalFeeDescription"
-                value={formData.additionalFeeDescription}
-                onChange={handleChange}
-              />
-              {helperText.additionalFeeDescription && (
-                <small>Additional Fee Description is required</small>
-              )}
-            </div>
-            <div>
-              <label>Additional Fee Amount:</label>
-              <input
-                type="text"
-                name="additionalFeeAmount"
-                value={formData.additionalFeeAmount}
-                onChange={handleChange}
-              />
-              {helperText.additionalFeeAmount && (
-                <small>
-                  Additional Fee Amount must be a positive number only
-                </small>
-              )}
-            </div>
-            <button type="submit" disabled={!isFormValid}>
-              Create Day Tour
-            </button>
-            <button type="button" onClick={handleClear}>
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/admin/day-tour-activities")}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+      <div className={styles.form_container}>
+        {isMutating ? (
+          <Loading />
+        ) : (
+          <DayTourForm trigger={trigger} isMutating={isMutating} />
+        )}
+      </div>
+
+      {notification.isOpen && (
+        <NotificationModal
+          isOpen={notification.isOpen}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification({ ...notification, isOpen: false })}
+        />
       )}
     </div>
   );
 }
-
-export default Page;

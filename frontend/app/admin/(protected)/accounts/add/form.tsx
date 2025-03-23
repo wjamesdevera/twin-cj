@@ -210,6 +210,7 @@ const Form: React.FC = () => {
         </label>
         <input
           type="tel"
+          maxLength={11}
           {...register("phoneNumber")}
           required
           className={errors.phoneNumber ? styles.invalid_input : ""}
