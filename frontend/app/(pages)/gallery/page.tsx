@@ -12,6 +12,8 @@ const Header: React.FC = () => {
         alt="Resort View"
         fill
         className={styles.image}
+        sizes="100vw"
+        style={{ objectFit: "cover" }}
       />
     </header>
   );
