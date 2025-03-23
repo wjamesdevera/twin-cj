@@ -46,6 +46,7 @@ export default function DayTourForm() {
     handleSubmit,
     setValue,
     reset,
+    watch,
     formState: { errors },
   } = useForm<AddDayTourData>({
     resolver: zodResolver(dayTourSchema),
@@ -139,6 +140,9 @@ export default function DayTourForm() {
                   {errors.description.message}
                 </span>
               )}
+              <p className={styles["char-count"]}>
+                {watch("description")?.length || 0}/100 characters
+              </p>
             </div>
           </div>
           <div className={styles.right_column}>
