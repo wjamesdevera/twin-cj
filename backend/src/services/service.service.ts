@@ -788,3 +788,29 @@ export const createAdditionalFee = async (data: createAdditionalFeeType) => {
   appAssert(additionalFee, BAD_REQUEST, "Creating additional fee failed");
   return additionalFee;
 };
+
+export const updateAdditionalFee = async (
+  id: number,
+  data: createAdditionalFeeType
+) => {
+  const additionalFee = await prisma.additionalFee.update({
+    where: {
+      id,
+    },
+    data: {
+      ...data,
+    },
+  });
+  appAssert(additionalFee, BAD_REQUEST, "Updating additional fee failed");
+  return additionalFee;
+};
+
+export const deleteAdditionalFee = async (id: number) => {
+  const additionalFee = await prisma.additionalFee.delete({
+    where: {
+      id,
+    },
+  });
+  appAssert(additionalFee, NOT_FOUND, "Additional fee id not found");
+  return additionalFee;
+};

@@ -3,6 +3,7 @@ import {
   createAdditionalFeeHandler,
   createCabinHandler,
   createDayTourHandler,
+  deleteAdditionalFeeHandler,
   deleteCabinHandler,
   deleteDayTourHandler,
   deleteSelectedCabinsHandler,
@@ -13,6 +14,7 @@ import {
   getAllDayToursHandler,
   getCabinByIdHandler,
   getDayTourByIdHandler,
+  updateAddtionalFeeHandler,
   updateCabinHandler,
   updateDayTourHandler,
 } from "../controllers/service.controller";
@@ -38,6 +40,7 @@ router.delete("/day-tours/", deleteSelectedDayToursHandler);
 router.get("/additional-fees", getAdditionalFeeHandler);
 router.get("/additional-fees/:id", getAdditionalFeeByIdHandler);
 router.post("/additional-fees/", createAdditionalFeeHandler);
-router.put("/");
+router.put("/additional-fees/:id", updateAddtionalFeeHandler);
+router.delete("/additional-fees/:id", deleteAdditionalFeeHandler);
 
 export default router;

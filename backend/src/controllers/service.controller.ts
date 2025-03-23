@@ -11,6 +11,7 @@ import {
   createAdditionalFee,
   createCabin,
   createDayTour,
+  deleteAdditionalFee,
   deleteCabin,
   deleteDayTour,
   deleteMultipleCabin,
@@ -21,6 +22,7 @@ import {
   getAllDayTours,
   getCabinById,
   getDayTourById,
+  updateAdditionalFee,
   updateCabin,
   updateDayTour,
 } from "../services/service.service";
@@ -28,7 +30,6 @@ import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from "../constants/http";
 import { ROOT_STATIC_URL } from "../constants/url";
 import appAssert from "../utils/appAssert";
 import { idSchema, jsonSchema } from "../schemas/schemas";
-import { Z } from "@faker-js/faker/dist/airline-CBNP41sR";
 import { z } from "zod";
 
 export const createDayTourHandler = catchErrors(
@@ -295,8 +296,42 @@ export const createAdditionalFeeHandler = catchErrors(
     const data = additionalFeeSchema.parse(request.body);
     const additionalFees = await createAdditionalFee(parseAdditionalFee(data));
     appAssert(additionalFees, BAD_REQUEST, "Adding Additional Fees failed");
+    return response.status(CREATED).json({
+      additionalFees,
+    });
+  }
+);
+
+export const updateAddtionalFeeHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, "Invalid ID");
+
+    const data = additionalFeeSchema.parse(request.body);
+    appAssert(data, BAD_REQUEST, "Invalid data provided");
+
+    const additionalFees = await updateAdditionalFee(
+      Number(id),
+      parseAdditionalFee(data)
+    );
+
+    appAssert(additionalFees, NOT_FOUND, "No Additonal Fees found");
     return response.status(OK).json({
       additionalFees,
+    });
+  }
+);
+
+export const deleteAdditionalFeeHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, "Invalid ID");
+
+    const additionalFees = await deleteAdditionalFee(Number(id));
+    appAssert(additionalFees, NOT_FOUND, "No Additonal Fees found");
+
+    return response.status(OK).json({
+      message: "Addtional Fee deleted",
     });
   }
 );
