@@ -93,3 +93,23 @@ export const deleteDayTour = async (id: number) =>
   API.delete(`/api/services/day-tours/${id}`);
 export const multiDeleteDayTour = async (ids: string) =>
   API.delete(`/api/services/cabins?ids=${ids}`);
+
+type AdditionalFeeType = {
+  id: number;
+  type: string;
+  description: string;
+  amount: number;
+};
+// Additional Fee API
+export const createAdditionalFee = async (data: FormData) =>
+  API.post(`/api/services/additional-fees`, data);
+export const getAdditionalFees = async () =>
+  API.get<{ additionalFees: AdditionalFeeType[] }>(
+    "/api/services/additional-fees"
+  );
+export const getAdditionalFeeById = async (id: number) =>
+  API.get(`/api/services/additional-fees/${id}`);
+export const updateAdditionalFee = async (id: string, data: FormData) =>
+  API.put(`/api/services/additional-fees/${id}`, data);
+export const deleteAdditionalFee = async (id: number) =>
+  API.delete(`/api/services/additional-fees/${id}`);

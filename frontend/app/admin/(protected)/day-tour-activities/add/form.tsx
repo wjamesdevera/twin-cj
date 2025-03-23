@@ -24,55 +24,6 @@ export const dayTourSchema = z.object({
   description: descriptionSchema,
   file: fileSchema.optional(),
   price: priceSchema.or(z.number().gt(0)),
-  additionalFee: z
-    .object({
-      additionalFeeType: z
-        .string()
-        .trim()
-        .transform((val) => (val === "" ? undefined : val)) // Convert empty string to undefined
-        .optional() // Make field optional
-        .refine((val) => val === undefined || val.length >= 2, {
-          message: "Name must be at least 2 characters",
-        })
-        .refine((val) => val === undefined || val.length <= 50, {
-          message: "Name must be at most 50 characters long",
-        })
-        .refine((val) => val === undefined || /^[A-Za-z\s]+$/.test(val), {
-          message: "Name can only contain letters and spaces",
-        })
-        .transform((val) => (val ? val.replace(/\s+/g, " ").trim() : val)),
-      description: z
-        .string()
-        .trim()
-        .transform((val) => (val === "" ? undefined : val)) // Convert empty string to undefined
-        .optional() // Make field optional
-        .refine(
-          (val) => val === undefined || val.length >= 2,
-          "Description is required"
-        )
-        .refine(
-          (val) => val === undefined || val.length <= 100,
-          "Description is required"
-        )
-        .refine(
-          (val) => (val === undefined ? true : val.trim().length > 0),
-          "Description cannot be just spaces"
-        )
-        .optional(),
-      amount: z
-        .string()
-        .trim()
-        .transform((val) => (val === "" ? undefined : val)) // Convert empty string to undefined
-        .optional() // Make field optional
-        .refine((val) => val === undefined || /^[0-9.]+$/.test(val), {
-          message: "Price must be a number",
-        })
-        .refine((val) => val === undefined || Number(val) >= 0, {
-          message: "Invalid price",
-        })
-        .or(z.number().gte(0)),
-    })
-    .optional(),
 });
 
 type AddDayTourData = z.infer<typeof dayTourSchema>;
@@ -95,7 +46,7 @@ export default function DayTourForm() {
     handleSubmit,
     setValue,
     reset,
-    formState: { errors, dirtyFields },
+    formState: { errors },
   } = useForm<AddDayTourData>({
     resolver: zodResolver(dayTourSchema),
   });
@@ -138,14 +89,6 @@ export default function DayTourForm() {
         name: formData.name,
         description: formData.description,
         price: Number(formData.price),
-        additionalFee:
-          dirtyFields["additionalFee"] && formData.additionalFee
-            ? {
-                type: formData.additionalFee.additionalFeeType || "",
-                description: formData.additionalFee.description || "",
-                amount: Number(formData.additionalFee.amount),
-              }
-            : undefined,
       };
 
       data.append("data", JSON.stringify(jsonData));
@@ -232,60 +175,6 @@ export default function DayTourForm() {
               {errors.file && (
                 <span className={styles.error}>{errors.file.message}</span>
               )}
-            </div>
-          </div>
-          <div className={styles.full_width}>
-            <h3 className={styles.section_title}>Additional Fees (Optional)</h3>
-            <div className={styles.additional_fees_container}>
-              <div className={styles.additional_fees_left}>
-                <div className={styles.form_group}>
-                  <label>Type</label>
-                  <input
-                    type="text"
-                    {...register("additionalFee.additionalFeeType")}
-                    maxLength={50}
-                  />
-                  {errors.additionalFee?.additionalFeeType && (
-                    <span className={styles.error}>
-                      {errors.additionalFee.additionalFeeType.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className={styles.form_group}>
-                  <label>Description</label>
-                  <textarea
-                    rows={3}
-                    cols={30}
-                    maxLength={100}
-                    {...register("additionalFee.description")}
-                  />
-                  {errors.additionalFee?.description && (
-                    <span className={styles.error}>
-                      {errors.additionalFee.description.message}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className={styles.additional_fees_right}>
-                <div className={styles.form_group}>
-                  <label>Amount</label>
-                  <input
-                    type="number"
-                    placeholder="₱"
-                    min="0"
-                    step="0.01"
-                    {...register("additionalFee.amount")}
-                    className={styles.short_input}
-                  />
-                  {errors.additionalFee?.amount && (
-                    <span className={styles.error}>
-                      {errors.additionalFee.amount.message}
-                    </span>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
 

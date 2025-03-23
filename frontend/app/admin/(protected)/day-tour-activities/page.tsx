@@ -4,8 +4,8 @@ import styles from "./dashboard.module.scss";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
 import { options } from "@/app/api";
-import DayTourTable from "./daytourtable";  
-import CustomButton from "@/app/components/custom_button"; 
+import DayTourTable from "./daytourtable";
+import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
 import NotificationModal from "@/app/components/notification_modal";
 
@@ -44,7 +44,9 @@ const DayTourView = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectAll, setSelectAll] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<number | number[] | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<number | number[] | null>(
+    null
+  );
   const [notification, setNotification] = useState({
     isOpen: false,
     message: "",
@@ -72,6 +74,7 @@ const DayTourView = () => {
         const data = await response.json();
 
         if (Array.isArray(data?.data?.dayTours)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mappedDayTours = data.data.dayTours.map((tour: any) => {
             return {
               id: tour.id,
@@ -136,12 +139,14 @@ const DayTourView = () => {
         type: "success",
       });
       setDayTours((prev) =>
-        prev.filter((tour) => 
-          Array.isArray(deleteTarget) ? !deleteTarget.includes(tour.id) : tour.id !== deleteTarget
+        prev.filter((tour) =>
+          Array.isArray(deleteTarget)
+            ? !deleteTarget.includes(tour.id)
+            : tour.id !== deleteTarget
         )
       );
-      
     } catch (error) {
+      console.log(error);
       setNotification({
         isOpen: true,
         message: "An error occurred while deleting the day tour.",
@@ -153,33 +158,36 @@ const DayTourView = () => {
   };
 
   const deleteDayTour = async (id: number) => {
-    const response = await fetch(`${options.baseURL}/api/services/day-tours/${id}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await fetch(
+      `${options.baseURL}/api/services/day-tours/${id}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
-    if (!response.ok) throw new Error(`Failed to delete day tour with id: ${id}`);
+    if (!response.ok)
+      throw new Error(`Failed to delete day tour with id: ${id}`);
   };
 
-  
   const handleDelete = (id?: number) => {
     setDeleteTarget(id ? id : selectedIds);
     setIsModalOpen(true);
   };
-  
 
-  
-    const handleSelectAll = () => {
-      setSelectAll(!selectAll);
-      setSelectedIds(selectAll ? [] : dayTours.map((tour) => tour.id));
-    };
-  
-    const handleCheckboxChange = (id: number) => {
-      setSelectedIds((prev) =>
-        prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id]
-      );
-    };
-  
+  const handleSelectAll = () => {
+    setSelectAll(!selectAll);
+    setSelectedIds(selectAll ? [] : dayTours.map((tour) => tour.id));
+  };
+
+  const handleCheckboxChange = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id]
+    );
+  };
+
   if (loading) return <Loading />;
 
   if (error) {
@@ -189,24 +197,26 @@ const DayTourView = () => {
   return (
     <div className={styles.page_container}>
       <div className={styles.page_header}>
-      <h1 className={styles.title}>Day Tour Activites</h1>
+        <h1 className={styles.title}>Day Tour Activities</h1>
       </div>
       <div className={styles.subheader_container}>
-        <h2 className={styles.subheader}>Select a Day Tour Activity to modify in the Booking Page</h2>
+        <h2 className={styles.subheader}>
+          Select a Day Tour Activity to modify in the Booking Page
+        </h2>
         <div className={styles.button_container}>
-        <CustomButton 
-          label="Add Day Tour"
-          onClick={handleAdd} 
-          variant="primary"
-        />
-        
-        <CustomButton 
-          label="Delete Selected"
-          onClick={() => handleDelete()}
-          variant="danger" 
-          disabled={selectedIds.length === 0} 
-        />
-      </div>
+          <CustomButton
+            label="Add Day Tour"
+            onClick={handleAdd}
+            variant="primary"
+          />
+
+          <CustomButton
+            label="Delete Selected"
+            onClick={() => handleDelete()}
+            variant="danger"
+            disabled={selectedIds.length === 0}
+          />
+        </div>
       </div>
 
       <DayTourTable

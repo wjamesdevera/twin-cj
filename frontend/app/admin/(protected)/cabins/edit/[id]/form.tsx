@@ -57,6 +57,21 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
     type: "success",
   });
 
+  const handleClear = () => {
+    setConfirmAction(() => {
+      reset();
+    });
+
+    setConfirmMessage("Are you sure you want to reset all the fields?");
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleCancel = () => {
+    setConfirmAction(() => () => router.back());
+    setConfirmMessage("Are you sure you want to cancel?");
+    setIsConfirmModalOpen(true);
+  };
+
   const onSubmit = async (formData: EditCabinFormData) => {
     setConfirmAction(() => () => {
       const data = new FormData();
@@ -66,13 +81,6 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
         price: Number(formData.price),
         minCapacity: Number(formData.minCapacity),
         maxCapacity: Number(formData.maxCapacity),
-        additionalFee: formData.additionalFee
-          ? {
-              type: formData.additionalFee.additionalFeeType,
-              description: formData.additionalFee.description || "",
-              amount: Number(formData.additionalFee.amount),
-            }
-          : undefined,
       };
 
       data.append("data", JSON.stringify(jsonData));
@@ -91,21 +99,6 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
     });
 
     setConfirmMessage("Are you sure you want to add this cabin?");
-    setIsConfirmModalOpen(true);
-  };
-
-  const handleClear = () => {
-    setConfirmAction(() => {
-      reset();
-    });
-
-    setConfirmMessage("Are you sure you want to reset all the fields?");
-    setIsConfirmModalOpen(true);
-  };
-
-  const handleCancel = () => {
-    setConfirmAction(() => () => router.back());
-    setConfirmMessage("Are you sure you want to cancel?");
     setIsConfirmModalOpen(true);
   };
 
@@ -225,64 +218,6 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
                   {errors.file.message}
                 </p>
               )}
-            </div>
-          </div>
-
-          {/* Additional Fees Section */}
-          <div className={styles.full_width}>
-            <h3 className={styles.section_title}>Additional Fees (Optional)</h3>
-            <div className={styles.additional_fees_container}>
-              <div className={styles.additional_fees_left}>
-                <div className={styles.form_group}>
-                  <label>Type</label>
-                  <input
-                    type="text"
-                    data-section="additionalFee"
-                    {...register("additionalFee.additionalFeeType")}
-                    maxLength={50}
-                  />
-                  {errors.additionalFee?.additionalFeeType && (
-                    <p className={`${styles.message} ${styles.error}`}>
-                      {errors.additionalFee.additionalFeeType.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className={styles.form_group}>
-                  <label>Description</label>
-                  <textarea
-                    data-section="additionalFee"
-                    {...register("additionalFee.description")}
-                    rows={3}
-                    cols={30}
-                    maxLength={100}
-                  />
-                  {errors.additionalFee?.description && (
-                    <p className={`${styles.message} ${styles.error}`}>
-                      {errors.additionalFee.description.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className={styles.additional_fees_right}>
-                <div className={styles.form_group}>
-                  <label>Amount</label>
-                  <input
-                    type="number"
-                    placeholder="₱"
-                    {...register("additionalFee.amount")}
-                    min="0"
-                    step="0.01"
-                    className={styles.short_input}
-                  />
-                  {errors.additionalFee?.amount && (
-                    <p className={`${styles.message} ${styles.error}`}>
-                      {errors.additionalFee.amount.message}
-                    </p>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
 
