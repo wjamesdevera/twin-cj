@@ -180,8 +180,7 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
 
               <div className={styles.form_group}>
                 <label>
-                  Rate
-                  <span className={styles.required}>*</span>
+                  Rate <span className={styles.required}>*</span>
                 </label>
                 <input
                   type="number"
@@ -199,7 +198,7 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
 
             <div className={styles.form_group}>
               <label>
-                Upload Image <span className={styles.required}>*</span>
+                Upload Image
               </label>
               <input
                 type="file"
@@ -226,7 +225,7 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
           {/* Buttons */}
           <div className={styles.full_width}>
             <div className={styles.button_container}>
-              <CustomButton type="submit" label="Edit Cabin" />
+              <CustomButton type="submit" label="Save Changes" />
               <CustomButton
                 type="button"
                 label="Reset"

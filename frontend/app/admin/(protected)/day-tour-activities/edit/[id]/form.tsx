@@ -161,7 +161,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
 
             <div className={styles.form_group}>
               <label>
-                Upload Image <span className={styles.required}>*</span>
+                Upload Image
               </label>
               <input
                 type="file"
