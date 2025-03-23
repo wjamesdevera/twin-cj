@@ -174,12 +174,6 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
                   {errors.file.message}
                 </p>
               )}
-
-              {errors.file && (
-                <p className={`${styles.message} ${styles.error}`}>
-                  {errors.file.message}
-                </p>
-              )}
             </div>
           </div>
 
