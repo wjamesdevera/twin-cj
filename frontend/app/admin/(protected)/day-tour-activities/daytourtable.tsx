@@ -57,7 +57,7 @@ const DayTourTable: React.FC<DayTourTableProps> = ({
   handleDelete,
   selectAll,
 }) => {
-  const router = useRouter();
+  // const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(dayTours.length / ITEMS_PER_PAGE);
 
