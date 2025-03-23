@@ -1,20 +1,15 @@
 import { Router } from "express";
 import {
-  createAdditionalFeeHandler,
   createCabinHandler,
   createDayTourHandler,
-  deleteAdditionalFeeHandler,
   deleteCabinHandler,
   deleteDayTourHandler,
   deleteSelectedCabinsHandler,
   deleteSelectedDayToursHandler,
-  getAdditionalFeeByIdHandler,
-  getAdditionalFeeHandler,
   getAllCabinsHandler,
   getAllDayToursHandler,
   getCabinByIdHandler,
   getDayTourByIdHandler,
-  updateAddtionalFeeHandler,
   updateCabinHandler,
   updateDayTourHandler,
 } from "../controllers/service.controller";
@@ -36,11 +31,5 @@ router.get("/day-tours/:id", getDayTourByIdHandler);
 router.put("/day-tours/:id", upload.single("file"), updateDayTourHandler);
 router.delete("/day-tours/:id", deleteDayTourHandler);
 router.delete("/day-tours/", deleteSelectedDayToursHandler);
-
-router.get("/additional-fees", getAdditionalFeeHandler);
-router.get("/additional-fees/:id", getAdditionalFeeByIdHandler);
-router.post("/additional-fees/", createAdditionalFeeHandler);
-router.put("/additional-fees/:id", updateAddtionalFeeHandler);
-router.delete("/additional-fees/:id", deleteAdditionalFeeHandler);
 
 export default router;

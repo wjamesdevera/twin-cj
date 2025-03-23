@@ -1,5 +1,4 @@
 import {
-  additionalFeeSchema,
   cabinSchema,
   deleteItemsSchema,
   serviceSchema,
@@ -8,21 +7,16 @@ import {
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
 import {
-  createAdditionalFee,
   createCabin,
   createDayTour,
-  deleteAdditionalFee,
   deleteCabin,
   deleteDayTour,
   deleteMultipleCabin,
   deleteMultipleDayTour,
-  getAdditionalFeeById,
-  getAdditionalFees,
   getAllCabins,
   getAllDayTours,
   getCabinById,
   getDayTourById,
-  updateAdditionalFee,
   updateCabin,
   updateDayTour,
 } from "../services/service.service";
@@ -255,83 +249,6 @@ export const updateCabinHandler = catchErrors(
     response.status(OK).json({
       status: "success",
       data: { cabin: updatedCabin },
-    });
-  }
-);
-
-export const getAdditionalFeeHandler = catchErrors(
-  async (request: Request, response: Response) => {
-    const additionalFees = await getAdditionalFees();
-    appAssert(additionalFees, NOT_FOUND, "No Additonal Fees found");
-    return response.status(OK).json({
-      additionalFees,
-    });
-  }
-);
-
-export const getAdditionalFeeByIdHandler = catchErrors(
-  async (request: Request, response: Response) => {
-    const { id } = idSchema.parse(request.params);
-    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, "Invalid ID");
-    const additionalFees = await getAdditionalFeeById(Number(id));
-    appAssert(additionalFees, NOT_FOUND, "No Additonal Fees found");
-    return response.status(OK).json({
-      additionalFees,
-    });
-  }
-);
-
-type additionalFeeType = z.infer<typeof additionalFeeSchema>;
-
-function parseAdditionalFee(data: additionalFeeType) {
-  return {
-    type: data?.additionalFeeType,
-    description: data?.description,
-    amount: data?.amount,
-  };
-}
-
-export const createAdditionalFeeHandler = catchErrors(
-  async (request: Request, response: Response) => {
-    const data = additionalFeeSchema.parse(request.body);
-    const additionalFees = await createAdditionalFee(parseAdditionalFee(data));
-    appAssert(additionalFees, BAD_REQUEST, "Adding Additional Fees failed");
-    return response.status(CREATED).json({
-      additionalFees,
-    });
-  }
-);
-
-export const updateAddtionalFeeHandler = catchErrors(
-  async (request: Request, response: Response) => {
-    const { id } = idSchema.parse(request.params);
-    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, "Invalid ID");
-
-    const data = additionalFeeSchema.parse(request.body);
-    appAssert(data, BAD_REQUEST, "Invalid data provided");
-
-    const additionalFees = await updateAdditionalFee(
-      Number(id),
-      parseAdditionalFee(data)
-    );
-
-    appAssert(additionalFees, NOT_FOUND, "No Additonal Fees found");
-    return response.status(OK).json({
-      additionalFees,
-    });
-  }
-);
-
-export const deleteAdditionalFeeHandler = catchErrors(
-  async (request: Request, response: Response) => {
-    const { id } = idSchema.parse(request.params);
-    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, "Invalid ID");
-
-    const additionalFees = await deleteAdditionalFee(Number(id));
-    appAssert(additionalFees, NOT_FOUND, "No Additonal Fees found");
-
-    return response.status(OK).json({
-      message: "Addtional Fee deleted",
     });
   }
 );

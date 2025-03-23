@@ -16,33 +16,10 @@ export const descriptionSchema = z
 
 export const priceSchema = z.number().gt(0);
 
-export const additionalFeeSchema = z.object({
-  additionalFeeType: z
-    .string()
-    .trim()
-    .min(2, "Type is required")
-    .max(50, "Type must be at most 50 characters long")
-    .refine((val) => val === undefined || /^[A-Za-z\s]+$/.test(val), {
-      message: "Name can only contain letters and spaces",
-    })
-    .transform((val) => (val ? val.replace(/\s+/g, " ").trim() : val)),
-  description: z
-    .string()
-    .trim()
-    .min(2, "Description is required")
-    .max(100, "Description must be at most 100 characters long")
-    .refine(
-      (val) => (val === undefined ? true : val.trim().length > 0),
-      "Description cannot be just spaces"
-    ),
-  amount: z.number().gte(0),
-});
-
 export const serviceSchema = z.object({
   name: nameSchema,
   description: descriptionSchema,
   price: priceSchema,
-  additionalFee: additionalFeeSchema,
 });
 
 export const capacitySchema = z.number().gt(0);
@@ -51,13 +28,6 @@ export const cabinSchema = serviceSchema
   .extend({
     minCapacity: capacitySchema,
     maxCapacity: capacitySchema,
-    additionalFee: z
-      .object({
-        type: z.string().optional(),
-        description: z.string().optional(),
-        amount: z.number().optional(),
-      })
-      .optional(),
   })
   .refine((data) => data.minCapacity < data.maxCapacity, {
     message: "Min capacity should be less than Max capacity",
