@@ -292,12 +292,6 @@ export default function CabinForm() {
                   }
                 }}
               />
-              {!errors.file && (
-                <p className={`${styles.message} ${styles.success}`}>
-                  Image uploaded successfully!
-                </p>
-              )}
-
               {errors.file && (
                 <p className={`${styles.message} ${styles.error}`}>
                   {errors.file.message}
