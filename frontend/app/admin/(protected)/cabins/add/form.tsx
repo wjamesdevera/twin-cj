@@ -44,6 +44,7 @@ export default function CabinForm() {
     reset,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<AddCabinFormData>({
     resolver: zodResolver(cabinFormSchema),
@@ -162,6 +163,9 @@ export default function CabinForm() {
                 className={errors.description && styles.invalid_input}
                 maxLength={101}
               />
+              <p className={styles["char-count"]}>
+                {watch("description").length}/100 characters
+              </p>
               {errors.description && (
                 <span className={styles.error}>
                   {errors.description.message}

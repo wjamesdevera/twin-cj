@@ -30,6 +30,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<DayTourFormData>({
     resolver: zodResolver(dayTourSchema),
@@ -134,6 +135,9 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
                 maxLength={101}
                 required
               />
+              <p className={styles["char-count"]}>
+                {watch("description").length}/100 characters
+              </p>
               {errors.description && (
                 <span className={styles.error}>
                   {errors.description.message}

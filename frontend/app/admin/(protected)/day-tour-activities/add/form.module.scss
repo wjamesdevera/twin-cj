@@ -233,6 +233,12 @@
     align-items: center;
 }
 
+.char-count {
+  font-size: 0.8rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
     .capacityRateContainer {
