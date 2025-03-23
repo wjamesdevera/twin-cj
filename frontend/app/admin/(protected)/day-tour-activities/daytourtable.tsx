@@ -94,9 +94,6 @@ const DayTourTable: React.FC<DayTourTableProps> = ({
               <th>Image</th>
               <th>Description</th>
               <th>Rate</th>
-              <th>Type (Additional)</th>
-              <th>Description (Additional)</th>
-              <th>Amount (Additional)</th>
               <th>Date Created</th>
               <th>Last Updated</th>
             </tr>
