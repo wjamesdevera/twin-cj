@@ -95,7 +95,7 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
   };
 
   const handleClear = () => {
-    setConfirmAction(() => () => {
+    setConfirmAction(() => {
       reset();
     });
 
