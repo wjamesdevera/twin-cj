@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import PaymentDetailsHeader from "../components/paymentDetailsHeader";
+import PaymentDetailsHeader from "../../components/paymentDetailsHeader";
 import styles from "./paymentDetails.module.scss";
-import BackBtn from "../components/backButton";
-import PaymentContainer from "../components/paymentDetailsContainer";
-import SelectPayment from "../components/selectPayment";
-import PricingContainer from "../components/pricingContainer";
-import BookingButton from "../components/BookingButton";
+import BackBtn from "../../components/backButton";
+import PaymentContainer from "../../components/paymentDetailsContainer";
+import SelectPayment from "../../components/selectPayment";
+import PricingContainer from "../../components/pricingContainer";
+import BookingButton from "../../components/BookingButton";
 import { options } from "@/app/api";
 import { useForm } from "react-hook-form";
-import { paymentSchema } from "../lib/zodSchemas";
+import { paymentSchema } from "../../lib/zodSchemas";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 

@@ -4,7 +4,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { options } from "@/app/api";
-import styles from "./daytourtable.module.scss";
+import styles from "@/app/table.module.scss";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
 interface DayTour {
@@ -94,9 +94,6 @@ const DayTourTable: React.FC<DayTourTableProps> = ({
               <th>Image</th>
               <th>Description</th>
               <th>Rate</th>
-              <th>Type (Additional)</th>
-              <th>Description (Additional)</th>
-              <th>Amount (Additional)</th>
               <th>Date Created</th>
               <th>Last Updated</th>
             </tr>
@@ -166,7 +163,7 @@ const DayTourTable: React.FC<DayTourTableProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={12} className={styles.no_data}>
+                <td colSpan={14} className={styles.no_data}>
                   No day tour activities available
                 </td>
               </tr>

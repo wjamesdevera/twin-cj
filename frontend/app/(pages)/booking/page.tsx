@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
-import Header from "./../components/Header";
-import Accordion from "./../components/Accordion";
-import ScheduleSelector from "./../components/ScheduleSelector";
-import BookingCard from "./../components/BookingCard";
-import GuestInformation from "../components/GuestInformation";
-import { Loading } from "../components/loading";
+import Header from "@/app/components/Header";
+import Accordion from "@/app/components/Accordion";
+import ScheduleSelector from "@/app/components/ScheduleSelector";
+import BookingCard from "@/app/components/BookingCard";
+import GuestInformation from "@/app/components/GuestInformation";
+import { Loading } from "@/app/components/loading";
 import { useRouter } from "next/navigation";
 
 interface AccordionItem {
