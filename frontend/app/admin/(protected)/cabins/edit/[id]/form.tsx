@@ -112,11 +112,11 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
           <div className={styles.left_column}>
             <div className={styles.form_group}>
               <label>
-                Service Name <span className={styles.required}>*</span>
+                Cabin Name <span className={styles.required}>*</span>
               </label>
               <input
                 type="text"
-                placeholder="Cabin name"
+                placeholder="Enter the cabin name"
                 {...register("name")}
                 className={errors.name && styles.invalid_input}
                 maxLength={51}
@@ -131,7 +131,7 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
                 Description <span className={styles.required}>*</span>
               </label>
               <textarea
-                placeholder="Description"
+                placeholder="Enter the description"
                 {...register("description")}
                 className={errors.description && styles.invalid_input}
                 maxLength={101}
