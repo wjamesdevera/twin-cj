@@ -223,7 +223,7 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
           {/* Buttons */}
           <div className={styles.full_width}>
             <div className={styles.button_container}>
-              <CustomButton type="submit" label="Edit Cabin" />
+              <CustomButton type="submit" label="Save Changes" />
               <CustomButton
                 type="button"
                 label="Reset"
