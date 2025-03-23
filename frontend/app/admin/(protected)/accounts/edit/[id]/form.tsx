@@ -52,6 +52,7 @@ const Form: React.FC<EditUserFormArg> = ({
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -90,12 +91,27 @@ const Form: React.FC<EditUserFormArg> = ({
     openModal("Are you sure you want to save changes?", async () => {
       try {
         await trigger(data);
-        localStorage.setItem("adminUpdated", "true");
-        router.push("/admin/accounts");
-      } catch (error) {
-        console.error("Failed to update user:", error);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (error.message === "Email already in use") {
+          setError(
+            "email",
+            { type: "focus", message: error.message },
+            { shouldFocus: true }
+          );
+        } else if (error.message === "Phone number already in use") {
+          setError(
+            "phoneNumber",
+            {
+              type: "focus",
+              message: error.message,
+            },
+            { shouldFocus: true }
+          );
+        }
+      } finally {
+        closeModal();
       }
-      closeModal();
     });
   };
 
@@ -206,9 +222,7 @@ const Form: React.FC<EditUserFormArg> = ({
         onConfirm={modalConfig.onConfirm || closeModal}
         onClose={closeModal}
         confirmText="Yes"
-        confirmColor="#A80000"
         cancelText="No"
-        cancelColor="#CCCCCC"
       />
 
       {/* Buttons */}
