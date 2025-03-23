@@ -52,17 +52,27 @@ type ChangePasswordParams = {
 };
 
 export const createAccount = async (data: CreateAccountParams) => {
-  let existingUser = await prisma.personalDetail.findFirst({
+  let existingUser = await prisma.userAccount.findFirst({
     where: {
-      email: data.email.toLowerCase(),
+      personalDetail: {
+        email: data.email.toLowerCase(),
+      },
+    },
+    include: {
+      personalDetail: true,
     },
   });
 
   appAssert(!existingUser, CONFLICT, "Email already in use");
 
-  existingUser = await prisma.personalDetail.findFirst({
+  existingUser = await prisma.userAccount.findFirst({
     where: {
-      phoneNumber: data.phoneNumber,
+      personalDetail: {
+        phoneNumber: data.phoneNumber,
+      },
+    },
+    include: {
+      personalDetail: true,
     },
   });
 
