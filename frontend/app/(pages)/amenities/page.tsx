@@ -104,15 +104,21 @@ export default function Amenities() {
   return (
     <>
       <Header />
-      <SectionHeader title="AMENITIES" />
-      <MediaBanner mediaSrc="/assets/video-amenities.png" mediaType="image" />
-      <section className={styles.amenitiesSection}>
-        <div className="container">
-          <SectionHeader title="CABIN INCLUSIONS" />
-          <FeatureIcons />
-          <CardContainer cards={cabinCards} />
-        </div>
-      </section>
+      <div className={styles.mainContainer}>
+        <SectionHeader title="AMENITIES" />
+        <MediaBanner
+          mediaSrc="/assets/amenities-image.png"
+          mediaType="image"
+          altText="Amenities Banner"
+        />
+        <section className={styles.amenitiesSection}>
+          <div className="container">
+            <SectionHeader title="CABIN INCLUSIONS" />
+            <FeatureIcons />
+            <CardContainer cards={cabinCards} />
+          </div>
+        </section>
+      </div>
     </>
   );
 }
