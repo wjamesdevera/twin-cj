@@ -2,7 +2,8 @@ import { prisma } from "../config/db";
 import path from "path";
 import fs from "fs";
 import appAssert from "../utils/appAssert";
-import { NOT_FOUND } from "../constants/http";
+import { BAD_REQUEST, NOT_FOUND } from "../constants/http";
+import { O } from "@faker-js/faker/dist/airline-CBNP41sR";
 
 interface CreateDayTourParams {
   name: string;
@@ -755,4 +756,35 @@ export const updateCabin = async ({ id, data }: UpdateCabinParams) => {
     createdAt: updatedCabinService.createdAt,
     updatedAt: updatedCabinService.updatedAt,
   };
+};
+
+export const getAdditionalFees = async () => {
+  const additionalFees = await prisma.additionalFee.findMany();
+  return additionalFees;
+};
+
+export const getAdditionalFeeById = async (id: number) => {
+  const additionalFees = await prisma.additionalFee.findUnique({
+    where: {
+      id,
+    },
+  });
+  appAssert(additionalFees, NOT_FOUND, `Addtional Fee ID: ${id} not found`);
+  return additionalFees;
+};
+
+type createAdditionalFeeType = {
+  type: string;
+  description: string;
+  amount: number;
+};
+
+export const createAdditionalFee = async (data: createAdditionalFeeType) => {
+  const additionalFee = await prisma.additionalFee.create({
+    data: {
+      ...data,
+    },
+  });
+  appAssert(additionalFee, BAD_REQUEST, "Creating additional fee failed");
+  return additionalFee;
 };

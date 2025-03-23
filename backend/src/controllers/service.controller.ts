@@ -1,4 +1,5 @@
 import {
+  additionalFeeSchema,
   cabinSchema,
   deleteItemsSchema,
   serviceSchema,
@@ -7,12 +8,15 @@ import {
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
 import {
+  createAdditionalFee,
   createCabin,
   createDayTour,
   deleteCabin,
   deleteDayTour,
   deleteMultipleCabin,
   deleteMultipleDayTour,
+  getAdditionalFeeById,
+  getAdditionalFees,
   getAllCabins,
   getAllDayTours,
   getCabinById,
@@ -24,6 +28,8 @@ import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from "../constants/http";
 import { ROOT_STATIC_URL } from "../constants/url";
 import appAssert from "../utils/appAssert";
 import { idSchema, jsonSchema } from "../schemas/schemas";
+import { Z } from "@faker-js/faker/dist/airline-CBNP41sR";
+import { z } from "zod";
 
 export const createDayTourHandler = catchErrors(
   async (request: Request, response: Response) => {
@@ -248,6 +254,49 @@ export const updateCabinHandler = catchErrors(
     response.status(OK).json({
       status: "success",
       data: { cabin: updatedCabin },
+    });
+  }
+);
+
+export const getAdditionalFeeHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const additionalFees = await getAdditionalFees();
+    appAssert(additionalFees, NOT_FOUND, "No Additonal Fees found");
+    return response.status(OK).json({
+      additionalFees,
+    });
+  }
+);
+
+export const getAdditionalFeeByIdHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { id } = idSchema.parse(request.params);
+    appAssert(id && !isNaN(Number(id)), BAD_REQUEST, "Invalid ID");
+    const additionalFees = await getAdditionalFeeById(Number(id));
+    appAssert(additionalFees, NOT_FOUND, "No Additonal Fees found");
+    return response.status(OK).json({
+      additionalFees,
+    });
+  }
+);
+
+type additionalFeeType = z.infer<typeof additionalFeeSchema>;
+
+function parseAdditionalFee(data: additionalFeeType) {
+  return {
+    type: data?.additionalFeeType,
+    description: data?.description,
+    amount: data?.amount,
+  };
+}
+
+export const createAdditionalFeeHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const data = additionalFeeSchema.parse(request.body);
+    const additionalFees = await createAdditionalFee(parseAdditionalFee(data));
+    appAssert(additionalFees, BAD_REQUEST, "Adding Additional Fees failed");
+    return response.status(OK).json({
+      additionalFees,
     });
   }
 );
