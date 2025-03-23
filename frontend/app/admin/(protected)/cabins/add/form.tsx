@@ -160,6 +160,7 @@ export default function CabinForm() {
                 placeholder="Description"
                 {...register("description")}
                 className={errors.description && styles.invalid_input}
+                maxLength={101}
               />
               {errors.description && (
                 <span className={styles.error}>
