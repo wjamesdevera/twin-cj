@@ -6,6 +6,7 @@
   gap: 20px;
   justify-content: center;
   align-items: stretch;
+  margin: 3rem 0;
 }
 
 .card {
@@ -82,6 +83,7 @@
     gap: 10px;
     padding: 1rem;
     margin-top: auto;
+    margin-bottom: 1rem;
 
     .morePhotos,
     .bookNow {
@@ -118,6 +120,116 @@
   }
 }
 
+.galleryModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.galleryContent {
+  position: relative;
+  max-width: 70%;
+  max-height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  overflow: hidden;
+}
+
+.closeButton {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.486);
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+  z-index: 1001;
+  transition: color 0.3s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: #f0a500;
+  }
+}
+
+.swiperContainer {
+  width: 100%;
+  height: 80vh;
+  position: relative;
+}
+
+.swiperSlide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.galleryImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 0;
+}
+
+.swiperNavigation {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+  z-index: 1000;
+}
+
+.swiperButtonPrev,
+.swiperButtonNext {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 10px 15px;
+  font-size: 15px;
+  z-index: 10;
+  opacity: 1;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.swiperButtonPrev {
+  left: 10px;
+}
+
+.swiperButtonNext {
+  right: 10px;
+}
+
 @media (max-width: 1120px) {
   .cardContainer {
     grid-template-columns: repeat(2, 1fr);
@@ -137,5 +249,32 @@
 
   .card {
     max-width: 100%;
+  }
+  .swiperButtonPrev,
+  .swiperButtonNext {
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+  }
+
+  .swiperButtonPrev {
+    left: 5px;
+  }
+
+  .swiperButtonNext {
+    right: 5px;
+  }
+
+  .closeButton {
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+  }
+
+  .galleryContent {
+    max-width: 100%;
+    max-height: 100%;
   }
 }

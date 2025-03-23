@@ -34,6 +34,12 @@ export default function Amenities() {
         "2 queen-sized beds and 5 foam beds",
         "Spacious kitchen inside",
       ],
+      galleryImages: [
+        "/assets/amenities-venti-1.png",
+        "/assets/amenities-venti-2.png",
+        "/assets/amenities-venti-3.png",
+        "/assets/amenities-venti-4.png",
+      ],
     },
     {
       title: "Maxi Cabin",
@@ -45,6 +51,12 @@ export default function Amenities() {
         "Additional guests - ₱350 each",
       ],
       additionalInfo: ["1 queen-sized bed and 2 foam beds"],
+      galleryImages: [
+        "/assets/amenities-maxi-1.png",
+        "/assets/amenities-maxi-2.png",
+        "/assets/amenities-maxi-3.png",
+        "/assets/amenities-maxi-4.png",
+      ],
     },
     {
       title: "Mini Cabin",
@@ -58,6 +70,11 @@ export default function Amenities() {
         "Additional guests - ₱350 each",
       ],
       additionalInfo: ["1 queen-sized bed and 1 foam bed"],
+      galleryImages: [
+        "/assets/amenities-mini-1.png",
+        "/assets/amenities-mini-2.png",
+        "/assets/amenities-mini-3.png",
+      ],
     },
     {
       title: "Swimming Pool",
@@ -66,6 +83,11 @@ export default function Amenities() {
         "Dive into fun with our Swimming Pool Access, available for both day and night tours! Book a cabana or enjoy easy access to our kitchen facilities.",
       rates: [],
       additionalInfo: [],
+      galleryImages: [
+        "/assets/amenities-pool-1.png",
+        "/assets/amenities-pool-2.png",
+        "/assets/amenities-pool-3.png",
+      ],
     },
     {
       title: "River",
@@ -74,6 +96,11 @@ export default function Amenities() {
         "Unwind with nature where relaxation meets the scenic beauty of the Norzagaray and Angat Rivers flowing peacefully by.",
       rates: [],
       additionalInfo: [],
+      galleryImages: [
+        "/assets/amenities-river-1.png",
+        "/assets/amenities-river-2.png",
+        "/assets/amenities-river-3.png",
+      ],
     },
     {
       title: "Common Kitchen",
@@ -82,6 +109,7 @@ export default function Amenities() {
         "Fully equipped with essential appliances and cooking tools, it’s perfect for crafting your favorite dishes, whether sharing a meal with friends or creating a family feast.",
       rates: [],
       additionalInfo: [],
+      galleryImages: ["/assets/amenities-kitchen-1.png"],
     },
     {
       title: "Camping Ground",
@@ -90,6 +118,11 @@ export default function Amenities() {
         "Experience the great outdoors with Tent Pitching or Car Camping options. Rent a tent, enjoy a bonfire, and explore many other exciting activities in our peaceful, nature-filled camping ground.",
       rates: [],
       additionalInfo: [],
+      galleryImages: [
+        "/assets/amenities-camping-1.png",
+        "/assets/amenities-camping-2.png",
+        "/assets/amenities-camping-3.png",
+      ],
     },
     {
       title: "Gazebo",
@@ -98,6 +131,11 @@ export default function Amenities() {
         "Our Gazebo offers a beautiful space for events, providing a peaceful and scenic setting for gatherings, celebrations, or simply relaxing while enjoying nature.",
       rates: [],
       additionalInfo: [],
+      galleryImages: [
+        "/assets/amenities-gazebo-1.png",
+        "/assets/amenities-gazebo-2.png",
+        "/assets/amenities-gazebo-3.png",
+      ],
     },
   ];
 
