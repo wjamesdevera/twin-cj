@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -125,12 +126,13 @@ const CabinTable = ({
                   <td>{cabin.id}</td>
                   <td>{cabin.name}</td>
                   <td>
-                    <img
+                    <Image
                       src={cabin.imageUrl}
                       alt={cabin.name}
                       width={135}
                       height={90}
                       className={styles.image}
+                      unoptimized
                     />
                   </td>
                   <td>{cabin.description}</td>
@@ -152,25 +154,27 @@ const CabinTable = ({
         </table>
       </div>
 
-      <div className={styles.pagination}>
-        <button
-          className={styles.page_button}
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(currentPage - 1)}
-        >
-          Previous
-        </button>
-        <span className={styles.page_info}>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className={styles.page_button}
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(currentPage + 1)}
-        >
-          Next
-        </button>
-      </div>
+      {cabins.length > 0 && (
+        <div className={styles.pagination}>
+          <button
+            className={styles.page_button}
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            Previous
+          </button>
+          <span className={styles.page_info}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className={styles.page_button}
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
