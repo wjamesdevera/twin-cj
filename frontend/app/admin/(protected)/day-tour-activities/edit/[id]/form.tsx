@@ -65,7 +65,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
   });
 
   const handleClear = () => {
-    setConfirmAction(() => {
+    setConfirmAction(() => () => {
       reset();
     });
 
