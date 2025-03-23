@@ -178,8 +178,7 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
 
               <div className={styles.form_group}>
                 <label>
-                  Rate
-                  <span className={styles.required}>*</span>
+                  Rate <span className={styles.required}>*</span>
                 </label>
                 <input
                   type="number"
