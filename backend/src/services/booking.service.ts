@@ -388,7 +388,6 @@ export const getMonthlyBookings = async (req: Request, res: Response) => {
   yearlyBookings.forEach(({ checkIn }) => {
     const date = new Date(checkIn);
     const month = shortMonths[date.getMonth()];
-    console.log(month);
     if (monthlyBookingCount[month] !== undefined) {
       monthlyBookingCount[month]++;
     }

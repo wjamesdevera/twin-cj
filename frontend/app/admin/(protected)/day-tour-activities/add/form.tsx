@@ -6,46 +6,50 @@ import { Loading } from "@/app/components/loading";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
-import { cabinFormSchema } from "../../add/form";
+import NotificationModal from "@/app/components/notification_modal";
+import {
+  descriptionSchema,
+  fileSchema,
+  nameSchema,
+  priceSchema,
+} from "@/app/lib/zodSchemas";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import NotificationModal from "@/app/components/notification_modal";
 import useSWRMutation from "swr/mutation";
-import { updateCabin } from "@/app/lib/api";
+import { createDayTour } from "@/app/lib/api";
 
-interface CabinFormProps {
-  id: string;
-  defaultValues: EditCabinFormData;
-}
+export const dayTourSchema = z.object({
+  name: nameSchema,
+  description: descriptionSchema,
+  file: fileSchema.optional(),
+  price: priceSchema.or(z.number().gt(0)),
+});
 
-type EditCabinFormData = z.infer<typeof cabinFormSchema>;
+type AddDayTourData = z.infer<typeof dayTourSchema>;
 
-export default function CabinForm({ id, defaultValues }: CabinFormProps) {
+export default function DayTourForm() {
   const router = useRouter();
+
   const { trigger, isMutating } = useSWRMutation(
-    "edit",
-    (key, { arg }: { arg: FormData }) => updateCabin(id, arg)
+    "add",
+    (key, { arg }: { arg: FormData }) => createDayTour(arg),
+    {
+      onSuccess: () => {
+        router.push("/admin/day-tour-activities");
+      },
+    }
   );
 
   const {
     register,
     handleSubmit,
-    reset,
     setValue,
+    reset,
     formState: { errors },
-  } = useForm<EditCabinFormData>({
-    resolver: zodResolver(cabinFormSchema),
-    defaultValues: {
-      ...defaultValues,
-    },
+  } = useForm<AddDayTourData>({
+    resolver: zodResolver(dayTourSchema),
   });
-
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<() => void>(
-    () => () => {}
-  );
-  const [confirmMessage, setConfirmMessage] = useState("");
 
   const [notification, setNotification] = useState<{
     isOpen: boolean;
@@ -57,12 +61,18 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
     type: "success",
   });
 
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<() => void>(
+    () => () => {}
+  );
+  const [confirmMessage, setConfirmMessage] = useState("");
+
   const handleClear = () => {
-    setConfirmAction(() => {
+    setConfirmAction(() => () => {
       reset();
     });
 
-    setConfirmMessage("Are you sure you want to reset all the fields?");
+    setConfirmMessage("Are you sure you want to clear all the fields?");
     setIsConfirmModalOpen(true);
   };
 
@@ -72,21 +82,21 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
     setIsConfirmModalOpen(true);
   };
 
-  const onSubmit = async (formData: EditCabinFormData) => {
+  const onSubmit = async (formData: AddDayTourData) => {
     setConfirmAction(() => () => {
       const data = new FormData();
       const jsonData = {
         name: formData.name,
         description: formData.description,
         price: Number(formData.price),
-        minCapacity: Number(formData.minCapacity),
-        maxCapacity: Number(formData.maxCapacity),
       };
 
       data.append("data", JSON.stringify(jsonData));
       if (formData.file) {
         data.append("file", formData.file);
       }
+
+      console.log(data);
 
       trigger(data);
       setNotification({
@@ -95,10 +105,10 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
         type: "success",
       });
 
-      router.push("/admin/cabins");
+      router.push("/admin/day-tour-activities");
     });
 
-    setConfirmMessage("Are you sure you want to add this cabin?");
+    setConfirmMessage("Are you sure you want to add this day tour?");
     setIsConfirmModalOpen(true);
   };
 
@@ -111,14 +121,9 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
           <div className={styles.left_column}>
             <div className={styles.form_group}>
               <label>
-                Service Name <span className={styles.required}>*</span>
+                Title<span className={styles.required}>*</span>
               </label>
-              <input
-                type="text"
-                placeholder="Cabin name"
-                {...register("name")}
-                className={errors.name && styles.invalid_input}
-              />
+              <input type="text" {...register("name")} maxLength={50} />
               {errors.name && (
                 <span className={styles.error}>{errors.name.message}</span>
               )}
@@ -128,11 +133,7 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
               <label>
                 Description <span className={styles.required}>*</span>
               </label>
-              <textarea
-                placeholder="Description"
-                {...register("description")}
-                className={errors.description && styles.invalid_input}
-              />
+              <textarea {...register("description")} maxLength={100} />
               {errors.description && (
                 <span className={styles.error}>
                   {errors.description.message}
@@ -140,59 +141,23 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
               )}
             </div>
           </div>
-
-          {/* Right Column */}
           <div className={styles.right_column}>
-            <div className={styles.capacityRateContainer}>
-              <div className={styles.form_group}>
-                <label>
-                  Min Capacity <span className={styles.required}>*</span>
-                </label>
-                <input
-                  type="number"
-                  {...register("minCapacity")}
-                  className={errors.minCapacity && styles.invalid_input}
-                />
-                {errors.minCapacity && (
-                  <span className={styles.error}>
-                    {errors.minCapacity.message}
-                  </span>
-                )}
-              </div>
-
-              <div className={styles.form_group}>
-                <label>
-                  Max Capacity <span className={styles.required}>*</span>
-                </label>
-                <input
-                  type="number"
-                  {...register("maxCapacity")}
-                  className={errors.maxCapacity && styles.invalid_input}
-                />
-                {errors.maxCapacity && (
-                  <span className={styles.error}>
-                    {errors.maxCapacity.message}
-                  </span>
-                )}
-              </div>
-
-              <div className={styles.form_group}>
-                <label>
-                  Rate
-                  <span className={styles.required}>*</span>
-                </label>
-                <input
-                  type="number"
-                  placeholder="₱"
-                  {...register("price")}
-                  min="1"
-                  step="0.01"
-                  className={errors.price && styles.invalid_input}
-                />
-                {errors.price && (
-                  <span className={styles.error}>{errors.price.message}</span>
-                )}
-              </div>
+            <div className={styles.form_group}>
+              <label>
+                Rate <span className={styles.required}>*</span>
+              </label>
+              <input
+                type="number"
+                placeholder="₱"
+                data-section="service"
+                {...register("price")}
+                min="1"
+                step="0.01"
+                className={styles.short_input}
+              />
+              {errors.price && (
+                <span className={styles.error}>{errors.price.message}</span>
+              )}
             </div>
 
             <div className={styles.form_group}>
@@ -207,16 +172,8 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
                   }
                 }}
               />
-              {!errors.file && (
-                <p className={`${styles.message} ${styles.success}`}>
-                  Image uploaded successfully!
-                </p>
-              )}
-
               {errors.file && (
-                <p className={`${styles.message} ${styles.error}`}>
-                  {errors.file.message}
-                </p>
+                <span className={styles.error}>{errors.file.message}</span>
               )}
             </div>
           </div>
@@ -224,10 +181,10 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
           {/* Buttons */}
           <div className={styles.full_width}>
             <div className={styles.button_container}>
-              <CustomButton type="submit" label="Edit Cabin" />
+              <CustomButton type="submit" label="Add Day Tour" />
               <CustomButton
                 type="button"
-                label="Reset"
+                label="Clear"
                 variant="secondary"
                 onClick={handleClear}
               />
@@ -253,7 +210,6 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
         confirmText="Yes"
         cancelText="No"
       />
-
       <NotificationModal
         isOpen={notification.isOpen}
         message={notification.message}

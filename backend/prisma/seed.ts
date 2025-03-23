@@ -32,11 +32,11 @@ async function main() {
       name: faker.location.city(),
       description: faker.location.city(),
       imageUrl: faker.image.url(),
-      price: faker.number.int(),
+      price: faker.number.int({ min: 500, max: 3000 }),
       cabins: {
         create: {
-          maxCapacity: faker.number.int(),
-          minCapacity: faker.number.int(),
+          maxCapacity: faker.number.int({ min: 1, max: 3 }),
+          minCapacity: faker.number.int({ min: 3, max: 6 }),
         },
       },
       serviceCategory: {

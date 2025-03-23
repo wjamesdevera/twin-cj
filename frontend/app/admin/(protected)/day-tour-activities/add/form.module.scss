@@ -1,0 +1,271 @@
+.form {
+    display: grid;
+    grid-template-columns: 1fr 0.7fr;
+    gap: 20px;
+    max-width: 1600px;
+    width: 100%;
+    padding: 40px;
+}
+
+.form_group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-height: 100px;
+
+    label {
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    input, textarea {
+        padding: 10px;
+        border: 1px solid #BEBEBE;
+        border-radius: 5px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 200px;
+    }
+
+    .invalid_input {
+        border: 1px solid red;
+    }
+
+    .error {
+        color: red;
+        font-size: 10px;
+        margin-top: 5px;
+        min-height: 16px;
+        display: block;
+    }
+}
+
+/* Upload Section */
+.dragDropArea {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 47px;
+    border: 2px dashed #a45f14;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 79%;
+    margin: 0px 10px 10px 0px;
+
+    &:hover {
+        border-color: #784610;
+        background-color: #e9f5ff;
+    }
+}
+
+/* Image Preview */
+.imagePreview {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    object-fit: cover;
+}
+
+.uploadedImage {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.uploadPlaceholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 10px;
+}
+
+.uploadText {
+    font-size: var(--text-size-sm);
+    color: #555;
+    margin: 0;
+}
+
+/* Remove Image Button */
+.removeImageButton {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 0;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: #cc0000;
+    }
+}
+
+/* Message */
+.message {
+    font-size: var(--text-size-sm);
+    color: #000;
+    font-family: "Open Sans";
+    font-weight: 300;
+    margin-left: 10px;
+}
+
+/* Capacity Rate Container */
+.capacityRateContainer {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+    flex-wrap: wrap;
+
+    .form_group {
+        flex: 1;
+        min-width: 100px;
+        max-width: 100%;
+    }
+}
+
+/* Additional Fees */
+.additional_fees_container {
+    display: grid;
+    grid-template-columns: 1fr 0.7fr;
+    gap: 20px;
+    align-items: start;
+    width: 100%;
+}
+
+/* Form Group Containers */
+.form_group_container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form_group_left, .form_group_right {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form_group_right {
+    margin-top: 40px;
+}
+
+/* Additional Fees Sections */
+.additional_fees_left, .additional_fees_right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.short_input {
+    max-width: 120px;
+}
+
+/* Section Title */
+.section_title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Image Preview */
+.image_preview {
+    width: 210px;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+/* Full Width */
+.full_width {
+    grid-column: span 2;
+}
+
+/* Button Container */
+.button_container {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    width: 100%;
+    flex-direction: row;
+    margin-bottom: 100px;
+}
+
+/* Required */
+.required {
+    color: red;
+    font-weight: bold;
+}
+
+/* Capacity Container */
+.capacity_container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .capacityRateContainer {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .additional_fees_container, .form {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+    }
+
+    .uploadContainer {
+        width: 100%;
+        min-width: auto;
+        max-width: 100%;
+        padding: 20px;
+        text-align: left;
+    }
+
+    .full_width {
+        grid-column: span 1;
+    }
+
+    .button_container {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .image_preview {
+        width: 320px;
+    }
+}
