@@ -421,39 +421,34 @@ export const getCabinById = async (id: number) => {
 };
 
 export const getAllCabins = async () => {
-  try {
-    const cabins = await prisma.cabin.findMany({
-      include: {
-        additionalFee: true,
-        service: true,
-      },
-    });
+  const cabins = await prisma.cabin.findMany({
+    include: {
+      additionalFee: true,
+      service: true,
+    },
+  });
 
-    return cabins
-      .map((cabin) => {
-        if (!cabin.service) {
-          console.warn(`Cabin ID ${cabin.id} has no associated service.`);
-          return null;
-        }
+  return cabins
+    .map((cabin) => {
+      if (!cabin.service) {
+        console.warn(`Cabin ID ${cabin.id} has no associated service.`);
+        return null;
+      }
 
-        return {
-          id: cabin.service.id,
-          name: cabin.service.name,
-          description: cabin.service.description,
-          price: cabin.service.price,
-          imageUrl: cabin.service.imageUrl,
-          minCapacity: cabin.minCapacity,
-          maxCapacity: cabin.maxCapacity,
-          additionalFee: cabin.additionalFee ?? null,
-          createdAt: cabin.createdAt,
-          updatedAt: cabin.updatedAt,
-        };
-      })
-      .filter(Boolean);
-  } catch (error) {
-    console.error("Error fetching all cabins:", error);
-    throw error;
-  }
+      return {
+        id: cabin.service.id,
+        name: cabin.service.name,
+        description: cabin.service.description,
+        price: cabin.service.price,
+        imageUrl: cabin.service.imageUrl,
+        minCapacity: cabin.minCapacity,
+        maxCapacity: cabin.maxCapacity,
+        additionalFee: cabin.additionalFee ?? null,
+        createdAt: cabin.createdAt,
+        updatedAt: cabin.updatedAt,
+      };
+    })
+    .filter(Boolean);
 };
 
 type CreateCabinParams = {
