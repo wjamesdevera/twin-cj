@@ -6,7 +6,8 @@ model PaymentMethod {
     updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
-    paymentAccount PaymentAccount[]
+
+    paymentAccounts PaymentAccount[]
 
     @@map("payment_methods")
 }

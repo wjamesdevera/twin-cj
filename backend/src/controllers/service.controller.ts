@@ -24,6 +24,7 @@ import { BAD_REQUEST, CREATED, NOT_FOUND, OK } from "../constants/http";
 import { ROOT_STATIC_URL } from "../constants/url";
 import appAssert from "../utils/appAssert";
 import { idSchema, jsonSchema } from "../schemas/schemas";
+import { z } from "zod";
 
 export const createDayTourHandler = catchErrors(
   async (request: Request, response: Response) => {
@@ -39,6 +40,7 @@ export const createDayTourHandler = catchErrors(
     const requestBody = {
       ...validatedData,
       imageUrl,
+      serviceCategoryId: parsedJsonData.serviceCategoryId,
     };
 
     console.log(requestBody);
@@ -180,6 +182,7 @@ export const createCabinHandler = catchErrors(
     const requestBody = {
       ...validatedData,
       imageUrl,
+      serviceCategoryId: parsedJsonData.serviceCategoryId,
     };
 
     const createdCabin = await createCabin(requestBody);

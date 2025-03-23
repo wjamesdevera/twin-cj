@@ -186,6 +186,7 @@ const Form: React.FC<EditUserFormArg> = ({
         <label>Phone Number</label>
         <input
           type="tel"
+          maxLength={11}
           {...register("phoneNumber")}
           className={errors.phoneNumber ? styles.invalid_input : ""}
         />
