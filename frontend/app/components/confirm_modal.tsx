@@ -1,5 +1,4 @@
-"use client";
-
+import React from "react";
 import styles from "./confirm_modal.module.scss";
 
 interface ConfirmModalProps {
@@ -8,9 +7,7 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   title: string;
   confirmText: string;
-  confirmColor: string;
   cancelText: string;
-  cancelColor: string;
 }
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -19,9 +16,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   title,
   confirmText,
-  confirmColor,
   cancelText,
-  cancelColor,
 }) => {
   if (!isOpen) return null;
 
@@ -30,10 +25,10 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
       <div className={styles.modal}>
         <h2>{title}</h2>
         <div className={styles.button_container}>
-          <button className={styles.confirm_btn} style={{ backgroundColor: confirmColor }} onClick={onConfirm}>
+          <button className={styles.confirm_btn} onClick={onConfirm}>
             {confirmText}
           </button>
-          <button className={styles.cancel_btn} style={{ backgroundColor: cancelColor }} onClick={onClose}>
+          <button className={styles.cancel_btn} onClick={onClose}>
             {cancelText}
           </button>
         </div>
@@ -42,4 +37,4 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   );
 };
 
-export default ConfirmModal; 
+export default ConfirmModal;
