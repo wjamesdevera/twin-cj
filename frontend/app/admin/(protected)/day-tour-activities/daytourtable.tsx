@@ -4,7 +4,6 @@ import React from "react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { options } from "@/app/api";
-import { useRouter } from "next/navigation";
 import styles from "./daytourtable.module.scss";
 import { FaEdit, FaTrash } from "react-icons/fa";
 

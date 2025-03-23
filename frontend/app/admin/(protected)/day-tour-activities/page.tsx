@@ -4,7 +4,7 @@ import styles from "./dashboard.module.scss";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
 import { options } from "@/app/api";
-import DayTourTable from "./DayTourTable";  
+import DayTourTable from "./daytourtable";  
 import CustomButton from "@/app/components/custom_button"; 
 import ConfirmModal from "@/app/components/confirm_modal";
 import NotificationModal from "@/app/components/notification_modal";
