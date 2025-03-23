@@ -145,6 +145,7 @@ export default function CabinForm() {
                 placeholder="Cabin name"
                 {...register("name")}
                 className={errors.name && styles.invalid_input}
+                maxLength={51}
               />
               {errors.name && (
                 <span className={styles.error}>{errors.name.message}</span>
@@ -159,6 +160,7 @@ export default function CabinForm() {
                 placeholder="Description"
                 {...register("description")}
                 className={errors.description && styles.invalid_input}
+                maxLength={101}
               />
               {errors.description && (
                 <span className={styles.error}>
@@ -212,7 +214,6 @@ export default function CabinForm() {
                   type="number"
                   placeholder="₱"
                   {...register("price")}
-                  min="1"
                   step="0.01"
                   className={errors.price && styles.invalid_input}
                 />

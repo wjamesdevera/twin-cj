@@ -116,6 +116,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
                 type="text"
                 {...register("name")}
                 className={errors.name && styles.invalid_input}
+                maxLength={51}
                 required
               />
               {errors.name && (
@@ -130,6 +131,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
               <textarea
                 {...register("description")}
                 className={errors.description && styles.invalid_input}
+                maxLength={101}
                 required
               />
               {errors.description && (
