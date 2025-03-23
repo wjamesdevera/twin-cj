@@ -214,7 +214,6 @@ export default function CabinForm() {
                   type="number"
                   placeholder="₱"
                   {...register("price")}
-                  min="1"
                   step="0.01"
                   className={errors.price && styles.invalid_input}
                 />
