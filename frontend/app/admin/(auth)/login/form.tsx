@@ -77,18 +77,17 @@ const Timer = ({
     </div>
   );
 };
-
-const useLocalStorageState = (key: string, defaultValue: string) => {
+const useSessionStorageState = (key: string, defaultValue: string) => {
   const isBrowser = typeof window !== "undefined";
 
   const [state, setState] = useState(() => {
     if (!isBrowser) return defaultValue; // Prevent ReferenceError during SSR
-    return localStorage.getItem(key) || defaultValue;
+    return sessionStorage.getItem(key) || defaultValue;
   });
 
   useEffect(() => {
     if (isBrowser) {
-      localStorage.setItem(key, state);
+      sessionStorage.setItem(key, state);
     }
   }, [key, state, isBrowser]);
 
@@ -107,7 +106,7 @@ export function LoginForm() {
   const { register, handleSubmit } = useForm<FormData>({
     resolver: zodResolver(loginFormSchema),
   });
-  const [attempts, setAttempts] = useLocalStorageState("attempts", "0");
+  const [attempts, setAttempts] = useSessionStorageState("attempts", "0");
   const [isDisabled, setIsDisabled] = useState(false);
 
   useEffect(() => {
@@ -128,6 +127,7 @@ export function LoginForm() {
     (key, { arg }: { arg: { email: string; password: string } }) => login(arg),
     {
       onSuccess: () => {
+        setAttempts("0");
         router.replace("/admin");
       },
       onError: (error) => {
