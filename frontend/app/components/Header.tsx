@@ -195,24 +195,25 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
         </p>
 
         <div className={styles["booking-form"]}>
-          <div className={styles["form-field"]}>
-            <label htmlFor="checkin">Check in</label>
+          <div className={styles["form-field-group"]}>
+            <label className={styles["form-label"]}>Check in</label>
             <DatePicker
               selected={checkInDate}
               onChange={(date: Date | null) => setCheckInDate(date)}
               placeholderText="Select check-in date"
-              className={styles["date-input"]}
+              className={styles["form-input"]}
               dateFormat="MMMM d, yyyy"
               minDate={new Date()}
             />
           </div>
-          <div className={styles["form-field"]}>
-            <label htmlFor="checkout">Check out</label>
+
+          <div className={styles["form-field-group"]}>
+            <label className={styles["form-label"]}>Check out</label>
             <DatePicker
               selected={checkOutDate}
               onChange={(date: Date | null) => setCheckOutDate(date)}
               placeholderText="Select check-out date"
-              className={styles["date-input"]}
+              className={styles["form-input"]}
               dateFormat="MMMM d, yyyy"
               minDate={
                 checkInDate
@@ -221,13 +222,15 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
               }
             />
           </div>
-          <div className={styles["form-field"]}>
-            <label>No. of Guests</label>
+
+          <div className={styles["form-field-group"]}>
+            <label className={styles["form-label"]}>No. of Guests</label>
             <GuestsDropdown
               guestCounts={guestCounts}
               onApply={handleApplyGuests}
             />
           </div>
+
           <button
             className={styles["check-availability-btn"]}
             onClick={handleCheckAvailability}
