@@ -414,7 +414,6 @@ export default function WalkInForm() {
                 {...register("checkOutDate")}
                 type="date"
                 min={minDate}
-                disabled={packageType === "day-tour"}
                 onBlur={() => trigger("checkOutDate")}
               />
               {errors.checkOutDate && (
