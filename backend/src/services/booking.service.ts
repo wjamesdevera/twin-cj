@@ -21,6 +21,7 @@ interface Service {
   updatedAt: Date;
 }
 
+// Check Availability
 export const checkAvailability = async (
   checkInDate: string,
   checkOutDate: string
@@ -165,6 +166,7 @@ export const getServicesByCategory = async (
   }
 };
 
+// Create Bookings for Customer side
 export const createBooking = async (req: Request) => {
   try {
     const parsedBookingData = JSON.parse(req.body.bookingData || "{}");
@@ -285,6 +287,7 @@ export const createBooking = async (req: Request) => {
   }
 };
 
+// Admin Dashboard Latest Bookings
 export const getLatestBookings = async () => {
   try {
     const latestBookings = await prisma.booking.findMany({
@@ -393,7 +396,7 @@ export const getMonthlyBookings = async (req: Request, res: Response) => {
   }
 };
 
-// Admin Side
+// Admin Booking Dashboard
 export const viewBookings = async (req: Request, res: Response) => {
   try {
     const bookings = await prisma.booking.findMany({

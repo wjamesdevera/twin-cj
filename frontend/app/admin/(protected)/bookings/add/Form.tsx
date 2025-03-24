@@ -2,7 +2,7 @@
 
 import { walkinSchema } from "@/app/lib/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
@@ -33,6 +33,15 @@ type FormFields = {
   bookingStatus: string;
   proofOfPayment?: File;
 };
+
+interface BookingTypeData {
+  id: string;
+  name: string;
+  price?: number;
+  capacity?: number;
+  description?: string;
+}
+
 export default function WalkinForm() {
   const {
     register,
@@ -57,31 +66,66 @@ export default function WalkinForm() {
   today.setHours(0, 0, 0, 0);
   const minDate = today.toISOString().split("T")[0];
 
-  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const fetcher = async (url: string) => {
+    console.log("Fetching URL:", url);
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log("Response data:", data);
+    return data;
+  };
 
   const { data, error } = useSWR<{
     status: string;
-    data: Record<string, Package[]>;
+    data: Record<string, BookingTypeData[]>;
   }>(
     packageType && checkInDate
       ? `http://localhost:8080/api/bookings?type=${encodeURIComponent(
           packageType
-        )}&checkInDate=${new Date(checkInDate).toISOString().split("T")[0]}${
+        )}&checkInDate=${
+          checkInDate ? new Date(checkInDate).toISOString() : ""
+        }&checkOutDate=${
           packageType === "Overnight" && checkOutDate
-            ? `&checkOutDate=${
-                new Date(checkOutDate).toISOString().split("T")[0]
-              }`
+            ? new Date(checkOutDate).toISOString()
+            : checkInDate
+            ? new Date(checkInDate).toISOString()
             : ""
         }`
       : null,
     fetcher
   );
 
-  const availablePackages = data?.data?.[packageType] || [];
+  console.log("Data received:", data);
 
-  const onSubmit = (formData: FormFields) => {
-    console.log("Walk-in Booking Data:", formData);
-    router.push("http://localhost:3000/admin/bookings");
+  const availablePackages: BookingTypeData[] = data?.data?.[packageType] || [];
+
+  console.log("Available packages:", availablePackages);
+
+  const onSubmit = async (formData: FormFields) => {
+    console.log("Submitting...");
+    try {
+      const formDataToSend = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === "proofOfPayment" && value instanceof File) {
+          formDataToSend.append(key, value);
+        } else {
+          formDataToSend.append(key, String(value));
+        }
+      });
+
+      const response = await fetch("http://localhost:8080/api/bookings", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      console.log("Booking submitted successfully!");
+      // router.push("http://localhost:3000/admin/bookings");
+    } catch (error: any) {
+      console.error("Error submitting booking:", error);
+    }
   };
 
   const handleCancel = () => {
@@ -274,21 +318,23 @@ export default function WalkinForm() {
             )}
           </div>
 
-          <div className={styles.form_group}>
-            <label>
-              Check-out Date <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("checkOutDate")}
-              type="date"
-              min={minDate}
-              onBlur={() => trigger("checkOutDate")}
-            />
+          {packageType === "Overnight" && (
+            <div className={styles.form_group}>
+              <label>
+                Check-out Date <span className={styles.required}>*</span>
+              </label>
+              <input
+                {...register("checkOutDate")}
+                type="date"
+                min={minDate}
+                onBlur={() => trigger("checkOutDate")}
+              />
+              {errors.checkOutDate && (
+                <p className={styles.error}>{errors.checkOutDate?.message}</p>
+              )}
+            </div>
+          )}
 
-            {errors.checkOutDate && (
-              <p className={styles.error}>{errors.checkOutDate?.message}</p>
-            )}
-          </div>
           <div className={styles.form_group}>
             <label>
               Payment Account Number <span className={styles.required}>*</span>
