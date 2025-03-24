@@ -49,7 +49,7 @@ export const walkinSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email"),
   contactNumber: z.string().min(10, "Invalid contact number"),
-  packageType: z.enum(["Day Tour", "Overnight"]),
+  packageType: z.enum(["day-tour", "cabins"]),
   selectedPackage: z.string().min(1, "Package selection is required"),
   checkInDate: z.string(),
   checkOutDate: z.string(),

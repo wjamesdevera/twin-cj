@@ -10,20 +10,12 @@ import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
 
-interface Package {
-  id: string;
-  name: string;
-  price?: number;
-  capacity?: number;
-  description?: string;
-}
-
 type FormFields = {
   firstName: string;
   lastName: string;
   email: string;
   contactNumber: string;
-  packageType: "Day Tour" | "Overnight";
+  packageType: "day-tour" | "cabins";
   selectedPackage: string;
   checkInDate: string;
   checkOutDate: string;
@@ -34,6 +26,24 @@ type FormFields = {
   proofOfPayment?: File;
 };
 
+interface Service {
+  id: number;
+  serviceCategoryId: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+  serviceCategory: {
+    id: number;
+    category: {
+      id: number;
+      name: string;
+    };
+  };
+}
+
 interface BookingTypeData {
   id: string;
   name: string;
@@ -42,7 +52,12 @@ interface BookingTypeData {
   description?: string;
 }
 
-export default function WalkinForm() {
+interface BookingResponse {
+  status: string;
+  data: Record<string, BookingTypeData>;
+}
+
+export default function WalkInForm() {
   const {
     register,
     handleSubmit,
@@ -67,24 +82,29 @@ export default function WalkinForm() {
   const minDate = today.toISOString().split("T")[0];
 
   const fetcher = async (url: string) => {
-    console.log("Fetching URL:", url);
-    const response = await fetch(url);
-    const data = await response.json();
-    console.log("Response data:", data);
-    return data;
+    try {
+      console.log("Fetching URL:", url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Response data:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      throw error;
+    }
   };
 
-  const { data, error } = useSWR<{
-    status: string;
-    data: Record<string, BookingTypeData[]>;
-  }>(
+  const { data, error } = useSWR<BookingResponse>(
     packageType && checkInDate
       ? `http://localhost:8080/api/bookings?type=${encodeURIComponent(
           packageType
         )}&checkInDate=${
           checkInDate ? new Date(checkInDate).toISOString() : ""
         }&checkOutDate=${
-          packageType === "Overnight" && checkOutDate
+          packageType === "cabins" && checkOutDate
             ? new Date(checkOutDate).toISOString()
             : checkInDate
             ? new Date(checkInDate).toISOString()
@@ -94,11 +114,8 @@ export default function WalkinForm() {
     fetcher
   );
 
-  console.log("Data received:", data);
-
-  const availablePackages: BookingTypeData[] = data?.data?.[packageType] || [];
-
-  console.log("Available packages:", availablePackages);
+  const availablePackages: Service[] =
+    data?.data?.[packageType]?.services || [];
 
   const onSubmit = async (formData: FormFields) => {
     console.log("Submitting...");
@@ -194,8 +211,8 @@ export default function WalkinForm() {
               <option value="" disabled>
                 Select Package Type
               </option>
-              <option value="Day Tour">Day Tour</option>
-              <option value="Overnight">Overnight</option>
+              <option value="day-tour">Day Tour</option>
+              <option value="cabins">Overnight</option>
             </select>
             {errors.packageType && (
               <p className={styles.error}>{errors.packageType?.message}</p>
@@ -205,7 +222,7 @@ export default function WalkinForm() {
           {packageType && (
             <div className={styles.form_group}>
               <label>
-                {packageType === "Day Tour"
+                {packageType === "day-tour"
                   ? "Day Tour Package"
                   : "Cabin Selection"}
                 :
@@ -318,7 +335,7 @@ export default function WalkinForm() {
             )}
           </div>
 
-          {packageType === "Overnight" && (
+          {packageType === "cabins" && (
             <div className={styles.form_group}>
               <label>
                 Check-out Date <span className={styles.required}>*</span>
