@@ -10,8 +10,8 @@ interface ActivityCardProps {
   description: string;
   guidelines?: string[];
   rates?: { label: string; price: string }[];
-  buttonLabel: string;
-  buttonLink: string;
+  buttonLabel?: string;
+  buttonLink?: string;
   reverse?: boolean;
 }
 
@@ -66,9 +66,11 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
           </div>
         )}
 
-        <div className={styles.buttonContainer}>
-          <BookNowButton label={buttonLabel} link={buttonLink} />
-        </div>
+        {buttonLabel && buttonLink && (
+          <div className={styles.buttonContainer}>
+            <BookNowButton label={buttonLabel} link={buttonLink} />
+          </div>
+        )}
       </div>
     </div>
   );

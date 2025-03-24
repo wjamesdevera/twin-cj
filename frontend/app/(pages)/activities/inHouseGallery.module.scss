@@ -56,3 +56,16 @@
     }
   }
 }
+
+@media (max-width: 768px) {
+  .gallery {
+    grid-template-columns: 1fr;
+    margin: 1.5rem;
+
+    .galleryItem {
+      &.fullWidth {
+        grid-column: span 1;
+      }
+    }
+  }
+}

@@ -18,6 +18,8 @@ const Header: React.FC = () => {
         alt="Resort View"
         fill
         className={styles.image}
+        priority
+        sizes="(max-width: 768px) 100vw, 50vw"
       />
     </header>
   );
@@ -121,10 +123,8 @@ export default function Page() {
                 "2 pillows",
                 "2 blankets",
                 "Access to the bonfire",
-                "Access to the bonfire",
+                "Peaceful camping experience in a scenic riverside location",
               ]}
-              buttonLabel="Book Now"
-              buttonLink="#" // add link to booking page nalang :"D
             />
           </>
         );
@@ -137,16 +137,12 @@ export default function Page() {
               imageAlt="Photoshoot"
               title="PACKAGE A"
               description="Perfect for simple and straightforward shoots, this package includes access to our Cabana and the entire resort for your pictorial. Enjoy the serene ambiance and stunning backdrops to create timeless memories."
-              buttonLabel="Book Now"
-              buttonLink="#" // add link to booking page nalang :"D
             />
             <ActivityCard
               imageSrc="/assets/photoshoot-2.png"
               imageAlt="Photoshoot"
               title="PACKAGE B"
               description="Ideal for more intimate shoots, this package includes the use of our cozy Mini Cabin for preparation and photo-ops. Capture beautiful moments with picturesque resort views while enjoying the comfort of a private space for your shoot."
-              buttonLabel="Book Now"
-              buttonLink="#" // add link to booking page nalang :"D
               reverse
             />
             <ActivityCard
@@ -154,8 +150,13 @@ export default function Page() {
               imageAlt="Photoshoot"
               title="PACKAGE C"
               description="Designed for larger or more elaborate shoots, this package offers the spacious Maxi Cabin for your preparation and exclusive photo-ops. Take advantage of the cabin's features and the resort’s breathtaking scenery for stunning photos."
-              buttonLabel="Book Now"
-              buttonLink="#" // add link to booking page nalang :"D
+            />
+            <ActivityCard
+              imageSrc="/assets/photoshoot-2.png"
+              imageAlt="Photoshoot"
+              title="PACKAGE D"
+              description="For grand and sophisticated shoots, our Venti Cabin provides the ultimate preparation space and photo-op location. This premium package includes full access to the resort's most scenic spots, ensuring an unforgettable photoshoot experience."
+              reverse
             />
           </>
         );

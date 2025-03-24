@@ -34,3 +34,39 @@
     }
   }
 }
+
+@media (max-width: 1024px) {
+  .tabLayout .tabs {
+    gap: 1rem;
+
+    button {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .tabLayout .tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+
+    button {
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .tabLayout .tabs {
+    gap: 0.3rem;
+
+    button {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
+}

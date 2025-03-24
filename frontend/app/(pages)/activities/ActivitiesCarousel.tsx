@@ -43,6 +43,7 @@ const ActivitiesCarousel: React.FC<CarouselProps> = ({ images }) => {
                 src={image}
                 alt={`Carousel Image ${index + 1}`}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ objectFit: "cover" }}
               />
             </div>
