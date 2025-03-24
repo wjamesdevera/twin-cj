@@ -6,6 +6,7 @@ import {
   getBookingHandler,
   getLatestBookingsHandler,
   viewBookingsHandler,
+  createWalkInBookingHandler,
 } from "../controllers/booking.controller";
 
 const router = Router();
@@ -18,5 +19,6 @@ router.get("/monthly", getLatestBookingsHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
+router.post("/walk-in", upload.single("file"), createWalkInBookingHandler);
 
 export default router;

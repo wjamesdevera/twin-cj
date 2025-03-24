@@ -56,6 +56,7 @@ export const walkinSchema = z.object({
   paymentAccountName: z.string().min(1, "Payment account name is required"),
   paymentAccountNumber: z.string().min(1, "Payment account number is required"),
   paymentMethod: z.string().min(1, "Payment method is required"),
-  bookingStatus: z.string().min(1, "Booking status is required"),
   proofOfPayment: z.any().optional(),
+  totalPax: z.string().min(1, "Total Pax must be at least 1"),
+  amount: z.string().min(1, "Amount must be at least 1"),
 });

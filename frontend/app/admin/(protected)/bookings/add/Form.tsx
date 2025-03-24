@@ -22,8 +22,9 @@ type FormFields = {
   paymentAccountName: string;
   paymentAccountNumber: string;
   paymentMethod: string;
-  bookingStatus: string;
   proofOfPayment?: File;
+  totalPax: string;
+  amount: string;
 };
 
 interface Service {
@@ -33,15 +34,6 @@ interface Service {
   description: string;
   imageUrl: string;
   price: number;
-  createdAt: string;
-  updatedAt: string;
-  serviceCategory: {
-    id: number;
-    category: {
-      id: number;
-      name: string;
-    };
-  };
 }
 
 interface BookingTypeData {
@@ -50,6 +42,7 @@ interface BookingTypeData {
   price?: number;
   capacity?: number;
   description?: string;
+  services?: Service[];
 }
 
 interface BookingResponse {
@@ -83,13 +76,11 @@ export default function WalkInForm() {
 
   const fetcher = async (url: string) => {
     try {
-      console.log("Fetching URL:", url);
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Response data:", data);
       return data;
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -97,6 +88,7 @@ export default function WalkInForm() {
     }
   };
 
+  // fetch available services
   const { data, error } = useSWR<BookingResponse>(
     packageType && checkInDate
       ? `http://localhost:8080/api/bookings?type=${encodeURIComponent(
@@ -118,21 +110,29 @@ export default function WalkInForm() {
     data?.data?.[packageType]?.services || [];
 
   const onSubmit = async (formData: FormFields) => {
+    if (formData.packageType === "day-tour") {
+      formData.checkOutDate = formData.checkInDate;
+    }
     console.log("Submitting...");
+    console.log("Selected Package ID:", formData.selectedPackage);
+    console.log("Form Data: ", formData);
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (key === "proofOfPayment" && value instanceof File) {
+        if (key === "file" && value instanceof File) {
           formDataToSend.append(key, value);
         } else {
           formDataToSend.append(key, String(value));
         }
       });
 
-      const response = await fetch("http://localhost:8080/api/bookings", {
-        method: "POST",
-        body: formDataToSend,
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/bookings/walk-in",
+        {
+          method: "POST",
+          body: formDataToSend,
+        }
+      );
 
       if (!response.ok) {
         throw new Error(await response.text());
@@ -154,9 +154,14 @@ export default function WalkInForm() {
   };
 
   const handleAddBooking = async () => {
+    console.log("handleAddBooking called");
     const isValid = await trigger();
 
-    if (!isValid) return;
+    if (!isValid) {
+      console.error("Form is invalid!");
+      console.log("Errors:", errors);
+      return;
+    }
 
     setConfirmMessage("Are you sure you want to add this booking?");
     setConfirmAction(() => () => handleSubmit(onSubmit)());
@@ -257,6 +262,38 @@ export default function WalkInForm() {
 
           <div className={styles.form_group}>
             <label>
+              Total Guests <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("totalPax")}
+              type="number"
+              min={1}
+              onBlur={() => trigger("totalPax")}
+            />
+            {errors.totalPax && (
+              <p className={styles.error}>{errors.totalPax?.message}</p>
+            )}
+          </div>
+
+          <div className={styles.right_column}>
+            <div className={styles.form_group}>
+              <label>
+                Amount <span className={styles.required}>*</span>
+              </label>
+              <input
+                {...register("amount")}
+                type="number"
+                min={1}
+                onBlur={() => trigger("amount")}
+              />
+              {errors.amount && (
+                <p className={styles.error}>{errors.amount?.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.form_group}>
+            <label>
               Payment Account Name <span className={styles.required}>*</span>
             </label>
             <input
@@ -313,6 +350,7 @@ export default function WalkInForm() {
             <input
               {...register("contactNumber")}
               type="text"
+              maxLength={11}
               onBlur={() => trigger("contactNumber")}
             />
             {errors.contactNumber && (

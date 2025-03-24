@@ -17,6 +17,7 @@ import {
   checkAvailability,
   getLatestBookings,
   getMonthlyBookings,
+  createWalkInBooking,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -130,6 +131,20 @@ export const viewBookingsHandler = catchErrors(
       return res.status(INTERNAL_SERVER_ERROR).json({
         status: "error",
         message: "Failed to fetch bookings",
+      });
+    }
+  }
+);
+
+export const createWalkInBookingHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    try {
+      await createWalkInBooking(req, res);
+    } catch (error) {
+      console.error("Error creating walk-in booking:", error);
+      return res.status(INTERNAL_SERVER_ERROR).json({
+        status: "error",
+        message: "Failed to create walk-in booking",
       });
     }
   }

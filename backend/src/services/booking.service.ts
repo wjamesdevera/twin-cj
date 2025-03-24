@@ -293,7 +293,7 @@ export const getLatestBookings = async () => {
     const latestBookings = await prisma.booking.findMany({
       take: 10,
       orderBy: {
-        checkIn: "desc",
+        createdAt: "desc",
       },
       include: {
         services: {
@@ -443,5 +443,152 @@ export const viewBookings = async (req: Request, res: Response) => {
     };
   } catch (error) {
     console.error("Error fetching latest bookings:", error);
+  }
+};
+
+export const createWalkInBooking = async (req: Request, res: Response) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      contactNumber,
+      email,
+      checkInDate,
+      checkOutDate,
+      selectedPackage,
+      paymentAccountName,
+      paymentAccountNumber,
+      paymentMethod,
+      proofOfPayment,
+      totalPax,
+      amount,
+    } = req.body;
+
+    console.log("Received booking data:", {
+      firstName,
+      lastName,
+      contactNumber,
+      email,
+      checkInDate,
+      checkOutDate,
+      selectedPackage,
+      paymentAccountName,
+      paymentAccountNumber,
+      paymentMethod,
+      proofOfPayment,
+      totalPax,
+      amount,
+    });
+
+    const referenceCode = await generateReferenceCode();
+
+    // Find Personal Detail
+    let personalDetail = await prisma.personalDetail.findFirst({
+      where: { email: email },
+    });
+
+    if (!personalDetail) {
+      personalDetail = await prisma.personalDetail.create({
+        data: {
+          firstName: firstName,
+          lastName: lastName,
+          phoneNumber: contactNumber,
+          email: email,
+        },
+      });
+    }
+
+    // Find Customer
+    let customer = await prisma.customer.findUnique({
+      where: { personalDetailId: personalDetail.id },
+    });
+
+    if (!customer) {
+      customer = await prisma.customer.create({
+        data: {
+          personalDetailId: personalDetail.id,
+        },
+      });
+    }
+
+    // Find Booking Status
+    let pendingBookingStatus = await prisma.bookingStatus.findUnique({
+      where: { name: "Pending" },
+    });
+
+    if (!pendingBookingStatus) {
+      pendingBookingStatus = await prisma.bookingStatus.create({
+        data: { name: "Pending" },
+      });
+    }
+
+    // Find or Create Payment Method
+    let paymentMethodRecord = await prisma.paymentMethod.findFirst({
+      where: { name: paymentMethod },
+    });
+
+    if (!paymentMethodRecord) {
+      paymentMethodRecord = await prisma.paymentMethod.create({
+        data: { name: paymentMethod, type: paymentMethod },
+      });
+    }
+
+    // Create Payment Account
+    const paymentAccount = await prisma.paymentAccount.create({
+      data: {
+        accountName: paymentAccountName,
+        accountNumber: parseInt(paymentAccountNumber),
+        paymentMethodId: paymentMethodRecord.id,
+      },
+    });
+
+    // Create Transaction
+    const transaction = await prisma.transaction.create({
+      data: {
+        amount: parseFloat(amount),
+        proofOfPaymentImageUrl: proofOfPayment,
+        paymentAccountId: paymentAccount.id,
+      },
+    });
+
+    // Create Booking
+    const booking = await prisma.booking.create({
+      data: {
+        referenceCode,
+        checkIn: new Date(checkInDate),
+        checkOut: new Date(checkOutDate),
+        totalPax: parseInt(totalPax),
+        notes: "",
+        customerId: customer.id,
+        bookingStatusId: pendingBookingStatus.id,
+        transactionId: transaction.id,
+      },
+    });
+
+    // Retrieve the service details
+    const service = await prisma.service.findUnique({
+      where: { id: parseInt(selectedPackage) },
+    });
+
+    if (!service) {
+      throw new Error("Service not found");
+    }
+
+    // Create Booking Service
+    await prisma.bookingService.create({
+      data: {
+        bookingId: booking.id,
+        serviceId: selectedPackage.id,
+      },
+    });
+
+    return res.json({
+      referenceCode,
+      booking,
+      transaction,
+      serviceName: service.name,
+    });
+  } catch (error) {
+    console.error("Error creating walk-in booking:", error);
   }
 };
