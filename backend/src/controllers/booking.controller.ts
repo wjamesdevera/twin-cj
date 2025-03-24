@@ -142,6 +142,7 @@ export const createWalkInBookingHandler = catchErrors(
       await createWalkInBooking(req, res);
     } catch (error) {
       console.error("Error creating walk-in booking:", error);
+      console.log("Request Body:", req.body);
       return res.status(INTERNAL_SERVER_ERROR).json({
         status: "error",
         message: "Failed to create walk-in booking",

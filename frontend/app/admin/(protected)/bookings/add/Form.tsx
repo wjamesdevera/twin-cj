@@ -2,7 +2,7 @@
 
 import { walkinSchema } from "@/app/lib/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
@@ -16,7 +16,8 @@ type FormFields = {
   email: string;
   contactNumber: string;
   packageType: "day-tour" | "cabins";
-  selectedPackage: string;
+  selectedPackageId: string;
+  selectedPackageName: string;
   checkInDate: string;
   checkOutDate: string;
   paymentAccountName: string;
@@ -55,10 +56,14 @@ export default function WalkInForm() {
     register,
     handleSubmit,
     reset,
+    setValue,
     watch,
     trigger,
     formState: { errors },
-  } = useForm<FormFields>({ resolver: zodResolver(walkinSchema) });
+  } = useForm<FormFields>({
+    resolver: zodResolver(walkinSchema),
+    mode: "onChange",
+  });
 
   const router = useRouter();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -70,6 +75,14 @@ export default function WalkInForm() {
   const packageType = watch("packageType");
   const checkInDate = watch("checkInDate");
   const checkOutDate = watch("checkOutDate");
+
+  useEffect(() => {
+    if (packageType === "day-tour") {
+      setValue("checkOutDate", watch("checkInDate"));
+      trigger("checkOutDate");
+    }
+  }, [packageType, watch("checkInDate")]);
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const minDate = today.toISOString().split("T")[0];
@@ -113,18 +126,25 @@ export default function WalkInForm() {
     if (formData.packageType === "day-tour") {
       formData.checkOutDate = formData.checkInDate;
     }
+
     console.log("Submitting...");
-    console.log("Selected Package ID:", formData.selectedPackage);
     console.log("Form Data: ", formData);
+
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (key === "file" && value instanceof File) {
+        if (key === "proofOfPayment" && value instanceof File) {
           formDataToSend.append(key, value);
         } else {
           formDataToSend.append(key, String(value));
         }
       });
+
+      formDataToSend.append("selectedPackage", formData.selectedPackageId);
+
+      for (let pair of formDataToSend.entries()) {
+        console.log(pair[0], pair[1]);
+      }
 
       const response = await fetch(
         "http://localhost:8080/api/bookings/walk-in",
@@ -154,14 +174,16 @@ export default function WalkInForm() {
   };
 
   const handleAddBooking = async () => {
-    console.log("handleAddBooking called");
     const isValid = await trigger();
+    console.log("handleAddBooking called");
 
     if (!isValid) {
       console.error("Form is invalid!");
       console.log("Errors:", errors);
       return;
     }
+
+    console.log("Submitting booking data:", data);
 
     setConfirmMessage("Are you sure you want to add this booking?");
     setConfirmAction(() => () => handleSubmit(onSubmit)());
@@ -223,7 +245,6 @@ export default function WalkInForm() {
               <p className={styles.error}>{errors.packageType?.message}</p>
             )}
           </div>
-
           {packageType && (
             <div className={styles.form_group}>
               <label>
@@ -233,9 +254,20 @@ export default function WalkInForm() {
                 :
               </label>
               <select
-                {...register("selectedPackage")}
                 defaultValue=""
-                onBlur={() => trigger("selectedPackage")}
+                onBlur={() => trigger("selectedPackageId")}
+                onChange={(e) => {
+                  const selectedOption = availablePackages.find(
+                    (pkg) => pkg.id.toString() === e.target.value
+                  );
+                  if (selectedOption) {
+                    reset({
+                      ...watch(),
+                      selectedPackageId: selectedOption.id.toString(),
+                      selectedPackageName: selectedOption.name,
+                    });
+                  }
+                }}
               >
                 <option value="" disabled>
                   Select an Option
@@ -252,9 +284,9 @@ export default function WalkInForm() {
                   </option>
                 )}
               </select>
-              {errors.selectedPackage && (
+              {errors.selectedPackageId && (
                 <p className={styles.error}>
-                  {errors.selectedPackage?.message}
+                  {errors.selectedPackageId?.message}
                 </p>
               )}
             </div>
@@ -382,6 +414,7 @@ export default function WalkInForm() {
                 {...register("checkOutDate")}
                 type="date"
                 min={minDate}
+                disabled={packageType === "day-tour"}
                 onBlur={() => trigger("checkOutDate")}
               />
               {errors.checkOutDate && (

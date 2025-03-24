@@ -208,7 +208,7 @@ export const createBooking = async (req: Request) => {
     );
 
     // Find Personal Detail
-    let personalDetail = await prisma.personalDetail.findUnique({
+    let personalDetail = await prisma.personalDetail.findFirst({
       where: { email: email },
     });
 
@@ -480,10 +480,18 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
       amount,
     });
 
+    appAssert(email, BAD_REQUEST, "Email is required.");
+    appAssert(firstName, BAD_REQUEST, "First name is required.");
+    appAssert(lastName, BAD_REQUEST, "Last name is required.");
+    appAssert(contactNumber, BAD_REQUEST, "Contact number is required.");
+    appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
+    appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
+    appAssert(selectedPackage, BAD_REQUEST, "Package selection is required.");
+
     const referenceCode = await generateReferenceCode();
 
     // Find Personal Detail
-    let personalDetail = await prisma.personalDetail.findFirst({
+    let personalDetail = await prisma.personalDetail.findUnique({
       where: { email: email },
     });
 
@@ -575,10 +583,10 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
     }
 
     // Create Booking Service
-    await prisma.bookingService.create({
+    const bookingService = await prisma.bookingService.create({
       data: {
         bookingId: booking.id,
-        serviceId: selectedPackage.id,
+        serviceId: service.id,
       },
     });
 
@@ -586,6 +594,7 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
       referenceCode,
       booking,
       transaction,
+      bookingService,
       serviceName: service.name,
     });
   } catch (error) {
