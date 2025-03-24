@@ -550,6 +550,16 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
       },
     });
 
+    let paymentStatus = await prisma.paymentStatus.findFirst({
+      where: { name: "Pending" },
+    });
+
+    if (!paymentStatus) {
+      paymentStatus = await prisma.paymentStatus.create({
+        data: { name: "Pending" },
+      });
+    }
+
     // Create Transaction
     const transaction = await prisma.transaction.create({
       data: {
