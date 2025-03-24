@@ -44,15 +44,15 @@ const GuestsDropdown: React.FC<{
         <span className={styles["chevron-down"]}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="33"
-            height="33"
+            width="20"
+            height="20"
             viewBox="0 0 33 33"
             fill="none"
           >
-            <g opacity="0.5">
+            <g opacity="1">
               <path
                 d="M8.03643 11.6458C8.43916 11.2431 9.0921 11.2431 9.49483 11.6458L15.9844 18.1353L22.4738 11.6458C22.8766 11.2431 23.5296 11.2431 23.9324 11.6458C24.335 12.0485 24.335 12.7015 23.9324 13.1042L16.7136 20.3229C16.3109 20.7257 15.6579 20.7257 15.2552 20.3229L8.03643 13.1042C7.63369 12.7015 7.63369 12.0485 8.03643 11.6458Z"
-                fill="#FFF2F2"
+                fill="#7a7878"
               />
             </g>
           </svg>
@@ -168,6 +168,17 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
           checkOutDate,
           guestCounts,
         });
+
+        // added a smooth scroll to the accordion
+        setTimeout(() => {
+          const accordionElement = document.getElementById("booking-accordion");
+          if (accordionElement) {
+            accordionElement.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        }, 200);
       }
     } catch (error) {
       console.error("Error fetching availability:", error);

@@ -186,8 +186,8 @@ const Booking: React.FC = () => {
         }}
       />
       {showAccordion && (
-        <main style={{ padding: "1rem" }}>
-          <Accordion items={accordionItems} />
+        <main style={{ padding: "1rem" }} id="booking-accordion">
+          <Accordion items={accordionItems} initialOpenIndex={0} />
         </main>
       )}
     </div>
