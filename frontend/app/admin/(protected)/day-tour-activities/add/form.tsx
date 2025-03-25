@@ -22,7 +22,7 @@ import { createDayTour } from "@/app/lib/api";
 export const dayTourSchema = z.object({
   name: nameSchema,
   description: descriptionSchema,
-  file: fileSchema.optional(),
+  file: fileSchema,
   price: priceSchema.or(z.number().gt(0)),
 });
 

@@ -42,7 +42,7 @@ export const paymentSchema = z.object({
 });
 
 export const fileSchema = z
-  .instanceof(File)
+  .instanceof(File, { message: "Image upload is required" })
   .refine((file) => file.size > 0, "File is required")
   .refine((file) => file.size <= 1024 * 1024, "File size must be less than 1MB")
   .refine(

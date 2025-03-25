@@ -24,7 +24,7 @@ export const cabinFormSchema = z
   .object({
     name: nameSchema,
     description: descriptionSchema,
-    file: fileSchema.optional(),
+    file: fileSchema,
     price: priceSchema.or(z.number().gt(0)),
     minCapacity: capacitySchema.or(z.number().gt(0)),
     maxCapacity: capacitySchema.or(z.number().gt(0)),
