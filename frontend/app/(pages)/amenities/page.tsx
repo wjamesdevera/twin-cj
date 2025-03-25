@@ -113,7 +113,7 @@ export default function Amenities() {
     },
     {
       title: "Camping Ground",
-      image: "/assets/amenities_camping.jpg",
+      image: "/assets/amenities_camping.png",
       description:
         "Experience the great outdoors with Tent Pitching or Car Camping options. Rent a tent, enjoy a bonfire, and explore many other exciting activities in our peaceful, nature-filled camping ground.",
       rates: [],
