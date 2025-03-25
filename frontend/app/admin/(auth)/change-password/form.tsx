@@ -9,14 +9,50 @@ import Button from "@/app/components/button";
 import useSWRMutation from "swr/mutation";
 import { changePassword } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
+import { z } from "zod";
+import { passwordSchema } from "@/app/lib/zodSchemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z
+  .object({
+    oldPassword: z.string(),
+    newPassword: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Password do not mathc",
+  });
+
+type FormData = z.infer<typeof formSchema>;
 
 export function ChangePasswordForm() {
   const router = useRouter();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, dirtyFields },
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      oldPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
   const { trigger, isMutating, error } = useSWRMutation(
     "change-password",
-    (key, { arg }: { arg: { oldPassword: string; newPassword: string } }) =>
-      changePassword(arg),
+    (
+      key,
+      {
+        arg,
+      }: {
+        arg: FormData;
+      }
+    ) => changePassword(arg),
     {
       onSuccess: () => {
         router.push("/admin");
@@ -24,60 +60,18 @@ export function ChangePasswordForm() {
     }
   );
 
-  const [oldPassword, setOldPassword] = useState("");
-  const [isOldPasswordCorrect, setIsOldPasswordCorrect] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordVisible, setPasswordVisible] = useState({
-    old: false,
-    new: false,
-    confirm: false,
+  const [isPasswordVisible, setIsPasswordVisible] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
   });
 
-  const [passwordValidations, setPasswordValidations] = useState({
-    length: false,
-    lowercase: false,
-    uppercase: false,
-    number: false,
-    special: false,
-  });
-
-  const [passwordMatch, setPasswordMatch] = useState(true);
-
-  // Simulated check for old password (Replace with actual authentication logic)
-  const handleOldPasswordBlur = () => {
-    const correctOldPassword = "admin123"; // Replace
-    setIsOldPasswordCorrect(oldPassword === correctOldPassword);
-  };
-
-  const validatePassword = (password: string) => {
-    setPasswordValidations({
-      length: password.length >= 8,
-      lowercase: /[a-z]/.test(password),
-      uppercase: /[A-Z]/.test(password),
-      number: /[0-9]/.test(password),
-      special: /[!@#$%^&*]/.test(password),
-    });
-  };
-
-  const handleNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const password = e.target.value;
-    setNewPassword(password);
-    validatePassword(password);
-  };
-
-  const handleConfirmPasswordChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setConfirmPassword(e.target.value);
-    setPasswordMatch(e.target.value === newPassword);
-  };
-
-  const isAllValidationsPassed =
-    Object.values(passwordValidations).every(Boolean);
-
-  const handleChangePassword = async () => {
-    await trigger({ oldPassword, newPassword });
+  const onPasswordChange = async (data: FormData) => {
+    try {
+      await trigger(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return isMutating ? (
@@ -96,131 +90,29 @@ export function ChangePasswordForm() {
             Enter a new password below to change your password.
           </p>
         </div>
-        <div className={styles["form-control"]}>
+        <form
+          className={styles["form-control"]}
+          onSubmit={handleSubmit(onPasswordChange)}
+        >
           {/* Current Password */}
           <div className={styles["password-input-container"]}>
             <input
-              type={passwordVisible.old ? "text" : "password"}
+              type={isPasswordVisible.oldPassword ? "text" : "password"}
               placeholder="Current Password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              onBlur={handleOldPasswordBlur}
+              {...register("oldPassword")}
             />
-            {!oldPassword ? null : (
+            {dirtyFields["oldPassword"] && (
               <button
                 type="button"
                 className={styles["eye-icon"]}
                 onClick={() =>
-                  setPasswordVisible({
-                    ...passwordVisible,
-                    old: !passwordVisible.old,
+                  setIsPasswordVisible({
+                    ...isPasswordVisible,
+                    oldPassword: !isPasswordVisible.oldPassword,
                   })
                 }
-                disabled={!oldPassword}
               >
-                {passwordVisible.old ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            )}
-          </div>
-
-          {/* TODO: update to validate with backend */}
-          {error ? (
-            <small className={styles["error-message"]}>
-              Incorrect password.
-            </small>
-          ) : null}
-
-          {/* New Password */}
-          <div className={styles["password-input-container"]}>
-            <input
-              type={passwordVisible.new ? "text" : "password"}
-              placeholder="New Password"
-              value={newPassword}
-              onChange={handleNewPasswordChange}
-            />
-            {!isOldPasswordCorrect ? null : (
-              <button
-                type="button"
-                className={styles["eye-icon"]}
-                onClick={() =>
-                  setPasswordVisible({
-                    ...passwordVisible,
-                    new: !passwordVisible.new,
-                  })
-                }
-                disabled={!isOldPasswordCorrect}
-              >
-                {passwordVisible.new ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            )}
-          </div>
-
-          {/* Password Requirements */}
-          <div className={styles["password-requirements"]}>
-            <p>Your password must contain:</p>
-            <ul>
-              <li
-                className={
-                  passwordValidations.length ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.length ? "✔" : "✖"} At least 8 characters
-              </li>
-              <li
-                className={
-                  passwordValidations.lowercase ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.lowercase ? "✔" : "✖"} Lower case letters
-                (a-z)
-              </li>
-              <li
-                className={
-                  passwordValidations.uppercase ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.uppercase ? "✔" : "✖"} Upper case letters
-                (A-Z)
-              </li>
-              <li
-                className={
-                  passwordValidations.number ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.number ? "✔" : "✖"} Numbers (0-9)
-              </li>
-              <li
-                className={
-                  passwordValidations.special ? styles.valid : styles.invalid
-                }
-              >
-                {passwordValidations.special ? "✔" : "✖"} Special characters
-                (ex. !@#$%^&*)
-              </li>
-            </ul>
-          </div>
-
-          {/* Confirm Password */}
-          <div className={styles["password-input-container"]}>
-            <input
-              type={passwordVisible.confirm ? "text" : "password"}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={handleConfirmPasswordChange}
-            />
-            {!confirmPassword ? null : (
-              <button
-                type="button"
-                className={styles["eye-icon"]}
-                onClick={() =>
-                  setPasswordVisible({
-                    ...passwordVisible,
-                    confirm: !passwordVisible.confirm,
-                  })
-                }
-                disabled={!isAllValidationsPassed}
-              >
-                {passwordVisible.confirm ? (
+                {isPasswordVisible.oldPassword ? (
                   <EyeOff size={20} />
                 ) : (
                   <Eye size={20} />
@@ -228,14 +120,80 @@ export function ChangePasswordForm() {
               </button>
             )}
           </div>
-          {!passwordMatch && confirmPassword.length > 0 && (
+
+          {/* TODO: update to validate with backend */}
+          {error && (
             <small className={styles["error-message"]}>
-              Passwords do not match
+              Incorrect password.
+            </small>
+          )}
+
+          {/* New Password */}
+          <div className={styles["password-input-container"]}>
+            <input
+              type={isPasswordVisible.newPassword ? "text" : "password"}
+              placeholder="New Password"
+              {...register("newPassword")}
+            />
+            {dirtyFields["newPassword"] && (
+              <button
+                type="button"
+                className={styles["eye-icon"]}
+                onClick={() =>
+                  setIsPasswordVisible({
+                    ...isPasswordVisible,
+                    newPassword: !isPasswordVisible.newPassword,
+                  })
+                }
+              >
+                {isPasswordVisible.newPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+            )}
+          </div>
+          {errors.newPassword && (
+            <small className={styles["error-message"]}>
+              {errors.confirmPassword?.message}
+            </small>
+          )}
+
+          {/* Confirm Password */}
+          <div className={styles["password-input-container"]}>
+            <input
+              type={isPasswordVisible.confirmPassword ? "text" : "password"}
+              placeholder="Confirm Password"
+              {...register("confirmPassword")}
+            />
+            {dirtyFields["confirmPassword"] && (
+              <button
+                type="button"
+                className={styles["eye-icon"]}
+                onClick={() =>
+                  setIsPasswordVisible({
+                    ...isPasswordVisible,
+                    confirmPassword: !isPasswordVisible.confirmPassword,
+                  })
+                }
+              >
+                {isPasswordVisible.confirmPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+            )}
+          </div>
+          {errors.confirmPassword && (
+            <small className={styles["error-message"]}>
+              {errors.confirmPassword.message}
             </small>
           )}
 
           <div>
-            <Button fullWidth={true} onClick={handleChangePassword}>
+            <Button fullWidth={true} type="submit">
               Change Password
             </Button>
             <Button
@@ -246,7 +204,7 @@ export function ChangePasswordForm() {
               Cancel
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

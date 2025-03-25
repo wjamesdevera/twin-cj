@@ -7,9 +7,13 @@ import useSWRMutation from "swr/mutation";
 import { forgotPasword } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react"; 
+import { ArrowLeft } from "lucide-react";
+import { z } from "zod";
+import { emailSchema } from "@/app/lib/zodSchemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const Timer = ({ trigger }: { trigger: () => void }) => {
+const Timer = () => {
   const Ref = useRef<NodeJS.Timeout | null>(null);
   const [time, setTime] = useState<string>("05:00");
   const [isResendAvailable, setIsResetAvailable] = useState(false);
@@ -63,7 +67,6 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
 
   const onClickReset = () => {
     clearTimer(getDeadTime());
-    trigger();
   };
 
   return (
@@ -72,7 +75,7 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
         Resend in <span>{time}</span>
       </p>
       <input
-        type="button"
+        type="submit"
         disabled={!isResendAvailable}
         value={"Resend"}
         onClick={onClickReset}
@@ -81,10 +84,22 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
   );
 };
 
+const resetPasswordSchema = z.object({
+  email: emailSchema,
+});
+
+type FormData = z.infer<typeof resetPasswordSchema>;
+
 export function PasswordResetForm() {
-  const [email, setEmail] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
+
+  const { register, handleSubmit, getValues } = useForm<FormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
 
   const { trigger, isMutating, error } = useSWRMutation(
     "forgot-password",
@@ -96,8 +111,8 @@ export function PasswordResetForm() {
     }
   );
 
-  const handleForgotPassword = async () => {
-    await trigger({ email });
+  const onPasswordReset = async (data: FormData) => {
+    await trigger(data);
   };
 
   return (
@@ -106,59 +121,64 @@ export function PasswordResetForm() {
         <Loading />
       ) : (
         <div className={styles["right-container"]}>
-        <ArrowLeft className={styles["back-arrow"]} onClick={() => router.push("/admin/login")} />
-        <div className={styles["login-form-container"]}>
-          <div className={styles["login-form-wrapper"]}>
-            <div className={styles["form-title"]}>
-              <Image
-                src={twinCJLogo}
-                alt="Twin CJ Logo"
-                className={styles["login-logo"]}
-                objectFit="contain"
-              />
-              {!isSuccess ? (
-                <p className={styles["welcome-text"]}>
-                  Enter the email, phone number, or username associated with
-                  your account to change your password.
-                </p>
-              ) : (
-                <div className={styles["success-container"]}>
-                  <p className={styles["success-message"]}>
-                    {`A password reset email has been sent to ${email}`}
+          <ArrowLeft
+            className={styles["back-arrow"]}
+            onClick={() => router.push("/admin/login")}
+          />
+          <form
+            className={styles["login-form-container"]}
+            onSubmit={handleSubmit(onPasswordReset)}
+          >
+            <div className={styles["login-form-wrapper"]}>
+              <div className={styles["form-title"]}>
+                <Image
+                  src={twinCJLogo}
+                  alt="Twin CJ Logo"
+                  className={styles["login-logo"]}
+                  objectFit="contain"
+                />
+                {!isSuccess ? (
+                  <p className={styles["welcome-text"]}>
+                    Enter the email associated with your account to change your
+                    password.
                   </p>
-                  <Timer trigger={handleForgotPassword} />
+                ) : (
+                  <div className={styles["success-container"]}>
+                    <p className={styles["success-message"]}>
+                      {`A password reset email has been sent to ${getValues(
+                        "email"
+                      )}`}
+                    </p>
+                    <Timer />
+                  </div>
+                )}
+              </div>
+              {!isSuccess && (
+                <div className={styles["form-control"]}>
+                  <input
+                    type="text"
+                    placeholder="Email Address"
+                    {...register("email")}
+                  />
+                  {error && (
+                    <small className={styles["error-message"]}>
+                      We couldn&apos;t find an account with that email address.
+                      Please check the email you entered
+                    </small>
+                  )}
+                  <div>
+                    <button
+                      disabled={isMutating}
+                      className={styles["login-button"]}
+                      type="submit"
+                    >
+                      Send Verification
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-            {!isSuccess && (
-              <div className={styles["form-control"]}>
-                <input
-                  type="text"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                {error && (
-                  <small className={styles["error-message"]}>
-                    We couldn&apos;t find an account with that email address.
-                    Please check the email you entered or sign up for a new
-                    account.
-                  </small>
-                )}
-                <div>
-                  <button
-                    disabled={isMutating}
-                    className={styles["login-button"]}
-                    type="submit"
-                    onClick={handleForgotPassword}
-                  >
-                    Send Verification
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+          </form>
         </div>
       )}
     </>

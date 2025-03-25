@@ -3,6 +3,11 @@ import React, { useEffect, useState } from "react";
 import styles from "./dashboard.module.scss";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
+import { options } from "@/app/api";
+import DayTourTable from "./daytourtable";
+import CustomButton from "@/app/components/custom_button";
+import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
 
 interface DayTour {
   id: number;
@@ -26,6 +31,9 @@ const formatDate = (isoString?: string) => {
         month: "2-digit",
         day: "2-digit",
         year: "numeric",
+        minute: "2-digit",
+        hour: "2-digit",
+        second: "2-digit",
       });
 };
 
@@ -34,13 +42,23 @@ const DayTourView = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectAll, setSelectAll] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<number | number[] | null>(
+    null
+  );
+  const [notification, setNotification] = useState({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
   const router = useRouter();
 
   useEffect(() => {
     const fetchDayTours = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8080/api/services/day-tours",
+          `${options.baseURL}/api/services/day-tours`,
           {
             method: "GET",
             headers: {
@@ -56,6 +74,7 @@ const DayTourView = () => {
         const data = await response.json();
 
         if (Array.isArray(data?.data?.dayTours)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mappedDayTours = data.data.dayTours.map((tour: any) => {
             return {
               id: tour.id,
@@ -95,75 +114,77 @@ const DayTourView = () => {
   }, []);
 
   const handleAdd = () => {
-    router.push("/admin/day-tour-activities/create");
+    router.push("/admin/day-tour-activities/add");
   };
 
   const handleEdit = (id: number) => {
     router.push(`/admin/day-tour-activities/edit/${id}`);
   };
 
-  const handleDelete = async (id?: number) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete the selected day tour/s?"
-    );
-    if (!confirmed) {
-      return;
-    }
-
+  const confirmDelete = async () => {
     try {
-      if (id) {
-        // Single delete
-        const response = await fetch(
-          `http://localhost:8080/api/services/day-tours/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to delete day tour with id: ${id}`);
-        }
-        setDayTours((prevTours) => prevTours.filter((tour) => tour.id !== id));
-      } else {
-        // Multiple delete
-        await Promise.all(
-          selectedIds.map(async (id) => {
-            const response = await fetch(
-              `http://localhost:8080/api/services/day-tours/${id}`,
-              {
-                method: "DELETE",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            if (!response.ok) {
-              throw new Error(`Failed to delete day tour with id: ${id}`);
-            }
-          })
-        );
-
-        setDayTours((prevTours) =>
-          prevTours.filter((tour) => !selectedIds.includes(tour.id))
-        );
+      if (Array.isArray(deleteTarget)) {
+        await Promise.all(deleteTarget.map((id) => deleteDayTour(id)));
         setSelectedIds([]);
-        alert("Selected day tours deleted successfully!");
+        setSelectAll(false);
+      } else if (deleteTarget !== null) {
+        await deleteDayTour(deleteTarget);
       }
-    } catch (err) {
-      console.error(err);
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
+
+      setNotification({
+        isOpen: true,
+        message: Array.isArray(deleteTarget)
+          ? "Selected day tours deleted successfully!"
+          : "Day tour deleted successfully!",
+        type: "success",
+      });
+      setDayTours((prev) =>
+        prev.filter((tour) =>
+          Array.isArray(deleteTarget)
+            ? !deleteTarget.includes(tour.id)
+            : tour.id !== deleteTarget
+        )
       );
+    } catch (error) {
+      console.log(error);
+      setNotification({
+        isOpen: true,
+        message: "An error occurred while deleting the day tour.",
+        type: "error",
+      });
+    } finally {
+      setIsModalOpen(false);
     }
   };
 
+  const deleteDayTour = async (id: number) => {
+    const response = await fetch(
+      `${options.baseURL}/api/services/day-tours/${id}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!response.ok)
+      throw new Error(`Failed to delete day tour with id: ${id}`);
+  };
+
+  const handleDelete = (id?: number) => {
+    setDeleteTarget(id ? id : selectedIds);
+    setIsModalOpen(true);
+  };
+
+  const handleSelectAll = () => {
+    setSelectAll(!selectAll);
+    setSelectedIds(selectAll ? [] : dayTours.map((tour) => tour.id));
+  };
+
   const handleCheckboxChange = (id: number) => {
-    setSelectedIds((prevSelectedIds) =>
-      prevSelectedIds.includes(id)
-        ? prevSelectedIds.filter((selectedId) => selectedId !== id)
-        : [...prevSelectedIds, id]
+    setSelectedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id]
     );
   };
 
@@ -174,85 +195,55 @@ const DayTourView = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <h1>Day Tours</h1>
-      <button className="add" onClick={handleAdd}>
-        Add Day Tour
-      </button>
-      <button
-        className="delete"
-        onClick={() => handleDelete()}
-        disabled={!selectedIds.length}
-      >
-        Delete Selected
-      </button>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Select</th>
-            <th>Actions</th>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Image</th>
-            <th>Description</th>
-            <th>Rate</th>
-            <th>Type (Additional)</th>
-            <th>Description (Additional)</th>
-            <th>Amount (Additional)</th>
-            <th>Date Created</th>
-            <th>Last Updated</th>
-          </tr>
-        </thead>
-        <tbody>
-          {dayTours.map((dayTour) => (
-            <tr key={dayTour.id}>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(dayTour.id)}
-                  onChange={() => handleCheckboxChange(dayTour.id)}
-                />
-              </td>
-              <td className={styles.actions}>
-                <button className="edit" onClick={() => handleEdit(dayTour.id)}>
-                  Edit
-                </button>
-                <button
-                  className="delete"
-                  onClick={() => handleDelete(dayTour.id)}
-                >
-                  Delete
-                </button>
-              </td>
-              <td>{dayTour.id}</td>
-              <td>{dayTour.name}</td>
-              <td>
-                {dayTour.imageUrl ? (
-                  <img
-                    src={
-                      dayTour.imageUrl.startsWith("http")
-                        ? dayTour.imageUrl
-                        : `http://localhost:8080/uploads/${dayTour.imageUrl}`
-                    }
-                    alt={dayTour.name}
-                    width="100"
-                    height="100"
-                  />
-                ) : (
-                  "No image available"
-                )}
-              </td>
-              <td>{dayTour.description}</td>
-              <td>₱{dayTour.rate}</td>
-              <td>{dayTour.additionalFeeType}</td>
-              <td>{dayTour.additionalFeeDescription}</td>
-              <td>₱{dayTour.additionalFeeAmount}</td>
-              <td>{formatDate(dayTour.createdAt)}</td>
-              <td>{formatDate(dayTour.updatedAt)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className={styles.page_container}>
+      <div className={styles.page_header}>
+        <h1 className={styles.title}>Day Tour Activities</h1>
+      </div>
+      <div className={styles.subheader_container}>
+        <h2 className={styles.subheader}>
+          Select a Day Tour Activity to modify in the Booking Page
+        </h2>
+        <div className={styles.button_container}>
+          <CustomButton
+            label="Add Day Tour"
+            onClick={handleAdd}
+            variant="primary"
+          />
+
+          <CustomButton
+            label="Delete Selected"
+            onClick={() => handleDelete()}
+            variant="danger"
+            disabled={selectedIds.length === 0}
+          />
+        </div>
+      </div>
+
+      <DayTourTable
+        dayTours={dayTours}
+        selectedIds={selectedIds}
+        handleSelectAll={handleSelectAll}
+        handleCheckboxChange={handleCheckboxChange}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+        selectAll={selectAll}
+      />
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Are you sure you want to delete the selected day tour(s)?"
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+      />
+
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
+        message={notification.message}
+        type={notification.type as "success" | "error"}
+      />
     </div>
   );
 };

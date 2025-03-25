@@ -1,0 +1,89 @@
+.dashboardContainer {
+  display: flex;
+  gap: 16px;
+  height: 150px;
+  width: 100%;
+  max-width: 800px;
+
+  @media (max-width: 1440px) {
+    max-width: 100%;
+    gap: 12px;
+    padding: 0 16px;
+  }
+
+  @media (max-width: 1024px) {
+    padding: 0 20px;
+  }
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    height: auto;
+    gap: 8px;
+    padding: 0 12px;
+  }
+}
+
+.card {
+  height: 150px;
+  width: 100%;
+  max-width: 400px;
+  flex: 1;
+  padding: 24px;
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+
+  @media (max-width: 1440px) {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  @media (max-width: 767px) {
+    height: 120px;
+    max-width: 100%;
+    padding: 16px;
+  }
+}
+
+.pendingCard {
+  background: var(--Light-Sand---Accent, #d9ad7c);
+}
+
+.activeCard {
+  background: var(--Soft-Aqua---Accent, #94b5c4);
+}
+
+.text {
+  font-size: 1.2rem;
+  font-weight: 500;
+
+  @media (max-width: 767px) {
+    font-size: 1rem;
+  }
+}
+
+.number {
+  font-size: 3.2rem;
+  font-weight: 400;
+
+  @media (max-width: 767px) {
+    font-size: 2.5rem;
+  }
+}
+
+.icon {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  font-size: 3.5rem;
+  opacity: 0.6;
+
+  @media (max-width: 767px) {
+    font-size: 2.5rem;
+    right: 16px;
+    bottom: 16px;
+  }
+}

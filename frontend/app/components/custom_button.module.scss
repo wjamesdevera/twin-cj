@@ -4,6 +4,8 @@
     font-size: 14px;
     cursor: pointer;
     transition: 0.3s ease-in-out;
+    width: auto; /* Allow buttons to resize */
+    min-width: 120px; /* Default minimum width */
 }
 
 .primary {
@@ -37,10 +39,44 @@
     font-weight: bold;
 }
 
+.danger {
+    border: 1px solid #A80000;
+    background: white;
+    color: #A80000;
+}
+
+.danger:hover,
+.danger:active {
+    background: #A80000;
+    color: white;
+}
+
 .disabled {
     background: #c5c5c5 !important;
     color: #666666 !important;
     border: 1px solid #c5c5c5 !important;
     cursor: not-allowed !important;
     pointer-events: none; 
+}
+@media (max-width: 768px) {
+  .button {
+    width: 100%; 
+    padding: 10px 20px; 
+    font-size: 12px; 
+  }
+
+  .small {
+    width: 100%; 
+  }
+}
+
+@media (max-width: 480px) {
+  .button {
+    padding: 8px 15px; 
+    font-size: 11px; 
+  }
+
+  .small {
+    width: 100%; 
+  }
 }

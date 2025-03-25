@@ -32,15 +32,27 @@ export const registerSchema = loginSchema
 
 export const verificationCodeSchema = z.string().min(1).max(36);
 
-export const resetPasswordSchema = z.object({
-  password: passwordSchema,
-  verificationCode: verificationCodeSchema,
-});
+export const resetPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: passwordSchema,
+    verificationCode: verificationCodeSchema,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-export const changePasswordSchema = z.object({
-  oldPassword: passwordSchema,
-  newPassword: passwordSchema,
-});
+export const changePasswordSchema = z
+  .object({
+    oldPassword: passwordSchema,
+    newPassword: passwordSchema,
+    confirmPassword: passwordSchema,
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export const idSchema = z.string().uuid().trim();
 

@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./footer.module.scss";
+//import "@fortawesome/fontawesome-free/css/all.min.css";
 import twinCJLogo from "../../public/assets/twincjLogo.png";
 import Image from "next/image";
 import Link from "next/link";
@@ -62,19 +63,19 @@ const Footer: React.FC = () => {
           <ul className={styles.links}>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fas fa-map-marker-alt`}></i>
-              <a href="">Norzagaray, Bulacan</a>
+              <a>Norzagaray, Bulacan</a>
             </li>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fas fa-phone-alt`}></i>
-              <a href="">0917 559 9237</a>
+              <a>0917 559 9237</a>
             </li>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fas fa-envelope`}></i>
-              <a href="">twincj.riversideresort@gmail.com</a>
+              <a href="mailto:twincj.riversideresort@gmail.com">twincj.riversideresort@gmail.com</a>
             </li>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fab fa-facebook`}></i>
-              <a href="">Twin CJ Riverside Glamping Resort</a>
+              <a href="https://www.facebook.com/twincjriversideresort" target="_blank">Twin CJ Riverside Glamping Resort</a>
             </li>
           </ul>
         </div>

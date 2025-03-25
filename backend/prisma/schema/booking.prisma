@@ -1,0 +1,24 @@
+model Booking {
+  id            Int      @id @default(autoincrement()) @map("booking_id")
+  referenceCode String   @unique @map("reference_code")
+  checkIn       DateTime @map("check_in")
+  checkOut      DateTime @map("check_out")
+  totalPax      Int      @map("total_pax")
+  notes         String?  @map("notes")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId Int      @map("customer_id")
+
+  bookingStatus   BookingStatus @relation(fields: [bookingStatusId], references: [id])
+  bookingStatusId Int           @map("booking_status_id")
+
+  services BookingService[]
+
+  transactionId String       @unique @map("transaction_id")
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+  @@map("bookings")
+}

@@ -51,8 +51,10 @@ $side-bar-close-width: 3rem;
 .navitem-dropdown-container {
   display: flex;
   padding: 1rem;
+  width: 100%;
   border-bottom: 1px solid var(--color-sunset-orange-400);
   transition: background-color 0.3s ease;
+  padding-left: 0px;
 
   a {
     text-decoration: none;
@@ -100,10 +102,11 @@ $side-bar-close-width: 3rem;
   align-items: center;
   width: 100%;
   gap: 1rem;
+  padding-left: 1rem;
 }
 
 .dropdown-items {
-  padding-left: 1.5rem;
+  padding-left: 0;
 }
 
 .navitem-dropdown-wrapper {
@@ -117,8 +120,10 @@ $side-bar-close-width: 3rem;
 
 .navitem-dropdown-label {
   display: flex;
-  gap: 1rem;
   align-items: center;
+  width: 100%;
+  gap: 1rem;
+  padding-left: 1rem;
 }
 
 .navitem-dropdown-button {
@@ -148,7 +153,8 @@ $side-bar-close-width: 3rem;
 
 .logo {
   transition: height 0.3s ease, width 0.3s ease;
-  width: 100%;
+  width: 60%;
+  margin: 0 40px;
   aspect-ratio: 3/2;
   object-fit: contain;
 }

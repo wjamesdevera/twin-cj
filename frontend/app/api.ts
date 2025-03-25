@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const options = {
+export const options = {
   baseURL: process.env.API_ORIGIN || "http://localhost:8080",
   withCredentials: true,
 };
