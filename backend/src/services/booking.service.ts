@@ -566,6 +566,7 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
         amount: parseFloat(amount),
         proofOfPaymentImageUrl: proofOfPayment,
         paymentAccountId: paymentAccount.id,
+        paymentStatusId: paymentStatus.id,
       },
     });
 
