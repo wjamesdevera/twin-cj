@@ -127,9 +127,6 @@ export default function WalkInForm() {
       formData.checkOutDate = formData.checkInDate;
     }
 
-    console.log("Submitting...");
-    console.log("Form Data: ", formData);
-
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
@@ -141,10 +138,6 @@ export default function WalkInForm() {
       });
 
       formDataToSend.append("selectedPackage", formData.selectedPackageId);
-
-      for (let pair of formDataToSend.entries()) {
-        console.log(pair[0], pair[1]);
-      }
 
       const response = await fetch(
         "http://localhost:8080/api/bookings/walk-in",
@@ -158,8 +151,7 @@ export default function WalkInForm() {
         throw new Error(await response.text());
       }
 
-      console.log("Booking submitted successfully!");
-      // router.push("http://localhost:3000/admin/bookings");
+      router.push("http://localhost:3000/admin/bookings");
     } catch (error: any) {
       console.error("Error submitting booking:", error);
     }
@@ -175,15 +167,11 @@ export default function WalkInForm() {
 
   const handleAddBooking = async () => {
     const isValid = await trigger();
-    console.log("handleAddBooking called");
 
     if (!isValid) {
       console.error("Form is invalid!");
-      console.log("Errors:", errors);
       return;
     }
-
-    console.log("Submitting booking data:", data);
 
     setConfirmMessage("Are you sure you want to add this booking?");
     setConfirmAction(() => () => handleSubmit(onSubmit)());
@@ -228,7 +216,7 @@ export default function WalkInForm() {
 
           <div className={styles.form_group}>
             <label>
-              Package Type <span className={styles.required}>*</span>
+              Resort Schedule <span className={styles.required}>*</span>
             </label>
             <select
               {...register("packageType")}

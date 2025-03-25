@@ -491,7 +491,7 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
     const referenceCode = await generateReferenceCode();
 
     // Find Personal Detail
-    let personalDetail = await prisma.personalDetail.findUnique({
+    let personalDetail = await prisma.personalDetail.findFirst({
       where: { email: email },
     });
 
