@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./header.module.scss";
-import headerImage from "../../public/assets/header.png";
+import headerImage from "@/public/assets/header.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
@@ -266,6 +266,3 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 };
 
 export default Header;
-function setIsLoading(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}

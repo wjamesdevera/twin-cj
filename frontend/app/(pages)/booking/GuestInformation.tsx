@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import styles from "./guestinformation.module.scss";
-import BookingButton from "./BookingButton";
-import TermsAndConditions from "./TermsandConditions";
-import { on } from "events";
+import BookingButton from "../../components/BookingButton";
+import TermsAndConditions from "../../components/TermsandConditions";
 
 interface GuestInformationProps {
   onConfirmBooking: (bookingDetails: {

@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
-import Header from "@/app/components/Header";
+import Header from "@/app/(pages)/booking/Header";
 import Accordion from "@/app/components/Accordion";
-import ScheduleSelector from "@/app/components/ScheduleSelector";
-import BookingCard from "@/app/components/BookingCard";
-import GuestInformation from "@/app/components/GuestInformation";
+import ScheduleSelector from "@/app/(pages)/booking/ScheduleSelector";
+import BookingCard from "@/app/(pages)/booking/BookingCard";
+import GuestInformation from "@/app/(pages)/booking/GuestInformation";
 import { useRouter } from "next/navigation";
+import { Loading } from "@/app/components/loading";
 
 interface AccordionItem {
   title: string;
@@ -16,6 +17,7 @@ interface AccordionItem {
 }
 
 interface BookingCardData {
+  id: number;
   name: string;
   description: string;
   price: number;
@@ -183,7 +185,7 @@ const Booking: React.FC = () => {
                 .filter((card) => availableServices.includes(card.name))
                 .map((card) => (
                   <BookingCard
-                    key={card.name}
+                    key={card.id}
                     title={card.name}
                     description={card.description}
                     price={`₱${card.price}`}

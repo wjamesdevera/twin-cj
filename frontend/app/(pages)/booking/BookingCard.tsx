@@ -16,7 +16,6 @@ const BookingCard: React.FC<BookingCardProps> = ({
   title,
   description,
   price,
-  // additionalPrice,
   imageSrc,
   isSelected,
   onSelect,
@@ -38,7 +37,6 @@ const BookingCard: React.FC<BookingCardProps> = ({
           <div className={styles.description}>{description}</div>
           <div className={styles.priceDetails}>
             <span className={styles.price}>{price}</span>
-            {/* <span className={styles.additionalPrice}>{additionalPrice}</span> */}
           </div>
         </div>
         <div className={styles.imageContainer}>
