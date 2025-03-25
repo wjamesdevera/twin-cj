@@ -9,6 +9,7 @@ import useSWR from "swr";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
 
 type FormFields = {
   firstName: string;
@@ -71,6 +72,7 @@ export default function WalkInForm() {
   const [confirmAction, setConfirmAction] = useState<() => void>(
     () => () => {}
   );
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
   const packageType = watch("packageType");
   const checkInDate = watch("checkInDate");
@@ -131,7 +133,7 @@ export default function WalkInForm() {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         if (key === "proofOfPayment" && value instanceof File) {
-          formDataToSend.append(key, value);
+          formDataToSend.append("file", value);
         } else {
           formDataToSend.append(key, String(value));
         }
@@ -151,7 +153,7 @@ export default function WalkInForm() {
         throw new Error(await response.text());
       }
 
-      router.push("http://localhost:3000/admin/bookings");
+      setIsNotificationModalOpen(true);
     } catch (error: any) {
       console.error("Error submitting booking:", error);
     }
@@ -501,6 +503,24 @@ export default function WalkInForm() {
           cancelText="No"
         />
       </div>
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={() => {
+          confirmAction();
+          setIsConfirmModalOpen(false);
+        }}
+        title={confirmMessage}
+        confirmText="Yes"
+        cancelText="No"
+      />
+
+      <NotificationModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+        message="Your booking has been successfully confirmed."
+        type={"success"}
+      />
     </form>
   );
 }
