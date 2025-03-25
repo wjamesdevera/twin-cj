@@ -158,7 +158,9 @@ export default function WalkInForm() {
   };
 
   const handleCancel = () => {
-    setConfirmMessage("Are you sure you want to cancel?");
+    setConfirmMessage(
+      "Are you sure you want to cancel? Any unsaved progress will be lost."
+    );
     setConfirmAction(
       () => () => router.push("http://localhost:3000/admin/bookings")
     );
@@ -179,7 +181,25 @@ export default function WalkInForm() {
   };
 
   const handleClear = () => {
-    reset();
+    setConfirmMessage("Are you sure you want to clear the form? ");
+    setConfirmAction(() => () => {
+      reset();
+      setValue("firstName", "");
+      setValue("lastName", "");
+      setValue("email", "");
+      setValue("contactNumber", "");
+      setValue("packageType", undefined as any);
+      setValue("selectedPackageId", "");
+      setValue("selectedPackageName", "");
+      setValue("checkInDate", "");
+      setValue("checkOutDate", "");
+      setValue("paymentAccountName", "");
+      setValue("paymentAccountNumber", "");
+      setValue("paymentMethod", "");
+      setValue("totalPax", "");
+      setValue("amount", "");
+    });
+    setIsConfirmModalOpen(true);
   };
 
   return (
@@ -294,59 +314,6 @@ export default function WalkInForm() {
               <p className={styles.error}>{errors.totalPax?.message}</p>
             )}
           </div>
-
-          <div className={styles.right_column}>
-            <div className={styles.form_group}>
-              <label>
-                Amount <span className={styles.required}>*</span>
-              </label>
-              <input
-                {...register("amount")}
-                type="number"
-                min={1}
-                onBlur={() => trigger("amount")}
-              />
-              {errors.amount && (
-                <p className={styles.error}>{errors.amount?.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.form_group}>
-            <label>
-              Payment Account Name <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("paymentAccountName")}
-              type="text"
-              onBlur={() => trigger("paymentAccountName")}
-            />
-            {errors.paymentAccountName && (
-              <p className={styles.error}>
-                {errors.paymentAccountName?.message}
-              </p>
-            )}
-          </div>
-
-          <div className={styles.form_group}>
-            <label>
-              Payment Method <span className={styles.required}>*</span>
-            </label>
-            <select
-              {...register("paymentMethod")}
-              defaultValue=""
-              onBlur={() => trigger("paymentMethod")}
-            >
-              <option value="" disabled>
-                Select Payment Method
-              </option>
-              <option value="Gcash">Gcash</option>
-              <option value="Credit Card">Credit Card</option>
-            </select>
-            {errors.paymentMethod && (
-              <p className={styles.error}>{errors.paymentMethod?.message}</p>
-            )}
-          </div>
         </div>
 
         <div className={styles.right_column}>
@@ -410,6 +377,65 @@ export default function WalkInForm() {
             </div>
           )}
 
+          <div className={styles.form_group}>
+            <label>
+              Amount <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("amount")}
+              type="number"
+              min={1}
+              onBlur={() => trigger("amount")}
+            />
+            {errors.amount && (
+              <p className={styles.error}>{errors.amount?.message}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Details Section */}
+      <h2 className={styles.section_title}>Payment Details</h2>
+      <div className={styles.form_group_container}>
+        <div className={styles.left_column}>
+          <div className={styles.form_group}>
+            <label>
+              Payment Method <span className={styles.required}>*</span>
+            </label>
+            <select
+              {...register("paymentMethod")}
+              defaultValue=""
+              onBlur={() => trigger("paymentMethod")}
+            >
+              <option value="" disabled>
+                Select Payment Method
+              </option>
+              <option value="Gcash">Gcash</option>
+              <option value="Credit Card">Credit Card</option>
+            </select>
+            {errors.paymentMethod && (
+              <p className={styles.error}>{errors.paymentMethod?.message}</p>
+            )}
+          </div>
+
+          <div className={styles.form_group}>
+            <label>
+              Payment Account Name <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("paymentAccountName")}
+              type="text"
+              onBlur={() => trigger("paymentAccountName")}
+            />
+            {errors.paymentAccountName && (
+              <p className={styles.error}>
+                {errors.paymentAccountName?.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.right_column}>
           <div className={styles.form_group}>
             <label>
               Payment Account Number <span className={styles.required}>*</span>
