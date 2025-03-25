@@ -1,29 +1,33 @@
 import { z } from "zod";
 
+export const nameSchema = z
+  .string()
+  .trim()
+  .min(2, "Name must be at least 2 characters")
+  .max(50, "Name must be at most 50 characters long")
+  .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces")
+  .transform((val) => val.replace(/\s+/g, " ").trim());
+
+export const descriptionSchema = z
+  .string()
+  .min(1, "Description is required")
+  .max(100, "Description should not exceed 100 characters")
+  .refine((val) => val.trim().length > 0, "Description cannot be just spaces");
+
+export const priceSchema = z.number().gt(0);
+
 export const serviceSchema = z.object({
-  name: z.string({ message: "Name is required" }),
-  description: z.string({ message: "Description is required" }),
-  price: z.number({ message: "Price required" }),
-  additionalFee: z
-    .object({
-      type: z.string().optional(),
-      description: z.string().optional(),
-      amount: z.number().optional(),
-    })
-    .optional(),
+  name: nameSchema,
+  description: descriptionSchema,
+  price: priceSchema,
 });
+
+export const capacitySchema = z.number().gt(0);
 
 export const cabinSchema = serviceSchema
   .extend({
-    minCapacity: z.number().int(),
-    maxCapacity: z.number().int(),
-    additionalFee: z
-      .object({
-        type: z.string().optional(),
-        description: z.string().optional(),
-        amount: z.number().optional(),
-      })
-      .optional(),
+    minCapacity: capacitySchema,
+    maxCapacity: capacitySchema,
   })
   .refine((data) => data.minCapacity < data.maxCapacity, {
     message: "Min capacity should be less than Max capacity",

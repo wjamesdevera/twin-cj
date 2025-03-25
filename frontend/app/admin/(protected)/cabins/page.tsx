@@ -1,62 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import useSWR, { mutate } from "swr";
 import { deleteCabin, getCabins, multiDeleteCabin } from "@/app/lib/api";
 import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
-
-interface Service {
-  id: number;
-}
-
-interface AdditionalFee {
-  type: string;
-  description: string;
-  amount: number;
-}
-
-interface Cabin {
-  id: number;
-  minCapacity: number;
-  maxCapacity: number;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  service: Service;
-  additionalFee?: AdditionalFee | null;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-const formatPrice = (price: number) => {
-  return price.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
-
-const formatDate = (isoString?: string) => {
-  if (!isoString) return "N/A";
-  return new Date(isoString).toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-  });
-};
+import CabinTable from "./CabinTable";
+import CustomButton from "@/app/components/custom_button";
+import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
+import styles from "./page.module.scss";
 
 const CabinDashboard = () => {
   const router = useRouter();
-
   const [selectedCabins, setSelectedCabins] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<number | number[] | null>(
+    null
+  );
+  const [notification, setNotification] = useState({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
 
   const { data, isLoading } = useSWR("getCabins", getCabins);
-
-  const { cabins } = data?.data || [];
+  const cabins = data?.data?.cabins || [];
 
   const toggleSelection = (id: number) => {
     setSelectedCabins((prev) =>
@@ -71,31 +42,57 @@ const CabinDashboard = () => {
     (key, { arg }: { arg: number }) => deleteCabin(arg)
   );
 
-  const handleDeletCabin = async (id: number) => {
-    // NOTE: Add a modal before running the trigger for deleteawait trigger(id);
-
-    mutate("getCabins");
-    alert("Cabin deleted successfully!");
+  const handleDeleteCabin = (id: number) => {
+    setDeleteTarget(id);
+    setIsModalOpen(true);
   };
 
-  const deleteSelectedCabins = async () => {
+  const deleteSelectedCabins = () => {
     if (selectedCabins.length === 0) {
-      alert("No cabins selected.");
+      setNotification({
+        isOpen: true,
+        message: "No cabins selected.",
+        type: "error",
+      });
       return;
     }
-    // NOTE: ADD modal before deletion
-    multiDeleteCabin(selectedCabins.join(","));
-    setSelectedCabins([]);
-    setSelectAll(false);
+    setDeleteTarget(selectedCabins);
+    setIsModalOpen(true);
+  };
 
-    alert("Selected cabin/s deleted successfully!");
+  const confirmDelete = async () => {
+    try {
+      if (Array.isArray(deleteTarget)) {
+        await multiDeleteCabin(deleteTarget.join(","));
+        setSelectedCabins([]);
+        setSelectAll(false);
+      } else if (deleteTarget !== null) {
+        await trigger(deleteTarget);
+      }
+
+      mutate("getCabins", true);
+      setIsModalOpen(false);
+      setNotification({
+        isOpen: true,
+        message: Array.isArray(deleteTarget)
+          ? "Selected cabins deleted successfully!"
+          : "Cabin deleted successfully!",
+        type: "success",
+      });
+    } catch (error) {
+      setNotification({
+        isOpen: true,
+        message: "An error occurred while deleting the cabin.",
+        type: "error",
+      });
+    }
   };
 
   const toggleSelectAll = () => {
     if (selectAll) {
       setSelectedCabins([]);
     } else {
-      setSelectedCabins(cabins.map((cabin: Cabin) => cabin.id));
+      setSelectedCabins(cabins.map((cabin: { id: number }) => cabin.id));
     }
     setSelectAll(!selectAll);
   };
@@ -103,125 +100,54 @@ const CabinDashboard = () => {
   return isLoading ? (
     <Loading />
   ) : (
-    <div>
-      <div style={{ marginTop: "80px" }}></div>
-
-      <button onClick={() => router.push("/admin/cabins/create")}>
-        Add Cabin
-      </button>
-      <button
-        onClick={deleteSelectedCabins}
-        disabled={selectedCabins.length === 0}
-      >
-        Delete Selected
-      </button>
-
-      <div>
-        <table style={{ width: "100%", textAlign: "center" }}>
-          <thead>
-            <tr>
-              <th style={{ border: "1px solid" }}>
-                <input
-                  type="checkbox"
-                  checked={selectAll}
-                  onChange={toggleSelectAll}
-                />
-              </th>
-              <th style={{ border: "1px solid" }}>Action</th>
-              <th style={{ border: "1px solid" }}>ID</th>
-              <th style={{ border: "1px solid" }}>Name</th>
-              <th style={{ border: "1px solid" }}>Image</th>
-              <th style={{ border: "1px solid" }}>Description</th>
-              <th style={{ border: "1px solid" }}>Rate</th>
-              <th style={{ border: "1px solid" }}>Minimum Capacity</th>
-              <th style={{ border: "1px solid" }}>Maximum Capacity</th>
-              <th style={{ border: "1px solid" }}>Additional Fee Type</th>
-              <th style={{ border: "1px solid" }}>
-                Additional Fee Description
-              </th>
-              <th style={{ border: "1px solid" }}>Additional Fee Amount</th>
-              <th style={{ border: "1px solid" }}>Date Created</th>
-              <th style={{ border: "1px solid" }}>Last Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cabins.map((cabin: Cabin) => (
-              <tr key={cabin.id}>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedCabins.includes(cabin.id)}
-                    onChange={() => toggleSelection(cabin.id)}
-                  />
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  <button
-                    onClick={() =>
-                      router.push(`/admin/cabins/update/${cabin.id}`)
-                    }
-                  >
-                    Edit
-                  </button>
-                  <button onClick={() => handleDeletCabin(cabin.id)}>
-                    Delete
-                  </button>
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.id}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.name}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      src={cabin.imageUrl}
-                      alt={cabin.name}
-                      width={135}
-                      height={90}
-                    />
-                  </div>
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.description}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  ₱{formatPrice(cabin.price)}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.minCapacity}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.maxCapacity}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.additionalFee?.type || "N/A"}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.additionalFee?.description || "N/A"}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {cabin.additionalFee?.amount
-                    ? `₱${formatPrice(cabin.additionalFee.amount)}`
-                    : "N/A"}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {formatDate(cabin.createdAt)}
-                </td>
-                <td style={{ border: "1px solid", verticalAlign: "middle" }}>
-                  {formatDate(cabin.updatedAt)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className={styles.page_container}>
+      <div className={styles.page_header}>
+        <h1 className={styles.title}>Cabins</h1>
       </div>
+
+      <div className={styles.subheader_container}>
+        <h2 className={styles.subheader}>
+          Select a Cabin to modify in the Booking Page
+        </h2>
+        <div className={styles.button_container}>
+          <CustomButton
+            label="Add Cabin"
+            onClick={() => router.push("/admin/cabins/add")}
+            variant="primary"
+          />
+          <CustomButton
+            label="Delete Selected"
+            onClick={deleteSelectedCabins}
+            variant="danger"
+            disabled={selectedCabins.length === 0}
+          />
+        </div>
+      </div>
+
+      <CabinTable
+        cabins={cabins}
+        selectedCabins={selectedCabins}
+        toggleSelection={toggleSelection}
+        toggleSelectAll={toggleSelectAll}
+        selectAll={selectAll}
+        handleDeleteCabin={handleDeleteCabin}
+      />
+
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Are you sure you want to delete the selected cabin(s)?"
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+      />
+
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
+        message={notification.message}
+        type={notification.type as "success" | "error"}
+      />
     </div>
   );
 };

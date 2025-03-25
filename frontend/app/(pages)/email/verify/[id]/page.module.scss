@@ -12,14 +12,18 @@
 .failedBanner {
   padding: 1rem;
   border-radius: 10px;
-  border: 1px solid var(--color-red-600);
-  border-left: 8px solid var(--color-red-600);
-  background-color: var(--color-red-50);
+  border: 1px solid var(--color-red-800);
+  border-left: 8px solid var(--color-red-800);
   margin-bottom: 1.5rem;
-  color: var(--color-red-800);
+  color: #92400e;
   font-size: 0.9rem;
 }
-
+.verificationTitle {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin: 2rem;
+}
 .main {
   margin-top: var(--navbar-height);
   display: flex;
@@ -29,4 +33,31 @@
 }
 
 .messageContainer {
+  align-items: center;
+  justify-content: center;
+}
+
+.messageText {
+  color: var(--text, #555);
+  font-size: var(--text-size-base);
+  line-height: var(--text-line-height-base);
+  text-wrap: wrap;
+  margin-top: 1.5rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.messageWrapper {
+  text-align: center;
+}
+
+.messageButton {
+  color: var(--color-neutral-100);
+  background-color: var(--color-sunset-orange-500);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  font-size: var(--text-size-base);
+  line-height: var(--text-line-height-base);
 }
