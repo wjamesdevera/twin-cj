@@ -442,7 +442,7 @@ export default function WalkInForm() {
         <div className={styles.button_container}>
           <CustomButton
             type="button"
-            label="Add Booking"
+            label="Edit Booking"
             onClick={handleAddBooking}
           />
           <CustomButton
