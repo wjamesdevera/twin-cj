@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import styles from "./cardcontainer.module.scss";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
@@ -10,18 +10,18 @@ import "swiper/css/navigation";
 
 interface CardProps {
   title: string;
-  image: string;
+  image: StaticImageData;
   description: string;
   rates: string[];
   additionalInfo: string[];
-  galleryImages?: string[];
+  galleryImages?: StaticImageData[];
 }
 
 const CardContainer: React.FC<{ cards: CardProps[] }> = ({ cards }) => {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [galleryImages, setGalleryImages] = useState<StaticImageData[]>([]);
 
-  const openGallery = (images: string[]) => {
+  const openGallery = (images: StaticImageData[]) => {
     setGalleryImages(images);
     setIsGalleryOpen(true);
   };
@@ -115,7 +115,7 @@ const CardContainer: React.FC<{ cards: CardProps[] }> = ({ cards }) => {
             >
               {galleryImages.map((image, index) => (
                 <SwiperSlide key={index} className={styles.swiperSlide}>
-                  <img
+                  <Image
                     src={image}
                     alt={`Gallery Image ${index + 1}`}
                     className={styles.galleryImage}
