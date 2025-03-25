@@ -5,6 +5,7 @@ import userRoutes from "./user.routes";
 import feedbackRoutes from "./feedback.routes";
 import serviceRoutes from "./service.routes";
 import sessionRoutes from "./session.routes";
+import bookingRoutes from "./booking.routes";
 import { authenticate } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/upload";
 
@@ -25,6 +26,7 @@ router.use("/users", authenticate, userRoutes);
 router.use("/services", serviceRoutes);
 router.use("/feedbacks", feedbackRoutes);
 router.use("/services", serviceRoutes);
+router.use("/bookings", bookingRoutes);
 
 router.post("/upload", upload.single("file"), (req, res) => {
   res.json({

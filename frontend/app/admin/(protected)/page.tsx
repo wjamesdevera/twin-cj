@@ -1,109 +1,82 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DashboardContainer from "../../components/DashboardContainer";
 import Chart from "../../components/Chart";
 import BookingTable from "../../components/BookingTable";
 import styles from "./../(protected)/page.module.scss";
+import { Loading } from "@/app/components/loading";
+
+interface BookingData {
+  referenceNo: string;
+  service: string;
+  checkIn: string;
+  checkOut: string;
+  total: number;
+  customerName: string;
+  email: string;
+  status: string;
+}
 
 const Page = () => {
-  const dashboardData = {
-    pendingReservations: 5,
-    activeReservations: 10,
+  const [dashboardData, setDashboardData] = useState({
+    pendingReservations: 0,
+    activeReservations: 0,
+  });
+  const [bookings, setBookings] = useState<BookingData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const formatDate = (date: string): string => {
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${month}/${day}/${year}`;
   };
 
-  const bookings = [
-    {
-      referenceNo: "20241121-030",
-      service: "Maxi Cabin",
-      checkIn: "11/21/2024",
-      checkOut: "11/23/2024",
-      total: 18000,
-      customerName: "Ralph Kyle Labaguis",
-      email: "test@gmail.com",
-      status: "pending",
-    },
-    {
-      referenceNo: "20241121-029",
-      service: "Venti Cabin",
-      checkIn: "11/21/2024",
-      checkOut: "11/22/2024",
-      total: 12000,
-      customerName: "Winfrey De Vera",
-      email: "test@gmail.com",
-      status: "active",
-    },
-    {
-      referenceNo: "20241121-028",
-      service: "Maxi Cabin",
-      checkIn: "11/21/2024",
-      checkOut: "11/22/2024",
-      total: 6000,
-      customerName: "Paul Trinidad",
-      email: "test@gmail.com",
-      status: "active",
-    },
-    {
-      referenceNo: "20241121-027",
-      service: "River Day Tour",
-      checkIn: "11/21/2024",
-      checkOut: "11/22/2024",
-      total: 500,
-      customerName: "Kurt Duterte",
-      email: "test@gmail.com",
-      status: "completed",
-    },
-    {
-      referenceNo: "20241121-026",
-      service: "Swimming Pool",
-      checkIn: "11/21/2024",
-      checkOut: "11/22/2024",
-      total: 1000,
-      customerName: "Patricia Arellano",
-      email: "test@gmail.com",
-      status: "active",
-    },
-    {
-      referenceNo: "20241121-025",
-      service: "Mini Cabin",
-      checkIn: "11/21/2024",
-      checkOut: "11/22/2024",
-      total: 3500,
-      customerName: "Chrizelle Feliciano",
-      email: "test@gmail.com",
-      status: "active",
-    },
-    {
-      referenceNo: "20241121-024",
-      service: "Maxi Cabin",
-      checkIn: "11/21/2024",
-      checkOut: "11/22/2024",
-      total: 7500,
-      customerName: "Dawn Andal",
-      email: "test@gmail.com",
-      status: "completed",
-    },
-    {
-      referenceNo: "20241121-023",
-      service: "Mini Cabin",
-      checkIn: "11/21/2024",
-      checkOut: "11/22/2024",
-      total: 3000,
-      customerName: "Matthew Abraham Tomaneng",
-      email: "test@gmail.com",
-      status: "completed",
-    },
-    {
-      referenceNo: "20241121-023",
-      service: "Mini Cabin",
-      checkIn: "11/21/2024",
-      checkOut: "11/22/2024",
-      total: 3000,
-      customerName: "Matthew Abraham Tomaneng",
-      email: "test@gmail.com",
-      status: "completed",
-    },
-  ];
+  useEffect(() => {
+    const fetchBookingData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/api/bookings/latest-bookings"
+        );
+
+        const contentType = response.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const errorText = await response.text();
+          throw new Error(`Expected JSON but received HTML: ${errorText}`);
+        }
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch bookings");
+        }
+        const data = await response.json();
+
+        const formattedBookings = data.bookings.map((booking: BookingData) => ({
+          ...booking,
+          checkIn: formatDate(booking.checkIn),
+          checkOut: formatDate(booking.checkOut),
+          total: booking.total.toFixed(2),
+        }));
+
+        setBookings(formattedBookings);
+        setDashboardData({
+          pendingReservations: data.pendingReservations,
+          activeReservations: data.activeReservations,
+        });
+        setLoading(false);
+      } catch (error) {
+        setError("An error occurred while fetching bookings");
+        setLoading(false);
+      }
+    };
+
+    fetchBookingData();
+  }, []);
+
+  if (loading) return <Loading />;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className={styles.dashboardContainer}>

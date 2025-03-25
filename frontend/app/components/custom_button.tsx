@@ -6,7 +6,7 @@ import styles from "./custom_button.module.scss";
 interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
   href?: string;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "danger";
   size?: "small" | "default";
   disabled?: boolean;
   children?: React.ReactNode;

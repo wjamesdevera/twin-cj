@@ -6,10 +6,10 @@ model PaymentAccount {
     updatedAt     DateTime @updatedAt @map("updated_at")
 
     // Relations
-    paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
-    paymentMethodId Int           @map("payment_method_id")
+    transactions Transaction[] @relation("TransactionPaymentAccount")
 
-    transaction Transaction[]
+    paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+    paymentMethodId Int?           @map("payment_method_id")
 
     @@map("payment_accounts")
 }

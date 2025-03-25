@@ -8,6 +8,10 @@ import { Loading } from "@/app/components/loading";
 import Image from "next/image";
 import twinCJLogo from "@/public/assets/twin-cj-logo.png";
 import Link from "next/link";
+import { emailSchema } from "@/app/lib/zodSchemas";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const Timer = ({
   updateIsDisabled,
@@ -15,24 +19,20 @@ const Timer = ({
   updateIsDisabled: (isDisabled: boolean) => void;
 }) => {
   const Ref = useRef<NodeJS.Timeout | null>(null);
-  const [time, setTime] = useState<string>("01:00");
+  const [time, setTime] = useState("01:00");
 
-  const getTimeRemaining = (endTime: Date) => {
-    const total =
-      Date.parse(endTime.toString()) - Date.parse(new Date().toString());
-
+  const getTimeRemaining = (endTime: number) => {
+    const total = endTime - Date.now();
     const seconds = Math.floor((total / 1000) % 60);
     const minutes = Math.floor((total / 1000 / 60) % 60);
-    return {
-      total,
-      minutes,
-      seconds,
-    };
+
+    return { total, minutes, seconds };
   };
 
   const startTimer = useCallback(
-    (endTime: Date) => {
+    (endTime: number) => {
       const { total, minutes, seconds } = getTimeRemaining(endTime);
+
       if (total >= 0) {
         setTime(
           `${minutes.toString().padStart(2, "0")}:${seconds
@@ -40,31 +40,30 @@ const Timer = ({
             .padStart(2, "0")}`
         );
       } else {
-        updateIsDisabled(false); // 🔹 Set to false when the timer ends
+        updateIsDisabled(false);
+        localStorage.removeItem("deadline"); // 🔹 Clear deadline
         if (Ref.current) clearInterval(Ref.current);
       }
     },
     [updateIsDisabled]
   );
 
-  const clearTimer = useCallback(
-    (endTime: Date) => {
-      setTime("01:00");
-      if (Ref.current) clearInterval(Ref.current);
-      const id = setInterval(() => startTimer(endTime), 1000);
-      Ref.current = id;
-    },
-    [startTimer]
-  );
+  const clearTimer = useCallback(() => {
+    let deadline = localStorage.getItem("deadline");
 
-  const getDeadTime = (): Date => {
-    const deadline = new Date();
-    deadline.setMinutes(deadline.getMinutes() + 1);
-    return deadline;
-  };
+    if (!deadline) {
+      const newDeadline = Date.now() + 60 * 1000; // 🔹 Set 1-minute timer
+      localStorage.setItem("deadline", newDeadline.toString());
+      deadline = newDeadline.toString();
+    }
+
+    if (Ref.current) clearInterval(Ref.current);
+    startTimer(Number(deadline));
+    Ref.current = setInterval(() => startTimer(Number(deadline)), 1000);
+  }, [startTimer]);
 
   useEffect(() => {
-    clearTimer(getDeadTime());
+    clearTimer();
     return () => {
       if (Ref.current) clearInterval(Ref.current);
     };
@@ -78,16 +77,40 @@ const Timer = ({
     </div>
   );
 };
+const useSessionStorageState = (key: string, defaultValue: string) => {
+  const isBrowser = typeof window !== "undefined";
+
+  const [state, setState] = useState(() => {
+    if (!isBrowser) return defaultValue; // Prevent ReferenceError during SSR
+    return sessionStorage.getItem(key) || defaultValue;
+  });
+
+  useEffect(() => {
+    if (isBrowser) {
+      sessionStorage.setItem(key, state);
+    }
+  }, [key, state, isBrowser]);
+
+  return [state, setState] as const;
+};
+
+const loginFormSchema = z.object({
+  email: emailSchema,
+  password: z.string(),
+});
+
+type FormData = z.infer<typeof loginFormSchema>;
 
 export function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [attempts, setAttempts] = useState(0);
+  const { register, handleSubmit } = useForm<FormData>({
+    resolver: zodResolver(loginFormSchema),
+  });
+  const [attempts, setAttempts] = useSessionStorageState("attempts", "0");
   const [isDisabled, setIsDisabled] = useState(false);
 
   useEffect(() => {
-    if (attempts > 3) {
+    if (Number(attempts) > 3) {
       setIsDisabled(true);
     } else {
       setIsDisabled(false);
@@ -96,7 +119,7 @@ export function LoginForm() {
 
   const updateIsDisabled = (isDisabled: boolean) => {
     setIsDisabled(isDisabled);
-    setAttempts(0);
+    setAttempts("0");
   };
 
   const { trigger, error, isMutating } = useSWRMutation(
@@ -104,6 +127,7 @@ export function LoginForm() {
     (key, { arg }: { arg: { email: string; password: string } }) => login(arg),
     {
       onSuccess: () => {
+        setAttempts("0");
         router.replace("/admin");
       },
       onError: (error) => {
@@ -112,13 +136,13 @@ export function LoginForm() {
     }
   );
 
-  const handleLogin = async () => {
+  const onLogin = async (data: FormData) => {
     try {
-      await trigger({ email, password });
+      await trigger(data);
       console.log("Login successful");
     } catch (error) {
       console.log(error);
-      setAttempts(() => attempts + 1);
+      setAttempts(() => (Number(attempts) + 1).toString());
     }
   };
 
@@ -134,27 +158,33 @@ export function LoginForm() {
                 src={twinCJLogo}
                 alt="Twin CJ Logo"
                 className={styles["login-logo"]}
-                objectFit="contain"
               />
-              <p className={styles["welcome-text"]}>
-                Welcome! Please log-in with your admin account.
-              </p>
+              {!isDisabled ? (
+                <p className={styles["welcome-text"]}>
+                  Welcome! Please log-in with your admin account.
+                </p>
+              ) : (
+                <p className={styles["welcome-text"]}>
+                  Please try again after the timeout has expired.
+                </p>
+              )}
               {isDisabled && <Timer updateIsDisabled={updateIsDisabled} />}
             </div>
-            <div className={styles["form-control"]}>
+            <form
+              className={styles["form-control"]}
+              onSubmit={handleSubmit(onLogin)}
+            >
               {!isDisabled && (
                 <>
                   <input
                     type="text"
                     placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register("email")}
                   />
                   <input
                     type="password"
                     placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password")}
                   />
                   {error && (
                     <small className={styles["error-message"]}>
@@ -173,13 +203,12 @@ export function LoginForm() {
                 <button
                   className={styles["login-button"]}
                   type="submit"
-                  onClick={handleLogin}
                   disabled={isMutating || isDisabled}
                 >
                   {isMutating ? "Logging in..." : "Login"}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
