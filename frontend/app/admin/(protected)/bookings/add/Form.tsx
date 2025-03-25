@@ -158,6 +158,11 @@ export default function WalkInForm() {
         }
       });
 
+      // Log the FormData object for debugging
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+
       formDataToSend.append("selectedPackage", formData.selectedPackageId);
 
       const response = await fetch(
