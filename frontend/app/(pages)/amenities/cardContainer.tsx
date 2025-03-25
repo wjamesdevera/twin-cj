@@ -7,6 +7,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import { useRouter } from "next/navigation";
 
 interface CardProps {
   title: string;
@@ -18,6 +19,7 @@ interface CardProps {
 }
 
 const CardContainer: React.FC<{ cards: CardProps[] }> = ({ cards }) => {
+  const router = useRouter();
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryImages, setGalleryImages] = useState<StaticImageData[]>([]);
 
@@ -31,7 +33,7 @@ const CardContainer: React.FC<{ cards: CardProps[] }> = ({ cards }) => {
   };
 
   const handleBookNow = () => {
-    window.location.href = "/booking";
+    router.replace("/booking");
   };
 
   return (
