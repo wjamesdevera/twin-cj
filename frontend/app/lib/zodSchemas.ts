@@ -60,4 +60,5 @@ export const walkinSchema = z.object({
   proofOfPayment: z.any().optional(),
   totalPax: z.string().min(1, "Total Pax must be at least 1"),
   amount: z.string().min(1, "Amount must be at least 1"),
+  bookingStatus: z.enum(["approve", "reject", "cancel"]), 
 });
