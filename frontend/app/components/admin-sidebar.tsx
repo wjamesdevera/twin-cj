@@ -1,6 +1,6 @@
 "use client";
 
-import React, { JSX, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import styles from "./admin-sidebar.module.scss";
 import Image from "next/image";
 import Link from "next/link";
@@ -55,6 +55,11 @@ const NavItem = ({
 
 const NavDropdown = ({ collapsed }: NavDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    if (collapsed) {
+      setIsOpen(false);
+    }
+  }, [collapsed]);
 
   return (
     <>

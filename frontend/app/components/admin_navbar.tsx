@@ -20,7 +20,7 @@ const AdminNavbar: React.FC = () => {
   return (
     <nav className={styles.adminNavbar}>
       <div className={styles.container}>
-        <Link href="/" className={styles.viewSiteLink}>
+        <Link href="/" target="_blank" className={styles.viewSiteLink}>
           View Site
         </Link>
 
