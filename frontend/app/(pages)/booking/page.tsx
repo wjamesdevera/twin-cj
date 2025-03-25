@@ -42,6 +42,7 @@ const Booking: React.FC = () => {
 
   const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [showAccordion, setShowAccordion] = useState(false);
+  const [isDayTourLocked, setIsDayTourLocked] = useState(false);
 
   const { data, error } = useSWR<{
     status: string;
@@ -55,6 +56,23 @@ const Booking: React.FC = () => {
     fetcher
   );
 
+  // Set booking type based on check-in and check-out dates
+  useEffect(() => {
+    if (bookingData.checkInDate && bookingData.checkOutDate) {
+      const isSameDay =
+        bookingData.checkInDate.toDateString() ===
+        bookingData.checkOutDate.toDateString();
+
+      setIsDayTourLocked(isSameDay);
+
+      setBookingData((prev) => ({
+        ...prev,
+        bookingType: isSameDay ? "day-tour" : prev.bookingType || "cabins",
+      }));
+    }
+  }, [bookingData.checkInDate, bookingData.checkOutDate]);
+
+  // Filter out booked services
   useEffect(() => {
     if (data?.status === "success" && bookingData.bookingType) {
       let services = data.data[bookingData.bookingType]?.services || [];
@@ -94,7 +112,7 @@ const Booking: React.FC = () => {
     }));
   };
 
-  if (error) return <div>Failed to load</div>;
+  if (error) return <Loading />;
 
   const accordionItems: AccordionItem[] = [
     {
@@ -102,7 +120,13 @@ const Booking: React.FC = () => {
       content: (
         <ScheduleSelector
           selectedOption={bookingData.bookingType}
-          handleOptionSelect={(option) => handleChange("bookingType", option)}
+          handleOptionSelect={(option) => {
+            if (isDayTourLocked && bookingData.bookingType === "day-tour")
+              return;
+            if (!isDayTourLocked && option === "day-tour") return;
+            handleChange("bookingType", option);
+          }}
+          disabled={isDayTourLocked}
         />
       ),
     },
@@ -131,6 +155,10 @@ const Booking: React.FC = () => {
                     imageSrc={card.imageUrl}
                     isSelected={bookingData.selectedOption === card.name}
                     onSelect={() => handleChange("selectedOption", card.name)}
+                    disabled={
+                      !bookingData.bookingType ||
+                      bookingData.bookingCards.length === 0
+                    }
                   />
                 ))}
             </div>
@@ -162,6 +190,10 @@ const Booking: React.FC = () => {
                     imageSrc={card.imageUrl}
                     isSelected={bookingData.selectedOption === card.name}
                     onSelect={() => handleChange("selectedOption", card.name)}
+                    disabled={
+                      !bookingData.bookingType ||
+                      bookingData.bookingCards.length === 0
+                    }
                   />
                 ))}
             </div>

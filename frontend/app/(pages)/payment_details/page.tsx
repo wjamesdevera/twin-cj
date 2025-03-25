@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { paymentSchema } from "../../lib/zodSchemas";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Swal from "sweetalert2";
 
 type PaymentFormData = z.infer<typeof paymentSchema> & {
   proofOfPayment: File | null;
@@ -90,7 +91,6 @@ export default function PaymentDetails() {
         (card: BookingCardData) => card.name === bookingData.selectedOption
       );
 
-      console.log(data.proofOfPayment);
       const formData = new FormData();
       formData.append("bookingData", JSON.stringify(bookingData));
       formData.append("paymentMethod", data.paymentMethod);
@@ -104,8 +104,15 @@ export default function PaymentDetails() {
 
       if (!response.ok) throw new Error("Failed to confirm booking");
 
-      alert("Booking successful!");
-      sessionStorage.removeItem("bookingData");
+      //NOTE: subject to change
+      Swal.fire({
+        title: "Booking Successful!",
+        icon: "success",
+        draggable: true,
+      }).then(() => {
+        sessionStorage.removeItem("bookingData");
+        window.location.href = "http://localhost:3000/";
+      });
     } catch (error) {
       console.error("Error confirming booking:", error);
       alert("Failed to confirm booking. Please try again.");
@@ -135,7 +142,7 @@ export default function PaymentDetails() {
             }
             packageType={bookingData.selectedOption}
             packagePrice={selectedCard?.price || 0}
-            totalAmount={selectedCard?.price || 0}
+            totalAmount={selectedCard?.price ? selectedCard.price * 0.5 : 0}
             bookingType={
               bookingData.bookingType === "day-tour" ? "Day Tour" : "Overnight"
             }

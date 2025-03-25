@@ -4,6 +4,7 @@ import styles from "./header.module.scss";
 import headerImage from "../../public/assets/header.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
 
 type GuestType = "adults" | "children";
 type Action = "increment" | "decrement";
@@ -138,7 +139,21 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 
   const handleCheckAvailability = async () => {
     if (!checkInDate || !checkOutDate) {
-      alert("Please select both check-in and check-out dates.");
+      Swal.fire({
+        title: "Please select check-in and check-out dates",
+        icon: "error",
+        draggable: true,
+      });
+      return;
+    }
+
+    //NOTE:
+    if (checkInDate > checkOutDate) {
+      Swal.fire({
+        title: "Check-out date must be after check-in date",
+        icon: "error",
+        draggable: true,
+      });
       return;
     }
 
@@ -226,11 +241,7 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
               placeholderText="Select check-out date"
               className={styles["form-input"]}
               dateFormat="MMMM d, yyyy"
-              minDate={
-                checkInDate
-                  ? new Date(checkInDate.getTime() + 86400000)
-                  : new Date()
-              }
+              minDate={checkInDate || new Date()}
             />
           </div>
 
