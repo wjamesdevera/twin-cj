@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
-
 .cardContainer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -10,7 +8,7 @@
 }
 
 .card {
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-poppins);
   background: #ffffff;
   overflow: hidden;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
