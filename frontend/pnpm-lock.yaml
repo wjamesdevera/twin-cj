@@ -39,7 +39,7 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0(chart.js@4.4.8)(react@19.0.0)
       react-datepicker:
-        specifier: ^8.2.0
+        specifier: ^8.2.1
         version: 8.2.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-dom:
         specifier: ^19.0.0
