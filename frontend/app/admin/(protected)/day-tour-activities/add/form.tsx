@@ -122,9 +122,9 @@ export default function DayTourForm() {
           <div className={styles.left_column}>
             <div className={styles.form_group}>
               <label>
-                Title<span className={styles.required}>*</span>
+                Day Tour Name <span className={styles.required}>*</span>
               </label>
-              <input type="text" {...register("name")} maxLength={51} />
+              <input type="text" {...register("name")} maxLength={51} placeholder="Enter the day tour name" />
               {errors.name && (
                 <span className={styles.error}>{errors.name.message}</span>
               )}
@@ -134,7 +134,7 @@ export default function DayTourForm() {
               <label>
                 Description <span className={styles.required}>*</span>
               </label>
-              <textarea {...register("description")} maxLength={101} />
+              <textarea {...register("description")} maxLength={101} placeholder="Enter the description" />
               {errors.description && (
                 <span className={styles.error}>
                   {errors.description.message}

@@ -111,13 +111,14 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
           <div className={styles.left_column}>
             <div className={styles.form_group}>
               <label>
-                Name <span className={styles.required}>*</span>
+                Day Tour Name <span className={styles.required}>*</span>
               </label>
               <input
                 type="text"
                 {...register("name")}
                 className={errors.name && styles.invalid_input}
                 maxLength={51}
+                placeholder="Enter the day tour name"
                 required
               />
               {errors.name && (
@@ -133,6 +134,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
                 {...register("description")}
                 className={errors.description && styles.invalid_input}
                 maxLength={101}
+                placeholder="Enter the description"
                 required
               />
               <p className={styles["char-count"]}>
@@ -156,6 +158,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
                 type="text"
                 {...register("price")}
                 className={styles.short_input}
+                placeholder="₱"
                 required
               />
               {errors.price && (
