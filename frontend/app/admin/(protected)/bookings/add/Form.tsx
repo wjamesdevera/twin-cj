@@ -9,6 +9,7 @@ import useSWR from "swr";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
 
 type FormFields = {
   firstName: string;
@@ -71,6 +72,14 @@ export default function WalkInForm() {
   const [confirmAction, setConfirmAction] = useState<() => void>(
     () => () => {}
   );
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState<"success" | "error">(
+    "success"
+  );
+  const [selectedPackagePrice, setSelectedPackagePrice] = useState<
+    number | null
+  >(null);
 
   const packageType = watch("packageType");
   const checkInDate = watch("checkInDate");
@@ -81,7 +90,19 @@ export default function WalkInForm() {
       setValue("checkOutDate", watch("checkInDate"));
       trigger("checkOutDate");
     }
-  }, [packageType, watch("checkInDate")]);
+
+    const selectedPackage = availablePackages.find(
+      (pkg) => pkg.id.toString() === watch("selectedPackageId")
+    );
+    if (selectedPackage) {
+      const halfPrice = selectedPackage.price / 2;
+      setSelectedPackagePrice(halfPrice);
+      setValue("amount", halfPrice.toString());
+    } else {
+      setSelectedPackagePrice(null);
+      setValue("amount", "");
+    }
+  }, [packageType, watch("checkInDate"), watch("selectedPackageId")]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -127,24 +148,22 @@ export default function WalkInForm() {
       formData.checkOutDate = formData.checkInDate;
     }
 
-    console.log("Submitting...");
-    console.log("Form Data: ", formData);
-
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         if (key === "proofOfPayment" && value instanceof File) {
-          formDataToSend.append(key, value);
+          formDataToSend.append("file", value);
         } else {
           formDataToSend.append(key, String(value));
         }
       });
 
-      formDataToSend.append("selectedPackage", formData.selectedPackageId);
-
-      for (let pair of formDataToSend.entries()) {
-        console.log(pair[0], pair[1]);
+      // Log the FormData object for debugging
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(`${key}: ${value}`);
       }
+
+      formDataToSend.append("selectedPackage", formData.selectedPackageId);
 
       const response = await fetch(
         "http://localhost:8080/api/bookings/walk-in",
@@ -157,11 +176,14 @@ export default function WalkInForm() {
       if (!response.ok) {
         throw new Error(await response.text());
       }
-
-      console.log("Booking submitted successfully!");
-      // router.push("http://localhost:3000/admin/bookings");
+      setNotificationMessage("Your booking has been successfully confirmed.");
+      setNotificationType("success");
+      setIsNotificationModalOpen(true);
     } catch (error: any) {
       console.error("Error submitting booking:", error);
+      setNotificationMessage("Error submitting booking: " + error.message);
+      setNotificationType("error");
+      setIsNotificationModalOpen(true);
     }
   };
 
@@ -177,15 +199,11 @@ export default function WalkInForm() {
 
   const handleAddBooking = async () => {
     const isValid = await trigger();
-    console.log("handleAddBooking called");
 
     if (!isValid) {
       console.error("Form is invalid!");
-      console.log("Errors:", errors);
       return;
     }
-
-    console.log("Submitting booking data:", data);
 
     setConfirmMessage("Are you sure you want to add this booking?");
     setConfirmAction(() => () => handleSubmit(onSubmit)());
@@ -248,7 +266,7 @@ export default function WalkInForm() {
 
           <div className={styles.form_group}>
             <label>
-              Package Type <span className={styles.required}>*</span>
+              Resort Schedule <span className={styles.required}>*</span>
             </label>
             <select
               {...register("packageType")}
@@ -397,7 +415,8 @@ export default function WalkInForm() {
               {...register("amount")}
               type="number"
               min={1}
-              onBlur={() => trigger("amount")}
+              value={selectedPackagePrice !== null ? selectedPackagePrice : ""}
+              readOnly
             />
             {errors.amount && (
               <p className={styles.error}>{errors.amount?.message}</p>
@@ -513,6 +532,24 @@ export default function WalkInForm() {
           cancelText="No"
         />
       </div>
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={() => {
+          confirmAction();
+          setIsConfirmModalOpen(false);
+        }}
+        title={confirmMessage}
+        confirmText="Yes"
+        cancelText="No"
+      />
+
+      <NotificationModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+        message={notificationMessage}
+        type={notificationType}
+      />
     </form>
   );
 }

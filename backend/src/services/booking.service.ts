@@ -491,7 +491,7 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
     const referenceCode = await generateReferenceCode();
 
     // Find Personal Detail
-    let personalDetail = await prisma.personalDetail.findUnique({
+    let personalDetail = await prisma.personalDetail.findFirst({
       where: { email: email },
     });
 
@@ -545,7 +545,7 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
     const paymentAccount = await prisma.paymentAccount.create({
       data: {
         accountName: paymentAccountName,
-        accountNumber: parseInt(paymentAccountNumber),
+        accountNumber: paymentAccountNumber,
         paymentMethodId: paymentMethodRecord.id,
       },
     });
@@ -566,6 +566,7 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
         amount: parseFloat(amount),
         proofOfPaymentImageUrl: proofOfPayment,
         paymentAccountId: paymentAccount.id,
+        paymentStatusId: paymentStatus.id,
       },
     });
 

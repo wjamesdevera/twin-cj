@@ -90,7 +90,6 @@ export default function PaymentDetails() {
         (card: BookingCardData) => card.name === bookingData.selectedOption
       );
 
-      console.log(data.proofOfPayment);
       const formData = new FormData();
       formData.append("bookingData", JSON.stringify(bookingData));
       formData.append("paymentMethod", data.paymentMethod);
