@@ -6,11 +6,13 @@ import styles from "./scheduleselector.module.scss";
 interface ScheduleSelectorProps {
   selectedOption: string | null;
   handleOptionSelect: (option: string) => void;
+  disabled?: boolean;
 }
 
 const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
   selectedOption,
   handleOptionSelect,
+  disabled = false,
 }) => {
   return (
     <div className={styles.scheduleSelector}>
@@ -27,6 +29,7 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
             id="day-tour"
             checked={selectedOption === "day-tour"}
             onChange={() => handleOptionSelect("day-tour")}
+            disabled={disabled}
           />
           <label htmlFor="day-tour">
             Day Tour <span>(8:00 AM - 5:00 PM)</span>
@@ -44,6 +47,7 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
             id="overnight"
             checked={selectedOption === "cabins"}
             onChange={() => handleOptionSelect("cabins")}
+            disabled={disabled}
           />
           <label htmlFor="cabins">
             Overnight <span>(4:00 PM - 12:00 NN)</span>

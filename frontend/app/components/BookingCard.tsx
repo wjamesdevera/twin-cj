@@ -9,6 +9,7 @@ interface BookingCardProps {
   imageSrc: string;
   isSelected: boolean;
   onSelect: () => void;
+  disabled?: boolean;
 }
 
 const BookingCard: React.FC<BookingCardProps> = ({

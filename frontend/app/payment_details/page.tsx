@@ -90,7 +90,6 @@ export default function PaymentDetails() {
         (card: BookingCardData) => card.name === bookingData.selectedOption
       );
 
-      console.log(data.proofOfPayment);
       const formData = new FormData();
       formData.append("bookingData", JSON.stringify(bookingData));
       formData.append("paymentMethod", data.paymentMethod);
@@ -135,7 +134,7 @@ export default function PaymentDetails() {
             }
             packageType={bookingData.selectedOption}
             packagePrice={selectedCard?.price || 0}
-            totalAmount={selectedCard?.price || 0}
+            totalAmount={selectedCard?.price ? selectedCard.price * 0.5 : 0}
             bookingType={
               bookingData.bookingType === "day-tour" ? "Day Tour" : "Overnight"
             }
