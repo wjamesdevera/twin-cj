@@ -73,6 +73,13 @@ export default function WalkInForm() {
     () => () => {}
   );
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState<"success" | "error">(
+    "success"
+  );
+  const [selectedPackagePrice, setSelectedPackagePrice] = useState<
+    number | null
+  >(null);
 
   const packageType = watch("packageType");
   const checkInDate = watch("checkInDate");
@@ -83,7 +90,19 @@ export default function WalkInForm() {
       setValue("checkOutDate", watch("checkInDate"));
       trigger("checkOutDate");
     }
-  }, [packageType, watch("checkInDate")]);
+
+    const selectedPackage = availablePackages.find(
+      (pkg) => pkg.id.toString() === watch("selectedPackageId")
+    );
+    if (selectedPackage) {
+      const halfPrice = selectedPackage.price / 2;
+      setSelectedPackagePrice(halfPrice);
+      setValue("amount", halfPrice.toString());
+    } else {
+      setSelectedPackagePrice(null);
+      setValue("amount", "");
+    }
+  }, [packageType, watch("checkInDate"), watch("selectedPackageId")]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -152,10 +171,14 @@ export default function WalkInForm() {
       if (!response.ok) {
         throw new Error(await response.text());
       }
-
+      setNotificationMessage("Your booking has been successfully confirmed.");
+      setNotificationType("success");
       setIsNotificationModalOpen(true);
     } catch (error: any) {
       console.error("Error submitting booking:", error);
+      setNotificationMessage("Error submitting booking: " + error.message);
+      setNotificationType("error");
+      setIsNotificationModalOpen(true);
     }
   };
 
@@ -387,7 +410,8 @@ export default function WalkInForm() {
               {...register("amount")}
               type="number"
               min={1}
-              onBlur={() => trigger("amount")}
+              value={selectedPackagePrice !== null ? selectedPackagePrice : ""}
+              readOnly
             />
             {errors.amount && (
               <p className={styles.error}>{errors.amount?.message}</p>
@@ -518,8 +542,8 @@ export default function WalkInForm() {
       <NotificationModal
         isOpen={isNotificationModalOpen}
         onClose={() => setIsNotificationModalOpen(false)}
-        message="Your booking has been successfully confirmed."
-        type={"success"}
+        message={notificationMessage}
+        type={notificationType}
       />
     </form>
   );
