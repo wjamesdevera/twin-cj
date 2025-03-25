@@ -122,9 +122,9 @@ const Booking: React.FC = () => {
         <ScheduleSelector
           selectedOption={bookingData.bookingType}
           handleOptionSelect={(option) => {
-            if (bookingData.bookingType === "cabins" && option === "day-tour")
+            if (isDayTourLocked && bookingData.bookingType === "day-tour")
               return;
-
+            if (!isDayTourLocked && option === "day-tour") return;
             handleChange("bookingType", option);
           }}
           disabled={isDayTourLocked}
