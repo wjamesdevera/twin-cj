@@ -1,0 +1,40 @@
+.featureIcons {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 2rem 0;
+  text-align: center;
+
+  .iconBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    color: #444;
+    height: 100%;
+    justify-content: flex-start;
+
+    svg {
+      font-size: 2rem;
+      color: #d4a373;
+      flex-shrink: 0;
+    }
+
+    span {
+      font-weight: 600;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      text-align: center;
+      display: inline-block;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .featureIcons {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+}
