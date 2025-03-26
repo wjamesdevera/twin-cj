@@ -10,8 +10,7 @@ model Transaction {
   paymentAccount   PaymentAccount? @relation(fields: [paymentAccountId], references: [id], name: "TransactionPaymentAccount")
   paymentAccountId Int?            @map("payment_account_id")
 
-  paymentStatus   PaymentStatus? @relation(fields: [paymentStatusId], references: [id])
-  paymentStatusId Int?           @map("payment_status_id")
+ 
 
   booking Booking?
 

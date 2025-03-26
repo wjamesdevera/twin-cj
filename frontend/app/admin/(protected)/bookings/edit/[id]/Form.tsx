@@ -105,14 +105,30 @@ export default function WalkInForm({ referenceNo }: FormProps) {
         const response = await fetch(
           `http://localhost:8080/api/bookings/${referenceNo}`
         );
+        if (!response.ok) throw new Error("Failed to fetch booking");
 
         const bookingData = await response.json();
 
-        Object.keys(bookingData).forEach((key) => {
-          setValue(key as keyof FormFields, bookingData[key]);
-        });
+        if (bookingData) {
+          Object.entries(bookingData).forEach(([key, value]) => {
+            const typedKey = key as keyof FormFields;
+
+            if (
+              typeof value === "string" ||
+              value instanceof File ||
+              value === undefined
+            ) {
+              setValue(typedKey, value);
+            } else {
+              console.warn(
+                `Skipping key ${key} due to incompatible type:`,
+                value
+              );
+            }
+          });
+        }
       } catch (err) {
-        console.error("Failed to load booking data.");
+        console.error("Failed to load booking data:", err);
       }
     };
 

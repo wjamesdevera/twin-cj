@@ -33,10 +33,6 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleEditBooking = (id: number) => {
-    router.push(`/admin/bookings/edit/${id}`);
-  };
-
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -82,17 +78,12 @@ export default function Page() {
                 checkIn: formatDate(booking.checkIn),
                 checkOut: formatDate(booking.checkOut),
                 total: parseFloat(formatAmount(booking.total)),
-                onEdit: () => handleEditBooking(booking.id),
               })) || []
             }
           />
         </div>
       </div>
-      <div
-        className={styles.floatingIcon}
-        onClick={() => router.push("/admin/bookings/add")}
-        style={{ cursor: "pointer" }}
-      >
+      <div className={styles.floatingIcon} style={{ cursor: "pointer" }}>
         <svg
           width="61"
           height="57"
