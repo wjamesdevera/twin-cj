@@ -15,6 +15,7 @@ const BookingButton: React.FC<BookingButtonProps> = ({
   return (
     <div className={styles.buttonContainer}>
       <button
+        type="submit"
         className={styles.bookingButton}
         onClick={onClick}
         disabled={disabled}

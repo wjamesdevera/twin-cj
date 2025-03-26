@@ -2,6 +2,41 @@ import React, { useState } from "react";
 import styles from "./guestinformation.module.scss";
 import BookingButton from "../../components/BookingButton";
 import TermsAndConditions from "../../components/TermsandConditions";
+import { z } from "zod";
+import {
+  emailSchema,
+  nameSchema,
+  phoneNumberSchema,
+} from "@/app/lib/zodSchemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const guestInformationSchema = z
+  .object({
+    firstName: nameSchema,
+    lastName: nameSchema,
+    contactNumber: phoneNumberSchema,
+    email: emailSchema,
+    retypeEmail: z.string(),
+    specialRequest: z
+      .string()
+      .regex(/^[a-zA-Z0-9 ]*$/)
+      .optional(),
+    isTermsChecked: z.boolean().refine((value) => value === true, {
+      message:
+        "You must accept the Terms and Conditions and Privacy Policy to proceed.",
+    }),
+    isPrivacyChecked: z.boolean().refine((value) => value === true, {
+      message:
+        "You must accept the Terms and Conditions and Privacy Policy to proceed.",
+    }),
+  })
+  .refine((g) => g.email === g.retypeEmail, {
+    path: ["retypeEmail"],
+    message: "Email does not match",
+  });
+
+type GuestInformationFormData = z.infer<typeof guestInformationSchema>;
 
 interface GuestInformationProps {
   onConfirmBooking: (bookingDetails: {
@@ -15,97 +50,28 @@ interface GuestInformationProps {
 const GuestInformation: React.FC<GuestInformationProps> = ({
   onConfirmBooking,
 }) => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<GuestInformationFormData>({
+    resolver: zodResolver(guestInformationSchema),
+    defaultValues: {
+      isTermsChecked: false,
+      isPrivacyChecked: false,
+    },
+  });
   // State for form fields
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [retypeEmail, setRetypeEmail] = useState("");
-  const [specialRequest, setSpecialRequest] = useState("");
 
-  // State for validation messages
-  const [firstNameError, setFirstNameError] = useState("");
-  const [lastNameError, setLastNameError] = useState("");
-  const [contactNumberError, setContactNumberError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [retypeEmailError, setRetypeEmailError] = useState("");
-
-  // State for the checkboxes
-  const [isTermsChecked, setIsTermsChecked] = useState(false);
-  const [isPrivacyChecked, setIsPrivacyChecked] = useState(false);
-
-  // Validate First Name and Last Name (alphabetic only)
-  const validateName = (name: string, field: "firstName" | "lastName") => {
-    const regex = /^[A-Za-z]+$/;
-    if (!regex.test(name)) {
-      if (field === "firstName") {
-        setFirstNameError("First Name should only contain letters.");
-      } else {
-        setLastNameError("Last Name should only contain letters.");
-      }
-    } else {
-      if (field === "firstName") {
-        setFirstNameError("");
-      } else {
-        setLastNameError("");
-      }
-    }
-  };
-
-  // Validate Contact Number (numbers only and up to 11 digits)
-  const validateContactNumber = (number: string) => {
-    const regex = /^\d+$/;
-    if (!regex.test(number)) {
-      setContactNumberError("Contact Number should only contain numbers.");
-    } else if (number.length > 11) {
-      setContactNumberError("Contact Number should not exceed 11 digits.");
-    } else {
-      setContactNumberError("");
-    }
-  };
-
-  // Validate Email
-  const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!regex.test(email)) {
-      setEmailError("Please enter a valid email address.");
-    } else {
-      setEmailError("");
-    }
-  };
-
-  // Ensure email matches the re-typed email
-  const validateRetypeEmail = (retypeEmail: string) => {
-    if (retypeEmail !== email) {
-      setRetypeEmailError("Emails do not match.");
-    } else {
-      setRetypeEmailError("");
-    }
-  };
-
-  // Check if all fields are filled and both checkboxes are checked
-  const isFormValid =
-    firstName.trim() !== "" &&
-    lastName.trim() !== "" &&
-    contactNumber.trim() !== "" &&
-    email.trim() !== "" &&
-    retypeEmail.trim() !== "" &&
-    email === retypeEmail &&
-    isTermsChecked &&
-    isPrivacyChecked &&
-    !firstNameError &&
-    !lastNameError &&
-    !contactNumberError &&
-    !emailError &&
-    !retypeEmailError;
-
-  const handleConfirmBookingClick = () => {
+  const handleConfirmBookingClick = (data: GuestInformationFormData) => {
     const bookingDetails = {
-      firstName,
-      lastName,
-      contactNumber,
-      email,
-      specialRequest,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      contactNumber: data.contactNumber,
+      email: data.email,
+      specialRequest: data.specialRequest,
     };
     onConfirmBooking(bookingDetails);
   };
@@ -113,22 +79,21 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
   return (
     <div className={styles.guestInfoContainer}>
       <h2 className={styles.sectionTitle}>Guest Information</h2>
-      <form className={styles.form}>
+      <form
+        className={styles.form}
+        onSubmit={handleSubmit(handleConfirmBookingClick)}
+      >
         <div className={styles.row}>
           <div className={styles.field}>
             <label>First Name</label>
             <input
               type="text"
               placeholder="First Name"
-              value={firstName}
-              onChange={(e) => {
-                setFirstName(e.target.value);
-                validateName(e.target.value, "firstName");
-              }}
-              className={firstNameError ? styles.errorInput : ""}
+              {...register("firstName")}
+              className={errors.firstName ? styles.errorInput : ""}
             />
-            {firstNameError && (
-              <p className={styles.errorText}>{firstNameError}</p>
+            {errors.firstName && (
+              <p className={styles.errorText}>{errors.firstName.message}</p>
             )}
           </div>
           <div className={styles.field}>
@@ -136,15 +101,11 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
             <input
               type="text"
               placeholder="Last Name"
-              value={lastName}
-              onChange={(e) => {
-                setLastName(e.target.value);
-                validateName(e.target.value, "lastName");
-              }}
-              className={lastNameError ? styles.errorInput : ""}
+              {...register("lastName")}
+              className={errors.lastName ? styles.errorInput : ""}
             />
-            {lastNameError && (
-              <p className={styles.errorText}>{lastNameError}</p>
+            {errors.lastName && (
+              <p className={styles.errorText}>{errors.lastName.message}</p>
             )}
           </div>
           <div className={styles.field}>
@@ -152,19 +113,12 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
             <input
               type="text"
               placeholder="09123456789"
-              value={contactNumber}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value.length <= 11) {
-                  setContactNumber(value);
-                  validateContactNumber(value);
-                }
-              }}
+              {...register("contactNumber")}
               maxLength={11}
-              className={contactNumberError ? styles.errorInput : ""}
+              className={errors.contactNumber ? styles.errorInput : ""}
             />
-            {contactNumberError && (
-              <p className={styles.errorText}>{contactNumberError}</p>
+            {errors.contactNumber && (
+              <p className={styles.errorText}>{errors.contactNumber.message}</p>
             )}
           </div>
         </div>
@@ -174,29 +128,23 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
             <input
               type="email"
               placeholder="Type your Email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                validateEmail(e.target.value);
-              }}
-              className={emailError ? styles.errorInput : ""}
+              {...register("email")}
+              className={errors.email ? styles.errorInput : ""}
             />
-            {emailError && <p className={styles.errorText}>{emailError}</p>}
+            {errors.email && (
+              <p className={styles.errorText}>{errors.email.message}</p>
+            )}
           </div>
           <div className={styles.field}>
             <label>Re-type Email</label>
             <input
               type="email"
               placeholder="Re-type your Email"
-              value={retypeEmail}
-              onChange={(e) => {
-                setRetypeEmail(e.target.value);
-                validateRetypeEmail(e.target.value);
-              }}
-              className={retypeEmailError ? styles.errorInput : ""}
+              {...register("retypeEmail")}
+              className={errors.retypeEmail ? styles.errorInput : ""}
             />
-            {retypeEmailError && (
-              <p className={styles.errorText}>{retypeEmailError}</p>
+            {errors.retypeEmail && (
+              <p className={styles.errorText}>{errors.retypeEmail.message}</p>
             )}
           </div>
         </div>
@@ -205,50 +153,45 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
           <input
             type="text"
             placeholder="Type your Special Request"
-            value={specialRequest}
-            onChange={(e) => setSpecialRequest(e.target.value)}
-            className={emailError ? styles.errorInput : ""}
+            {...register("specialRequest")}
+            className={errors.specialRequest ? styles.errorInput : ""}
           />
         </div>
         <div className={styles.checkboxRow}>
           <label>
             <input
               type="checkbox"
-              checked={isTermsChecked}
-              disabled={!isTermsChecked}
+              checked={watch("isTermsChecked")}
+              disabled={true}
+              {...register("isTermsChecked")}
               className={styles.checkbox}
               readOnly // prevents the user to uncheck the checkbox
             />{" "}
             I have read and agree to the{" "}
             <TermsAndConditions
               type="terms"
-              onAgree={() => setIsTermsChecked(true)}
+              onAgree={() => setValue("isTermsChecked", true)}
             />
             .
           </label>
           <label>
             <input
               type="checkbox"
-              checked={isPrivacyChecked}
-              disabled={!isPrivacyChecked}
+              checked={watch("isPrivacyChecked")}
+              disabled={true}
               readOnly
             />{" "}
             I consent to the processing of my personal data as explained in the{" "}
             <TermsAndConditions
               type="privacy"
-              onAgree={() => setIsPrivacyChecked(true)}
+              onAgree={() => setValue("isPrivacyChecked", true)}
             />
             .
           </label>
         </div>
+        {/* Disable the button unless all fields are filled and both checkboxes are checked */}
+        <BookingButton text="Proceed to Payment" />
       </form>
-
-      {/* Disable the button unless all fields are filled and both checkboxes are checked */}
-      <BookingButton
-        text="Proceed to Payment"
-        onClick={handleConfirmBookingClick}
-        disabled={!isFormValid}
-      />
     </div>
   );
 };

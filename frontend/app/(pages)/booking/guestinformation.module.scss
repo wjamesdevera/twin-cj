@@ -63,9 +63,9 @@
 
 .errorText {
   color: red;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
   font-style: italic;
+  font-size: var(--text-size-xs);
+  margin-top: 0.25rem;
 }
 
 .checkbox {

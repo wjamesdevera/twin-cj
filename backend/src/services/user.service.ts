@@ -96,6 +96,9 @@ export const updateUser = async ({ id, data }: EditUserParams) => {
 
   let existingUser = await prisma.userAccount.findFirst({
     where: {
+      NOT: {
+        id: id,
+      },
       personalDetail: {
         email: data.email?.toLowerCase(),
       },
@@ -109,6 +112,9 @@ export const updateUser = async ({ id, data }: EditUserParams) => {
 
   existingUser = await prisma.userAccount.findFirst({
     where: {
+      NOT: {
+        id: id,
+      },
       personalDetail: {
         phoneNumber: data.phoneNumber,
       },

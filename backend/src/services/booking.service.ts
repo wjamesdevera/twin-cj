@@ -273,11 +273,25 @@ export const createBooking = async (req: Request) => {
       },
     });
 
+    const services = bookingCards.map((card) => card.name);
+
     const { error } = await sendMail({
       to: customer.personalDetail?.email || "delivered@resend.dev",
       ...getBookingSuccessEmailTemplate(
         referenceCode,
-        `${customer.personalDetail?.firstName} ${customer.personalDetail?.lastName}`
+        `${customer.personalDetail?.firstName} ${customer.personalDetail?.lastName}`,
+        `${new Date(checkInDate).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
+        })} - ${new Date(checkOutDate).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
+        })}`,
+        services
       ),
     });
 
