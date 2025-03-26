@@ -171,6 +171,7 @@ export default function WalkInForm() {
       }
 
       formDataToSend.append("selectedPackage", formData.selectedPackageId);
+      formDataToSend.append("packageType", formData.packageType);
 
       const response = await fetch(
         "http://localhost:8080/api/bookings/walk-in",
@@ -183,7 +184,7 @@ export default function WalkInForm() {
       if (!response.ok) {
         throw new Error(await response.text());
       }
-      setNotificationMessage("Your booking has been successfully confirmed.");
+      setNotificationMessage("Your booking has been successfully added.");
       setNotificationType("success");
       setIsNotificationModalOpen(true);
 
@@ -512,8 +513,18 @@ export default function WalkInForm() {
             <input
               {...register("paymentAccountNumber")}
               type="text"
+              inputMode="numeric"
+              pattern="\d*"
+              maxLength={16}
+              onInput={(e) => {
+                e.currentTarget.value = e.currentTarget.value.replace(
+                  /\D/g,
+                  ""
+                );
+              }}
               onBlur={() => trigger("paymentAccountNumber")}
             />
+
             {errors.paymentAccountNumber && (
               <p className={styles.error}>
                 {errors.paymentAccountNumber?.message}

@@ -24,7 +24,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   const [filters, setFilters] = useState({
     searchTerm: "",
     statusFilter: "all",
-    serviceFilter: "all",
+    // serviceFilter: "all",
     startDateFilter: "",
     endDateFilter: "",
   });
@@ -40,26 +40,36 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     }));
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 10);
+  };
+
   // Filter the bookings based on the filters
   const filteredBookings = bookings.filter((booking) => {
+    const searchLower = filters.searchTerm.toLowerCase();
+
     const matchesSearchTerm =
-      booking.referenceNo
-        .toLowerCase()
-        .includes(filters.searchTerm.toLowerCase()) ||
-      booking.customerName
-        .toLowerCase()
-        .includes(filters.searchTerm.toLowerCase()) ||
-      booking.email.toLowerCase().includes(filters.searchTerm.toLowerCase());
+      booking.referenceNo.toLowerCase().includes(searchLower) ||
+      booking.customerName.toLowerCase().includes(searchLower) ||
+      booking.email.toLowerCase().includes(searchLower) ||
+      booking.service.toLowerCase().includes(searchLower);
 
     const matchesStatus =
       filters.statusFilter === "all" ||
       booking.status.toLowerCase() === filters.statusFilter.toLowerCase();
 
-    const matchesService =
-      filters.serviceFilter === "all" ||
-      booking.service.toLowerCase() === filters.serviceFilter.toLowerCase();
+    // const matchesService =
+    //   filters.serviceFilter === "all" ||
+    //   booking.service.toLowerCase() === filters.serviceFilter.toLowerCase();
 
-    return matchesSearchTerm && matchesStatus && matchesService;
+    const bookingDate = new Date(booking.checkIn).toISOString().split("T")[0];
+
+    const matchesDate =
+      (!filters.startDateFilter || bookingDate >= filters.startDateFilter) &&
+      (!filters.endDateFilter || bookingDate <= filters.endDateFilter);
+
+    return matchesSearchTerm && matchesStatus && matchesDate;
   });
 
   return (
@@ -86,7 +96,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
               <input
                 type="text"
                 name="searchTerm"
-                placeholder="Search by Reference No., Customer Name, or Email"
+                placeholder="Search by Reference No., Name, Email, or Service"
                 className={styles.searchInput}
                 value={filters.searchTerm}
                 onChange={handleFilterChange}
@@ -94,14 +104,43 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             </div>
           </div>
 
-          {/* Status Filter */}
           <div className={styles.rightGroup}>
+            {/* Date Filter */}
+            <div className={styles.filterForm}>
+              <label htmlFor="startDateFilter" className={styles.filterLabel}>
+                Start Date:
+              </label>
+              <input
+                type="date"
+                id="startDateFilter"
+                name="startDateFilter"
+                value={filters.startDateFilter}
+                onChange={handleFilterChange}
+                className={styles.filterSelect}
+              />
+            </div>
+
+            <div className={styles.filterForm}>
+              <label htmlFor="endDateFilter" className={styles.filterLabel}>
+                End Date:
+              </label>
+              <input
+                type="date"
+                id="endDateFilter"
+                name="endDateFilter"
+                value={filters.endDateFilter}
+                onChange={handleFilterChange}
+                className={styles.filterSelect}
+              />
+            </div>
+
             <div className={styles.filterForm}>
               <label htmlFor="statusFilter" className={styles.filterLabel}>
                 Filter by Status:
               </label>
               <select
                 id="statusFilter"
+                name="statusFilter"
                 value={filters.statusFilter}
                 onChange={handleFilterChange}
                 className={styles.filterSelect}
@@ -109,11 +148,14 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                 <option value="all">All</option>
                 <option value="pending">Pending</option>
                 <option value="active">Active</option>
+                <option value="approved">Approved</option>
+                <option value="reupload">Reupload</option>
+                <option value="cancel">Cancel</option>
                 <option value="completed">Completed</option>
               </select>
             </div>
 
-            {/* Service Filter */}
+            {/* Service Filter
             <div className={styles.filterForm}>
               <label htmlFor="serviceFilter" className={styles.filterLabel}>
                 Filter by Service:
@@ -129,7 +171,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                 <option value="day tour">Day Tour</option>
                 <option value="cabin">Cabin</option>
               </select>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -175,7 +217,15 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                       ? styles.statusPending
                       : booking.status === "active"
                       ? styles.statusActive
-                      : styles.statusCompleted
+                      : booking.status === "approved"
+                      ? styles.statusApproved
+                      : booking.status === "reupload"
+                      ? styles.statusReupload
+                      : booking.status === "cancel"
+                      ? styles.statusCancel
+                      : booking.status === "completed"
+                      ? styles.statusCompleted
+                      : ""
                   }`}
                 >
                   {booking.status}
