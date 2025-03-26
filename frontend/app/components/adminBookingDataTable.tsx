@@ -173,9 +173,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                   <Link
                     href={`/admin/bookings/edit/${booking.referenceNo}`}
                     className={styles.referenceLink}
-                    onClick={() =>
-                      console.log("Clicked ID:", booking.referenceNo, bookings)
-                    }
                   >
                     {booking.referenceNo}
                   </Link>

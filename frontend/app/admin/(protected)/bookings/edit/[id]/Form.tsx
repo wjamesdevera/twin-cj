@@ -1,6 +1,25 @@
 "use client";
 
 import { walkinSchema } from "@/app/lib/zodSchemas";
+
+type BookingFormData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  contactNumber: string;
+  packageType: "day-tour" | "cabins";
+  selectedPackageId: string;
+  selectedPackageName: string;
+  checkInDate: string;
+  checkOutDate: string;
+  paymentAccountName: string;
+  paymentAccountNumber: string;
+  paymentMethod: string;
+  proofOfPayment?: File;
+  totalPax: string;
+  amount: string;
+  bookingStatus: "approve" | "reject" | "cancel";
+};
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -56,7 +75,14 @@ interface FormProps {
   referenceNo: string;
 }
 
-export default function WalkInForm({ referenceNo }: FormProps) {
+export default function EditBooking({
+  referenceNo,
+  defaultValues,
+}: {
+  referenceNo: string;
+  defaultValues: BookingFormData;
+}) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -72,7 +98,7 @@ export default function WalkInForm({ referenceNo }: FormProps) {
 
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<
-    "approve" | "reject" | "cancel" | ""
+    "approve" | "pending" | "cancel" | "Reupload" | ""
   >("");
   const [statusReason, setStatusReason] = useState("");
   const [tempReason, setTempReason] = useState("");
@@ -80,23 +106,11 @@ export default function WalkInForm({ referenceNo }: FormProps) {
   const [rejectReason, setRejectReason] = useState("");
   const [cancelReason, setCancelReason] = useState("");
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStatus = e.target.value as "approve" | "reject" | "cancel";
+  const packageType = watch("packageType");
+  const checkInDate = watch("checkInDate");
+  const checkOutDate = watch("checkOutDate");
 
-    setSelectedStatus(newStatus);
-    setIsStatusModalOpen(true);
-
-    if (newStatus === "reject") {
-      setTempReason(rejectReason);
-    } else if (newStatus === "cancel") {
-      setTempReason(cancelReason);
-    } else {
-      setTempReason("");
-    }
-
-    setReasonError("");
-  };
-
+  // Fetch booking data
   useEffect(() => {
     if (!referenceNo) return;
 
@@ -109,24 +123,20 @@ export default function WalkInForm({ referenceNo }: FormProps) {
 
         const bookingData = await response.json();
 
-        if (bookingData) {
-          Object.entries(bookingData).forEach(([key, value]) => {
-            const typedKey = key as keyof FormFields;
+        Object.entries(bookingData).forEach(([key, value]) => {
+          const typedKey = key as keyof FormFields;
 
-            if (
-              typeof value === "string" ||
-              value instanceof File ||
-              value === undefined
-            ) {
-              setValue(typedKey, value);
-            } else {
-              console.warn(
-                `Skipping key ${key} due to incompatible type:`,
-                value
-              );
-            }
-          });
-        }
+          if (typeof value === "string" || value instanceof File) {
+            setValue(typedKey, value);
+          } else if (value === null || value === undefined) {
+            setValue(typedKey, "");
+          } else {
+            console.warn(
+              `Skipping key ${key} due to incompatible type:`,
+              value
+            );
+          }
+        });
       } catch (err) {
         console.error("Failed to load booking data:", err);
       }
@@ -135,17 +145,28 @@ export default function WalkInForm({ referenceNo }: FormProps) {
     fetchBooking();
   }, [referenceNo, setValue]);
 
-  const handleConfirm = () => {
-    if (
-      (selectedStatus === "reject" || selectedStatus === "cancel") &&
-      !tempReason.trim()
-    ) {
-      setReasonError("Reason is required");
-      return;
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStatus = e.target.value as
+      | "approve"
+      | "pending"
+      | "cancel"
+      | "Reupload";
+    setSelectedStatus(newStatus);
+    setIsStatusModalOpen(true);
+
+    if (newStatus === "cancel") {
+      setTempReason(rejectReason);
+    } else {
+      setTempReason("");
     }
 
-    if (selectedStatus === "reject") {
-      setRejectReason(tempReason);
+    setReasonError("");
+  };
+
+  const handleConfirm = () => {
+    if (selectedStatus === "cancel" && !tempReason.trim()) {
+      setReasonError("Reason is required");
+      return;
     } else if (selectedStatus === "cancel") {
       setCancelReason(tempReason);
     }
@@ -153,24 +174,6 @@ export default function WalkInForm({ referenceNo }: FormProps) {
     setStatusReason(selectedStatus === "approve" ? "" : tempReason);
     setIsStatusModalOpen(false);
   };
-
-  const router = useRouter();
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState<() => void>(
-    () => () => {}
-  );
-
-  const packageType = watch("packageType");
-  const checkInDate = watch("checkInDate");
-  const checkOutDate = watch("checkOutDate");
-
-  useEffect(() => {
-    if (packageType === "day-tour") {
-      setValue("checkOutDate", watch("checkInDate"));
-      trigger("checkOutDate");
-    }
-  }, [packageType, watch("checkInDate")]);
 
   const fetcher = async (url: string) => {
     try {
@@ -186,7 +189,7 @@ export default function WalkInForm({ referenceNo }: FormProps) {
     }
   };
 
-  // fetch available services
+  // Fetch available services
   const { data, error } = useSWR<BookingResponse>(
     packageType && checkInDate
       ? `http://localhost:8080/api/bookings?type=${encodeURIComponent(
@@ -207,12 +210,15 @@ export default function WalkInForm({ referenceNo }: FormProps) {
   const availablePackages: Service[] =
     data?.data?.[packageType]?.services || [];
 
+  useEffect(() => {
+    if (packageType === "day-tour") {
+      setValue("checkOutDate", watch("checkInDate"));
+      trigger("checkOutDate");
+    }
+  }, [packageType, watch("checkInDate")]);
+
   const handleEditBooking = () => {
-    setConfirmMessage("Are you sure you want to edit this booking?");
-    setConfirmAction(() => async () => {
-      await handleSubmit(onSubmit)();
-    });
-    setIsConfirmModalOpen(true);
+    handleSubmit(onSubmit)();
   };
 
   const onSubmit = async (formData: FormFields) => {
@@ -243,13 +249,7 @@ export default function WalkInForm({ referenceNo }: FormProps) {
   };
 
   const handleCancel = () => {
-    setConfirmMessage(
-      "Are you sure you want to cancel? Any unsaved progress will be lost."
-    );
-    setConfirmAction(
-      () => () => router.push("http://localhost:3000/admin/bookings")
-    );
-    setIsConfirmModalOpen(true);
+    router.push("http://localhost:3000/admin/bookings");
   };
 
   return (
@@ -263,6 +263,7 @@ export default function WalkInForm({ referenceNo }: FormProps) {
             <input
               {...register("firstName", { disabled: true })}
               type="text"
+              value={watch("firstName")}
               readOnly
             />
           </div>
@@ -333,14 +334,13 @@ export default function WalkInForm({ referenceNo }: FormProps) {
               onChange={(e) => {
                 const status = e.target.value as
                   | "approve"
-                  | "reject"
-                  | "cancel";
+                  | "pending"
+                  | "cancel"
+                  | "Reupload";
 
                 setSelectedStatus(status);
 
-                if (status === "reject") {
-                  setTempReason(rejectReason);
-                } else if (status === "cancel") {
+                if (status === "cancel") {
                   setTempReason(cancelReason);
                 } else {
                   setTempReason("");
@@ -351,7 +351,8 @@ export default function WalkInForm({ referenceNo }: FormProps) {
               }}
             >
               <option value="approve">Approve</option>
-              <option value="reject">Reject</option>
+              <option value="pending">Pending</option>
+              <option value="reupload">Reupload</option>
               <option value="cancel">Cancel</option>
             </select>
 
@@ -441,24 +442,41 @@ export default function WalkInForm({ referenceNo }: FormProps) {
           />
         </div>
 
-        <ConfirmModal
+        {selectedStatus === "cancel" && (
+          <>
+            <h2>Message for Cancellation</h2>
+            <textarea
+              placeholder="Enter reason (max 100 characters)"
+              maxLength={100}
+              value={tempReason}
+              onChange={(e) => {
+                setTempReason(e.target.value);
+
+                if (e.target.value.trim()) {
+                  setReasonError("");
+                }
+              }}
+            />
+            {tempReason.length > 100 && (
+              <span className="error-message">
+                Reason can't be more than 100 characters
+              </span>
+            )}
+          </>
+        )}
+        {/* <ConfirmModal
           isOpen={isStatusModalOpen}
           onClose={() => {
             setIsStatusModalOpen(false);
             setReasonError("");
           }}
           onConfirm={() => {
-            if (
-              (selectedStatus === "reject" || selectedStatus === "cancel") &&
-              !tempReason.trim()
-            ) {
+            if (selectedStatus === "cancel" && !tempReason.trim()) {
               setReasonError("Reason is required");
               return;
             }
 
-            if (selectedStatus === "reject") {
-              setRejectReason(tempReason);
-            } else if (selectedStatus === "cancel") {
+            if (selectedStatus === "cancel") {
               setCancelReason(tempReason);
             }
 
@@ -469,7 +487,7 @@ export default function WalkInForm({ referenceNo }: FormProps) {
           confirmText="Yes"
           cancelText="No"
         >
-          {(selectedStatus === "reject" || selectedStatus === "cancel") && (
+          {selectedStatus === "cancel" && (
             <>
               <textarea
                 placeholder="Enter reason (max 100 characters)"
@@ -485,7 +503,7 @@ export default function WalkInForm({ referenceNo }: FormProps) {
               {reasonError && <p className={styles.error}>{reasonError}</p>}
             </>
           )}
-        </ConfirmModal>
+        </ConfirmModal> */}
       </div>
     </form>
   );

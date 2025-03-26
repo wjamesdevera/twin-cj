@@ -723,7 +723,7 @@ export const getBookingById = async (req: Request, res: Response) => {
 export const editBookingStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { bookingStatus, status } = req.body;
+    const { bookingStatus, status, message } = req.body;
 
     // Validate required fields
     appAssert(id, BAD_REQUEST, "Booking ID is required");
@@ -739,14 +739,9 @@ export const editBookingStatus = async (req: Request, res: Response) => {
     }
 
     // Update booking status
-    const updatedBooking = await prisma.bookingStatus.update({
-      where: { id: Number(booking) },
-      data: { name: status },
-    });
-
-    return res.status(200).json({
-      message: "Booking and payment status updated successfully",
-      booking: updatedBooking,
+    const updatedBookingStatus = await prisma.bookingStatus.update({
+      where: { id: booking.bookingStatusId },
+      data: { name: status, message: message || null },
     });
   } catch (error) {
     console.error("Error updating statuses:", error);
