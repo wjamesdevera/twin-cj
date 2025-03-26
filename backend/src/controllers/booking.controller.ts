@@ -152,6 +152,25 @@ export const createWalkInBookingHandler = catchErrors(
   }
 );
 
+export const getBookingByReferenceCode = catchErrors(
+  async (req: Request, res: Response) => {
+    const { referenceCode } = req.params;
+
+    const booking = await prisma.booking.findUnique({
+      where: { referenceCode: referenceCode },
+      include: {
+        services: true,
+      },
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.json(booking);
+  }
+);
+
 export const updateBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
     try {

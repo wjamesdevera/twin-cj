@@ -676,11 +676,65 @@ export const editBooking = async (req: Request, res: Response) => {
   }
 };
 
+// Get Booking by ID
+export const getBookingById = async (req: Request, res: Response) => {
+  try {
+    const { referenceNo } = req.params;
+    appAssert(referenceNo, BAD_REQUEST, "Booking referenceNo is required.");
+
+    const booking = await prisma.booking.findUnique({
+      where: { referenceCode: referenceNo },
+      include: {
+        services: {
+          include: { service: true },
+        },
+        transaction: {
+          include: {
+            paymentAccount: {
+              include: { paymentMethod: true },
+            },
+          },
+        },
+        customer: {
+          include: { personalDetail: true },
+        },
+        bookingStatus: true,
+      },
+    });
+
+    appAssert(booking, BAD_REQUEST, "Booking not found.");
+
+    return res.json({
+      referenceNo: booking.referenceCode,
+      checkIn: booking.checkIn.toISOString(),
+      checkOut: booking.checkOut.toISOString(),
+      services: booking.services.map((s) => s.service.name),
+      total: booking.transaction?.amount || 0,
+      paymentMethod:
+        booking.transaction?.paymentAccount?.paymentMethod?.name || "N/A",
+      paymentAccountName:
+        booking.transaction?.paymentAccount?.accountName || "N/A",
+      paymentAccountNumber:
+        booking.transaction?.paymentAccount?.accountNumber || "N/A",
+      customerName: `${booking.customer.personalDetail?.firstName ?? ""} ${
+        booking.customer.personalDetail?.lastName ?? ""
+      }`,
+      email: booking.customer.personalDetail?.email || "N/A",
+      status: booking.bookingStatus.name,
+    });
+  } catch (error) {
+    console.error("Error fetching booking by ID:", error);
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch booking" });
+  }
+};
+
 // Update Booking
 export const editBookingStatus = async (req: Request, res: Response) => {
   try {
     const { bookingId } = req.params;
-    const { bookingStatus, paymentStatusId, paymentStatus } = req.body;
+    const { bookingStatus, paymentStatusId, paymentStatus, status } = req.body;
 
     // Validate required fields
     appAssert(bookingId, BAD_REQUEST, "Booking ID is required");
@@ -711,13 +765,13 @@ export const editBookingStatus = async (req: Request, res: Response) => {
     // Update booking status
     const updatedBooking = await prisma.bookingStatus.update({
       where: { id: Number(bookingId) },
-      data: { name: bookingStatus },
+      data: { name: status },
     });
 
     // Update payment status
-    const updatedPaymentStatus = await prisma.paymentStatus.update({
-      where: { id: Number(paymentStatusId) },
-      data: { name: paymentStatus },
+    const updatedPaymentStatus = await prisma.transaction.update({
+      where: { id: booking.transactionId },
+      data: { paymentStatusId: Number(paymentStatusId) },
     });
 
     return res.status(200).json({
