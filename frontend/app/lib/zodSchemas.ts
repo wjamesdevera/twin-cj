@@ -53,7 +53,8 @@ export const fileSchema = z
 export const priceSchema = z
   .string()
   .regex(/[0-9.]/, "Price must be a number")
-  .refine((price) => Number(price) >= 0, "Invalid price");
+  .refine((price) => Number(price) >= 0, "Invalid price")
+  .refine((price) => Number(price) <= 100_000, "Invalid price");
 
 export const capacitySchema = z
   .string()

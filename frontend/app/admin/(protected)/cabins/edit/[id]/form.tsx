@@ -24,7 +24,7 @@ export const cabinFormSchema = z
     name: nameSchema,
     description: descriptionSchema,
     file: fileSchema.optional(),
-    price: priceSchema.or(z.number().gt(0)),
+    price: priceSchema.or(z.number().gt(0).lte(100_000)),
     minCapacity: capacitySchema.or(z.number().gt(0)),
     maxCapacity: capacitySchema.or(z.number().gt(0)),
   })

@@ -23,7 +23,7 @@ export const dayTourSchema = z.object({
   name: nameSchema,
   description: descriptionSchema,
   file: fileSchema,
-  price: priceSchema.or(z.number().gt(0)),
+  price: priceSchema.or(z.number().gt(0).lte(100_000)),
 });
 
 type AddDayTourData = z.infer<typeof dayTourSchema>;

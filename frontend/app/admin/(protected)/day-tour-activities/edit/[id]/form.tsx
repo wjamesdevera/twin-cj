@@ -28,7 +28,7 @@ const dayTourSchema = z.object({
   name: nameSchema,
   description: descriptionSchema,
   file: fileSchema.optional(),
-  price: priceSchema.or(z.number().gt(0)),
+  price: priceSchema.or(z.number().gt(0).lte(100_000)),
 });
 
 type DayTourFormData = z.infer<typeof dayTourSchema>;

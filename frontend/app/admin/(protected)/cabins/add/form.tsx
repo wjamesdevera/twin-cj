@@ -25,13 +25,17 @@ export const cabinFormSchema = z
     name: nameSchema,
     description: descriptionSchema,
     file: fileSchema,
-    price: priceSchema.or(z.number().gt(0)),
+    price: priceSchema.or(z.number().gt(0).lte(100_000)),
     minCapacity: capacitySchema.or(z.number().gt(0)),
     maxCapacity: capacitySchema.or(z.number().gt(0)),
   })
   .refine((cabin) => cabin.minCapacity <= cabin.maxCapacity, {
     path: ["maxCapacity"],
-    message: "Max capacity should be greater then min capacity",
+    message: "Max capacity should be greater than min capacity",
+  })
+  .refine((cabin) => cabin.minCapacity <= cabin.maxCapacity, {
+    path: ["minCapacity"],
+    message: "Min capacity should be less than max capacity",
   });
 
 type AddCabinFormData = z.infer<typeof cabinFormSchema>;
