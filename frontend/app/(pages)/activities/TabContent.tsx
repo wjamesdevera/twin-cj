@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styles from "./tabContent.module.scss";
 import Image from "next/image";
+import priceListImage from "@/public/assets/pricelist.png";
 
 interface TabContentProps {
   title: string;
@@ -47,7 +48,7 @@ const TabContent: React.FC<TabContentProps> = ({
               &times;
             </button>
             <Image
-              src={"/assets/pricelist.png"}
+              src={priceListImage}
               alt="Offers"
               className={styles.modalImage}
             />

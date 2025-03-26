@@ -38,7 +38,7 @@ async function main() {
     ],
   });
 
-  const service = await prisma.service.create({
+  const ventiCabin = await prisma.service.create({
     data: {
       name: "Venti Cabin",
       description: `For groups of 15-20
@@ -67,6 +67,68 @@ Additional Inclusions:
       },
     },
   });
+
+  const maxiCabin = await prisma.service.create({
+    data: {
+      name: "Maxi Cabin",
+      description: `For 6-8 guests
+Rates:
+
+    Day tour (8AM - 5PM) - ₱5,000
+    Overnight (4PM - 12NN) - ₱6,000
+    Additional guests - ₱350 each
+
+Additional Inclusions:
+
+    1 queen-sized bed and 2 foam beds`,
+      imageUrl: "/assets/amenities_maxi.jpg",
+      price: 6_000,
+      cabins: {
+        create: {
+          maxCapacity: 6,
+          minCapacity: 8,
+        },
+      },
+      serviceCategory: {
+        create: {
+          categoryId: 1,
+        },
+      },
+    },
+  });
+
+  for (let i = 0; i < 3; i++) {
+    const miniCabin = await prisma.service.create({
+      data: {
+        name: "Mini Cabin",
+        description: `For 2-4 guests
+Rates:
+
+    Day tour (8AM - 5PM) - ₱2,000 for 2 guests
+    ₱2,500 for 3-4 guests
+    Overnight (4PM - 12NN) - ₱3,000 for 2 guests
+    ₱3,500 for 3-4 guests
+    Additional guests - ₱350 each
+
+Additional Inclusions:
+
+    1 queen-sized bed and 1 foam bed`,
+        imageUrl: "/assets/amenities_mini.jpg",
+        price: 3_500,
+        cabins: {
+          create: {
+            maxCapacity: 2,
+            minCapacity: 4,
+          },
+        },
+        serviceCategory: {
+          create: {
+            categoryId: 1,
+          },
+        },
+      },
+    });
+  }
 
   const bookingStatus = await prisma.bookingStatus.createMany({
     data: [
@@ -138,7 +200,7 @@ Additional Inclusions:
         checkOut,
         totalPax: faker.number.int({ min: 1, max: 10 }),
         bookingStatusId: pendingStatus?.id || 1,
-        services: { create: { serviceId: service.id } },
+        services: { create: { serviceId: ventiCabin.id } },
         customerId: customer.id,
         transactionId: transaction.id,
       },
