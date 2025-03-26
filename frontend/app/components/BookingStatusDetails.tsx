@@ -87,7 +87,7 @@ const BookingStatusDetails = (props: any) => {
               </p>
               <ol>
                 <li>Please bring a valid ID and booking confirmation for verification.</li>
-                <li>Do arrive at least ten minutes before the actual schedule.</li>
+                <li>Do arrive at least ten minutes before the actual booked schedule.</li>
                 <li>No smoking inside the premises and observe quiet hours.</li>
               </ol>
             </div>
