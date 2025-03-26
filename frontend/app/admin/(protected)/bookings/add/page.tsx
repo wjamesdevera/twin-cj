@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
-import Form from "./form";
+import Form from "./Form";
 import styles from "./page.module.scss";
 import ConfirmModal from "@/app/components/confirm_modal";
 

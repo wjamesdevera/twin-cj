@@ -68,9 +68,12 @@
   .section_title {
     font-size: 20px;
     font-weight: bold;
-    margin-top: 20px;
     margin-bottom: 10px;
     color: #333;
+  }
+  
+  .section_title_with_margin {
+    margin-top: 2rem; 
   }
   
 .button_container {

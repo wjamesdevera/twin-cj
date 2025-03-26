@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { DownloadTableExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 interface Booking {
   referenceNo: string;
@@ -17,6 +19,7 @@ interface BookingTableProps {
 }
 
 const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
+  const tableRef = useRef<HTMLTableElement | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     searchTerm: "",
@@ -61,113 +64,127 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
   return (
     <div className={styles.tableContainer}>
-      <h2 className={styles.tableTitle}>Bookings & Transactions</h2>
-
-      <div className={styles.topContainer}>
-        {/* Search Bar */}
-        <div className={styles.searchContainer}>
-          <div className={styles.leftGroup}>
-            <input
-              type="text"
-              name="searchTerm"
-              placeholder="Search by Reference No., Customer Name, or Email"
-              className={styles.searchInput}
-              value={filters.searchTerm}
-              onChange={handleFilterChange}
-            />
-          </div>
+      <div className={styles.table_wrapper}>
+        <div className={styles.headerContainer}>
+          <h2 className={styles.tableTitle}>Bookings & Transactions</h2>
+          <DownloadTableExcel
+            filename="Twin CJ Booking Details"
+            sheet="bookings"
+            currentTableRef={tableRef.current}
+          >
+            <button className={styles.exportButton}>
+              <i className="fas fa-download"></i> Export
+            </button>
+          </DownloadTableExcel>
         </div>
 
-        {/* Status Filter */}
-        <div className={styles.rightGroup}>
-          <div className={styles.filterForm}>
-            <label htmlFor="statusFilter" className={styles.filterLabel}>
-              Filter by Status:
-            </label>
-            <select
-              id="statusFilter"
-              value={filters.statusFilter}
-              onChange={handleFilterChange}
-              className={styles.filterSelect}
-            >
-              <option value="all">All</option>
-              <option value="pending">Pending</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-            </select>
+        <div className={styles.topContainer}>
+          {/* Search Bar */}
+          <div className={styles.searchContainer}>
+            <div className={styles.leftGroup}>
+              <label className={styles.searchLabel}>Search</label>
+              <input
+                type="text"
+                name="searchTerm"
+                placeholder="Search by Reference No., Customer Name, or Email"
+                className={styles.searchInput}
+                value={filters.searchTerm}
+                onChange={handleFilterChange}
+              />
+            </div>
           </div>
 
-          {/* Service Filter */}
-          <div className={styles.filterForm}>
-            <label htmlFor="serviceFilter" className={styles.filterLabel}>
-              Filter by Service:
-            </label>
-            <select
-              id="serviceFilter"
-              name="serviceFilter"
-              value={filters.serviceFilter}
-              onChange={handleFilterChange}
-              className={styles.filterSelect}
-            >
-              <option value="all">All</option>
-              <option value="day tour">Day Tour</option>
-              <option value="cabin">Cabin</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <table className={styles.table}>
-        <thead className={styles.tableHead}>
-          <tr>
-            <th>Reference No.</th>
-            <th>Service</th>
-            <th>Check-In</th>
-            <th>Check-Out</th>
-            <th>Total</th>
-            <th>Customer Name</th>
-            <th>Email</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredBookings.map((booking: Booking, index: number) => (
-            <tr key={index} className={styles.tableRow}>
-              <td className={styles.tableCell}>
-                <a
-                  href={`/booking/${booking.referenceNo}`}
-                  className={styles.referenceLink}
-                >
-                  {booking.referenceNo}
-                </a>
-              </td>
-              <td className={styles.tableCell}>{booking.service}</td>
-              <td className={styles.tableCell}>{booking.checkIn}</td>
-              <td className={styles.tableCell}>{booking.checkOut}</td>
-              <td className={styles.tableCell}>
-                ₱
-                {booking.total.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </td>
-              <td className={styles.tableCell}>{booking.customerName}</td>
-              <td className={styles.tableCell}>{booking.email}</td>
-              <td
-                className={`${styles.tableCell} ${
-                  booking.status === "pending"
-                    ? styles.statusPending
-                    : booking.status === "active"
-                    ? styles.statusActive
-                    : styles.statusCompleted
-                }`}
+          {/* Status Filter */}
+          <div className={styles.rightGroup}>
+            <div className={styles.filterForm}>
+              <label htmlFor="statusFilter" className={styles.filterLabel}>
+                Filter by Status:
+              </label>
+              <select
+                id="statusFilter"
+                value={filters.statusFilter}
+                onChange={handleFilterChange}
+                className={styles.filterSelect}
               >
-                {booking.status}
-              </td>
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+
+            {/* Service Filter */}
+            <div className={styles.filterForm}>
+              <label htmlFor="serviceFilter" className={styles.filterLabel}>
+                Filter by Service:
+              </label>
+              <select
+                id="serviceFilter"
+                name="serviceFilter"
+                value={filters.serviceFilter}
+                onChange={handleFilterChange}
+                className={styles.filterSelect}
+              >
+                <option value="all">All</option>
+                <option value="day tour">Day Tour</option>
+                <option value="cabin">Cabin</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <table ref={tableRef} className={styles.table}>
+          <thead className={styles.tableHead}>
+            <tr>
+              <th>Reference No.</th>
+              <th>Service</th>
+              <th>Check-In</th>
+              <th>Check-Out</th>
+              <th>Total</th>
+              <th>Customer Name</th>
+              <th>Email</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredBookings.map((booking: Booking, index: number) => (
+              <tr key={index} className={styles.tableRow}>
+                <td className={styles.tableCell}>
+                  <a
+                    href={`/booking/${booking.referenceNo}`}
+                    className={styles.referenceLink}
+                  >
+                    {booking.referenceNo}
+                  </a>
+                </td>
+                <td className={styles.tableCell}>{booking.service}</td>
+                <td className={styles.tableCell}>{booking.checkIn}</td>
+                <td className={styles.tableCell}>{booking.checkOut}</td>
+                <td className={styles.tableCell}>
+                  ₱
+                  {booking.total.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </td>
+                <td className={styles.tableCell}>{booking.customerName}</td>
+                <td className={styles.tableCell}>{booking.email}</td>
+                <td
+                  className={`${styles.tableCell} ${
+                    booking.status === "pending"
+                      ? styles.statusPending
+                      : booking.status === "active"
+                      ? styles.statusActive
+                      : styles.statusCompleted
+                  }`}
+                >
+                  {booking.status}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

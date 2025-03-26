@@ -105,8 +105,13 @@ export default function WalkInForm() {
   }, [packageType, watch("checkInDate"), watch("selectedPackageId")]);
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const minDate = today.toISOString().split("T")[0];
+  const minDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  )
+    .toISOString()
+    .split("T")[0];
 
   const fetcher = async (url: string) => {
     try {
@@ -181,6 +186,10 @@ export default function WalkInForm() {
       setNotificationMessage("Your booking has been successfully confirmed.");
       setNotificationType("success");
       setIsNotificationModalOpen(true);
+
+      setTimeout(() => {
+        router.push("http://localhost:3000/admin/bookings");
+      }, 1500);
     } catch (error: any) {
       console.error("Error submitting booking:", error);
       setNotificationMessage("Error submitting booking: " + error.message);
@@ -202,8 +211,18 @@ export default function WalkInForm() {
   const handleAddBooking = async () => {
     const isValid = await trigger();
 
-    if (!isValid) {
-      console.error("Form is invalid!");
+    const proofOfPayment = watch("proofOfPayment");
+
+    if (
+      !isValid ||
+      !proofOfPayment ||
+      (proofOfPayment instanceof FileList && proofOfPayment.length === 0)
+    ) {
+      setNotificationMessage(
+        "Please fill in all required fields and upload proof of payment."
+      );
+      setNotificationType("error");
+      setIsNotificationModalOpen(true);
       return;
     }
 
@@ -236,6 +255,8 @@ export default function WalkInForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+      {/* Guest Details Section */}
+      <h2 className={styles.section_title}>Guest Details</h2>
       <div className={styles.form_group_container}>
         <div className={styles.left_column}>
           <div className={styles.form_group}>
@@ -254,6 +275,22 @@ export default function WalkInForm() {
 
           <div className={styles.form_group}>
             <label>
+              Email <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("email")}
+              type="email"
+              onBlur={() => trigger("email")}
+            />
+            {errors.email && (
+              <p className={styles.error}>{errors.email?.message}</p>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.right_column}>
+          <div className={styles.form_group}>
+            <label>
               Last Name <span className={styles.required}>*</span>
             </label>
             <input
@@ -263,6 +300,46 @@ export default function WalkInForm() {
             />
             {errors.lastName && (
               <p className={styles.error}>{errors.lastName?.message}</p>
+            )}
+          </div>
+
+          <div className={styles.form_group}>
+            <label>
+              Contact Number <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("contactNumber")}
+              type="text"
+              maxLength={11}
+              onBlur={() => trigger("contactNumber")}
+            />
+            {errors.contactNumber && (
+              <p className={styles.error}>{errors.contactNumber?.message}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Booking Details Section */}
+      <h2
+        className={`${styles.section_title} ${styles.section_title_with_margin}`}
+      >
+        Booking Details
+      </h2>
+      <div className={styles.form_group_container}>
+        <div className={styles.left_column}>
+          <div className={styles.form_group}>
+            <label>
+              Check-in Date <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("checkInDate")}
+              type="date"
+              min={minDate}
+              onBlur={() => trigger("checkInDate")}
+            />
+            {errors.checkInDate && (
+              <p className={styles.error}>{errors.checkInDate?.message}</p>
             )}
           </div>
 
@@ -285,6 +362,40 @@ export default function WalkInForm() {
               <p className={styles.error}>{errors.packageType?.message}</p>
             )}
           </div>
+
+          <div className={styles.form_group}>
+            <label>
+              Total Guests <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("totalPax")}
+              type="number"
+              min={1}
+              onBlur={() => trigger("totalPax")}
+            />
+            {errors.totalPax && (
+              <p className={styles.error}>{errors.totalPax?.message}</p>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.right_column}>
+          {packageType === "cabins" && (
+            <div className={styles.form_group}>
+              <label>
+                Check-out Date <span className={styles.required}>*</span>
+              </label>
+              <input
+                {...register("checkOutDate")}
+                type="date"
+                min={minDate}
+                onBlur={() => trigger("checkOutDate")}
+              />
+              {errors.checkOutDate && (
+                <p className={styles.error}>{errors.checkOutDate?.message}</p>
+              )}
+            </div>
+          )}
           {packageType && (
             <div className={styles.form_group}>
               <label>
@@ -331,84 +442,6 @@ export default function WalkInForm() {
               )}
             </div>
           )}
-
-          <div className={styles.form_group}>
-            <label>
-              Total Guests <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("totalPax")}
-              type="number"
-              min={1}
-              onBlur={() => trigger("totalPax")}
-            />
-            {errors.totalPax && (
-              <p className={styles.error}>{errors.totalPax?.message}</p>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.right_column}>
-          <div className={styles.form_group}>
-            <label>
-              Email <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("email")}
-              type="email"
-              onBlur={() => trigger("email")}
-            />
-            {errors.email && (
-              <p className={styles.error}>{errors.email?.message}</p>
-            )}
-          </div>
-          <div className={styles.form_group}>
-            <label>
-              Contact Number <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("contactNumber")}
-              type="text"
-              maxLength={11}
-              onBlur={() => trigger("contactNumber")}
-            />
-            {errors.contactNumber && (
-              <p className={styles.error}>{errors.contactNumber?.message}</p>
-            )}
-          </div>
-
-          <div className={styles.form_group}>
-            <label>
-              Check-in Date <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("checkInDate")}
-              type="date"
-              min={minDate}
-              onBlur={() => trigger("checkInDate")}
-            />
-            {errors.checkInDate && (
-              <p className={styles.error}>{errors.checkInDate?.message}</p>
-            )}
-          </div>
-
-          {packageType === "cabins" && (
-            <div className={styles.form_group}>
-              <label>
-                Check-out Date <span className={styles.required}>*</span>
-              </label>
-              <input
-                {...register("checkOutDate")}
-                type="date"
-                min={minDate}
-                onBlur={() => trigger("checkOutDate")}
-              />
-              {errors.checkOutDate && (
-                <p className={styles.error}>{errors.checkOutDate?.message}</p>
-              )}
-            </div>
-          )}
-
           <div className={styles.form_group}>
             <label>
               Amount <span className={styles.required}>*</span>
@@ -428,7 +461,11 @@ export default function WalkInForm() {
       </div>
 
       {/* Payment Details Section */}
-      <h2 className={styles.section_title}>Payment Details</h2>
+      <h2
+        className={`${styles.section_title} ${styles.section_title_with_margin}`}
+      >
+        Payment Details
+      </h2>
       <div className={styles.form_group_container}>
         <div className={styles.left_column}>
           <div className={styles.form_group}>
@@ -450,7 +487,6 @@ export default function WalkInForm() {
               <p className={styles.error}>{errors.paymentMethod?.message}</p>
             )}
           </div>
-
           <div className={styles.form_group}>
             <label>
               Payment Account Name <span className={styles.required}>*</span>
@@ -484,7 +520,6 @@ export default function WalkInForm() {
               </p>
             )}
           </div>
-
           <div className={styles.form_group}>
             <label>
               Proof of Payment <span className={styles.required}>*</span>
@@ -521,18 +556,6 @@ export default function WalkInForm() {
             onClick={handleCancel}
           />
         </div>
-
-        <ConfirmModal
-          isOpen={isConfirmModalOpen}
-          onClose={() => setIsConfirmModalOpen(false)}
-          onConfirm={() => {
-            confirmAction();
-            setIsConfirmModalOpen(false);
-          }}
-          title={confirmMessage}
-          confirmText="Yes"
-          cancelText="No"
-        />
       </div>
       <ConfirmModal
         isOpen={isConfirmModalOpen}

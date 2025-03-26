@@ -1,42 +1,150 @@
-.tableContainer {
-  padding: 24px;
-  border-radius: 8px;
-  background-color: #ffffff9a;
-  overflow: hidden;
-  max-height: 100vh;
-  position: relative;
+.headerContainer {
+  display: flex;
+  justify-content: space-between; 
+  width: 100%;
+  margin-bottom: 20px; 
 }
+
+
+.tableContainer {
+  width: 100%;
+  padding: 20px;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+.table_wrapper {
+  width: 100%;
+  max-height: 66.4vh;
+  margin: 20px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  
+ }
 
 .topContainer {
   display: flex;
   justify-content: space-between;
   max-height: 140px;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .leftGroup {
   display: flex;
-  justify-content: start;
+  flex-direction: column; 
+  align-items: flex-start; 
 }
 
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 2000px; 
+}
+.searchLabel {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+  visibility: hidden; 
+}
+.searchInput {
+  height: 45px;
+  width:500px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease-in-out;
+  text-indent: 12px;
+}
+
+.searchInput:focus {
+  border-color: var(--color-sunset-orange-500);
+  box-shadow: 0px 2px 10px rgba(255, 94, 77, 0.3);
+}
+
+.exportButton {
+  background-color:  var(--color-sunset-orange-500);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 5px;
+}
+
+.exportButton i {
+  font-size: 16px;
+}
+
+/* Right Group (Filters) */
 .rightGroup {
   display: flex;
-  justify-content: end;
   flex-direction: row;
   align-items: center;
   width: 500px;
-  gap: 10px;
+  gap: 15px;
+}
+
+/* Dropdown Styling */
+.filterForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.filterLabel {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.filterSelect {
+  width: 180px;
+  padding: 12px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--color-sunset-orange-500);
+  box-shadow: 0px 2px 8px rgba(255, 94, 77, 0.3);
+}
+
+/* Table Styles */
+.table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 16px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .tableTitle {
   color: var(--color-sunset-orange-500);
   font-family: Open Sans, sans-serif;
-  font-size: var(--text-size-xl);
-  font-weight: 600;
-  padding: 15px;
+  font-weight: bold;
+  margin-bottom: 20px;
   position: sticky;
   top: 0;
   background-color: #ffffff9a;
   z-index: 3;
+  font-size: 24px;
 }
 
 .tableHead {
@@ -49,17 +157,18 @@
 }
 
 .tableHead th {
-  padding: 12px;
+  padding: 14px;
   font-weight: 600;
   color: var(--color-sunset-orange-500);
   background-color: #ffffff;
 }
 
 .table tbody {
-  display: block;
-  overflow: hidden;
-  //NOTE: adjust the height when pagination is added
-  max-height: 100vh;
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 16px;
 }
 
 .table thead,
@@ -77,27 +186,89 @@
   padding: 12px;
 }
 
+/* Status Colors */
 .statusPending {
   color: var(--color-sunset-orange-500);
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .statusActive {
   color: #46733b;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .statusCompleted {
   color: #3b6273;
-  font-weight: 400;
+  font-weight: 500;
 }
 
+/* Reference Link */
 .referenceLink {
   color: var(--color-sunset-orange-500);
   text-decoration: none;
   font-weight: 600;
-
+  
   &:hover {
     text-decoration: underline;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .tableContainer {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .table {
+    min-width: 700px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .table {
+    min-width: 600px;
+    font-size: 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 8px;
+  }
+
+  .searchInput {
+    max-width: 300px;
+  }
+
+  .filterSelect {
+    width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tableContainer {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 500px;
+    font-size: 10px;
+  }
+
+  .table th,
+  .table td {
+    padding: 5px;
+  }
+
+  .searchInput {
+    max-width: 250px;
+    font-size: 14px;
+  }
+
+  .filterSelect {
+    width: 130px;
+    font-size: 12px;
   }
 }
