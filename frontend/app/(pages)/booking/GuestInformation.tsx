@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./guestinformation.module.scss";
 import BookingButton from "../../components/BookingButton";
 import TermsAndConditions from "../../components/TermsandConditions";
