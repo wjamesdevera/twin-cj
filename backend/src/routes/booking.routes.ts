@@ -5,6 +5,8 @@ import {
   createBookingHandler,
   getBookingHandler,
   getLatestBookingsHandler,
+  getMonthlyBookingsHandler,
+  getYearlyBookingsHandler,
   viewBookingsHandler,
 } from "../controllers/booking.controller";
 import { getMonthlyBookings } from "../services/booking.service";
@@ -15,7 +17,8 @@ router.post("/", upload.single("file"), createBookingHandler);
 router.get("/", getBookingHandler);
 router.get("/check-availability", checkAvailabilityHandler);
 router.get("/latest-bookings", getLatestBookingsHandler);
-router.get("/monthly", getMonthlyBookings);
+router.get("/monthly", getMonthlyBookingsHandler);
+router.get("/yearly", getYearlyBookingsHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);

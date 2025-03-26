@@ -427,57 +427,39 @@ export const getMonthlyBookings = async (req: Request, res: Response) => {
   res.json({
     monthlyBookingCount,
   });
+};
 
-  // try {
-  //   const currentDate = new Date();
-  //   const startOfMonth = new Date(
-  //     currentDate.getFullYear(),
-  //     currentDate.getMonth(),
-  //     1
-  //   );
-  //   const endOfMonth = new Date(
-  //     currentDate.getFullYear(),
-  //     currentDate.getMonth() + 1,
-  //     0
-  //   );
+export const getYearlyBookings = async (req: Request, res: Response) => {
+  const currentYear = new Date().getFullYear();
 
-  //   // Fetch the bookings for the current month
-  //   const monthlyBookings = await prisma.booking.findMany({
-  //     where: {
-  //       checkIn: {
-  //         gte: startOfMonth,
-  //       },
-  //       checkOut: {
-  //         lte: endOfMonth,
-  //       },
-  //     },
-  //     select: {
-  //       checkIn: true,
-  //     },
-  //   });
+  // Initialize an object to store yearly booking counts
+  const yearlyBookingCount: Record<number, number> = {};
 
-  //   const labels: string[] = [];
-  //   const values: number[] = [];
+  // Populate initial structure with zero counts
+  for (let year = currentYear - 5; year <= currentYear; year++) {
+    yearlyBookingCount[year] = 0;
+  }
 
-  //   monthlyBookings.forEach((booking) => {
-  //     const checkInDate = new Date(booking.checkIn);
-  //     const formattedDate = checkInDate.toLocaleDateString();
-  //     const index = labels.indexOf(formattedDate);
+  // Fetch all bookings for the last 5 years
+  const yearlyBookings = await prisma.booking.findMany({
+    where: {
+      checkIn: {
+        gte: new Date(`${currentYear - 5}-01-01T00:00:00.000Z`),
+        lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
+      },
+    },
+    select: { checkIn: true },
+  });
 
-  //     if (index === -1) {
-  //       labels.push(formattedDate);
-  //       values.push(1);
-  //     } else {
-  //       values[index] += 1;
-  //     }
-  //   });
+  // Count bookings per year
+  yearlyBookings.forEach(({ checkIn }) => {
+    const year = new Date(checkIn).getFullYear();
+    if (yearlyBookingCount[year] !== undefined) {
+      yearlyBookingCount[year]++;
+    }
+  });
 
-  //   res.json({
-  //     ...monthlyBookings,
-  //   });
-  // } catch (error) {
-  //   console.error("Error fetching monthly bookings:", error);
-  // }
+  res.json({ yearlyBookingCount });
 };
 
 // Admin Side

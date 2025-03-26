@@ -17,6 +17,7 @@ import {
   checkAvailability,
   getLatestBookings,
   getMonthlyBookings,
+  getYearlyBookings,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -99,7 +100,7 @@ export const getLatestBookingsHandler = async (
   }
 };
 
-export const getMonthlyBookingsController = async (
+export const getMonthlyBookingsHandler = async (
   req: Request,
   res: Response
 ) => {
@@ -113,6 +114,16 @@ export const getMonthlyBookingsController = async (
   }
 };
 
+export const getYearlyBookingsHandler = async (req: Request, res: Response) => {
+  try {
+    const bookings = await getYearlyBookings(req, res);
+
+    res.status(OK).json(bookings);
+  } catch (error) {
+    console.error("Error in getMonthlyBookingsController:", error);
+    res.status(NOT_FOUND).send("Failed to fetch monthly bookings");
+  }
+};
 // Admin Side
 export const viewBookingsHandler = catchErrors(
   async (req: Request, res: Response) => {

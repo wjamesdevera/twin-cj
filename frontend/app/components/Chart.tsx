@@ -39,7 +39,7 @@ const BookingsChart: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/bookings/monthly`,
+          `http://localhost:8080/api/bookings/${filter}`,
           {
             headers: {
               "Cache-Control": "no-store",
@@ -51,18 +51,19 @@ const BookingsChart: React.FC = () => {
           throw new Error("Failed to fetch data");
         }
 
-        const { monthlyBookingCount } = await response.json();
+        const { monthlyBookingCount, yearlyBookingCount } =
+          await response.json();
 
-        console.log("Fetched data:", monthlyBookingCount);
+        console.log("Fetched data:", monthlyBookingCount || yearlyBookingCount);
 
         const newData = {
-          labels: Object.keys(monthlyBookingCount),
+          labels: Object.keys(monthlyBookingCount || yearlyBookingCount),
           datasets: [
             {
               label: `${
                 filter.charAt(0).toUpperCase() + filter.slice(1)
               } Bookings`,
-              data: Object.values(monthlyBookingCount),
+              data: Object.values(monthlyBookingCount || yearlyBookingCount),
               backgroundColor: [
                 "#8d6e63",
                 "#a1887f",
