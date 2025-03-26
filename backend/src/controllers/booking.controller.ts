@@ -154,10 +154,10 @@ export const createWalkInBookingHandler = catchErrors(
 
 export const getBookingByReferenceCode = catchErrors(
   async (req: Request, res: Response) => {
-    const { referenceCode } = req.params;
+    const { id } = req.params;
 
     const booking = await prisma.booking.findUnique({
-      where: { referenceCode: referenceCode },
+      where: { id: Number(id) },
       include: {
         services: true,
       },

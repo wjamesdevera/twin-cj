@@ -22,7 +22,7 @@ router.get("/monthly", getLatestBookingsHandler);
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
 router.post("/walk-in", upload.single("file"), createWalkInBookingHandler);
-router.get("/:referenceCode", getBookingByReferenceCode);
+router.get("/:id", getBookingByReferenceCode);
 router.put("/:id", updateBookingHandler);
 
 export default router;

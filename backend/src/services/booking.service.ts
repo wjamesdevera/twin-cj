@@ -679,11 +679,11 @@ export const editBooking = async (req: Request, res: Response) => {
 // Get Booking by ID
 export const getBookingById = async (req: Request, res: Response) => {
   try {
-    const { referenceNo } = req.params;
-    appAssert(referenceNo, BAD_REQUEST, "Booking referenceNo is required.");
+    const { id } = req.params;
+    appAssert(id, BAD_REQUEST, "Booking referenceNo is required.");
 
     const booking = await prisma.booking.findUnique({
-      where: { referenceCode: referenceNo },
+      where: { id: Number(id) },
       include: {
         services: {
           include: { service: true },
