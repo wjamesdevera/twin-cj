@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import styles from "./bookings.module.scss";
 import BookingTable from "@/app/components/adminBookingDataTable";
@@ -8,6 +8,7 @@ import { Loading } from "@/app/components/loading";
 import { useRouter } from "next/navigation";
 
 interface Booking {
+  id: number;
   referenceNo: string;
   checkIn: string;
   checkOut: string;
@@ -31,6 +32,10 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const handleEditBooking = (id: number) => {
+    router.push(`/admin/bookings/edit/${id}`);
+  };
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -77,6 +82,7 @@ export default function Page() {
                 checkIn: formatDate(booking.checkIn),
                 checkOut: formatDate(booking.checkOut),
                 total: parseFloat(formatAmount(booking.total)),
+                onEdit: () => handleEditBooking(booking.id),
               })) || []
             }
           />

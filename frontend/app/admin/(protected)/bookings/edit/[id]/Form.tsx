@@ -52,7 +52,11 @@ interface BookingResponse {
   data: Record<string, BookingTypeData>;
 }
 
-export default function WalkInForm() {
+interface FormProps {
+  referenceNo: string;
+}
+
+export default function WalkInForm({ referenceNo }: FormProps) {
   const {
     register,
     handleSubmit,
@@ -92,6 +96,28 @@ export default function WalkInForm() {
 
     setReasonError("");
   };
+
+  useEffect(() => {
+    if (!referenceNo) return;
+
+    const fetchBooking = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/bookings/${referenceNo}`
+        );
+
+        const bookingData = await response.json();
+
+        Object.keys(bookingData).forEach((key) => {
+          setValue(key as keyof FormFields, bookingData[key]);
+        });
+      } catch (err) {
+        console.error("Failed to load booking data.");
+      }
+    };
+
+    fetchBooking();
+  }, [referenceNo, setValue]);
 
   const handleConfirm = () => {
     if (

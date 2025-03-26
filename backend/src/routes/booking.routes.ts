@@ -17,10 +17,10 @@ router.get("/", getBookingHandler);
 router.get("/check-availability", checkAvailabilityHandler);
 router.get("/latest-bookings", getLatestBookingsHandler);
 router.get("/monthly", getLatestBookingsHandler);
-router.put("/", updateBookingHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
 router.post("/walk-in", upload.single("file"), createWalkInBookingHandler);
+router.put("/:id", updateBookingHandler);
 
 export default router;

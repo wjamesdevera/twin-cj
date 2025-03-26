@@ -18,6 +18,7 @@ import {
   getLatestBookings,
   getMonthlyBookings,
   createWalkInBooking,
+  editBookingStatus,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
