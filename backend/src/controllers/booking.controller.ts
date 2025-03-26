@@ -150,3 +150,18 @@ export const createWalkInBookingHandler = catchErrors(
     }
   }
 );
+
+export const updateBookingHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    try {
+      await editBookingStatus(req, res);
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      console.log("Request Body:", req.body);
+      return res.status(INTERNAL_SERVER_ERROR).json({
+        status: "error",
+        message: "Failed to update booking status",
+      });
+    }
+  }
+);

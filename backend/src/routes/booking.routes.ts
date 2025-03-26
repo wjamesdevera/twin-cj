@@ -7,6 +7,7 @@ import {
   getLatestBookingsHandler,
   viewBookingsHandler,
   createWalkInBookingHandler,
+  updateBookingHandler,
 } from "../controllers/booking.controller";
 
 const router = Router();
@@ -16,6 +17,7 @@ router.get("/", getBookingHandler);
 router.get("/check-availability", checkAvailabilityHandler);
 router.get("/latest-bookings", getLatestBookingsHandler);
 router.get("/monthly", getLatestBookingsHandler);
+router.put("/", updateBookingHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);

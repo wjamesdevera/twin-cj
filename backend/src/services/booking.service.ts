@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
-import { BAD_REQUEST } from "../constants/http";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "../constants/http";
 import { parse } from "path";
 
 interface ServiceCategory {
@@ -610,5 +610,125 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error creating walk-in booking:", error);
+  }
+};
+
+export const editBooking = async (req: Request, res: Response) => {
+  try {
+    const { bookingId } = req.params;
+    const {
+      checkInDate,
+      checkOutDate,
+      bookingCards,
+      specialRequest,
+      totalPax,
+    } = req.body;
+
+    appAssert(bookingId, BAD_REQUEST, "Booking ID is required.");
+    appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
+    appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
+    appAssert(Array.isArray(bookingCards), BAD_REQUEST, "Invalid services.");
+
+    // Find existing booking
+    const booking = await prisma.booking.findUnique({
+      where: { id: Number(bookingId) },
+      include: { services: true },
+    });
+
+    appAssert(booking, BAD_REQUEST, "Booking not found.");
+
+    // Check new availability
+    const availableServices = await checkAvailability(
+      checkInDate,
+      checkOutDate
+    );
+    const selectedServices = bookingCards.map(
+      (card: { id: number }) => card.id
+    );
+
+    const isAvailable = selectedServices.every((id) =>
+      availableServices.some((service) => service.id === id)
+    );
+
+    appAssert(
+      isAvailable,
+      BAD_REQUEST,
+      "One or more services are not available."
+    );
+
+    // Update Booking
+    const updatedBooking = await prisma.booking.update({
+      where: { id: Number(bookingId) },
+      data: {
+        checkIn: new Date(checkInDate),
+        checkOut: new Date(checkOutDate),
+        totalPax,
+        notes: specialRequest || "",
+      },
+    });
+
+    return res.json({
+      message: "Booking updated successfully",
+      updatedBooking,
+    });
+  } catch (error) {
+    console.error("Error updating booking:", error);
+  }
+};
+
+// Update Booking
+export const editBookingStatus = async (req: Request, res: Response) => {
+  try {
+    const { bookingId } = req.params;
+    const { bookingStatus, paymentStatusId, paymentStatus } = req.body;
+
+    // Validate required fields
+    appAssert(bookingId, BAD_REQUEST, "Booking ID is required");
+    appAssert(bookingStatus, BAD_REQUEST, "Booking status is required");
+    appAssert(paymentStatusId, BAD_REQUEST, "Payment status ID is required");
+    appAssert(paymentStatus, BAD_REQUEST, "Payment status is required");
+
+    // Check if the booking exists
+    const booking = await prisma.booking.findUnique({
+      where: { id: Number(bookingId) },
+    });
+
+    if (!booking) {
+      return res.status(BAD_REQUEST).json({ error: "Booking not found" });
+    }
+
+    // Check if the payment status exists
+    const payment = await prisma.paymentStatus.findUnique({
+      where: { id: Number(paymentStatusId) },
+    });
+
+    if (!payment) {
+      return res
+        .status(BAD_REQUEST)
+        .json({ error: "Payment status not found" });
+    }
+
+    // Update booking status
+    const updatedBooking = await prisma.bookingStatus.update({
+      where: { id: Number(bookingId) },
+      data: { name: bookingStatus },
+    });
+
+    // Update payment status
+    const updatedPaymentStatus = await prisma.paymentStatus.update({
+      where: { id: Number(paymentStatusId) },
+      data: { name: paymentStatus },
+    });
+
+    return res.status(200).json({
+      message: "Booking and payment status updated successfully",
+      booking: updatedBooking,
+      paymentStatus: updatedPaymentStatus,
+    });
+  } catch (error) {
+    console.error("Error updating statuses:", error);
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json({ error: "Internal Server Error" });
   }
 };
