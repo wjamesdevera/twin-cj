@@ -90,7 +90,7 @@ export default function Home() {
       )}
 
       {bookingData?.bookingStatus?.name === "Invalid" && <BookingStatusDetails status="Invalid" />}
-      {bookingData?.bookingStatus?.name === "Approved" && <BookingStatusPrintButton />}
+      {/* {bookingData?.bookingStatus?.name === "Approved" && <BookingStatusPrintButton />} */}
       {bookingData?.bookingStatus?.name === "Reupload" && (
         <BookingStatusDetailsReupload
           referenceCode={bookingData?.referenceCode}
