@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import styles from "./adminBookingDataTable.module.scss";
+import Link from "next/link";
 
 interface Booking {
+  id: number;
   referenceNo: string;
   service: string;
   checkIn: string;
@@ -17,6 +19,7 @@ interface BookingTableProps {
 }
 
 const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
+  const [updatedBookings, setUpdatedBookings] = useState(bookings);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     searchTerm: "",
@@ -58,6 +61,37 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
     return matchesSearchTerm && matchesStatus && matchesService;
   });
+
+  const handleEdit = async (referenceNo: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/bookings/${referenceNo}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "Pending" }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update booking");
+      }
+
+      const updatedBooking = await response.json();
+
+      setUpdatedBookings((prev) =>
+        prev.map((booking) =>
+          booking.referenceNo === referenceNo
+            ? { ...booking, status: updatedBooking.status }
+            : booking
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update booking:", error);
+    }
+  };
 
   return (
     <div className={styles.tableContainer}>
@@ -133,15 +167,18 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredBookings.map((booking: Booking, index: number) => (
-              <tr key={index} className={styles.tableRow}>
+            {filteredBookings.map((booking) => (
+              <tr key={booking.referenceNo} className={styles.tableRow}>
                 <td className={styles.tableCell}>
-                  <a
-                    href={`/booking/${booking.referenceNo}`}
+                  <Link
+                    href={`/admin/bookings/edit/${booking.id}`}
                     className={styles.referenceLink}
+                    onClick={() =>
+                      console.log("Clicked referenceNo:", booking.referenceNo)
+                    }
                   >
                     {booking.referenceNo}
-                  </a>
+                  </Link>
                 </td>
                 <td className={styles.tableCell}>{booking.service}</td>
                 <td className={styles.tableCell}>{booking.checkIn}</td>
