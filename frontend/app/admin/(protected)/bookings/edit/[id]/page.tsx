@@ -19,6 +19,28 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchBooking = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/bookings/${id}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch booking details.");
+        }
+
+        const data = await response.json();
+        setBooking(data);
+      } catch (error) {
+        setError("Error fetching booking data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooking();
+  }, [id]);
+
   if (loading) return <Loading />;
 
   return (

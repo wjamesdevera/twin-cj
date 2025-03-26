@@ -550,23 +550,12 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
       },
     });
 
-    let paymentStatus = await prisma.paymentStatus.findFirst({
-      where: { name: "Pending" },
-    });
-
-    if (!paymentStatus) {
-      paymentStatus = await prisma.paymentStatus.create({
-        data: { name: "Pending" },
-      });
-    }
-
     // Create Transaction
     const transaction = await prisma.transaction.create({
       data: {
         amount: parseFloat(amount),
         proofOfPaymentImageUrl: proofOfPayment,
         paymentAccountId: paymentAccount.id,
-        paymentStatusId: paymentStatus.id,
       },
     });
 
@@ -679,11 +668,11 @@ export const editBooking = async (req: Request, res: Response) => {
 // Get Booking by ID
 export const getBookingById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    appAssert(id, BAD_REQUEST, "Booking referenceNo is required.");
+    const { referenceCode } = req.params;
+    appAssert(referenceCode, BAD_REQUEST, "Booking referenceNo is required.");
 
     const booking = await prisma.booking.findUnique({
-      where: { id: Number(id) },
+      where: { referenceCode: referenceCode },
       include: {
         services: {
           include: { service: true },
@@ -734,13 +723,11 @@ export const getBookingById = async (req: Request, res: Response) => {
 export const editBookingStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { bookingStatus, paymentStatusId, paymentStatus, status } = req.body;
+    const { bookingStatus, status } = req.body;
 
     // Validate required fields
     appAssert(id, BAD_REQUEST, "Booking ID is required");
     appAssert(bookingStatus, BAD_REQUEST, "Booking status is required");
-    appAssert(paymentStatusId, BAD_REQUEST, "Payment status ID is required");
-    appAssert(paymentStatus, BAD_REQUEST, "Payment status is required");
 
     // Check if the booking exists
     const booking = await prisma.booking.findUnique({
@@ -751,33 +738,15 @@ export const editBookingStatus = async (req: Request, res: Response) => {
       return res.status(BAD_REQUEST).json({ error: "Booking not found" });
     }
 
-    // Check if the payment status exists
-    const payment = await prisma.paymentStatus.findUnique({
-      where: { id: Number(paymentStatusId) },
-    });
-
-    if (!payment) {
-      return res
-        .status(BAD_REQUEST)
-        .json({ error: "Payment status not found" });
-    }
-
     // Update booking status
     const updatedBooking = await prisma.bookingStatus.update({
       where: { id: Number(booking) },
       data: { name: status },
     });
 
-    // Update payment status
-    const updatedPaymentStatus = await prisma.transaction.update({
-      where: { id: booking.transactionId },
-      data: { paymentStatusId: Number(paymentStatusId) },
-    });
-
     return res.status(200).json({
       message: "Booking and payment status updated successfully",
       booking: updatedBooking,
-      paymentStatus: updatedPaymentStatus,
     });
   } catch (error) {
     console.error("Error updating statuses:", error);

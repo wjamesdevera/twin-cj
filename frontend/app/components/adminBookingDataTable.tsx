@@ -62,10 +62,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     return matchesSearchTerm && matchesStatus && matchesService;
   });
 
-  const handleEdit = async (referenceNo: string) => {
+  const handleEdit = async (referenceCode: string) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/bookings/${referenceNo}`,
+        `http://localhost:8080/api/bookings/${referenceCode}`,
         {
           method: "PUT",
           headers: {
@@ -83,7 +83,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
       setUpdatedBookings((prev) =>
         prev.map((booking) =>
-          booking.referenceNo === referenceNo
+          booking.referenceNo === referenceCode
             ? { ...booking, status: updatedBooking.status }
             : booking
         )
@@ -171,10 +171,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
               <tr key={booking.referenceNo} className={styles.tableRow}>
                 <td className={styles.tableCell}>
                   <Link
-                    href={`/admin/bookings/edit/${booking.id}`}
+                    href={`/admin/bookings/edit/${booking.referenceNo}`}
                     className={styles.referenceLink}
                     onClick={() =>
-                      console.log("Clicked referenceNo:", booking.referenceNo)
+                      console.log("Clicked ID:", booking.referenceNo, bookings)
                     }
                   >
                     {booking.referenceNo}
