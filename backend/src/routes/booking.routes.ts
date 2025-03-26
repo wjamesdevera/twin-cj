@@ -19,6 +19,6 @@ router.get("/monthly", getLatestBookingsHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
-router.post("/walk-in", upload.single("file"), createWalkInBookingHandler);
+router.post("/walk-in", upload.single("proofOfPayment"), createWalkInBookingHandler);
 
 export default router;

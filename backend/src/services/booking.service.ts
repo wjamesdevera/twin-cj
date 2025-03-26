@@ -564,7 +564,7 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
     const transaction = await prisma.transaction.create({
       data: {
         amount: parseFloat(amount),
-        proofOfPaymentImageUrl: proofOfPayment,
+        proofOfPaymentImageUrl: req.file?.path,
         paymentAccountId: paymentAccount.id,
         paymentStatusId: paymentStatus.id,
       },

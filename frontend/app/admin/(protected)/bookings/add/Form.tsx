@@ -151,8 +151,10 @@ export default function WalkInForm() {
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (key === "proofOfPayment" && value instanceof File) {
-          formDataToSend.append("file", value);
+        if (key === "proofOfPayment") {
+          if (value instanceof FileList && value.length > 0) {
+            formDataToSend.append("proofOfPayment", value[0]);
+          }
         } else {
           formDataToSend.append(key, String(value));
         }
