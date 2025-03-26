@@ -134,10 +134,10 @@ export default function CabinForm({ id, defaultValues }: CabinFormProps) {
                 placeholder="Enter the description"
                 {...register("description")}
                 className={errors.description && styles.invalid_input}
-                maxLength={101}
+                maxLength={501}
               />
               <p className={styles["char-count"]}>
-                {watch("description").length}/100 characters
+                {watch("description").length}/500 characters
               </p>
               {errors.description && (
                 <span className={styles.error}>
