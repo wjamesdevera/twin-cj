@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import styles from "./page.module.scss";
 import Image from "next/image";
@@ -6,6 +7,7 @@ import HomePageCarousel from "./components/home-page-carousel";
 import Button from "./components/button";
 import SectionHeader from "./components/SectionHeader";
 import MainLayout from "./layouts/main.layout";
+import { useRouter } from "next/navigation";
 
 const cabins = [
   {
@@ -63,6 +65,20 @@ const CabinCard: React.FC<CabinCardProps> = ({
     </div>
   );
 };
+
+const BookingButton = () => {
+  const router = useRouter();
+  return (
+    <Button
+      variant="outline-white"
+      fullWidth={true}
+      className={styles["book-now-button"]}
+      onClick={() => router.push("/booking")}
+    >
+      Book Now
+    </Button>
+  );
+};
 export default function page() {
   return (
     <MainLayout>
@@ -90,13 +106,7 @@ export default function page() {
                 <p className={styles["subtext"]}>
                   Enjoy the scenic view by the river
                 </p>
-                <Button
-                  variant="outline-white"
-                  fullWidth={true}
-                  className={styles["book-now-button"]}
-                >
-                  Book Now
-                </Button>
+                <BookingButton />
                 <p className={styles["subtext"]}>
                   Check your booking status{" "}
                   <Link href="/booking-status">here</Link>!
