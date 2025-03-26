@@ -4,6 +4,8 @@ import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST } from "../constants/http";
 import { parse } from "path";
+import { sendMail } from "../utils/sendMail";
+import { getBookingSuccessEmailTemplate } from "../utils/emailTemplates";
 
 interface ServiceCategory {
   id: number;
@@ -206,30 +208,34 @@ export const createBooking = async (req: Request) => {
     );
 
     // Find Personal Detail
-    let personalDetail = await prisma.personalDetail.findFirst({
-      where: { email: email },
-    });
-
-    if (!personalDetail) {
-      personalDetail = await prisma.personalDetail.create({
-        data: {
+    let customer = await prisma.customer.findFirst({
+      where: {
+        personalDetail: {
+          email: email,
           firstName: firstName,
           lastName: lastName,
-          phoneNumber: contactNumber,
-          email: email,
+          phoneNumber: lastName,
         },
-      });
-    }
-
-    // Find Customer
-    let customer = await prisma.customer.findUnique({
-      where: { personalDetailId: personalDetail.id },
+      },
+      include: {
+        personalDetail: true,
+      },
     });
 
     if (!customer) {
       customer = await prisma.customer.create({
         data: {
-          personalDetailId: personalDetail.id,
+          personalDetail: {
+            create: {
+              email: email,
+              firstName: firstName,
+              lastName: lastName,
+              phoneNumber: lastName,
+            },
+          },
+        },
+        include: {
+          personalDetail: true,
         },
       });
     }
@@ -266,6 +272,16 @@ export const createBooking = async (req: Request) => {
         transactionId: transaction.id,
       },
     });
+
+    const { error } = await sendMail({
+      to: customer.personalDetail?.email || "delivered@resend.dev",
+      ...getBookingSuccessEmailTemplate(
+        referenceCode,
+        `${customer.personalDetail?.firstName} ${customer.personalDetail?.lastName}`
+      ),
+    });
+
+    if (error) console.log(error);
 
     const bookingServices = await Promise.all(
       bookingCards.map((card: { id: number }) =>

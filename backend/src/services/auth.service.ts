@@ -1,4 +1,5 @@
 import config from "../config/config";
+
 import { prisma } from "../config/db";
 import {
   BAD_REQUEST,
