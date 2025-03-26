@@ -66,6 +66,52 @@ export default function WalkInForm() {
     mode: "onChange",
   });
 
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<
+    "approve" | "reject" | "cancel" | ""
+  >("");
+  const [statusReason, setStatusReason] = useState("");
+  const [tempReason, setTempReason] = useState("");
+  const [reasonError, setReasonError] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStatus = e.target.value as "approve" | "reject" | "cancel";
+
+    setSelectedStatus(newStatus);
+    setIsStatusModalOpen(true);
+
+    if (newStatus === "reject") {
+      setTempReason(rejectReason);
+    } else if (newStatus === "cancel") {
+      setTempReason(cancelReason);
+    } else {
+      setTempReason("");
+    }
+
+    setReasonError("");
+  };
+
+  const handleConfirm = () => {
+    if (
+      (selectedStatus === "reject" || selectedStatus === "cancel") &&
+      !tempReason.trim()
+    ) {
+      setReasonError("Reason is required");
+      return;
+    }
+
+    if (selectedStatus === "reject") {
+      setRejectReason(tempReason);
+    } else if (selectedStatus === "cancel") {
+      setCancelReason(tempReason);
+    }
+
+    setStatusReason(selectedStatus === "approve" ? "" : tempReason);
+    setIsStatusModalOpen(false);
+  };
+
   const router = useRouter();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
@@ -83,10 +129,6 @@ export default function WalkInForm() {
       trigger("checkOutDate");
     }
   }, [packageType, watch("checkInDate")]);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const minDate = today.toISOString().split("T")[0];
 
   const fetcher = async (url: string) => {
     try {
@@ -123,35 +165,27 @@ export default function WalkInForm() {
   const availablePackages: Service[] =
     data?.data?.[packageType]?.services || [];
 
+  const handleEditBooking = () => {
+    setConfirmMessage("Are you sure you want to edit this booking?");
+    setConfirmAction(() => async () => {
+      await handleSubmit(onSubmit)();
+    });
+    setIsConfirmModalOpen(true);
+  };
+
   const onSubmit = async (formData: FormFields) => {
-    if (formData.packageType === "day-tour") {
-      formData.checkOutDate = formData.checkInDate;
+    if (!formData.bookingStatus) {
+      alert("Booking Status is required!");
+      return;
     }
 
-    console.log("Submitting...");
-    console.log("Form Data: ", formData);
-
     try {
-      const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === "proofOfPayment" && value instanceof File) {
-          formDataToSend.append(key, value);
-        } else {
-          formDataToSend.append(key, String(value));
-        }
-      });
-
-      formDataToSend.append("selectedPackage", formData.selectedPackageId);
-
-      for (let pair of formDataToSend.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
       const response = await fetch(
-        "http://localhost:8080/api/bookings/walk-in",
+        "http://localhost:8080/api/bookings/update",
         {
-          method: "POST",
-          body: formDataToSend,
+          method: "PUT",
+          body: JSON.stringify(formData),
+          headers: { "Content-Type": "application/json" },
         }
       );
 
@@ -159,10 +193,10 @@ export default function WalkInForm() {
         throw new Error(await response.text());
       }
 
-      console.log("Booking submitted successfully!");
-      // router.push("http://localhost:3000/admin/bookings");
-    } catch (error: any) {
-      console.error("Error submitting booking:", error);
+      console.log("Booking updated successfully!");
+      router.push("http://localhost:3000/admin/bookings");
+    } catch (error) {
+      console.error("Error updating booking:", error);
     }
   };
 
@@ -176,45 +210,6 @@ export default function WalkInForm() {
     setIsConfirmModalOpen(true);
   };
 
-  const handleAddBooking = async () => {
-    const isValid = await trigger();
-    console.log("handleAddBooking called");
-
-    if (!isValid) {
-      console.error("Form is invalid!");
-      console.log("Errors:", errors);
-      return;
-    }
-
-    console.log("Submitting booking data:", data);
-
-    setConfirmMessage("Are you sure you want to add this booking?");
-    setConfirmAction(() => () => handleSubmit(onSubmit)());
-    setIsConfirmModalOpen(true);
-  };
-
-  const handleClear = () => {
-    setConfirmMessage("Are you sure you want to clear the form? ");
-    setConfirmAction(() => () => {
-      reset();
-      setValue("firstName", "");
-      setValue("lastName", "");
-      setValue("email", "");
-      setValue("contactNumber", "");
-      setValue("packageType", undefined as any);
-      setValue("selectedPackageId", "");
-      setValue("selectedPackageName", "");
-      setValue("checkInDate", "");
-      setValue("checkOutDate", "");
-      setValue("paymentAccountName", "");
-      setValue("paymentAccountNumber", "");
-      setValue("paymentMethod", "");
-      setValue("totalPax", "");
-      setValue("amount", "");
-    });
-    setIsConfirmModalOpen(true);
-  };
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div className={styles.form_group_container}>
@@ -224,13 +219,10 @@ export default function WalkInForm() {
               First Name <span className={styles.required}>*</span>
             </label>
             <input
-              {...register("firstName")}
+              {...register("firstName", { disabled: true })}
               type="text"
-              onBlur={() => trigger("firstName")}
+              readOnly
             />
-            {errors.firstName && (
-              <p className={styles.error}>{errors.firstName?.message}</p>
-            )}
           </div>
 
           <div className={styles.form_group}>
@@ -238,33 +230,20 @@ export default function WalkInForm() {
               Last Name <span className={styles.required}>*</span>
             </label>
             <input
-              {...register("lastName")}
+              {...register("lastName", { disabled: true })}
               type="text"
-              onBlur={() => trigger("lastName")}
+              readOnly
             />
-            {errors.lastName && (
-              <p className={styles.error}>{errors.lastName?.message}</p>
-            )}
           </div>
 
           <div className={styles.form_group}>
             <label>
               Package Type <span className={styles.required}>*</span>
             </label>
-            <select
-              {...register("packageType")}
-              defaultValue=""
-              onBlur={() => trigger("packageType")}
-            >
-              <option value="" disabled>
-                Select Package Type
-              </option>
+            <select {...register("packageType", { disabled: true })} disabled>
               <option value="day-tour">Day Tour</option>
               <option value="cabins">Overnight</option>
             </select>
-            {errors.packageType && (
-              <p className={styles.error}>{errors.packageType?.message}</p>
-            )}
           </div>
           {packageType && (
             <div className={styles.form_group}>
@@ -274,25 +253,8 @@ export default function WalkInForm() {
                   : "Cabin Selection"}
                 :
               </label>
-              <select
-                defaultValue=""
-                onBlur={() => trigger("selectedPackageId")}
-                onChange={(e) => {
-                  const selectedOption = availablePackages.find(
-                    (pkg) => pkg.id.toString() === e.target.value
-                  );
-                  if (selectedOption) {
-                    reset({
-                      ...watch(),
-                      selectedPackageId: selectedOption.id.toString(),
-                      selectedPackageName: selectedOption.name,
-                    });
-                  }
-                }}
-              >
-                <option value="" disabled>
-                  Select an Option
-                </option>
+              <select disabled>
+                <option value="">Select an Option</option>
                 {availablePackages.length > 0 ? (
                   availablePackages.map((pkg) => (
                     <option key={pkg.id} value={pkg.id}>
@@ -305,11 +267,6 @@ export default function WalkInForm() {
                   </option>
                 )}
               </select>
-              {errors.selectedPackageId && (
-                <p className={styles.error}>
-                  {errors.selectedPackageId?.message}
-                </p>
-              )}
             </div>
           )}
 
@@ -318,44 +275,48 @@ export default function WalkInForm() {
               Total Guests <span className={styles.required}>*</span>
             </label>
             <input
-              {...register("totalPax")}
+              {...register("totalPax", { disabled: true })}
               type="number"
               min={1}
-              onBlur={() => trigger("totalPax")}
+              readOnly
             />
-            {errors.totalPax && (
-              <p className={styles.error}>{errors.totalPax?.message}</p>
-            )}
-          </div>
-          <div className={styles.form_group}>
-            <label>
-              Total Guests <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("totalPax")}
-              type="number"
-              min={1}
-              onBlur={() => trigger("totalPax")}
-            />
-            {errors.totalPax && (
-              <p className={styles.error}>{errors.totalPax?.message}</p>
-            )}
           </div>
 
           <div className={styles.form_group}>
             <label>
               Booking Status <span className={styles.required}>*</span>
             </label>
-            <select {...register("bookingStatus")} defaultValue="">
-              <option value="" disabled>
-                Select Status
-              </option>
+            <select
+              {...register("bookingStatus")}
+              onChange={(e) => {
+                const status = e.target.value as
+                  | "approve"
+                  | "reject"
+                  | "cancel";
+
+                setSelectedStatus(status);
+
+                if (status === "reject") {
+                  setTempReason(rejectReason);
+                } else if (status === "cancel") {
+                  setTempReason(cancelReason);
+                } else {
+                  setTempReason("");
+                }
+
+                setReasonError("");
+                setTimeout(() => setIsStatusModalOpen(true), 0);
+              }}
+            >
               <option value="approve">Approve</option>
               <option value="reject">Reject</option>
               <option value="cancel">Cancel</option>
             </select>
-            {errors.bookingStatus && (
-              <p className={styles.error}>{errors.bookingStatus?.message}</p>
+
+            {statusReason && selectedStatus !== "approve" && (
+              <p className={styles.status_reason}>
+                <strong>Reason:</strong> {statusReason}
+              </p>
             )}
           </div>
         </div>
@@ -366,27 +327,22 @@ export default function WalkInForm() {
               Email <span className={styles.required}>*</span>
             </label>
             <input
-              {...register("email")}
+              {...register("email", { disabled: true })}
               type="email"
-              onBlur={() => trigger("email")}
+              readOnly
             />
-            {errors.email && (
-              <p className={styles.error}>{errors.email?.message}</p>
-            )}
           </div>
+
           <div className={styles.form_group}>
             <label>
               Contact Number <span className={styles.required}>*</span>
             </label>
             <input
-              {...register("contactNumber")}
+              {...register("contactNumber", { disabled: true })}
               type="text"
               maxLength={11}
-              onBlur={() => trigger("contactNumber")}
+              readOnly
             />
-            {errors.contactNumber && (
-              <p className={styles.error}>{errors.contactNumber?.message}</p>
-            )}
           </div>
 
           <div className={styles.form_group}>
@@ -394,14 +350,10 @@ export default function WalkInForm() {
               Check-in Date <span className={styles.required}>*</span>
             </label>
             <input
-              {...register("checkInDate")}
+              {...register("checkInDate", { disabled: true })}
               type="date"
-              min={minDate}
-              onBlur={() => trigger("checkInDate")}
+              readOnly
             />
-            {errors.checkInDate && (
-              <p className={styles.error}>{errors.checkInDate?.message}</p>
-            )}
           </div>
 
           {packageType === "cabins" && (
@@ -410,14 +362,10 @@ export default function WalkInForm() {
                 Check-out Date <span className={styles.required}>*</span>
               </label>
               <input
-                {...register("checkOutDate")}
+                {...register("checkOutDate", { disabled: true })}
                 type="date"
-                min={minDate}
-                onBlur={() => trigger("checkOutDate")}
+                readOnly
               />
-              {errors.checkOutDate && (
-                <p className={styles.error}>{errors.checkOutDate?.message}</p>
-              )}
             </div>
           )}
 
@@ -426,14 +374,11 @@ export default function WalkInForm() {
               Amount <span className={styles.required}>*</span>
             </label>
             <input
-              {...register("amount")}
+              {...register("amount", { disabled: true })}
               type="number"
               min={1}
-              onBlur={() => trigger("amount")}
+              readOnly
             />
-            {errors.amount && (
-              <p className={styles.error}>{errors.amount?.message}</p>
-            )}
           </div>
         </div>
       </div>
@@ -443,14 +388,9 @@ export default function WalkInForm() {
           <CustomButton
             type="button"
             label="Edit Booking"
-            onClick={handleAddBooking}
+            onClick={handleEditBooking}
           />
-          <CustomButton
-            type="button"
-            label="Clear"
-            variant="secondary"
-            onClick={handleClear}
-          />
+
           <CustomButton
             type="button"
             label="Cancel"
@@ -460,16 +400,50 @@ export default function WalkInForm() {
         </div>
 
         <ConfirmModal
-          isOpen={isConfirmModalOpen}
-          onClose={() => setIsConfirmModalOpen(false)}
-          onConfirm={() => {
-            confirmAction();
-            setIsConfirmModalOpen(false);
+          isOpen={isStatusModalOpen}
+          onClose={() => {
+            setIsStatusModalOpen(false);
+            setReasonError("");
           }}
-          title={confirmMessage}
+          onConfirm={() => {
+            if (
+              (selectedStatus === "reject" || selectedStatus === "cancel") &&
+              !tempReason.trim()
+            ) {
+              setReasonError("Reason is required");
+              return;
+            }
+
+            if (selectedStatus === "reject") {
+              setRejectReason(tempReason);
+            } else if (selectedStatus === "cancel") {
+              setCancelReason(tempReason);
+            }
+
+            setStatusReason(selectedStatus === "approve" ? "" : tempReason);
+            setIsStatusModalOpen(false);
+          }}
+          title={`Are you sure you want to ${selectedStatus}?`}
           confirmText="Yes"
           cancelText="No"
-        />
+        >
+          {(selectedStatus === "reject" || selectedStatus === "cancel") && (
+            <>
+              <textarea
+                placeholder="Enter reason (max 100 characters)"
+                maxLength={100}
+                value={tempReason}
+                onChange={(e) => {
+                  setTempReason(e.target.value);
+                  if (e.target.value.trim()) {
+                    setReasonError("");
+                  }
+                }}
+              />
+              {reasonError && <p className={styles.error}>{reasonError}</p>}
+            </>
+          )}
+        </ConfirmModal>
       </div>
     </form>
   );
