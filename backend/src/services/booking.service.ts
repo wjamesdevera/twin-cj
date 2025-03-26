@@ -4,6 +4,8 @@ import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "../constants/http";
 import { parse } from "path";
+import { sendMail } from "../utils/sendMail";
+import { getBookingSuccessEmailTemplate } from "../utils/emailTemplates";
 
 interface ServiceCategory {
   id: number;
@@ -208,30 +210,34 @@ export const createBooking = async (req: Request) => {
     );
 
     // Find Personal Detail
-    let personalDetail = await prisma.personalDetail.findFirst({
-      where: { email: email },
-    });
-
-    if (!personalDetail) {
-      personalDetail = await prisma.personalDetail.create({
-        data: {
+    let customer = await prisma.customer.findFirst({
+      where: {
+        personalDetail: {
+          email: email,
           firstName: firstName,
           lastName: lastName,
-          phoneNumber: contactNumber,
-          email: email,
+          phoneNumber: lastName,
         },
-      });
-    }
-
-    // Find Customer
-    let customer = await prisma.customer.findUnique({
-      where: { personalDetailId: personalDetail.id },
+      },
+      include: {
+        personalDetail: true,
+      },
     });
 
     if (!customer) {
       customer = await prisma.customer.create({
         data: {
-          personalDetailId: personalDetail.id,
+          personalDetail: {
+            create: {
+              email: email,
+              firstName: firstName,
+              lastName: lastName,
+              phoneNumber: lastName,
+            },
+          },
+        },
+        include: {
+          personalDetail: true,
         },
       });
     }
@@ -268,6 +274,30 @@ export const createBooking = async (req: Request) => {
         transactionId: transaction.id,
       },
     });
+
+    const services = bookingCards.map((card) => card.name);
+
+    const { error } = await sendMail({
+      to: customer.personalDetail?.email || "delivered@resend.dev",
+      ...getBookingSuccessEmailTemplate(
+        referenceCode,
+        `${customer.personalDetail?.firstName} ${customer.personalDetail?.lastName}`,
+        `${new Date(checkInDate).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
+        })} - ${new Date(checkOutDate).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
+        })}`,
+        services
+      ),
+    });
+
+    if (error) console.log(error);
 
     const bookingServices = await Promise.all(
       bookingCards.map((card: { id: number }) =>
@@ -342,58 +372,79 @@ export const getLatestBookings = async () => {
   }
 };
 
-export const getMonthlyBookings = async (req: Request, res: Response) => {
-  try {
-    const currentDate = new Date();
-    const startOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    const endOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      0
-    );
+export const getMonthlyBookings = async () => {
+  const currentYear = new Date().getFullYear();
+  const shortMonths = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
-    // Fetch the bookings for the current month
-    const monthlyBookings = await prisma.booking.findMany({
-      where: {
-        checkIn: {
-          gte: startOfMonth,
-        },
-        checkOut: {
-          lte: endOfMonth,
-        },
+  const monthlyBookingCount = shortMonths.reduce((acc, month) => {
+    acc[month] = 0;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const yearlyBookings = await prisma.booking.findMany({
+    where: {
+      checkIn: {
+        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`), // Start of the year
+        lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
       },
-      select: {
-        checkIn: true,
-      },
-    });
+    },
+  });
 
-    const labels: string[] = [];
-    const values: number[] = [];
+  yearlyBookings.forEach(({ checkIn }) => {
+    const date = new Date(checkIn);
+    const month = shortMonths[date.getMonth()];
+    if (monthlyBookingCount[month] !== undefined) {
+      monthlyBookingCount[month]++;
+    }
+    return monthlyBookingCount;
+  });
+  return monthlyBookingCount;
+};
 
-    monthlyBookings.forEach((booking) => {
-      const checkInDate = new Date(booking.checkIn);
-      const formattedDate = checkInDate.toLocaleDateString();
-      const index = labels.indexOf(formattedDate);
+export const getYearlyBookings = async () => {
+  const currentYear = new Date().getFullYear();
 
-      if (index === -1) {
-        labels.push(formattedDate);
-        values.push(1);
-      } else {
-        values[index] += 1;
-      }
-    });
+  // Initialize an object to store yearly booking counts
+  const yearlyBookingCount: Record<number, number> = {};
 
-    res.json({
-      labels: labels,
-      values: values,
-    });
-  } catch (error) {
-    console.error("Error fetching monthly bookings:", error);
+  // Populate initial structure with zero counts
+  for (let year = currentYear - 5; year <= currentYear; year++) {
+    yearlyBookingCount[year] = 0;
   }
+
+  // Fetch all bookings for the last 5 years
+  const yearlyBookings = await prisma.booking.findMany({
+    where: {
+      checkIn: {
+        gte: new Date(`${currentYear - 5}-01-01T00:00:00.000Z`),
+        lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
+      },
+    },
+    select: { checkIn: true },
+  });
+
+  // Count bookings per year
+  yearlyBookings.forEach(({ checkIn }) => {
+    const year = new Date(checkIn).getFullYear();
+    if (yearlyBookingCount[year] !== undefined) {
+      yearlyBookingCount[year]++;
+    }
+  });
+
+  return yearlyBookingCount;
 };
 
 // Admin Booking Dashboard

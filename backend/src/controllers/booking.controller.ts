@@ -19,6 +19,7 @@ import {
   getMonthlyBookings,
   createWalkInBooking,
   editBookingStatus,
+  getYearlyBookings,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -101,20 +102,24 @@ export const getLatestBookingsHandler = async (
   }
 };
 
-export const getMonthlyBookingsController = async (
+export const getMonthlyBookingsHandler = async (
   req: Request,
   res: Response
 ) => {
-  try {
-    const bookings = await getMonthlyBookings(req, res);
+  const bookings = await getMonthlyBookings();
 
-    res.status(OK).json(bookings);
-  } catch (error) {
-    console.error("Error in getMonthlyBookingsController:", error);
-    res.status(NOT_FOUND).send("Failed to fetch monthly bookings");
-  }
+  res.status(OK).json({
+    monthlyBookingCount: bookings,
+  });
 };
 
+export const getYearlyBookingsHandler = async (req: Request, res: Response) => {
+  const bookings = await getYearlyBookings();
+
+  res.status(OK).json({
+    yearlyBookingCount: bookings,
+  });
+};
 // Admin Side
 export const viewBookingsHandler = catchErrors(
   async (req: Request, res: Response) => {

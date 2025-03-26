@@ -162,6 +162,7 @@ const Form: React.FC = () => {
           {...register("firstName")}
           required
           className={errors.firstName ? styles.invalid_input : ""}
+          placeholder="Enter your first name"
         />
         {errors.firstName && (
           <span className={styles.error}>{errors.firstName.message}</span>
@@ -178,6 +179,7 @@ const Form: React.FC = () => {
           {...register("lastName")}
           required
           className={errors.lastName ? styles.invalid_input : ""}
+          placeholder="Enter your last name"
         />
         {errors.lastName && (
           <span className={styles.error}>{errors.lastName.message}</span>
@@ -194,6 +196,7 @@ const Form: React.FC = () => {
           {...register("email")}
           required
           className={errors.email ? styles.invalid_input : ""}
+          placeholder="email@email.com"
         />
         {errors.email && (
           <span className={styles.error}>{errors.email.message}</span>
@@ -207,9 +210,11 @@ const Form: React.FC = () => {
         </label>
         <input
           type="tel"
+          maxLength={11}
           {...register("phoneNumber")}
           required
           className={errors.phoneNumber ? styles.invalid_input : ""}
+          placeholder="09XXXXXXXXX"
         />
         {errors.phoneNumber && (
           <span className={styles.error}>{errors.phoneNumber.message}</span>
@@ -221,7 +226,7 @@ const Form: React.FC = () => {
         <label>
           Password <span className={styles.required}>*</span>
         </label>
-        <input type="password" {...register("password")} required />
+        <input type="password" {...register("password")} placeholder="Enter your password" required />
         {errors.password && (
           <span className={styles.error}>{errors.password.message}</span>
         )}
@@ -232,7 +237,7 @@ const Form: React.FC = () => {
         <label>
           Confirm Password <span className={styles.required}>*</span>
         </label>
-        <input type="password" {...register("confirmPassword")} required />
+        <input type="password" {...register("confirmPassword")} placeholder="Confirm your password" required />
         {errors.confirmPassword && (
           <span className={styles.error}>{errors.confirmPassword.message}</span>
         )}

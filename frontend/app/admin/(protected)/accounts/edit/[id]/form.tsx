@@ -52,6 +52,7 @@ const Form: React.FC<EditUserFormArg> = ({
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -90,12 +91,28 @@ const Form: React.FC<EditUserFormArg> = ({
     openModal("Are you sure you want to save changes?", async () => {
       try {
         await trigger(data);
-        localStorage.setItem("adminUpdated", "true");
-        router.push("/admin/accounts");
-      } catch (error) {
-        console.error("Failed to update user:", error);
+        router.replace("/admin/accounts");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (error.message === "Email already in use") {
+          setError(
+            "email",
+            { type: "focus", message: error.message },
+            { shouldFocus: true }
+          );
+        } else if (error.message === "Phone number already in use") {
+          setError(
+            "phoneNumber",
+            {
+              type: "focus",
+              message: error.message,
+            },
+            { shouldFocus: true }
+          );
+        }
+      } finally {
+        closeModal();
       }
-      closeModal();
     });
   };
 
@@ -149,6 +166,7 @@ const Form: React.FC<EditUserFormArg> = ({
           type="text"
           {...register("firstName")}
           className={errors.firstName ? styles.invalid_input : ""}
+          placeholder="Enter your first name"
         />
         {errors.firstName && (
           <span className={styles.error}>{errors.firstName.message}</span>
@@ -162,6 +180,7 @@ const Form: React.FC<EditUserFormArg> = ({
           type="text"
           {...register("lastName")}
           className={errors.lastName ? styles.invalid_input : ""}
+          placeholder="Enter your last name"
         />
         {errors.lastName && (
           <span className={styles.error}>{errors.lastName.message}</span>
@@ -175,6 +194,7 @@ const Form: React.FC<EditUserFormArg> = ({
           type="email"
           {...register("email")}
           className={errors.email ? styles.invalid_input : ""}
+          placeholder="email@email.com"
         />
         {errors.email && (
           <span className={styles.error}>{errors.email.message}</span>
@@ -186,8 +206,10 @@ const Form: React.FC<EditUserFormArg> = ({
         <label>Phone Number</label>
         <input
           type="tel"
+          maxLength={11}
           {...register("phoneNumber")}
           className={errors.phoneNumber ? styles.invalid_input : ""}
+          placeholder="09XXXXXXXXX"
         />
         {errors.phoneNumber && (
           <span className={styles.error}>{errors.phoneNumber.message}</span>
@@ -201,9 +223,7 @@ const Form: React.FC<EditUserFormArg> = ({
         onConfirm={modalConfig.onConfirm || closeModal}
         onClose={closeModal}
         confirmText="Yes"
-        confirmColor="#A80000"
         cancelText="No"
-        cancelColor="#CCCCCC"
       />
 
       {/* Buttons */}

@@ -38,32 +38,34 @@ const Page = () => {
   useEffect(() => {
     const fetchBookingData = async () => {
       try {
-        const response = await fetch(
+        const latestBookingResponse = await fetch(
           "http://localhost:8080/api/bookings/latest-bookings"
         );
 
-        const contentType = response.headers.get("Content-Type");
+        const contentType = latestBookingResponse.headers.get("Content-Type");
         if (!contentType || !contentType.includes("application/json")) {
-          const errorText = await response.text();
+          const errorText = await latestBookingResponse.text();
           throw new Error(`Expected JSON but received HTML: ${errorText}`);
         }
 
-        if (!response.ok) {
+        if (!latestBookingResponse.ok) {
           throw new Error("Failed to fetch bookings");
         }
-        const data = await response.json();
+        const latestBookingData = await latestBookingResponse.json();
 
-        const formattedBookings = data.bookings.map((booking: BookingData) => ({
-          ...booking,
-          checkIn: formatDate(booking.checkIn),
-          checkOut: formatDate(booking.checkOut),
-          total: booking.total.toFixed(2),
-        }));
+        const formattedBookings = latestBookingData.bookings.map(
+          (booking: BookingData) => ({
+            ...booking,
+            checkIn: formatDate(booking.checkIn),
+            checkOut: formatDate(booking.checkOut),
+            total: booking.total.toFixed(2),
+          })
+        );
 
         setBookings(formattedBookings);
         setDashboardData({
-          pendingReservations: data.pendingReservations,
-          activeReservations: data.activeReservations,
+          pendingReservations: latestBookingData.pendingReservations,
+          activeReservations: latestBookingData.activeReservations,
         });
         setLoading(false);
       } catch (error) {

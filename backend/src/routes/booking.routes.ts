@@ -5,12 +5,16 @@ import {
   createBookingHandler,
   getBookingHandler,
   getLatestBookingsHandler,
+  getMonthlyBookingsHandler,
+  getYearlyBookingsHandler,
   viewBookingsHandler,
   createWalkInBookingHandler,
   updateBookingHandler,
   getBookingByIdHandler,
 } from "../controllers/booking.controller";
-import { getBookingById } from "../services/booking.service";
+import { getMonthlyBookings,
+  getBookingById
+ } from "../services/booking.service";
 
 const router = Router();
 
@@ -18,7 +22,8 @@ router.post("/", upload.single("file"), createBookingHandler);
 router.get("/", getBookingHandler);
 router.get("/check-availability", checkAvailabilityHandler);
 router.get("/latest-bookings", getLatestBookingsHandler);
-router.get("/monthly", getLatestBookingsHandler);
+router.get("/monthly", getMonthlyBookingsHandler);
+router.get("/yearly", getYearlyBookingsHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
