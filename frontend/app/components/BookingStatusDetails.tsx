@@ -83,16 +83,12 @@ const BookingStatusDetails = (props: any) => {
                 <b>Important Reminders</b>
               </p>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi
-                at neque egestas turpis varius pellentesque vitae sed est.
+                Please take note of the following reminders ahead of your reserved schedule:
               </p>
               <ol>
-                <li>Duis cursus nisi vitae enim pellentesque fringilla.</li>
-                <li>Nam eget dolor et enim fringilla semper.</li>
-                <li>
-                  Nullam lectus lorem, facilisis quis aliquam sollicitudin,
-                  facilisis eu ipsum. Sed eget viverra purus.
-                </li>
+                <li>Please bring a valid ID and booking confirmation for verification.</li>
+                <li>Do arrive at least ten minutes before the actual schedule.</li>
+                <li>No smoking inside the premises and observe quiet hours.</li>
               </ol>
             </div>
           </div>
@@ -170,16 +166,12 @@ const BookingStatusDetails = (props: any) => {
                 <b>Important Reminders</b>
               </p>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi
-                at neque egestas turpis varius pellentesque vitae sed est.
+                Please take note of the following reminders for your pending reservation:
               </p>
               <ol>
-                <li>Duis cursus nisi vitae enim pellentesque fringilla.</li>
-                <li>Nam eget dolor et enim fringilla semper.</li>
-                <li>
-                  Nullam lectus lorem, facilisis quis aliquam sollicitudin,
-                  facilisis eu ipsum. Sed eget viverra purus.
-                </li>
+                <li>Booking approvals usually take 24-48 hours.</li>
+                <li>Ensure that your payment is valid, processed, and is confirmed.</li>
+                <li>You will receive an email for any updates that are to be made with your booking.</li>
               </ol>
             </div>
           </div>
@@ -261,12 +253,58 @@ const BookingStatusDetails = (props: any) => {
         <div className={`${styles["booking-status-details-container"]}`}>
           <div
             className={`${styles["booking-status-details-container-heading"]}`}
-            style={{ paddingBottom: 5 }}
           >
             <h3>Your Booking Has Been Cancelled</h3>
-            <h4>
-              (dynamic message here based from the reason of why the booking was cancelled from the admin dashboard)
-            </h4>
+            <h4>Your booking was cancelled due to unforeseen circumstances.</h4>
+          </div>
+          <hr />
+          <div className={`${styles["booking-status-details-container-sub"]}`}>
+            <div className={`${styles["booking-status-details-left"]}`}>
+              <p>
+                <b>Status:&nbsp;</b>
+                <span style={{ color: "red", fontStyle: "italic" }}>
+                  Cancelled
+                </span>
+              </p>
+              <p>
+                <b>Reason for Rejection:&nbsp;</b>
+              </p>
+              <p>
+                Your booking was cancelled at your request or by an administrator.
+              </p>
+            </div>
+            <div
+              className={`${styles["booking-status-details-container-divider"]}`}
+            ></div>
+            <div className={`${styles["booking-status-details-right"]}`}>
+              <p>
+                <b>What You Can Do Next:</b>
+              </p>
+              <p>
+                <b>Check Your Email</b>
+              </p>
+              <ol>
+                <li>
+                  More details regarding the cancellation may have been sent to your registered email.
+                </li>
+              </ol>
+              <p>
+                <b>Review Booking Policies</b>
+              </p>
+              <ol>
+                <li>
+                  Ensure your booking met all requirements to avoid future cancellations.
+                </li>
+              </ol>
+              <p>
+                <b>Contact Support</b>
+              </p>
+              <ol>
+                <li>
+                  If you believe this was an error or need further clarification, please reach out to us.
+                </li>
+              </ol>
+            </div>
           </div>
         </div>
       </section>
