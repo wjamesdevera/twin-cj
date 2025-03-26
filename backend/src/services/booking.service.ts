@@ -384,7 +384,7 @@ export const getLatestBookings = async () => {
   }
 };
 
-export const getMonthlyBookings = async (req: Request, res: Response) => {
+export const getMonthlyBookings = async () => {
   const currentYear = new Date().getFullYear();
   const shortMonths = [
     "Jan",
@@ -423,13 +423,10 @@ export const getMonthlyBookings = async (req: Request, res: Response) => {
     }
     return monthlyBookingCount;
   });
-
-  res.json({
-    monthlyBookingCount,
-  });
+  return monthlyBookingCount;
 };
 
-export const getYearlyBookings = async (req: Request, res: Response) => {
+export const getYearlyBookings = async () => {
   const currentYear = new Date().getFullYear();
 
   // Initialize an object to store yearly booking counts
@@ -459,7 +456,7 @@ export const getYearlyBookings = async (req: Request, res: Response) => {
     }
   });
 
-  res.json({ yearlyBookingCount });
+  return yearlyBookingCount;
 };
 
 // Admin Side
