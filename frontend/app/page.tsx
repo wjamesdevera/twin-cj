@@ -1,3 +1,6 @@
+"use client";
+import { Parallax } from "react-parallax";
+
 import Link from "next/link";
 import styles from "./page.module.scss";
 import Image from "next/image";
@@ -11,21 +14,21 @@ const cabins = [
   {
     imageSrc: "/assets/home_mini.jpg",
     imgAltText: "Mini Cabin",
-    title: "Mini Cabin",
+    title: "Mini",
     description: "For 3 to 4 guests",
     availableCabins: 3,
   },
   {
     imageSrc: "/assets/home_maxi.png",
     imgAltText: "Maxi Cabin",
-    title: "Maxi Cabin",
+    title: "Maxi",
     description: "For 6 to 8 guests",
     availableCabins: 3,
   },
   {
     imageSrc: "/assets/home_venti.png",
     imgAltText: "Venti",
-    title: "Maxi Cabin",
+    title: "Venti",
     description: "For 15 to 20 guests",
     availableCabins: 1,
   },
@@ -56,7 +59,7 @@ const CabinCard: React.FC<CabinCardProps> = ({
         <div className={styles["description"]}>
           <p>{description}</p>
           <p>
-            {availableCabins} {title} available
+            {availableCabins} {title} Cabin available
           </p>
         </div>
       </div>
@@ -123,16 +126,24 @@ export default function page() {
         </section>
 
         <section className={styles.footstepsSection}>
-          <div className={styles.footstepsContent}>
-            <h2>FOOTSTEPS TO THE RIVER</h2>
-          </div>
-          <div className={styles.footstepsImage}>
+          <div className={styles.staticBackground}>
             <Image
               src="/assets/home_river.jpg"
               alt="River Footsteps"
               fill
-              priority
+              className={styles.staticImage}
             />
+          </div>
+
+          <Parallax
+            bgImage="/assets/home_river.jpg"
+            bgImageAlt="River Footsteps"
+            strength={300}
+            className={styles.parallaxContainer}
+          />
+
+          <div className={styles.footstepsContent}>
+            <h2>FOOTSTEPS TO THE RIVER</h2>
           </div>
         </section>
 
