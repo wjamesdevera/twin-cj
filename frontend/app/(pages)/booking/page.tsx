@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import useSWR from "swr";
-import Header from "@/app/components/Header";
+import Header from "@/app/(pages)/booking/Header";
 import Accordion from "@/app/components/Accordion";
-import ScheduleSelector from "@/app/components/ScheduleSelector";
-import BookingCard from "@/app/components/BookingCard";
-import GuestInformation from "@/app/components/GuestInformation";
-import { Loading } from "@/app/components/loading";
+import ScheduleSelector from "@/app/(pages)/booking/ScheduleSelector";
+import BookingCard from "@/app/(pages)/booking/BookingCard";
+import GuestInformation from "@/app/(pages)/booking/GuestInformation";
 import { useRouter } from "next/navigation";
+import { Loading } from "@/app/components/loading";
 
 interface AccordionItem {
   title: string;
@@ -17,6 +17,7 @@ interface AccordionItem {
 }
 
 interface BookingCardData {
+  id: number;
   name: string;
   description: string;
   price: number;
@@ -43,6 +44,7 @@ const Booking: React.FC = () => {
 
   const [availableServices, setAvailableServices] = useState<string[]>([]);
   const [showAccordion, setShowAccordion] = useState(false);
+  const [isDayTourLocked, setIsDayTourLocked] = useState(false);
 
   const { data, error } = useSWR<{
     status: string;
@@ -56,6 +58,23 @@ const Booking: React.FC = () => {
     fetcher
   );
 
+  // Set booking type based on check-in and check-out dates
+  useEffect(() => {
+    if (bookingData.checkInDate && bookingData.checkOutDate) {
+      const isSameDay =
+        bookingData.checkInDate.toDateString() ===
+        bookingData.checkOutDate.toDateString();
+
+      setIsDayTourLocked(isSameDay);
+
+      setBookingData((prev) => ({
+        ...prev,
+        bookingType: isSameDay ? "day-tour" : prev.bookingType || "cabins",
+      }));
+    }
+  }, [bookingData.checkInDate, bookingData.checkOutDate]);
+
+  // Filter out booked services
   useEffect(() => {
     if (data?.status === "success" && bookingData.bookingType) {
       let services = data.data[bookingData.bookingType]?.services || [];
@@ -95,7 +114,7 @@ const Booking: React.FC = () => {
     }));
   };
 
-  if (error) return <div>Failed to load</div>;
+  if (error) return <Loading />;
 
   const accordionItems: AccordionItem[] = [
     {
@@ -103,7 +122,13 @@ const Booking: React.FC = () => {
       content: (
         <ScheduleSelector
           selectedOption={bookingData.bookingType}
-          handleOptionSelect={(option) => handleChange("bookingType", option)}
+          handleOptionSelect={(option) => {
+            if (isDayTourLocked && bookingData.bookingType === "day-tour")
+              return;
+            if (!isDayTourLocked && option === "day-tour") return;
+            handleChange("bookingType", option);
+          }}
+          disabled={isDayTourLocked}
         />
       ),
     },
@@ -132,6 +157,10 @@ const Booking: React.FC = () => {
                     imageSrc={card.imageUrl}
                     isSelected={bookingData.selectedOption === card.name}
                     onSelect={() => handleChange("selectedOption", card.name)}
+                    disabled={
+                      !bookingData.bookingType ||
+                      bookingData.bookingCards.length === 0
+                    }
                   />
                 ))}
             </div>
@@ -156,13 +185,17 @@ const Booking: React.FC = () => {
                 .filter((card) => availableServices.includes(card.name))
                 .map((card) => (
                   <BookingCard
-                    key={card.name}
+                    key={card.id}
                     title={card.name}
                     description={card.description}
                     price={`₱${card.price}`}
                     imageSrc={card.imageUrl}
                     isSelected={bookingData.selectedOption === card.name}
                     onSelect={() => handleChange("selectedOption", card.name)}
+                    disabled={
+                      !bookingData.bookingType ||
+                      bookingData.bookingCards.length === 0
+                    }
                   />
                 ))}
             </div>
@@ -186,8 +219,8 @@ const Booking: React.FC = () => {
         }}
       />
       {showAccordion && (
-        <main style={{ padding: "1rem" }}>
-          <Accordion items={accordionItems} />
+        <main style={{ padding: "1rem" }} id="booking-accordion">
+          <Accordion items={accordionItems} initialOpenIndex={0} />
         </main>
       )}
     </div>

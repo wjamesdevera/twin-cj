@@ -14,13 +14,10 @@ interface CreateDayTourParams {
 }
 
 export const createDayTour = async (data: CreateDayTourParams) => {
-  const category = await prisma.category.create({
-    data: { name: "day-tour" },
-  });
 
   const serviceCategory = await prisma.serviceCategory.create({
     data: {
-      categoryId: category.id,
+      categoryId: 2,
     },
   });
 
@@ -366,13 +363,10 @@ type CreateCabinParams = {
 };
 
 export const createCabin = async (data: CreateCabinParams) => {
-  const category = await prisma.category.create({
-    data: { name: "cabins" },
-  });
 
   const serviceCategory = await prisma.serviceCategory.create({
     data: {
-      categoryId: category.id,
+      categoryId: 1,
     },
   });
 

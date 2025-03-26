@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import styles from "./header.module.scss";
-import headerImage from "../../public/assets/header.png";
+import headerImage from "@/public/assets/header.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
 
 type GuestType = "adults" | "children";
 type Action = "increment" | "decrement";
@@ -44,15 +45,15 @@ const GuestsDropdown: React.FC<{
         <span className={styles["chevron-down"]}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="33"
-            height="33"
+            width="20"
+            height="20"
             viewBox="0 0 33 33"
             fill="none"
           >
-            <g opacity="0.5">
+            <g opacity="1">
               <path
                 d="M8.03643 11.6458C8.43916 11.2431 9.0921 11.2431 9.49483 11.6458L15.9844 18.1353L22.4738 11.6458C22.8766 11.2431 23.5296 11.2431 23.9324 11.6458C24.335 12.0485 24.335 12.7015 23.9324 13.1042L16.7136 20.3229C16.3109 20.7257 15.6579 20.7257 15.2552 20.3229L8.03643 13.1042C7.63369 12.7015 7.63369 12.0485 8.03643 11.6458Z"
-                fill="#FFF2F2"
+                fill="#7a7878"
               />
             </g>
           </svg>
@@ -138,7 +139,21 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 
   const handleCheckAvailability = async () => {
     if (!checkInDate || !checkOutDate) {
-      alert("Please select both check-in and check-out dates.");
+      Swal.fire({
+        title: "Please select check-in and check-out dates",
+        icon: "error",
+        draggable: true,
+      });
+      return;
+    }
+
+    //NOTE:
+    if (checkInDate > checkOutDate) {
+      Swal.fire({
+        title: "Check-out date must be after check-in date",
+        icon: "error",
+        draggable: true,
+      });
       return;
     }
 
@@ -168,6 +183,17 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
           checkOutDate,
           guestCounts,
         });
+
+        // added a smooth scroll to the accordion
+        setTimeout(() => {
+          const accordionElement = document.getElementById("booking-accordion");
+          if (accordionElement) {
+            accordionElement.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        }, 200);
       }
     } catch (error) {
       console.error("Error fetching availability:", error);
@@ -195,39 +221,38 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
         </p>
 
         <div className={styles["booking-form"]}>
-          <div className={styles["form-field"]}>
-            <label htmlFor="checkin">Check in</label>
+          <div className={styles["form-field-group"]}>
+            <label className={styles["form-label"]}>Check in</label>
             <DatePicker
               selected={checkInDate}
               onChange={(date: Date | null) => setCheckInDate(date)}
               placeholderText="Select check-in date"
-              className={styles["date-input"]}
+              className={styles["form-input"]}
               dateFormat="MMMM d, yyyy"
               minDate={new Date()}
             />
           </div>
-          <div className={styles["form-field"]}>
-            <label htmlFor="checkout">Check out</label>
+
+          <div className={styles["form-field-group"]}>
+            <label className={styles["form-label"]}>Check out</label>
             <DatePicker
               selected={checkOutDate}
               onChange={(date: Date | null) => setCheckOutDate(date)}
               placeholderText="Select check-out date"
-              className={styles["date-input"]}
+              className={styles["form-input"]}
               dateFormat="MMMM d, yyyy"
-              minDate={
-                checkInDate
-                  ? new Date(checkInDate.getTime() + 86400000)
-                  : new Date()
-              }
+              minDate={checkInDate || new Date()}
             />
           </div>
-          <div className={styles["form-field"]}>
-            <label>No. of Guests</label>
+
+          <div className={styles["form-field-group"]}>
+            <label className={styles["form-label"]}>No. of Guests</label>
             <GuestsDropdown
               guestCounts={guestCounts}
               onApply={handleApplyGuests}
             />
           </div>
+
           <button
             className={styles["check-availability-btn"]}
             onClick={handleCheckAvailability}
@@ -241,6 +266,3 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 };
 
 export default Header;
-function setIsLoading(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}

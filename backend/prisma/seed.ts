@@ -27,34 +27,130 @@ async function main() {
     },
   });
 
-  const service = await prisma.service.create({
+  const categories = await prisma.category.createMany({
+    data: [
+      {
+        name: "cabins",
+      },
+      {
+        name: "day-tour",
+      },
+    ],
+  });
+
+  const ventiCabin = await prisma.service.create({
     data: {
-      name: faker.location.city(),
-      description: faker.location.city(),
-      imageUrl: faker.image.url(),
-      price: faker.number.int({ min: 500, max: 3000 }),
+      name: "Venti Cabin",
+      description: `For groups of 15-20
+Rates:
+
+    Day tour (8AM - 5PM) - ₱10,000
+    Overnight (4PM - 12NN) - ₱12,000
+    Additional guests - ₱350 each
+
+Additional Inclusions:
+
+    2 queen-sized beds and 5 foam beds
+    Spacious kitchen inside`,
+      imageUrl: "/assets/amenities_venti.jpg",
+      price: 12_000,
       cabins: {
         create: {
-          maxCapacity: faker.number.int({ min: 1, max: 3 }),
-          minCapacity: faker.number.int({ min: 3, max: 6 }),
+          maxCapacity: 15,
+          minCapacity: 20,
         },
       },
       serviceCategory: {
         create: {
-          category: {
-            create: {
-              name: "cabin",
-            },
-          },
+          categoryId: 1,
         },
       },
     },
   });
 
-  const bookingStatus = await prisma.bookingStatus.create({
+  const maxiCabin = await prisma.service.create({
     data: {
-      name: "pending",
+      name: "Maxi Cabin",
+      description: `For 6-8 guests
+Rates:
+
+    Day tour (8AM - 5PM) - ₱5,000
+    Overnight (4PM - 12NN) - ₱6,000
+    Additional guests - ₱350 each
+
+Additional Inclusions:
+
+    1 queen-sized bed and 2 foam beds`,
+      imageUrl: "/assets/amenities_maxi.jpg",
+      price: 6_000,
+      cabins: {
+        create: {
+          maxCapacity: 6,
+          minCapacity: 8,
+        },
+      },
+      serviceCategory: {
+        create: {
+          categoryId: 1,
+        },
+      },
     },
+  });
+
+  for (let i = 0; i < 3; i++) {
+    const miniCabin = await prisma.service.create({
+      data: {
+        name: "Mini Cabin",
+        description: `For 2-4 guests
+Rates:
+
+    Day tour (8AM - 5PM) - ₱2,000 for 2 guests
+    ₱2,500 for 3-4 guests
+    Overnight (4PM - 12NN) - ₱3,000 for 2 guests
+    ₱3,500 for 3-4 guests
+    Additional guests - ₱350 each
+
+Additional Inclusions:
+
+    1 queen-sized bed and 1 foam bed`,
+        imageUrl: "/assets/amenities_mini.jpg",
+        price: 3_500,
+        cabins: {
+          create: {
+            maxCapacity: 2,
+            minCapacity: 4,
+          },
+        },
+        serviceCategory: {
+          create: {
+            categoryId: 1,
+          },
+        },
+      },
+    });
+  }
+
+  const bookingStatus = await prisma.bookingStatus.createMany({
+    data: [
+      {
+        name: "Pending",
+      },
+      {
+        name: "Cancelled",
+      },
+      {
+        name: "Confirmed",
+      },
+      {
+        name: "Rejected",
+      },
+      {
+        name: "Approved",
+      },
+      {
+        name: "Invalid",
+      },
+    ],
   });
 
   const customer = await prisma.customer.create({
@@ -78,6 +174,12 @@ async function main() {
     },
   });
 
+  const pendingStatus = await prisma.bookingStatus.findUnique({
+    where: {
+      name: "Pending",
+    },
+  });
+
   for (let i = 0; i < 200; i++) {
     const transaction = await prisma.transaction.create({
       data: {
@@ -97,8 +199,8 @@ async function main() {
         checkIn,
         checkOut,
         totalPax: faker.number.int({ min: 1, max: 10 }),
-        bookingStatusId: bookingStatus.id,
-        services: { create: { serviceId: service.id } },
+        bookingStatusId: pendingStatus?.id || 1,
+        services: { create: { serviceId: ventiCabin.id } },
         customerId: customer.id,
         transactionId: transaction.id,
       },
