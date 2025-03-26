@@ -8,8 +8,9 @@ import {
   viewBookingsHandler,
   createWalkInBookingHandler,
   updateBookingHandler,
-  getBookingByReferenceCode,
+  getBookingByIdHandler,
 } from "../controllers/booking.controller";
+import { getBookingById } from "../services/booking.service";
 
 const router = Router();
 
@@ -22,7 +23,7 @@ router.get("/monthly", getLatestBookingsHandler);
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
 router.post("/walk-in", upload.single("file"), createWalkInBookingHandler);
-router.get("/:id", getBookingByReferenceCode);
+router.get("/:id", getBookingByIdHandler);
 router.put("/:id", updateBookingHandler);
 
 export default router;

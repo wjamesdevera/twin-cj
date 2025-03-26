@@ -733,18 +733,18 @@ export const getBookingById = async (req: Request, res: Response) => {
 // Update Booking
 export const editBookingStatus = async (req: Request, res: Response) => {
   try {
-    const { bookingId } = req.params;
+    const { referenceCode } = req.params;
     const { bookingStatus, paymentStatusId, paymentStatus, status } = req.body;
 
     // Validate required fields
-    appAssert(bookingId, BAD_REQUEST, "Booking ID is required");
+    appAssert(referenceCode, BAD_REQUEST, "Booking ID is required");
     appAssert(bookingStatus, BAD_REQUEST, "Booking status is required");
     appAssert(paymentStatusId, BAD_REQUEST, "Payment status ID is required");
     appAssert(paymentStatus, BAD_REQUEST, "Payment status is required");
 
     // Check if the booking exists
     const booking = await prisma.booking.findUnique({
-      where: { id: Number(bookingId) },
+      where: { referenceCode: referenceCode },
     });
 
     if (!booking) {
@@ -764,7 +764,7 @@ export const editBookingStatus = async (req: Request, res: Response) => {
 
     // Update booking status
     const updatedBooking = await prisma.bookingStatus.update({
-      where: { id: Number(bookingId) },
+      where: { id: Number(booking) },
       data: { name: status },
     });
 

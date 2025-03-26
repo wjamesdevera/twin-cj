@@ -152,7 +152,7 @@ export const createWalkInBookingHandler = catchErrors(
   }
 );
 
-export const getBookingByReferenceCode = catchErrors(
+export const getBookingByIdHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
 
