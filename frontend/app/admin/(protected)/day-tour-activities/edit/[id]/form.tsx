@@ -95,7 +95,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
     await trigger(data);
     setNotification({
       isOpen: true,
-      message: "Cabin added successfully!",
+      message: "Changes saved successfully!",
       type: "success",
     });
 

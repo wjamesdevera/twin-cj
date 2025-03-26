@@ -102,7 +102,7 @@ export default function DayTourForm() {
       trigger(data);
       setNotification({
         isOpen: true,
-        message: "Cabin added successfully!",
+        message: "Day Tour added successfully!",
         type: "success",
       });
 
