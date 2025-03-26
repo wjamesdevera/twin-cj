@@ -6,18 +6,32 @@ import { Loading } from "@/app/components/loading";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
-import { cabinFormSchema } from "../../add/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import NotificationModal from "@/app/components/notification_modal";
 import useSWRMutation from "swr/mutation";
 import { updateCabin } from "@/app/lib/api";
+import { capacitySchema, descriptionSchema, fileSchema, nameSchema, priceSchema } from "@/app/lib/zodSchemas";
 
 interface CabinFormProps {
   id: string;
   defaultValues: EditCabinFormData;
 }
+
+export const cabinFormSchema = z
+  .object({
+    name: nameSchema,
+    description: descriptionSchema,
+    file: fileSchema.optional(),
+    price: priceSchema.or(z.number().gt(0)),
+    minCapacity: capacitySchema.or(z.number().gt(0)),
+    maxCapacity: capacitySchema.or(z.number().gt(0)),
+  })
+  .refine((cabin) => cabin.minCapacity <= cabin.maxCapacity, {
+    path: ["maxCapacity"],
+    message: "Max capacity should be greater then min capacity",
+  });
 
 type EditCabinFormData = z.infer<typeof cabinFormSchema>;
 
