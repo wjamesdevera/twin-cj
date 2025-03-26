@@ -255,6 +255,22 @@ const BookingStatusDetails = (props: any) => {
         </div>
       </section>
     );
+  } else if (props.status === "Cancelled") {
+    return (
+      <section className={`${styles["booking-status-details-section"]}`}>
+        <div className={`${styles["booking-status-details-container"]}`}>
+          <div
+            className={`${styles["booking-status-details-container-heading"]}`}
+            style={{ paddingBottom: 5 }}
+          >
+            <h3>Your Booking Has Been Cancelled</h3>
+            <h4>
+              (dynamic message here based from the reason of why the booking was cancelled from the admin dashboard)
+            </h4>
+          </div>
+        </div>
+      </section>
+    );
   } else if (props.status === "Invalid") {
     return (
       <section className={`${styles["booking-status-details-section"]}`}>
