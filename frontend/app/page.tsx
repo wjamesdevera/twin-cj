@@ -11,13 +11,13 @@ const cabins = [
   {
     imageSrc: "/assets/home_mini.jpg",
     imgAltText: "Mini Cabin",
-    title: "Mini",
+    title: "Mini Cabin",
     description: "For 3 to 4 guests",
     availableCabins: 3,
   },
   {
     imageSrc: "/assets/home_maxi.png",
-    imgAltText: "Maxi",
+    imgAltText: "Maxi Cabin",
     title: "Maxi Cabin",
     description: "For 6 to 8 guests",
     availableCabins: 3,
@@ -56,7 +56,7 @@ const CabinCard: React.FC<CabinCardProps> = ({
         <div className={styles["description"]}>
           <p>{description}</p>
           <p>
-            {availableCabins} {title} cabins available
+            {availableCabins} {title} available
           </p>
         </div>
       </div>
