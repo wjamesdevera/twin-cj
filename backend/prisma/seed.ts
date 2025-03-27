@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/utils/password";
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
+import { generateReferenceCode } from "../src/utils/referenceCodeGenerator";
 const prisma = new PrismaClient();
 async function main() {
   const hashedPassword = await hashPassword("Pa$$w0rd123");
@@ -195,7 +196,7 @@ Additional Inclusions:
 
     await prisma.booking.create({
       data: {
-        referenceCode: faker.finance.accountNumber(),
+        referenceCode: await generateReferenceCode(),
         checkIn,
         checkOut,
         totalPax: faker.number.int({ min: 1, max: 10 }),

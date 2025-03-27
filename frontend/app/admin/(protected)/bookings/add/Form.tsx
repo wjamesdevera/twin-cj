@@ -10,6 +10,7 @@ import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
 import NotificationModal from "@/app/components/notification_modal";
+import { z } from "zod";
 
 type FormFields = {
   firstName: string;
@@ -27,7 +28,6 @@ type FormFields = {
   proofOfPayment?: File;
   totalPax: string;
   amount: string;
-  bookingStatus: "approve" | "reject" | "cancel";
 };
 
 interface Service {
@@ -53,6 +53,8 @@ interface BookingResponse {
   data: Record<string, BookingTypeData>;
 }
 
+type FormData = z.infer<typeof walkinSchema>;
+
 export default function WalkInForm() {
   const {
     register,
@@ -62,8 +64,24 @@ export default function WalkInForm() {
     watch,
     trigger,
     formState: { errors },
-  } = useForm<FormFields>({
+  } = useForm<FormData>({
     resolver: zodResolver(walkinSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      contactNumber: "",
+      packageType: undefined,
+      selectedPackageId: "",
+      selectedPackageName: "",
+      checkInDate: "",
+      checkOutDate: "",
+      paymentAccountName: "",
+      paymentAccountNumber: "",
+      paymentMethod: "",
+      totalPax: "",
+      amount: "",
+    },
     mode: "onChange",
   });
 
@@ -150,6 +168,7 @@ export default function WalkInForm() {
     data?.data?.[packageType]?.services || [];
 
   const onSubmit = async (formData: FormFields) => {
+    console.log(formData);
     if (formData.packageType === "day-tour") {
       formData.checkOutDate = formData.checkInDate;
     }
@@ -158,7 +177,7 @@ export default function WalkInForm() {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         if (key === "proofOfPayment") {
-          if (value instanceof FileList && value.length > 0) {
+          if (value instanceof FileList) {
             formDataToSend.append("proofOfPayment", value[0]);
           }
         } else {
@@ -211,25 +230,25 @@ export default function WalkInForm() {
   };
 
   const handleAddBooking = async () => {
-    const isValid = await trigger();
+    // const isValid = await trigger();
 
-    const proofOfPayment = watch("proofOfPayment");
+    // const proofOfPayment = watch("proofOfPayment");
 
-    if (
-      !isValid ||
-      !proofOfPayment ||
-      (proofOfPayment instanceof FileList && proofOfPayment.length === 0)
-    ) {
-      setNotificationMessage(
-        "Please fill in all required fields and upload proof of payment."
-      );
-      setNotificationType("error");
-      setIsNotificationModalOpen(true);
-      return;
-    }
+    // if (
+    //   !isValid ||
+    //   !proofOfPayment ||
+    //   (proofOfPayment instanceof FileList && proofOfPayment.length === 0)
+    // ) {
+    //   setNotificationMessage(
+    //     "Please fill in all required fields and upload proof of payment."
+    //   );
+    //   setNotificationType("error");
+    //   setIsNotificationModalOpen(true);
+    //   return;
+    // }
 
     setConfirmMessage("Are you sure you want to add this booking?");
-    setConfirmAction(() => () => handleSubmit(onSubmit)());
+    setConfirmAction(() => () => handleSubmit(onSubmit));
     setIsConfirmModalOpen(true);
   };
 
@@ -237,20 +256,6 @@ export default function WalkInForm() {
     setConfirmMessage("Are you sure you want to clear the form? ");
     setConfirmAction(() => () => {
       reset();
-      setValue("firstName", "");
-      setValue("lastName", "");
-      setValue("email", "");
-      setValue("contactNumber", "");
-      setValue("packageType", undefined as any);
-      setValue("selectedPackageId", "");
-      setValue("selectedPackageName", "");
-      setValue("checkInDate", "");
-      setValue("checkOutDate", "");
-      setValue("paymentAccountName", "");
-      setValue("paymentAccountNumber", "");
-      setValue("paymentMethod", "");
-      setValue("totalPax", "");
-      setValue("amount", "");
     });
     setIsConfirmModalOpen(true);
   };
@@ -538,8 +543,12 @@ export default function WalkInForm() {
             </label>
             <input
               type="file"
-              {...register("proofOfPayment")}
-              accept="image/*,application/pdf"
+              // {...register("proofOfPayment")}
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  setValue("proofOfPayment", e.target.files[0]); // Manually set value
+                }
+              }}
             />
             {errors.proofOfPayment && (
               <p className={styles.error}>{errors.proofOfPayment?.message}</p>
@@ -551,9 +560,9 @@ export default function WalkInForm() {
       <div className={styles.full_width}>
         <div className={styles.button_container}>
           <CustomButton
-            type="button"
+            type="submit"
             label="Add Booking"
-            onClick={handleAddBooking}
+            // onClick={handleAddBooking}
           />
           <CustomButton
             type="button"

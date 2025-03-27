@@ -41,6 +41,15 @@ export const paymentSchema = z.object({
   paymentMethod: z.string().nonempty("Payment method is required"),
 });
 
+export const fileSchema = z
+  .instanceof(File, { message: "Image upload is required" })
+  .refine((file) => file.size > 0, "File is required")
+  .refine((file) => file.size <= 1024 * 1024, "File size must be less than 1MB")
+  .refine(
+    (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
+    "Invalid File Type"
+  );
+
 export const walkinSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
@@ -54,23 +63,13 @@ export const walkinSchema = z.object({
   paymentAccountName: z.string().min(1, "Payment account name is required"),
   paymentAccountNumber: z.string().min(1, "Payment account number is required"),
   paymentMethod: z.string().min(1, "Payment method is required"),
-  proofOfPayment: z.any().optional(),
+  proofOfPayment: fileSchema,
   totalPax: z
     .string()
     .min(1, "Total Pax must be at least 1")
     .max(30, "Total Pax must be at most 30"),
   amount: z.string().min(1, "Amount must be at least 1"),
-  bookingStatus: z.enum(["approve", "reject", "cancel"]), 
 });
-
-export const fileSchema = z
-  .instanceof(File, { message: "Image upload is required" })
-  .refine((file) => file.size > 0, "File is required")
-  .refine((file) => file.size <= 1024 * 1024, "File size must be less than 1MB")
-  .refine(
-    (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
-    "Invalid File Type"
-  );
 
 export const priceSchema = z
   .string()

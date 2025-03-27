@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import styles from "./bookings.module.scss";
 import BookingTable from "@/app/components/adminBookingDataTable";
@@ -8,7 +8,6 @@ import { Loading } from "@/app/components/loading";
 import { useRouter } from "next/navigation";
 
 interface Booking {
-  id: number;
   referenceNo: string;
   checkIn: string;
   checkOut: string;
@@ -83,7 +82,11 @@ export default function Page() {
           />
         </div>
       </div>
-      <div className={styles.floatingIcon} style={{ cursor: "pointer" }}>
+      <div
+        className={styles.floatingIcon}
+        onClick={() => router.push("/admin/bookings/add")}
+        style={{ cursor: "pointer" }}
+      >
         <svg
           width="61"
           height="57"
