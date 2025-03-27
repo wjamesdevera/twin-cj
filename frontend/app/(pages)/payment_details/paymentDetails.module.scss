@@ -1,3 +1,41 @@
+.transferDetails {
+  ul {
+    margin: 15px 0;
+    padding-left: 0;
+    list-style-type: none;
+
+    li {
+      margin-bottom: 12px;
+    }
+  }
+
+  .paymentMethod {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    align-items: center;
+    gap: 10px;
+
+    strong {
+      font-weight: 600;
+      color: var(--color-neutral-700);
+    }
+
+    span {
+      letter-spacing: 0.5px;
+    }
+  }
+
+  p {
+    color: var(--color-neutral-600);
+
+    &.note {
+      font-size: 0.9em;
+      font-style: italic;
+      color: var(--color-neutral-500);
+    }
+  }
+}
+
 .paymentContainer {
   height: auto;
   max-width: 100vw;
@@ -36,6 +74,11 @@
   font-family: "Open Sans";
   gap: 20px;
   box-sizing: border-box;
+  grid-template-areas:
+    "left1 right1"
+    "left2 right2"
+    "left3 ."
+    "left4 .";
 }
 
 .leftContainer,
@@ -47,24 +90,50 @@
 
 .container1 {
   order: 2;
-  grid-row: span 2;
+  grid-area: right1;
+  height: 100%;
 }
 
 .container2 {
   order: 1;
+  grid-area: left1;
 }
 
 .container3 {
   order: 3;
+  grid-area: left2;
 }
 
 .container4 {
   order: 4;
+  grid-area: left3;
 }
 
 .container5 {
   order: 5;
+  grid-area: right2;
   height: auto;
+  align-self: start;
+}
+
+.paymentContainers {
+  grid-auto-rows: min-content;
+}
+
+@media (max-width: 768px) {
+  .paymentContainers {
+    grid-template-areas: "right1" // Pricing
+      "left1" // Payment Info
+      "left2" // Transfer Details
+      "right2" // Cancellation Policy
+      "left3" // Select Payment
+      "left4"; // (if magdadagdag pa containers)
+    grid-template-columns: 1fr;
+  }
+
+  .container1 {
+    height: auto;
+  }
 }
 
 @media (max-width: 1550px) {

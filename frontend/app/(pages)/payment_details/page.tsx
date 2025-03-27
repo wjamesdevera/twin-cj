@@ -162,7 +162,26 @@ export default function PaymentDetails() {
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container3}`}
             heading="Transfer Details"
-            subheading="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at neque egestas turpis varius pellentesque vitae sed est. Duis cursus nisi vitae enim pellentesque fringilla."
+            subheading={
+              <div className={styles.transferDetails}>
+                <p>Please send your payment to any of the following:</p>
+                <ul>
+                  <li>
+                    <div className={styles.paymentMethod}>
+                      <strong>G-Cash:</strong>
+                      <span>09175599237</span>
+                    </div>
+                  </li>
+                  <li>
+                    <div className={styles.paymentMethod}>
+                      <strong>Bank Transfer:</strong>
+                      <span>XXXX-XXXX-XXXX-XXXX</span>
+                    </div>
+                  </li>
+                </ul>
+                <p className={styles.note}></p>
+              </div>
+            }
           />
           <SelectPayment
             className={`${styles.leftContainer} ${styles.container4}`}
