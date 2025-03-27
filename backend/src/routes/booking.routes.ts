@@ -8,6 +8,12 @@ import {
   getMonthlyBookingsHandler,
   getYearlyBookingsHandler,
   viewBookingsHandler,
+  createWalkInBookingHandler,
+  updateBookingHandler,
+  getBookingByIdHandler,
+  getBookingStatusesHandler,
+  getBookingStatusHandler,
+  reuploadPaymentImageHandler,
 } from "../controllers/booking.controller";
 import { getMonthlyBookings } from "../services/booking.service";
 
@@ -22,5 +28,15 @@ router.get("/yearly", getYearlyBookingsHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
+router.post("/walk-in", upload.single("file"), createWalkInBookingHandler);
+router.get("/status/:referenceCode", getBookingStatusHandler);
+router.get("/statuses", getBookingStatusesHandler);
+router.get("/:referenceCode", getBookingByIdHandler);
+router.patch("/status/:id", updateBookingHandler);
+router.put(
+  "/status/:referenceCode",
+  upload.single("file"),
+  reuploadPaymentImageHandler
+);
 
 export default router;

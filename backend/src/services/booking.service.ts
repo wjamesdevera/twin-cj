@@ -2,10 +2,12 @@ import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
-import { BAD_REQUEST } from "../constants/http";
-import { parse } from "path";
+import { BAD_REQUEST, NOT_FOUND } from "../constants/http";
 import { sendMail } from "../utils/sendMail";
 import { getBookingSuccessEmailTemplate } from "../utils/emailTemplates";
+import { ROOT_STATIC_URL } from "../constants/url";
+import path from "path";
+import fs from "fs";
 
 interface ServiceCategory {
   id: number;
@@ -23,6 +25,7 @@ interface Service {
   updatedAt: Date;
 }
 
+// Check Availability
 export const checkAvailability = async (
   checkInDate: string,
   checkOutDate: string
@@ -167,6 +170,7 @@ export const getServicesByCategory = async (
   }
 };
 
+// Create Bookings for Customer side
 export const createBooking = async (req: Request) => {
   try {
     const parsedBookingData = JSON.parse(req.body.bookingData || "{}");
@@ -315,21 +319,7 @@ export const createBooking = async (req: Request) => {
   }
 };
 
-interface LatestBookingsResponse {
-  bookings: {
-    referenceNo: string;
-    checkIn: string;
-    checkOut: string;
-    service: string;
-    total: number;
-    customerName: string;
-    email: string;
-    status: string;
-  }[];
-  pendingReservations: number;
-  activeReservations: number;
-}
-
+// Admin Dashboard Latest Bookings
 export const getLatestBookings = async () => {
   try {
     const latestBookings = await prisma.booking.findMany({
@@ -459,7 +449,7 @@ export const getYearlyBookings = async () => {
   return yearlyBookingCount;
 };
 
-// Admin Side
+// Admin Booking Dashboard
 export const viewBookings = async (req: Request, res: Response) => {
   try {
     const bookings = await prisma.booking.findMany({
@@ -507,4 +497,523 @@ export const viewBookings = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching latest bookings:", error);
   }
+};
+
+export const createWalkInBooking = async (req: Request, res: Response) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      contactNumber,
+      email,
+      checkInDate,
+      checkOutDate,
+      selectedPackage,
+      paymentAccountName,
+      paymentAccountNumber,
+      paymentMethod,
+      proofOfPayment,
+      totalPax,
+      amount,
+    } = req.body;
+
+    console.log("Received booking data:", {
+      firstName,
+      lastName,
+      contactNumber,
+      email,
+      checkInDate,
+      checkOutDate,
+      selectedPackage,
+      paymentAccountName,
+      paymentAccountNumber,
+      paymentMethod,
+      proofOfPayment,
+      totalPax,
+      amount,
+    });
+
+    appAssert(email, BAD_REQUEST, "Email is required.");
+    appAssert(firstName, BAD_REQUEST, "First name is required.");
+    appAssert(lastName, BAD_REQUEST, "Last name is required.");
+    appAssert(contactNumber, BAD_REQUEST, "Contact number is required.");
+    appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
+    appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
+    appAssert(selectedPackage, BAD_REQUEST, "Package selection is required.");
+
+    const referenceCode = await generateReferenceCode();
+
+    // Find Personal Detail
+    let personalDetail = await prisma.personalDetail.findFirst({
+      where: { email: email },
+    });
+
+    if (!personalDetail) {
+      personalDetail = await prisma.personalDetail.create({
+        data: {
+          firstName: firstName,
+          lastName: lastName,
+          phoneNumber: contactNumber,
+          email: email,
+        },
+      });
+    }
+
+    // Find Customer
+    let customer = await prisma.customer.findUnique({
+      where: { personalDetailId: personalDetail.id },
+    });
+
+    if (!customer) {
+      customer = await prisma.customer.create({
+        data: {
+          personalDetailId: personalDetail.id,
+        },
+      });
+    }
+
+    // Find Booking Status
+    let pendingBookingStatus = await prisma.bookingStatus.findUnique({
+      where: { name: "Pending" },
+    });
+
+    if (!pendingBookingStatus) {
+      pendingBookingStatus = await prisma.bookingStatus.create({
+        data: { name: "Pending" },
+      });
+    }
+
+    // Find or Create Payment Method
+    let paymentMethodRecord = await prisma.paymentMethod.findFirst({
+      where: { name: paymentMethod },
+    });
+
+    if (!paymentMethodRecord) {
+      paymentMethodRecord = await prisma.paymentMethod.create({
+        data: { name: paymentMethod, type: paymentMethod },
+      });
+    }
+
+    // Create Payment Account
+    const paymentAccount = await prisma.paymentAccount.create({
+      data: {
+        accountName: paymentAccountName,
+        accountNumber: paymentAccountNumber,
+        paymentMethodId: paymentMethodRecord.id,
+      },
+    });
+
+    // Create Transaction
+    const transaction = await prisma.transaction.create({
+      data: {
+        amount: parseFloat(amount),
+        proofOfPaymentImageUrl: proofOfPayment,
+        paymentAccountId: paymentAccount.id,
+      },
+    });
+
+    // Create Booking
+    const booking = await prisma.booking.create({
+      data: {
+        referenceCode,
+        checkIn: new Date(checkInDate),
+        checkOut: new Date(checkOutDate),
+        totalPax: parseInt(totalPax),
+        notes: "",
+        customerId: customer.id,
+        bookingStatusId: pendingBookingStatus.id,
+        transactionId: transaction.id,
+      },
+    });
+
+    // Retrieve the service details
+    const service = await prisma.service.findUnique({
+      where: { id: parseInt(selectedPackage) },
+    });
+
+    if (!service) {
+      throw new Error("Service not found");
+    }
+
+    // Create Booking Service
+    const bookingService = await prisma.bookingService.create({
+      data: {
+        bookingId: booking.id,
+        serviceId: service.id,
+      },
+    });
+
+    return res.json({
+      referenceCode,
+      booking,
+      transaction,
+      bookingService,
+      serviceName: service.name,
+    });
+  } catch (error) {
+    console.error("Error creating walk-in booking:", error);
+  }
+};
+
+export const editBooking = async (req: Request, res: Response) => {
+  try {
+    const { bookingId } = req.params;
+    const {
+      checkInDate,
+      checkOutDate,
+      bookingCards,
+      specialRequest,
+      totalPax,
+    } = req.body;
+
+    appAssert(bookingId, BAD_REQUEST, "Booking ID is required.");
+    appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
+    appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
+    appAssert(Array.isArray(bookingCards), BAD_REQUEST, "Invalid services.");
+
+    // Find existing booking
+    const booking = await prisma.booking.findUnique({
+      where: { id: Number(bookingId) },
+      include: { services: true },
+    });
+
+    appAssert(booking, BAD_REQUEST, "Booking not found.");
+
+    // Check new availability
+    const availableServices = await checkAvailability(
+      checkInDate,
+      checkOutDate
+    );
+    const selectedServices = bookingCards.map(
+      (card: { id: number }) => card.id
+    );
+
+    const isAvailable = selectedServices.every((id) =>
+      availableServices.some((service) => service.id === id)
+    );
+
+    appAssert(
+      isAvailable,
+      BAD_REQUEST,
+      "One or more services are not available."
+    );
+
+    // Update Booking
+    const updatedBooking = await prisma.booking.update({
+      where: { id: Number(bookingId) },
+      data: {
+        checkIn: new Date(checkInDate),
+        checkOut: new Date(checkOutDate),
+        totalPax,
+        notes: specialRequest || "",
+      },
+    });
+
+    return res.json({
+      message: "Booking updated successfully",
+      updatedBooking,
+    });
+  } catch (error) {
+    console.error("Error updating booking:", error);
+  }
+};
+
+// Update Booking
+export const editBookingStatus = async (
+  referenceCode: string,
+  bookingStatus: string
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      referenceCode,
+    },
+  });
+  appAssert(booking, NOT_FOUND, "Booking not found");
+
+  const updatedBooking = await prisma.booking.update({
+    where: {
+      referenceCode,
+    },
+    data: {
+      bookingStatusId: Number(bookingStatus),
+    },
+  });
+
+  appAssert(updatedBooking, NOT_FOUND, "Booking not found");
+  return updatedBooking;
+};
+
+export const getBookingStatuses = async () => {
+  return await prisma.bookingStatus.findMany();
+};
+
+export const getBookingByReferenceCode = async (referenceCode: string) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      referenceCode
+    },
+    select: {
+      id: true,
+      referenceCode: true,
+      checkIn: true,
+      checkOut: true,
+      totalPax: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+      services: {
+        select: {
+          service: {
+            include: {
+              serviceCategory: true,
+            },
+          },
+        },
+      },
+      customer: {
+        select: {
+          personalDetail: true,
+        },
+      },
+      bookingStatus: true,
+      transaction: {
+        include: {
+          paymentAccount: true,
+        },
+      },
+    },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not founds");
+
+  return {
+    id: booking.id,
+    referenceCode: booking.referenceCode,
+    checkIn: booking.checkIn,
+    checkOut: booking.checkOut,
+    totalPax: booking.totalPax,
+    notes: booking.notes,
+    createdAt: booking.createdAt,
+    updatedAt: booking.updatedAt,
+    services: booking.services,
+    customer: {
+      id: booking.customer?.personalDetail?.id,
+      firstName: booking.customer?.personalDetail?.firstName,
+      lastName: booking.customer?.personalDetail?.lastName,
+      email: booking.customer?.personalDetail?.email,
+      phoneNumber: booking.customer?.personalDetail?.phoneNumber,
+      createdAt: booking.customer?.personalDetail?.createdAt,
+      updatedAt: booking.customer?.personalDetail?.updatedAt,
+    },
+    bookingStatus: booking.bookingStatus.name,
+    transaction: {
+      id: booking.transaction?.id,
+      proofOfPaymentImageUrl: booking.transaction?.proofOfPaymentImageUrl,
+      amount: booking.transaction?.amount,
+      createdAt: booking.transaction?.createdAt,
+      updatedAt: booking.transaction?.updatedAt,
+    },
+  };
+};
+
+export const getAllBooking = async () => {
+  const bookings = await prisma.booking.findMany({
+    select: {
+      id: true,
+      referenceCode: true,
+      checkIn: true,
+      checkOut: true,
+      totalPax: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+      services: {
+        select: {
+          service: true,
+        },
+      },
+      customer: {
+        select: {
+          personalDetail: true,
+        },
+      },
+      bookingStatus: true,
+      transaction: {
+        include: {
+          paymentAccount: true,
+        },
+      },
+    },
+  });
+
+  return bookings.map((booking) => {
+    return {
+      id: booking.id,
+      referenceCode: booking.referenceCode,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      totalPax: booking.totalPax,
+      notes: booking.notes,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      services: booking.services,
+      customer: {
+        id: booking.customer?.personalDetail?.id,
+        firstName: booking.customer?.personalDetail?.firstName,
+        lastName: booking.customer?.personalDetail?.lastName,
+        email: booking.customer?.personalDetail?.email,
+        phoneNumber: booking.customer?.personalDetail?.phoneNumber,
+        createdAt: booking.customer?.personalDetail?.createdAt,
+        updatedAt: booking.customer?.personalDetail?.updatedAt,
+      },
+      bookingStatus: booking.bookingStatus.name,
+      transaction: {
+        id: booking.transaction?.id,
+        proofOfPaymentImageUrl: booking.transaction?.proofOfPaymentImageUrl,
+        amount: booking.transaction?.amount,
+        createdAt: booking.transaction?.createdAt,
+        updatedAt: booking.transaction?.updatedAt,
+      },
+    };
+  });
+};
+
+export const getBookingStatus = async (referenceCode: string) => {
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { referenceCode },
+      include: {
+        customer: true,
+        bookingStatus: true,
+        services: {
+          include: {
+            service: {
+              include: {
+                serviceCategory: {
+                  include: {
+                    category: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        transaction: true,
+      },
+    });
+
+    appAssert(booking, NOT_FOUND, "Booking not found");
+
+    return {
+      id: booking.id,
+      referenceCode: booking.referenceCode,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      totalPax: booking.totalPax,
+      notes: booking.notes,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      customerId: booking.customerId,
+      bookingStatusId: booking.bookingStatusId,
+      transactionId: booking.transactionId,
+      customer: booking.customer
+        ? {
+            id: booking.customer.id,
+            personalDetailId: booking.customer.personalDetailId,
+            createdAt: booking.customer.createdAt,
+            updatedAt: booking.customer.updatedAt,
+          }
+        : null,
+      bookingStatus: booking.bookingStatus
+        ? {
+            id: booking.bookingStatus.id,
+            name: booking.bookingStatus.name,
+            createdAt: booking.bookingStatus.createdAt,
+            updatedAt: booking.bookingStatus.updatedAt,
+          }
+        : null,
+      services: booking.services.map((booking) => ({
+        id: booking.service.id,
+        name: booking.service.name,
+        description: booking.service.description,
+        imageUrl: booking.service.imageUrl,
+        price: booking.service.price,
+        createdAt: booking.service.createdAt,
+        updatedAt: booking.service.updatedAt,
+        serviceCategoryId: booking.service.serviceCategoryId,
+        serviceCategory: booking.service.serviceCategory
+          ? {
+            id: booking.service.serviceCategory.id,
+            categoryId: booking.service.serviceCategory.categoryId,
+            category: booking.service.serviceCategory.category
+              ? {
+                id: booking.service.serviceCategory.category.id,
+                name: booking.service.serviceCategory.category.name,
+                createdAt: booking.service.serviceCategory.category.createdAt,
+                updatedAt: booking.service.serviceCategory.category.updatedAt,
+              } : null,
+          } : null,
+      })),
+      transaction: booking.transaction
+        ? {
+            id: booking.transaction.id,
+            proofOfPaymentImageUrl: booking.transaction.proofOfPaymentImageUrl,
+            amount: booking.transaction.amount,
+            createdAt: booking.transaction.createdAt,
+            updatedAt: booking.transaction.updatedAt,
+            paymentAccountId: booking.transaction.paymentAccountId,
+          }
+        : null,
+    };
+  } catch (error) {
+    console.error("Error fetching booking status:", error);
+  }
+};
+
+
+export const reuploadPaymentImage = async (
+  referenceCode: string,
+  file: Express.Multer.File
+) => {
+  appAssert(file, BAD_REQUEST, "No file uploaded");
+
+  const booking = await prisma.booking.findUnique({
+    where: { referenceCode },
+    include: { transaction: true },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not found");
+  appAssert(booking.transaction, NOT_FOUND, "Transaction not found");
+
+  const oldImageUrl = booking.transaction.proofOfPaymentImageUrl;
+  const proofOfPaymentImageUrl = `${ROOT_STATIC_URL}/${file.filename}`;
+
+  await prisma.transaction.update({
+    where: { id: booking.transactionId },
+    data: { proofOfPaymentImageUrl },
+  });
+
+  const pendingStatus = await prisma.bookingStatus.findUnique({
+    where: { name: "Pending" },
+  });
+
+  appAssert(pendingStatus, NOT_FOUND, "Pending status not found");
+
+  await prisma.booking.update({
+    where: { referenceCode },
+    data: { bookingStatusId: pendingStatus.id },
+  });
+
+  if (oldImageUrl) {
+    const oldImagePath = path.join(
+      __dirname,
+      "../../uploads",
+      path.basename(oldImageUrl)
+    );
+    if (fs.existsSync(oldImagePath)) {
+      fs.unlinkSync(oldImagePath);
+    }
+  }
+
+  return proofOfPaymentImageUrl;
 };

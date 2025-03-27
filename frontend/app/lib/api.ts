@@ -113,3 +113,147 @@ export const updateAdditionalFee = async (id: string, data: FormData) =>
   API.put(`/api/services/additional-fees/${id}`, data);
 export const deleteAdditionalFee = async (id: number) =>
   API.delete(`/api/services/additional-fees/${id}`);
+
+type ServiceCategory = {
+  id: number;
+  categoryId: number;
+};
+
+type Service = {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+  serviceCategoryId: number;
+  serviceCategory: ServiceCategory;
+};
+
+type BookingService = {
+  service: Service;
+};
+
+type Customer = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type Transaction = {
+  id: string;
+  proofOfPaymentImageUrl: string;
+  amount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type BookingResponse = {
+  id: number;
+  referenceCode: string;
+  checkIn: string;
+  checkOut: string;
+  totalPax: number;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  services: BookingService[];
+  customer: Customer;
+  bookingStatus: string;
+  transaction: Transaction;
+};
+
+// Booking API
+export const getBookingById = async (id: string) =>
+  API.get<BookingResponse>(`/api/bookings/${id}`);
+
+type BookingStatus = {
+  id?: number;
+  name?: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+// Booking Status API
+
+export const getBookingStatus = async () =>
+  API.get<BookingStatus[]>("/api/bookings/statuses");
+
+export const editBookingStatus = async (
+  referenceCode: string,
+  bookingStatus: { bookingStatus: string }
+) => API.patch(`/api/bookings/status/${referenceCode}`, bookingStatus);
+
+type ICategory = {
+    id: number;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+type IServiceCategory = {
+    id: number;
+    categoryId: number;
+    category: ICategory;
+};
+
+type IService = {
+    id: number;
+    name: string;
+    description: string;
+    imageUrl: string;
+    price: number;
+    createdAt: string;
+    updatedAt: string;
+    serviceCategoryId: number;
+    serviceCategory: IServiceCategory;
+};
+
+type ICustomer = {
+    id: number;
+    personalDetailId: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+type IBookingStatus = {
+    id: number;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+type ITransaction = {
+    id: string;
+    proofOfPaymentImageUrl: string;
+    amount: number;
+    createdAt: string;
+    updatedAt: string;
+    paymentAccountId: number;
+};
+
+type IBookingResponse = {
+    id: number;
+    referenceCode: string;
+    checkIn: string;
+    checkOut: string;
+    totalPax: number;
+    notes: string | null;
+    createdAt: string;
+    updatedAt: string;
+    customerId: number;
+    bookingStatusId: number;
+    transactionId: string;
+    customer: ICustomer;
+    bookingStatus: IBookingStatus;
+    services: IService[];
+    transaction: ITransaction;
+};
+
+export const getBookingStatuses = async (referenceCode: string) =>
+  API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);

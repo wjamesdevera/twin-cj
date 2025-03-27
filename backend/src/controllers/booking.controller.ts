@@ -10,14 +10,20 @@ import {
   OK,
 } from "../constants/http";
 import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
-import { ROOT_STATIC_URL } from "../constants/url";
 import {
   getServicesByCategory,
   createBooking,
+  getBookingStatuses,
+  reuploadPaymentImage,
   checkAvailability,
   getLatestBookings,
   getMonthlyBookings,
+  createWalkInBooking,
+  editBookingStatus,
   getYearlyBookings,
+  getBookingStatus,
+  getBookingByReferenceCode,
+  getAllBooking,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -25,26 +31,24 @@ export const getBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { type, checkInDate, checkOutDate } = req.query;
 
-    if (!type || !checkInDate || !checkOutDate) {
-      return res.status(BAD_REQUEST).json({
-        status: "error",
-        message:
-          "'type', 'checkInDate', and 'checkOutDate' query parameters are required",
+    if (type && checkInDate && checkOutDate) {
+      const categorizedBookings = await getServicesByCategory(
+        type as string,
+        checkInDate as string,
+        checkOutDate as string
+      );
+
+      appAssert(categorizedBookings, BAD_REQUEST, "No bookings available");
+
+      return res.status(OK).json({
+        status: "success",
+        data: categorizedBookings,
       });
     }
 
-    const categorizedBookings = await getServicesByCategory(
-      type as string,
-      checkInDate as string,
-      checkOutDate as string
-    );
+    const bookings = await getAllBooking();
 
-    appAssert(categorizedBookings, BAD_REQUEST, "No bookings available");
-
-    return res.status(OK).json({
-      status: "success",
-      data: categorizedBookings,
-    });
+    res.status(OK).json(bookings);
   }
 );
 
@@ -137,5 +141,72 @@ export const viewBookingsHandler = catchErrors(
         message: "Failed to fetch bookings",
       });
     }
+  }
+);
+
+export const createWalkInBookingHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    try {
+      await createWalkInBooking(req, res);
+    } catch (error) {
+      console.error("Error creating walk-in booking:", error);
+      console.log("Request Body:", req.body);
+      return res.status(INTERNAL_SERVER_ERROR).json({
+        status: "error",
+        message: "Failed to create walk-in booking",
+      });
+    }
+  }
+);
+
+export const getBookingByIdHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { referenceCode } = req.params;
+
+    const booking = await getBookingByReferenceCode(referenceCode);
+
+    res.status(OK).json(booking);
+  }
+);
+
+export const updateBookingHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { bookingStatus } = req.body;
+    const booking = await editBookingStatus(id, bookingStatus);
+    res.status(OK).json(booking);
+  }
+);
+
+export const getBookingStatusesHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const bookingStatus = await getBookingStatuses();
+    response.status(OK).json(bookingStatus);
+  }
+);
+
+export const getBookingStatusHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { referenceCode } = req.params;
+
+    const bookingStatus = await getBookingStatus(referenceCode);
+    
+    return res.status(OK).json(bookingStatus);
+  }
+);
+
+export const reuploadPaymentImageHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const { referenceCode } = request.params;
+    const file = request.file;
+
+    appAssert(file, BAD_REQUEST, "No file uploaded");
+
+    const proofOfPaymentImageUrl = await reuploadPaymentImage(referenceCode, file!);
+
+    return response.status(OK).json({
+      status: "success",
+      proofOfPaymentImageUrl,
+    });
   }
 );
