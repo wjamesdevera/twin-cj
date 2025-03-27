@@ -72,7 +72,7 @@ export default function PaymentDetails() {
   }, []);
 
   const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
-    (card: BookingCardData) => card.name === bookingData.selectedOption
+    (card: BookingCardData) => card.id === bookingData.selectedOption
   );
 
   const onSubmit = async (data: PaymentFormData) => {
@@ -86,10 +86,6 @@ export default function PaymentDetails() {
         alert("Please upload your proof of payment.");
         return;
       }
-
-      const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
-        (card: BookingCardData) => card.name === bookingData.selectedOption
-      );
 
       const formData = new FormData();
       formData.append("bookingData", JSON.stringify(bookingData));
@@ -131,7 +127,7 @@ export default function PaymentDetails() {
             imageSrc={
               (bookingData.bookingCards as BookingCardData[]).find(
                 (card: BookingCardData) =>
-                  card.name === bookingData.selectedOption
+                  card.id === bookingData.selectedOption
               )?.imageUrl || undefined
             }
             numberOfGuests={`${
@@ -140,7 +136,12 @@ export default function PaymentDetails() {
             type={
               bookingData.bookingType === "day-tour" ? "Day Tour" : "Overnight"
             }
-            packageType={bookingData.selectedOption}
+            packageType={
+              (bookingData.bookingCards as BookingCardData[]).find(
+                (card: BookingCardData) =>
+                  card.id === bookingData.selectedOption
+              )?.name || "Unknown"
+            }
             packagePrice={selectedCard?.price || 0}
             totalAmount={selectedCard?.price ? selectedCard.price * 0.5 : 0}
             bookingType={
@@ -150,12 +151,37 @@ export default function PaymentDetails() {
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container2}`}
             heading="Payment Information"
-            subheading="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at neque egestas turpis varius pellentesque vitae sed est. Duis cursus nisi vitae enim pellentesque fringilla. Nam eget dolor et enim fringilla semper non eu purus. Nullam lectus lorem, facilisis quis aliquam sollicitudin, facilisis eu ipsum. Sed eget viverra purus."
+            subheading="Please take note of the following details for your payment."
+            fullName={`${bookingData.firstName} ${bookingData.lastName}`}
+            email={bookingData.email}
+            contactNumber={bookingData.contactNumber}
+            downPayment={selectedCard?.price ? selectedCard.price * 0.5 : 0}
+            paymentMethod="Credit Card"
+            status="Pending"
           />
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container3}`}
             heading="Transfer Details"
-            subheading="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at neque egestas turpis varius pellentesque vitae sed est. Duis cursus nisi vitae enim pellentesque fringilla."
+            subheading={
+              <div className={styles.transferDetails}>
+                <p>Please send your payment to any of the following:</p>
+                <ul>
+                  <li>
+                    <div className={styles.paymentMethod}>
+                      <strong>G-Cash:</strong>
+                      <span>09175599237</span>
+                    </div>
+                  </li>
+                  <li>
+                    <div className={styles.paymentMethod}>
+                      <strong>Bank Transfer:</strong>
+                      <span>XXXX-XXXX-XXXX-XXXX</span>
+                    </div>
+                  </li>
+                </ul>
+                <p className={styles.note}></p>
+              </div>
+            }
           />
           <SelectPayment
             className={`${styles.leftContainer} ${styles.container4}`}
