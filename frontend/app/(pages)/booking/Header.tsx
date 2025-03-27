@@ -142,7 +142,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       Swal.fire({
         title: "Please select check-in and check-out dates",
         icon: "error",
-        draggable: true,
       });
       return;
     }
@@ -152,7 +151,14 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       Swal.fire({
         title: "Check-out date must be after check-in date",
         icon: "error",
-        draggable: true,
+      });
+      return;
+    }
+
+    if (guestCounts.adults === 0 && guestCounts.children === 0) {
+      Swal.fire({
+        title: "Please select at least one guest",
+        icon: "error",
       });
       return;
     }
