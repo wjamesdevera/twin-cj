@@ -259,4 +259,4 @@ export const getBookingStatuses = async (referenceCode: string) =>
   API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
 
 export const getBooking = async () =>
-  API.get<BookingResponse[]>(`/api/bookings`);
+  API.get<BookingResponse[]>(`/api/bookings/`);

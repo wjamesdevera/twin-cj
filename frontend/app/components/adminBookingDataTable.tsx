@@ -4,20 +4,62 @@ import styles from "./adminBookingDataTable.module.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Link from "next/link";
 
-interface Booking {
+type ServiceCategory = {
   id: number;
-  referenceNo: string;
-  service: string;
+  categoryId: number;
+};
+
+type Service = {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+  serviceCategoryId: number;
+  serviceCategory: ServiceCategory;
+};
+
+type BookingService = {
+  service: Service;
+};
+
+type Customer = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type Transaction = {
+  id: string;
+  proofOfPaymentImageUrl: string;
+  amount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type BookingResponse = {
+  id: number;
+  referenceCode: string;
   checkIn: string;
   checkOut: string;
-  total: number;
-  customerName: string;
-  email: string;
-  status: string;
-}
+  totalPax: number;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  services: BookingService[];
+  customer: Customer;
+  bookingStatus: string;
+  transaction: Transaction;
+};
 
 interface BookingTableProps {
-  bookings: Booking[];
+  bookings: BookingResponse[] | undefined;
 }
 
 const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
@@ -52,18 +94,19 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     const searchLower = filters.searchTerm.toLowerCase();
 
     const matchesSearchTerm =
-      booking.referenceNo.toLowerCase().includes(searchLower) ||
-      booking.customerName.toLowerCase().includes(searchLower) ||
-      booking.email.toLowerCase().includes(searchLower) ||
-      booking.service.toLowerCase().includes(searchLower);
+      booking.referenceCode.toLowerCase().includes(searchLower) ||
+      booking.customer.firstName.toLowerCase().includes(searchLower) ||
+      booking.customer.email.toLowerCase().includes(searchLower);
 
     const matchesStatus =
       filters.statusFilter === "all" ||
-      booking.status.toLowerCase() === filters.statusFilter.toLowerCase();
+      booking.bookingStatus.toLowerCase() ===
+        filters.statusFilter.toLowerCase();
 
     const matchesService =
       filters.serviceFilter === "all" ||
-      booking.service.toLowerCase() === filters.serviceFilter.toLowerCase();
+      booking.bookingStatus.toLowerCase() ===
+        filters.serviceFilter.toLowerCase();
 
     return matchesSearchTerm && matchesStatus && matchesService;
   });
@@ -185,46 +228,54 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredBookings.map((booking: Booking, index: number) => (
+            {filteredBookings.map((booking: BookingResponse, index: number) => (
               <tr key={index} className={styles.tableRow}>
                 <td className={styles.tableCell}>
-                  <a
-                    href={`/booking/${booking.referenceNo}`}
+                  <Link
+                    href={`/admin/bookings/edit/${booking.referenceCode}`}
                     className={styles.referenceLink}
                   >
-                    {booking.referenceNo}
-                  </a>
+                    {booking.referenceCode}
+                  </Link>
                 </td>
-                <td className={styles.tableCell}>{booking.service}</td>
-                <td className={styles.tableCell}>{booking.checkIn}</td>
-                <td className={styles.tableCell}>{booking.checkOut}</td>
+                <td className={styles.tableCell}>
+                  {booking.services.map((service) => service.service.name)[0]}
+                </td>
+                <td className={styles.tableCell}>
+                  {formatDate(booking.checkIn)}
+                </td>
+                <td className={styles.tableCell}>
+                  {formatDate(booking.checkOut)}
+                </td>
                 <td className={styles.tableCell}>
                   ₱
-                  {booking.total.toLocaleString(undefined, {
+                  {booking.transaction.amount.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </td>
-                <td className={styles.tableCell}>{booking.customerName}</td>
-                <td className={styles.tableCell}>{booking.email}</td>
+                <td
+                  className={styles.tableCell}
+                >{`${booking.customer.firstName} ${booking.customer.lastName}`}</td>
+                <td className={styles.tableCell}>{booking.customer.email}</td>
                 <td
                   className={`${styles.tableCell} ${
-                    booking.status === "pending"
+                    booking.bookingStatus === "pending"
                       ? styles.statusPending
-                      : booking.status === "active"
+                      : booking.bookingStatus === "active"
                       ? styles.statusActive
-                      : booking.status === "approved"
+                      : booking.bookingStatus === "approved"
                       ? styles.statusApproved
-                      : booking.status === "reupload"
+                      : booking.bookingStatus === "reupload"
                       ? styles.statusReupload
-                      : booking.status === "cancel"
+                      : booking.bookingStatus === "cancel"
                       ? styles.statusCancel
-                      : booking.status === "completed"
+                      : booking.bookingStatus === "completed"
                       ? styles.statusCompleted
                       : ""
                   }`}
                 >
-                  {booking.status}
+                  {booking.bookingStatus}
                 </td>
               </tr>
             ))}
