@@ -1,14 +1,34 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./backButton.module.scss";
+import ConfirmModal from "@/app/components/confirm_modal";
 
 interface BackButtonProps {
   className?: string;
 }
 
-export default function BackButton({ className }: BackButtonProps) {
+export default function backButton({ className }: BackButtonProps) {
+  const router = useRouter();
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  const handleBackClick = () => {
+    setIsConfirmModalOpen(true);
+  };
+
+  const confirmBackNavigation = () => {
+    setIsConfirmModalOpen(false);
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/booking");
+    }
+  };
+
   return (
     <div className={`${styles.backBtnContainer} ${className}`}>
-      <button className={styles.backBtn}>
+      <button className={styles.backBtn} onClick={handleBackClick}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="66"
@@ -23,6 +43,15 @@ export default function BackButton({ className }: BackButtonProps) {
         </svg>{" "}
         Booking Details
       </button>
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={confirmBackNavigation}
+        title="Are you sure you want to go back?"
+        confirmText="Yes"
+        cancelText="No"
+      />
     </div>
   );
 }
