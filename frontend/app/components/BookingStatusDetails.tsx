@@ -9,11 +9,11 @@ const BookingStatusDetails = (props: any) => {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true
+      hour12: true,
     });
   };
 
-  if (props.status === "Approved") {
+  if (props.status) {
     return (
       <section className={`${styles["booking-status-details-section"]}`}>
         <div className={`${styles["booking-status-details-container"]}`}>
@@ -31,48 +31,36 @@ const BookingStatusDetails = (props: any) => {
             <div className={`${styles["booking-status-details-left"]}`}>
               <p>
                 <b>Status:&nbsp;</b>
-                <span style={{ color: "green", fontStyle: "italic" }}>
+                <span style={{ color: "orange", fontStyle: "italic" }}>
                   {props.status}
                 </span>
               </p>
               <p>
                 <b>Reference Number:&nbsp;</b>
-                <span>
-                  {props.referenceCode}
-                </span>
+                <span>{props.referenceCode}</span>
               </p>
               {props.category == "day-tour" ? (
                 <p>
                   <b>Package:&nbsp;</b>
-                  <span>
-                    {props.service}
-                  </span>
+                  <span>{props.service}</span>
                 </p>
               ) : (
                 <p>
                   <b>Cabin:&nbsp;</b>
-                  <span>
-                    {props.service}
-                  </span>
+                  <span>{props.service}</span>
                 </p>
               )}
               <p>
                 <b>No. of Guests:&nbsp;</b>
-                <span>
-                  {props.totalPax}
-                </span>
+                <span>{props.totalPax}</span>
               </p>
               <p>
                 <b>Check-In:&nbsp;</b>
-                <span>
-                  {formatDate(props.checkIn)}
-                </span>
+                <span>{formatDate(props.checkIn)}</span>
               </p>
               <p>
                 <b>Check-Out:&nbsp;</b>
-                <span>
-                  {formatDate(props.checkOut)}
-                </span>
+                <span>{formatDate(props.checkOut)}</span>
               </p>
             </div>
             <div
@@ -83,11 +71,18 @@ const BookingStatusDetails = (props: any) => {
                 <b>Important Reminders</b>
               </p>
               <p>
-                Please take note of the following reminders ahead of your reserved schedule:
+                Please take note of the following reminders ahead of your
+                reserved schedule:
               </p>
               <ol>
-                <li>Please bring a valid ID and booking confirmation for verification.</li>
-                <li>Do arrive at least ten minutes before the actual booked schedule.</li>
+                <li>
+                  Please bring a valid ID and booking confirmation for
+                  verification.
+                </li>
+                <li>
+                  Do arrive at least ten minutes before the actual booked
+                  schedule.
+                </li>
                 <li>No smoking inside the premises and observe quiet hours.</li>
               </ol>
             </div>
@@ -120,42 +115,30 @@ const BookingStatusDetails = (props: any) => {
               </p>
               <p>
                 <b>Reference Number:&nbsp;</b>
-                <span>
-                  {props.referenceCode}
-                </span>
+                <span>{props.referenceCode}</span>
               </p>
               {props.category == "day-tour" ? (
                 <p>
                   <b>Package:&nbsp;</b>
-                  <span>
-                    {props.service}
-                  </span>
+                  <span>{props.service}</span>
                 </p>
               ) : (
                 <p>
                   <b>Cabin:&nbsp;</b>
-                  <span>
-                    {props.service}
-                  </span>
+                  <span>{props.service}</span>
                 </p>
               )}
               <p>
                 <b>No. of Guests:&nbsp;</b>
-                <span>
-                  {props.totalPax}
-                </span>
+                <span>{props.totalPax}</span>
               </p>
               <p>
                 <b>Check-In:&nbsp;</b>
-                <span>
-                  {formatDate(props.checkIn)}
-                </span>
+                <span>{formatDate(props.checkIn)}</span>
               </p>
               <p>
                 <b>Check-Out:&nbsp;</b>
-                <span>
-                  {formatDate(props.checkOut)}
-                </span>
+                <span>{formatDate(props.checkOut)}</span>
               </p>
             </div>
             <div
@@ -166,12 +149,19 @@ const BookingStatusDetails = (props: any) => {
                 <b>Important Reminders</b>
               </p>
               <p>
-                Please take note of the following reminders for your pending reservation:
+                Please take note of the following reminders for your pending
+                reservation:
               </p>
               <ol>
                 <li>Booking approvals usually take 24-48 hours.</li>
-                <li>Ensure that your payment is valid, processed, and is confirmed.</li>
-                <li>You will receive an email for any updates that are to be made with your booking.</li>
+                <li>
+                  Ensure that your payment is valid, processed, and is
+                  confirmed.
+                </li>
+                <li>
+                  You will receive an email for any updates that are to be made
+                  with your booking.
+                </li>
               </ol>
             </div>
           </div>
@@ -204,8 +194,8 @@ const BookingStatusDetails = (props: any) => {
                 <b>Reason for Rejection:&nbsp;</b>
               </p>
               <p>
-                The payment screenshot that was provided is unclear, incomplete, or
-                incorrect.
+                The payment screenshot that was provided is unclear, incomplete,
+                or incorrect.
               </p>
             </div>
             <div
@@ -270,7 +260,8 @@ const BookingStatusDetails = (props: any) => {
                 <b>Reason for Rejection:&nbsp;</b>
               </p>
               <p>
-                Your booking was cancelled at your request or by an administrator.
+                Your booking was cancelled at your request or by an
+                administrator.
               </p>
             </div>
             <div
@@ -285,7 +276,8 @@ const BookingStatusDetails = (props: any) => {
               </p>
               <ol>
                 <li>
-                  More details regarding the cancellation may have been sent to your registered email.
+                  More details regarding the cancellation may have been sent to
+                  your registered email.
                 </li>
               </ol>
               <p>
@@ -293,7 +285,8 @@ const BookingStatusDetails = (props: any) => {
               </p>
               <ol>
                 <li>
-                  Ensure your booking met all requirements to avoid future cancellations.
+                  Ensure your booking met all requirements to avoid future
+                  cancellations.
                 </li>
               </ol>
               <p>
@@ -301,7 +294,8 @@ const BookingStatusDetails = (props: any) => {
               </p>
               <ol>
                 <li>
-                  If you believe this was an error or need further clarification, please reach out to us.
+                  If you believe this was an error or need further
+                  clarification, please reach out to us.
                 </li>
               </ol>
             </div>

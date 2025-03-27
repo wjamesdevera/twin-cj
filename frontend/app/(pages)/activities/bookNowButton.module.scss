@@ -1,0 +1,22 @@
+.button {
+  display: inline-block;
+  background: transparent;
+  text-align: center;
+  padding: 0.75rem 1.5rem;
+  color: var(--Sunset-Orange, #a45f14);
+  font-family: "Open Sans";
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.25rem; /* 111.111% */
+  border-radius: 0.3125rem;
+  border: 1px solid var(--Sunset-Orange, #a45f14);
+  text-decoration: none;
+  transition: background 0.3s;
+
+  &:hover {
+    background: var(--Sunset-Orange, #a45f14);
+    color: #ffffff;
+    text-decoration: none;
+  }
+}

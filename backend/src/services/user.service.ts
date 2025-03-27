@@ -1,6 +1,6 @@
 import { UnwrapPromise } from "@prisma/client/runtime/library";
 import { prisma } from "../config/db";
-import { NOT_FOUND, TOO_MANY_REQUESTS } from "../constants/http";
+import { CONFLICT, NOT_FOUND, TOO_MANY_REQUESTS } from "../constants/http";
 import appAssert from "../utils/appAssert";
 
 export const getUser = async (id: string) => {
@@ -93,6 +93,38 @@ export const updateUser = async ({ id, data }: EditUserParams) => {
     },
   });
   appAssert(user, NOT_FOUND, "User not found");
+
+  let existingUser = await prisma.userAccount.findFirst({
+    where: {
+      NOT: {
+        id: id,
+      },
+      personalDetail: {
+        email: data.email?.toLowerCase(),
+      },
+    },
+    include: {
+      personalDetail: true,
+    },
+  });
+
+  appAssert(!existingUser, CONFLICT, "Email already in use");
+
+  existingUser = await prisma.userAccount.findFirst({
+    where: {
+      NOT: {
+        id: id,
+      },
+      personalDetail: {
+        phoneNumber: data.phoneNumber,
+      },
+    },
+    include: {
+      personalDetail: true,
+    },
+  });
+
+  appAssert(!existingUser, CONFLICT, "Phone number already in use");
 
   const updatedUser = await prisma.userAccount.update({
     where: {

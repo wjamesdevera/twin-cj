@@ -8,7 +8,6 @@ interface FormData {
 }
 
 interface Props {
-  onBookingFetched: (data: any) => void;
   register: UseFormRegister<FormData>;
   handleSubmit: UseFormHandleSubmit<FormData>;
   errors: FieldErrors<FormData>;

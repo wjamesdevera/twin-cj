@@ -1,20 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import styles from "./cabins_table.module.scss";
+import styles from "@/app/table.module.scss";
 
 interface Service {
   id: number;
 }
-
-interface AdditionalFee {
-  type: string;
-  description: string;
-  amount: number;
-}
-
 interface Cabin {
   id: number;
   minCapacity: number;
@@ -24,7 +18,6 @@ interface Cabin {
   price: number;
   imageUrl: string;
   service: Service;
-  additionalFee?: AdditionalFee | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -37,6 +30,8 @@ interface Props {
   selectAll: boolean;
   handleDeleteCabin: (id: number) => void;
 }
+
+const ITEMS_PER_PAGE = 5;
 
 const formatPrice = (price: number) => {
   return price.toLocaleString("en-US", {
@@ -67,6 +62,14 @@ const CabinTable = ({
   handleDeleteCabin,
 }: Props) => {
   const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(cabins.length / ITEMS_PER_PAGE);
+
+  const paginatedCabins = cabins.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className={styles.table_container}>
@@ -75,7 +78,11 @@ const CabinTable = ({
           <thead>
             <tr>
               <th>
-                <input type="checkbox" checked={selectAll} onChange={toggleSelectAll} />
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={toggleSelectAll}
+                />
               </th>
               <th>Action</th>
               <th>ID</th>
@@ -85,16 +92,13 @@ const CabinTable = ({
               <th>Rate</th>
               <th>Min Capacity</th>
               <th>Max Capacity</th>
-              <th>Additional Fee Type</th>
-              <th>Additional Fee Description</th>
-              <th>Additional Fee Amount</th>
               <th>Date Created</th>
               <th>Last Updated</th>
             </tr>
           </thead>
           <tbody>
-            {cabins.length > 0 ? (
-              cabins.map((cabin: Cabin) => (
+            {paginatedCabins.length > 0 ? (
+              paginatedCabins.map((cabin: Cabin) => (
                 <tr key={cabin.id}>
                   <td>
                     <input
@@ -106,7 +110,9 @@ const CabinTable = ({
                   <td className={styles.actions}>
                     <button
                       className={styles.edit_button}
-                      onClick={() => router.push(`/admin/cabins/update/${cabin.id}`)}
+                      onClick={() =>
+                        router.push(`/admin/cabins/edit/${cabin.id}`)
+                      }
                     >
                       <FaEdit />
                     </button>
@@ -123,30 +129,52 @@ const CabinTable = ({
                     <Image
                       src={cabin.imageUrl}
                       alt={cabin.name}
-                      width={135}
-                      height={90}
+                      width={25}
+                      height={25}
                       className={styles.image}
+                      unoptimized
                     />
                   </td>
                   <td>{cabin.description}</td>
                   <td>₱{formatPrice(cabin.price)}</td>
                   <td>{cabin.minCapacity}</td>
                   <td>{cabin.maxCapacity}</td>
-                  <td>{cabin.additionalFee?.type || "N/A"}</td>
-                  <td>{cabin.additionalFee?.description || "N/A"}</td>
-                  <td>{cabin.additionalFee?.amount ? `₱${formatPrice(cabin.additionalFee.amount)}` : "N/A"}</td>
                   <td>{formatDate(cabin.createdAt)}</td>
                   <td>{formatDate(cabin.updatedAt)}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={14} className={styles.no_data}>No cabins available</td>
+                <td colSpan={14} className={styles.no_data}>
+                  No cabins available
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {cabins.length > 0 && (
+        <div className={styles.pagination}>
+          <button
+            className={styles.page_button}
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            Previous
+          </button>
+          <span className={styles.page_info}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className={styles.page_button}
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

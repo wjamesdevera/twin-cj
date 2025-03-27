@@ -1,6 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.scss";
-import { Abril_Fatface, Poltawski_Nowy, Open_Sans } from "next/font/google";
+import {
+  Abril_Fatface,
+  Poltawski_Nowy,
+  Open_Sans,
+  Poppins,
+} from "next/font/google";
+
+export const poppins = Poppins({
+  variable: "--font-poppins",
+  weight: ["400", "600"],
+  subsets: ["latin"],
+});
 
 export const openSans = Open_Sans({
   variable: "--font-open-sans",
@@ -30,7 +41,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="">{children}</body>
+      <body
+        className={`${poppins.variable} ${openSans.variable} ${abrilFatface.variable} ${poltawskiNowy.variable} ${openSans.className}`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

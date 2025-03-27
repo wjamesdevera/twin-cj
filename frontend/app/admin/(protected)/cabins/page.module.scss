@@ -1,196 +1,149 @@
 .page_container {
-    display: flex;
-    flex-direction: column;
-    padding: 50px 70px 20px 70px;
-    transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 3rem;
+  transition: all 0.3s ease-in-out;
 }
 
 .page_header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.875rem;
 }
 
 .title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #a45f14;
-}
-
-.view_page_container {
-    text-align: right;
-}
-
-.view_page_link {
-    color: var(--color-neutral-700);
-    text-decoration: underline;
-    font-weight: 500;
-    transition: color 0.2s ease-in-out;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.view_page_link:hover,
-.view_page_link:active {
-    color: var(--color-neutral-900);
-    font-weight: bold;
+  font-size: var(--text-size-2xl);
+  line-height: var(--text-line-height-2xl);
+  font-weight: bold;
+  color: var(--color-sunset-orange-500);
 }
 
 .subheader_container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .button_container {
-    display: flex;
-    gap: 10px; 
+  display: flex;
+  gap: 1rem;
 }
 
 .subheader {
-    font-size: 16px;
-    color: #666;
-    margin: 0;
+  font-size: var(--text-size-base);
+  line-height: var(--text-line-height-base);
+  color: var(--color-neutral-500);
 }
-
-
-.button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 15px;
-    transition: all 0.3s ease-in-out;
-    cursor: pointer;
-    min-width: 120px;
-}
-
-
-.delete_selected_button {
-    background-color: #A80000;
-    color: white;
-    padding: 8px 25px;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: background 0.3s ease-in-out;
-    min-width: 120px;
-}
-
-.delete_selected_button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-.delete_selected_button:hover:not(:disabled) {
-    background-color: #870000;
-}
-
 
 @media (max-width: 1024px) {
-    .title {
-        font-size: 22px;
-    }
+  .title {
+    font-size: 22px;
+  }
 
-    .button_container {
-        width: 100%;
-        justify-content: flex-start;
-    }
+  .button_container {
+    width: 100%;
+    justify-content: right;
+  }
 
-    .page_header {
-        margin-bottom: 20px;
-    }
+  .page_header {
+    margin-bottom: 20px;
+  }
 
-    .button,
-    .delete_selected_button {
-        padding: 8px 18px;
-        font-size: 15px;
-    }
+  .button,
+  .delete_selected_button {
+    padding: 8px 18px;
+    font-size: 15px;
+  }
 }
 
 @media (max-width: 768px) {
-    .page_header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
+  .page_header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
-    .title {
-        font-size: 20px;
-    }
+  .title {
+    font-size: 20px;
+  }
 
-    .subheader {
-        font-size: 14px;
-    }
+  .subheader {
+    font-size: 14px;
+  }
 
-    .button_container {
-        flex-wrap: nowrap;
-        gap: 8px;
-    }
+  .button_container {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
 
-    .button,
-    .delete_selected_button {
-        padding: 7px 15px;
-        font-size: 14px;
-    }
+  .button,
+  .delete_selected_button {
+    padding: 7px 15px;
+    font-size: 14px;
+  }
 
-    .view_page_link {
-        font-size: 14px;
-    }
+  .view_page_link {
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 600px) {
-    .title {
-        font-size: 18px;
-    }
+  .title {
+    font-size: 18px;
+  }
 
-    .subheader {
-        font-size: 13px;
-    }
+  .subheader {
+    font-size: 13px;
+  }
 
-    .button_container {
-        justify-content: flex-start;
-    }
+  .view_page_link {
+    font-size: 13px;
+  }
+  .button_container {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    align-items: stretch;
+  }
 
-    .button,
-    .delete_selected_button {
-        padding: 6px 12px;
-        font-size: 13px;
-        min-width: 100px;
-    }
-
-    .view_page_link {
-        font-size: 13px;
-    }
+  .button,
+  .delete_selected_button {
+    width: 100%;
+    text-align: center;
+    min-width: unset;
+    max-width: 100%;
+    padding: 8px;
+  }
 }
 
 @media (max-width: 480px) {
-    .title {
-        font-size: 16px;
-    }
+  .title {
+    font-size: 16px;
+  }
 
-    .subheader {
-        font-size: 12px;
-    }
+  .subheader {
+    font-size: 12px;
+  }
 
-    .view_page_container {
-        text-align: left;
-    }
+  .view_page_container {
+    text-align: left;
+  }
 
-    .button_container {
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-    }
+  .button_container {
+    flex-wrap: nowrap;
+    justify-content: right;
+  }
 
-    .button,
-    .delete_selected_button {
-        padding: 5px 10px;
-        font-size: 12px;
-        min-width: 90px;
-        border-radius: 12px;
-    }
+  .button,
+  .delete_selected_button {
+    padding: 5px 10px;
+    font-size: 12px;
+    min-width: 90px;
+    border-radius: 12px;
+  }
 
-    .view_page_link {
-        font-size: 12px;
-    }
+  .view_page_link {
+    font-size: 12px;
+  }
 }

@@ -1,4 +1,5 @@
 import config from "../config/config";
+
 import { prisma } from "../config/db";
 import {
   BAD_REQUEST,
@@ -52,17 +53,27 @@ type ChangePasswordParams = {
 };
 
 export const createAccount = async (data: CreateAccountParams) => {
-  let existingUser = await prisma.personalDetail.findUnique({
+  let existingUser = await prisma.userAccount.findFirst({
     where: {
-      email: data.email.toLowerCase(),
+      personalDetail: {
+        email: data.email.toLowerCase(),
+      },
+    },
+    include: {
+      personalDetail: true,
     },
   });
 
   appAssert(!existingUser, CONFLICT, "Email already in use");
 
-  existingUser = await prisma.personalDetail.findUnique({
+  existingUser = await prisma.userAccount.findFirst({
     where: {
-      phoneNumber: data.phoneNumber,
+      personalDetail: {
+        phoneNumber: data.phoneNumber,
+      },
+    },
+    include: {
+      personalDetail: true,
     },
   });
 
@@ -105,23 +116,6 @@ export const createAccount = async (data: CreateAccountParams) => {
   //ignore email errors for now
   if (error) console.log(error);
 
-  // const session = await prisma.session.create({
-  //   data: {
-  //     userAccountId: userAccountId,
-  //     userAgent: data.userAgent,
-  //     expiresAt: thirtyDaysFromNow(),
-  //   },
-  // });
-
-  // const refreshToken = signToken({
-  //   sessionId: session.id,
-  // });
-
-  // const accessToken = signToken({
-  //   userId: userAccountId,
-  //   sessionId: session.id,
-  // });
-
   return {
     user: {
       firstName: createUser.firstName,
@@ -129,15 +123,16 @@ export const createAccount = async (data: CreateAccountParams) => {
       phoneNumber: createUser.phoneNumber,
       email: createUser.email,
     },
-    // accessToken: accessToken,
-    // refreshToken: refreshToken,
   };
 };
 
 export const loginAccount = async (data: LoginAccountParams) => {
-  const user = await prisma.personalDetail.findUnique({
+  const user = await prisma.personalDetail.findFirst({
     where: {
       email: data.email,
+      userAccount: {
+        isVerified: true,
+      },
     },
     include: {
       userAccount: true,

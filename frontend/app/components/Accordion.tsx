@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./accordion.module.scss";
 
 interface AccordionItem {
@@ -11,13 +11,33 @@ interface AccordionItem {
 
 interface AccordionProps {
   items: AccordionItem[];
+  initialOpenIndex?: number; // the index of the item that's initially opened
 }
 
-const Accordion: React.FC<AccordionProps> = ({ items }) => {
+const Accordion: React.FC<AccordionProps> = ({
+  items,
+  initialOpenIndex = null,
+}) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [selections, setSelections] = useState<{ [key: number]: boolean }>({});
   const contentRefs = useRef<HTMLDivElement[]>([]);
   const itemRefs = useRef<HTMLDivElement[]>([]);
+
+  // used to open d accordion item that's specified in initialOpenIndex ^^
+  useEffect(() => {
+    if (initialOpenIndex !== null) {
+      const timer = setTimeout(() => {
+        setActiveIndex(initialOpenIndex);
+        setTimeout(() => {
+          document.getElementById("booking-accordion")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 500);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [initialOpenIndex]);
 
   const handleSelection = (index: number) => {
     setSelections((prev) => ({ ...prev, [index]: true }));
