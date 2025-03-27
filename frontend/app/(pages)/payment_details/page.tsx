@@ -151,7 +151,13 @@ export default function PaymentDetails() {
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container2}`}
             heading="Payment Information"
-            subheading="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at neque egestas turpis varius pellentesque vitae sed est. Duis cursus nisi vitae enim pellentesque fringilla. Nam eget dolor et enim fringilla semper non eu purus. Nullam lectus lorem, facilisis quis aliquam sollicitudin, facilisis eu ipsum. Sed eget viverra purus."
+            subheading="Please take note of the following details for your payment."
+            fullName={`${bookingData.firstName} ${bookingData.lastName}`}
+            email={bookingData.email}
+            contactNumber={bookingData.contactNumber}
+            downPayment={selectedCard?.price ? selectedCard.price * 0.5 : 0}
+            paymentMethod="Credit Card"
+            status="Pending"
           />
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container3}`}

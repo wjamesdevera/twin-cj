@@ -49,7 +49,7 @@ const PricingContainer: React.FC<PricingContainerProps> = ({
 
       <div className={styles.totalAmountContainer}>
         <div className={styles.leftContainer}>
-          <h2 className={styles.pricingTitle}>Downpayment</h2>
+          <h2 className={styles.pricingTitle}>Down Payment: </h2>
         </div>
 
         <div className={styles.rightContainer}>
