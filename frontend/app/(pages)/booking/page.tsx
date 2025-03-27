@@ -34,9 +34,10 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const Booking: React.FC = () => {
   const router = useRouter();
   const [bookingData, setBookingData] = useState({
-    selectedOption: 0 as number,
+    Option: 0 as number,
     bookingType: null as string | null,
     bookingCards: [] as BookingCardData[],
+    selectedOption: null as number | null,
     checkInDate: null as Date | null,
     checkOutDate: null as Date | null,
     guestCounts: { adults: 1, children: 0 },
