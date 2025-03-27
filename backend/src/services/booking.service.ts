@@ -2,8 +2,12 @@ import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
-import { BAD_REQUEST } from "../constants/http";
-import { parse } from "path";
+import { BAD_REQUEST, NOT_FOUND } from "../constants/http";
+import { sendMail } from "../utils/sendMail";
+import { getBookingSuccessEmailTemplate } from "../utils/emailTemplates";
+import { ROOT_STATIC_URL } from "../constants/url";
+import path from "path";
+import fs from "fs";
 
 interface ServiceCategory {
   id: number;
@@ -208,30 +212,34 @@ export const createBooking = async (req: Request) => {
     );
 
     // Find Personal Detail
-    let personalDetail = await prisma.personalDetail.findFirst({
-      where: { email: email },
-    });
-
-    if (!personalDetail) {
-      personalDetail = await prisma.personalDetail.create({
-        data: {
+    let customer = await prisma.customer.findFirst({
+      where: {
+        personalDetail: {
+          email: email,
           firstName: firstName,
           lastName: lastName,
-          phoneNumber: contactNumber,
-          email: email,
+          phoneNumber: lastName,
         },
-      });
-    }
-
-    // Find Customer
-    let customer = await prisma.customer.findUnique({
-      where: { personalDetailId: personalDetail.id },
+      },
+      include: {
+        personalDetail: true,
+      },
     });
 
     if (!customer) {
       customer = await prisma.customer.create({
         data: {
-          personalDetailId: personalDetail.id,
+          personalDetail: {
+            create: {
+              email: email,
+              firstName: firstName,
+              lastName: lastName,
+              phoneNumber: lastName,
+            },
+          },
+        },
+        include: {
+          personalDetail: true,
         },
       });
     }
@@ -268,6 +276,30 @@ export const createBooking = async (req: Request) => {
         transactionId: transaction.id,
       },
     });
+
+    const services = bookingCards.map((card) => card.name);
+
+    const { error } = await sendMail({
+      to: customer.personalDetail?.email || "delivered@resend.dev",
+      ...getBookingSuccessEmailTemplate(
+        referenceCode,
+        `${customer.personalDetail?.firstName} ${customer.personalDetail?.lastName}`,
+        `${new Date(checkInDate).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
+        })} - ${new Date(checkOutDate).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
+        })}`,
+        services
+      ),
+    });
+
+    if (error) console.log(error);
 
     const bookingServices = await Promise.all(
       bookingCards.map((card: { id: number }) =>
@@ -342,58 +374,79 @@ export const getLatestBookings = async () => {
   }
 };
 
-export const getMonthlyBookings = async (req: Request, res: Response) => {
-  try {
-    const currentDate = new Date();
-    const startOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    const endOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      0
-    );
+export const getMonthlyBookings = async () => {
+  const currentYear = new Date().getFullYear();
+  const shortMonths = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
-    // Fetch the bookings for the current month
-    const monthlyBookings = await prisma.booking.findMany({
-      where: {
-        checkIn: {
-          gte: startOfMonth,
-        },
-        checkOut: {
-          lte: endOfMonth,
-        },
+  const monthlyBookingCount = shortMonths.reduce((acc, month) => {
+    acc[month] = 0;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const yearlyBookings = await prisma.booking.findMany({
+    where: {
+      checkIn: {
+        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`), // Start of the year
+        lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
       },
-      select: {
-        checkIn: true,
-      },
-    });
+    },
+  });
 
-    const labels: string[] = [];
-    const values: number[] = [];
+  yearlyBookings.forEach(({ checkIn }) => {
+    const date = new Date(checkIn);
+    const month = shortMonths[date.getMonth()];
+    if (monthlyBookingCount[month] !== undefined) {
+      monthlyBookingCount[month]++;
+    }
+    return monthlyBookingCount;
+  });
+  return monthlyBookingCount;
+};
 
-    monthlyBookings.forEach((booking) => {
-      const checkInDate = new Date(booking.checkIn);
-      const formattedDate = checkInDate.toLocaleDateString();
-      const index = labels.indexOf(formattedDate);
+export const getYearlyBookings = async () => {
+  const currentYear = new Date().getFullYear();
 
-      if (index === -1) {
-        labels.push(formattedDate);
-        values.push(1);
-      } else {
-        values[index] += 1;
-      }
-    });
+  // Initialize an object to store yearly booking counts
+  const yearlyBookingCount: Record<number, number> = {};
 
-    res.json({
-      labels: labels,
-      values: values,
-    });
-  } catch (error) {
-    console.error("Error fetching monthly bookings:", error);
+  // Populate initial structure with zero counts
+  for (let year = currentYear - 5; year <= currentYear; year++) {
+    yearlyBookingCount[year] = 0;
   }
+
+  // Fetch all bookings for the last 5 years
+  const yearlyBookings = await prisma.booking.findMany({
+    where: {
+      checkIn: {
+        gte: new Date(`${currentYear - 5}-01-01T00:00:00.000Z`),
+        lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
+      },
+    },
+    select: { checkIn: true },
+  });
+
+  // Count bookings per year
+  yearlyBookings.forEach(({ checkIn }) => {
+    const year = new Date(checkIn).getFullYear();
+    if (yearlyBookingCount[year] !== undefined) {
+      yearlyBookingCount[year]++;
+    }
+  });
+
+  return yearlyBookingCount;
 };
 
 // Admin Booking Dashboard
@@ -550,23 +603,12 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
       },
     });
 
-    let paymentStatus = await prisma.paymentStatus.findFirst({
-      where: { name: "Pending" },
-    });
-
-    if (!paymentStatus) {
-      paymentStatus = await prisma.paymentStatus.create({
-        data: { name: "Pending" },
-      });
-    }
-
     // Create Transaction
     const transaction = await prisma.transaction.create({
       data: {
         amount: parseFloat(amount),
         proofOfPaymentImageUrl: req.file?.path,
         paymentAccountId: paymentAccount.id,
-        paymentStatusId: paymentStatus.id,
       },
     });
 
@@ -611,4 +653,367 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error creating walk-in booking:", error);
   }
+};
+
+export const editBooking = async (req: Request, res: Response) => {
+  try {
+    const { bookingId } = req.params;
+    const {
+      checkInDate,
+      checkOutDate,
+      bookingCards,
+      specialRequest,
+      totalPax,
+    } = req.body;
+
+    appAssert(bookingId, BAD_REQUEST, "Booking ID is required.");
+    appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
+    appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
+    appAssert(Array.isArray(bookingCards), BAD_REQUEST, "Invalid services.");
+
+    // Find existing booking
+    const booking = await prisma.booking.findUnique({
+      where: { id: Number(bookingId) },
+      include: { services: true },
+    });
+
+    appAssert(booking, BAD_REQUEST, "Booking not found.");
+
+    // Check new availability
+    const availableServices = await checkAvailability(
+      checkInDate,
+      checkOutDate
+    );
+    const selectedServices = bookingCards.map(
+      (card: { id: number }) => card.id
+    );
+
+    const isAvailable = selectedServices.every((id) =>
+      availableServices.some((service) => service.id === id)
+    );
+
+    appAssert(
+      isAvailable,
+      BAD_REQUEST,
+      "One or more services are not available."
+    );
+
+    // Update Booking
+    const updatedBooking = await prisma.booking.update({
+      where: { id: Number(bookingId) },
+      data: {
+        checkIn: new Date(checkInDate),
+        checkOut: new Date(checkOutDate),
+        totalPax,
+        notes: specialRequest || "",
+      },
+    });
+
+    return res.json({
+      message: "Booking updated successfully",
+      updatedBooking,
+    });
+  } catch (error) {
+    console.error("Error updating booking:", error);
+  }
+};
+
+// Update Booking
+export const editBookingStatus = async (
+  referenceCode: string,
+  bookingStatus: string
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      referenceCode,
+    },
+  });
+  appAssert(booking, NOT_FOUND, "Booking not found");
+
+  const updatedBooking = await prisma.booking.update({
+    where: {
+      referenceCode,
+    },
+    data: {
+      bookingStatusId: Number(bookingStatus),
+    },
+  });
+
+  appAssert(updatedBooking, NOT_FOUND, "Booking not found");
+  return updatedBooking;
+};
+
+export const getBookingStatuses = async () => {
+  return await prisma.bookingStatus.findMany();
+};
+
+export const getBookingByReferenceCode = async (referenceCode: string) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      referenceCode
+    },
+    select: {
+      id: true,
+      referenceCode: true,
+      checkIn: true,
+      checkOut: true,
+      totalPax: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+      services: {
+        select: {
+          service: {
+            include: {
+              serviceCategory: true,
+            },
+          },
+        },
+      },
+      customer: {
+        select: {
+          personalDetail: true,
+        },
+      },
+      bookingStatus: true,
+      transaction: {
+        include: {
+          paymentAccount: true,
+        },
+      },
+    },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not founds");
+
+  return {
+    id: booking.id,
+    referenceCode: booking.referenceCode,
+    checkIn: booking.checkIn,
+    checkOut: booking.checkOut,
+    totalPax: booking.totalPax,
+    notes: booking.notes,
+    createdAt: booking.createdAt,
+    updatedAt: booking.updatedAt,
+    services: booking.services,
+    customer: {
+      id: booking.customer?.personalDetail?.id,
+      firstName: booking.customer?.personalDetail?.firstName,
+      lastName: booking.customer?.personalDetail?.lastName,
+      email: booking.customer?.personalDetail?.email,
+      phoneNumber: booking.customer?.personalDetail?.phoneNumber,
+      createdAt: booking.customer?.personalDetail?.createdAt,
+      updatedAt: booking.customer?.personalDetail?.updatedAt,
+    },
+    bookingStatus: booking.bookingStatus.name,
+    transaction: {
+      id: booking.transaction?.id,
+      proofOfPaymentImageUrl: booking.transaction?.proofOfPaymentImageUrl,
+      amount: booking.transaction?.amount,
+      createdAt: booking.transaction?.createdAt,
+      updatedAt: booking.transaction?.updatedAt,
+    },
+  };
+};
+
+export const getAllBooking = async () => {
+  const bookings = await prisma.booking.findMany({
+    select: {
+      id: true,
+      referenceCode: true,
+      checkIn: true,
+      checkOut: true,
+      totalPax: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+      services: {
+        select: {
+          service: true,
+        },
+      },
+      customer: {
+        select: {
+          personalDetail: true,
+        },
+      },
+      bookingStatus: true,
+      transaction: {
+        include: {
+          paymentAccount: true,
+        },
+      },
+    },
+  });
+
+  return bookings.map((booking) => {
+    return {
+      id: booking.id,
+      referenceCode: booking.referenceCode,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      totalPax: booking.totalPax,
+      notes: booking.notes,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      services: booking.services,
+      customer: {
+        id: booking.customer?.personalDetail?.id,
+        firstName: booking.customer?.personalDetail?.firstName,
+        lastName: booking.customer?.personalDetail?.lastName,
+        email: booking.customer?.personalDetail?.email,
+        phoneNumber: booking.customer?.personalDetail?.phoneNumber,
+        createdAt: booking.customer?.personalDetail?.createdAt,
+        updatedAt: booking.customer?.personalDetail?.updatedAt,
+      },
+      bookingStatus: booking.bookingStatus.name,
+      transaction: {
+        id: booking.transaction?.id,
+        proofOfPaymentImageUrl: booking.transaction?.proofOfPaymentImageUrl,
+        amount: booking.transaction?.amount,
+        createdAt: booking.transaction?.createdAt,
+        updatedAt: booking.transaction?.updatedAt,
+      },
+    };
+  });
+};
+
+export const getBookingStatus = async (referenceCode: string) => {
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { referenceCode },
+      include: {
+        customer: true,
+        bookingStatus: true,
+        services: {
+          include: {
+            service: {
+              include: {
+                serviceCategory: {
+                  include: {
+                    category: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        transaction: true,
+      },
+    });
+
+    appAssert(booking, NOT_FOUND, "Booking not found");
+
+    return {
+      id: booking.id,
+      referenceCode: booking.referenceCode,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      totalPax: booking.totalPax,
+      notes: booking.notes,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      customerId: booking.customerId,
+      bookingStatusId: booking.bookingStatusId,
+      transactionId: booking.transactionId,
+      customer: booking.customer
+        ? {
+            id: booking.customer.id,
+            personalDetailId: booking.customer.personalDetailId,
+            createdAt: booking.customer.createdAt,
+            updatedAt: booking.customer.updatedAt,
+          }
+        : null,
+      bookingStatus: booking.bookingStatus
+        ? {
+            id: booking.bookingStatus.id,
+            name: booking.bookingStatus.name,
+            createdAt: booking.bookingStatus.createdAt,
+            updatedAt: booking.bookingStatus.updatedAt,
+          }
+        : null,
+      services: booking.services.map((booking) => ({
+        id: booking.service.id,
+        name: booking.service.name,
+        description: booking.service.description,
+        imageUrl: booking.service.imageUrl,
+        price: booking.service.price,
+        createdAt: booking.service.createdAt,
+        updatedAt: booking.service.updatedAt,
+        serviceCategoryId: booking.service.serviceCategoryId,
+        serviceCategory: booking.service.serviceCategory
+          ? {
+            id: booking.service.serviceCategory.id,
+            categoryId: booking.service.serviceCategory.categoryId,
+            category: booking.service.serviceCategory.category
+              ? {
+                id: booking.service.serviceCategory.category.id,
+                name: booking.service.serviceCategory.category.name,
+                createdAt: booking.service.serviceCategory.category.createdAt,
+                updatedAt: booking.service.serviceCategory.category.updatedAt,
+              } : null,
+          } : null,
+      })),
+      transaction: booking.transaction
+        ? {
+            id: booking.transaction.id,
+            proofOfPaymentImageUrl: booking.transaction.proofOfPaymentImageUrl,
+            amount: booking.transaction.amount,
+            createdAt: booking.transaction.createdAt,
+            updatedAt: booking.transaction.updatedAt,
+            paymentAccountId: booking.transaction.paymentAccountId,
+          }
+        : null,
+    };
+  } catch (error) {
+    console.error("Error fetching booking status:", error);
+  }
+};
+
+
+export const reuploadPaymentImage = async (
+  referenceCode: string,
+  file: Express.Multer.File
+) => {
+  appAssert(file, BAD_REQUEST, "No file uploaded");
+
+  const booking = await prisma.booking.findUnique({
+    where: { referenceCode },
+    include: { transaction: true },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not found");
+  appAssert(booking.transaction, NOT_FOUND, "Transaction not found");
+
+  const oldImageUrl = booking.transaction.proofOfPaymentImageUrl;
+  const proofOfPaymentImageUrl = `${ROOT_STATIC_URL}/${file.filename}`;
+
+  await prisma.transaction.update({
+    where: { id: booking.transactionId },
+    data: { proofOfPaymentImageUrl },
+  });
+
+  const pendingStatus = await prisma.bookingStatus.findUnique({
+    where: { name: "Pending" },
+  });
+
+  appAssert(pendingStatus, NOT_FOUND, "Pending status not found");
+
+  await prisma.booking.update({
+    where: { referenceCode },
+    data: { bookingStatusId: pendingStatus.id },
+  });
+
+  if (oldImageUrl) {
+    const oldImagePath = path.join(
+      __dirname,
+      "../../uploads",
+      path.basename(oldImageUrl)
+    );
+    if (fs.existsSync(oldImagePath)) {
+      fs.unlinkSync(oldImagePath);
+    }
+  }
+
+  return proofOfPaymentImageUrl;
 };

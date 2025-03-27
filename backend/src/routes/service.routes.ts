@@ -24,6 +24,7 @@ router.post("/cabins", upload.single("file"), createCabinHandler);
 router.put("/cabins/:id", upload.single("file"), updateCabinHandler);
 router.delete("/cabins/:id", deleteCabinHandler);
 router.delete("/cabins", deleteSelectedCabinsHandler);
+// Day Tour End point
 router.post("/day-tours", upload.single("file"), createDayTourHandler);
 router.get("/day-tours", getAllDayToursHandler);
 router.get("/day-tours/:id", getDayTourByIdHandler);

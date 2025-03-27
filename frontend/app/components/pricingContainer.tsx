@@ -8,7 +8,7 @@ interface PricingContainerProps {
   type: string;
   bookingType: string;
   imageSrc?: string;
-  packageType: number;
+  packageType: string;
   totalAmount: number;
   packagePrice: number;
 }
@@ -49,12 +49,12 @@ const PricingContainer: React.FC<PricingContainerProps> = ({
 
       <div className={styles.totalAmountContainer}>
         <div className={styles.leftContainer}>
-          <h2 className={styles.pricingTitle}>Total Amount</h2>
+          <h2 className={styles.pricingTitle}>Down Payment: </h2>
         </div>
 
         <div className={styles.rightContainer}>
           <h3 className={styles.totalAmount}>
-            ₱ {totalAmount.toLocaleString()}
+            ₱ {totalAmount ? totalAmount.toLocaleString() : "0.00"}
           </h3>
         </div>
       </div>

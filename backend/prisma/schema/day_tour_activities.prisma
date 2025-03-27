@@ -7,8 +7,6 @@ model DayTourActivities {
     serviceId Int
     service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
-    additionalFeeId Int? @unique  
-    additionalFee   AdditionalFee? @relation(fields: [additionalFeeId], references: [id], onDelete: Cascade)
 
     @@map("day_tour_activities")
 }

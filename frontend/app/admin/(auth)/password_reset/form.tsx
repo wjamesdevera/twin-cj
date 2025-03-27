@@ -13,7 +13,7 @@ import { emailSchema } from "@/app/lib/zodSchemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-const Timer = ({ trigger }: { trigger: () => void }) => {
+const Timer = () => {
   const Ref = useRef<NodeJS.Timeout | null>(null);
   const [time, setTime] = useState<string>("05:00");
   const [isResendAvailable, setIsResetAvailable] = useState(false);
@@ -67,7 +67,6 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
 
   const onClickReset = () => {
     clearTimer(getDeadTime());
-    trigger();
   };
 
   return (
@@ -76,7 +75,7 @@ const Timer = ({ trigger }: { trigger: () => void }) => {
         Resend in <span>{time}</span>
       </p>
       <input
-        type="button"
+        type="submit"
         disabled={!isResendAvailable}
         value={"Resend"}
         onClick={onClickReset}
@@ -92,16 +91,14 @@ const resetPasswordSchema = z.object({
 type FormData = z.infer<typeof resetPasswordSchema>;
 
 export function PasswordResetForm() {
-  const [email, setEmail] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
+  const { register, handleSubmit, getValues } = useForm<FormData>({
     resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
   });
 
   const { trigger, isMutating, error } = useSWRMutation(
@@ -148,9 +145,11 @@ export function PasswordResetForm() {
                 ) : (
                   <div className={styles["success-container"]}>
                     <p className={styles["success-message"]}>
-                      {`A password reset email has been sent to ${email}`}
+                      {`A password reset email has been sent to ${getValues(
+                        "email"
+                      )}`}
                     </p>
-                    <Timer trigger={} />
+                    <Timer />
                   </div>
                 )}
               </div>
@@ -159,8 +158,7 @@ export function PasswordResetForm() {
                   <input
                     type="text"
                     placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register("email")}
                   />
                   {error && (
                     <small className={styles["error-message"]}>
@@ -173,7 +171,6 @@ export function PasswordResetForm() {
                       disabled={isMutating}
                       className={styles["login-button"]}
                       type="submit"
-                      onClick={handleForgotPassword}
                     >
                       Send Verification
                     </button>

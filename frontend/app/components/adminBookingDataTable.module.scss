@@ -158,6 +158,13 @@
   border-bottom: 1px solid #ddd;
 }
 
+.tableHead th {
+  padding: 12px;
+  font-weight: 600;
+  color: var(--color-sunset-orange-500);
+  background-color: #ffffff;
+}
+
 .table tbody {
   width: 100%;
   min-width: 800px;

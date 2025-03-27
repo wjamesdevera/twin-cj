@@ -2,8 +2,10 @@ import React, { useState, useRef } from "react";
 import { DownloadTableExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import Link from "next/link";
 
 interface Booking {
+  id: number;
   referenceNo: string;
   service: string;
   checkIn: string;
@@ -24,7 +26,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   const [filters, setFilters] = useState({
     searchTerm: "",
     statusFilter: "all",
-    // serviceFilter: "all",
+    serviceFilter: "all",
     startDateFilter: "",
     endDateFilter: "",
   });
@@ -59,17 +61,11 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       filters.statusFilter === "all" ||
       booking.status.toLowerCase() === filters.statusFilter.toLowerCase();
 
-    // const matchesService =
-    //   filters.serviceFilter === "all" ||
-    //   booking.service.toLowerCase() === filters.serviceFilter.toLowerCase();
+    const matchesService =
+      filters.serviceFilter === "all" ||
+      booking.service.toLowerCase() === filters.serviceFilter.toLowerCase();
 
-    const bookingDate = new Date(booking.checkIn).toISOString().split("T")[0];
-
-    const matchesDate =
-      (!filters.startDateFilter || bookingDate >= filters.startDateFilter) &&
-      (!filters.endDateFilter || bookingDate <= filters.endDateFilter);
-
-    return matchesSearchTerm && matchesStatus && matchesDate;
+    return matchesSearchTerm && matchesStatus && matchesService;
   });
 
   return (

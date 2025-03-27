@@ -27,6 +27,7 @@ type FormFields = {
   proofOfPayment?: File;
   totalPax: string;
   amount: string;
+  bookingStatus: "approve" | "reject" | "cancel";
 };
 
 interface Service {
