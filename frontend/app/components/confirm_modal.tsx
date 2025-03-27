@@ -50,5 +50,3 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 };
 
 export default ConfirmModal;
-
-export default ConfirmModal;

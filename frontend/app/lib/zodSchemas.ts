@@ -42,10 +42,10 @@ export const paymentSchema = z.object({
 });
 
 export const walkinSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email"),
-  contactNumber: z.string().min(10, "Invalid contact number"),
+  firstName: nameSchema,
+  lastName: nameSchema,
+  email: emailSchema,
+  contactNumber: phoneNumberSchema,
   packageType: z.enum(["day-tour", "cabins"]),
   selectedPackageId: z.string().min(1, "Selected package is required"),
   selectedPackageName: z.string().min(1),

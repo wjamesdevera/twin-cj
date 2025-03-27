@@ -10,7 +10,6 @@ import {
   OK,
 } from "../constants/http";
 import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
-import { ROOT_STATIC_URL } from "../constants/url";
 import {
   getServicesByCategory,
   createBooking,
@@ -20,6 +19,9 @@ import {
   createWalkInBooking,
   editBookingStatus,
   getYearlyBookings,
+  getBookingStatus,
+  getBookingByReferenceCode,
+  getAllBooking,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
 
@@ -27,26 +29,24 @@ export const getBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { type, checkInDate, checkOutDate } = req.query;
 
-    if (!type || !checkInDate || !checkOutDate) {
-      return res.status(BAD_REQUEST).json({
-        status: "error",
-        message:
-          "'type', 'checkInDate', and 'checkOutDate' query parameters are required",
+    if (type && checkInDate && checkOutDate) {
+      const categorizedBookings = await getServicesByCategory(
+        type as string,
+        checkInDate as string,
+        checkOutDate as string
+      );
+
+      appAssert(categorizedBookings, BAD_REQUEST, "No bookings available");
+
+      return res.status(OK).json({
+        status: "success",
+        data: categorizedBookings,
       });
     }
 
-    const categorizedBookings = await getServicesByCategory(
-      type as string,
-      checkInDate as string,
-      checkOutDate as string
-    );
+    const bookings = await getAllBooking();
 
-    appAssert(categorizedBookings, BAD_REQUEST, "No bookings available");
-
-    return res.status(OK).json({
-      status: "success",
-      data: categorizedBookings,
-    });
+    res.status(OK).json(bookings);
   }
 );
 
@@ -161,32 +161,24 @@ export const getBookingByIdHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { referenceCode } = req.params;
 
-    const booking = await prisma.booking.findUnique({
-      where: { referenceCode: referenceCode },
-      include: {
-        services: true,
-      },
-    });
+    const booking = await getBookingByReferenceCode(referenceCode);
 
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-
-    res.json(booking);
+    res.status(OK).json(booking);
   }
 );
 
 export const updateBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
-    try {
-      await editBookingStatus(req, res);
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-      console.log("Request Body:", req.body);
-      return res.status(INTERNAL_SERVER_ERROR).json({
-        status: "error",
-        message: "Failed to update booking status",
-      });
-    }
+    const { id } = req.params;
+    const { bookingStatus } = req.body;
+    const booking = await editBookingStatus(id, bookingStatus);
+    res.status(OK).json(booking);
+  }
+);
+
+export const getBookingStatusHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const bookingStatus = await getBookingStatus();
+    response.status(OK).json(bookingStatus);
   }
 );

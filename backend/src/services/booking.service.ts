@@ -2,8 +2,11 @@ import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "../constants/http";
-import { parse } from "path";
+import {
+  BAD_REQUEST,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+} from "../constants/http";
 import { sendMail } from "../utils/sendMail";
 import { getBookingSuccessEmailTemplate } from "../utils/emailTemplates";
 
@@ -717,87 +720,214 @@ export const editBooking = async (req: Request, res: Response) => {
 };
 
 // Get Booking by ID
-export const getBookingById = async (req: Request, res: Response) => {
-  try {
-    const { referenceCode } = req.params;
-    appAssert(referenceCode, BAD_REQUEST, "Booking referenceNo is required.");
+// export const getBookingById = async (req: Request, res: Response) => {
+//   try {
+//     const { referenceCode } = req.params;
+//     appAssert(referenceCode, BAD_REQUEST, "Booking referenceNo is required.");
 
-    const booking = await prisma.booking.findUnique({
-      where: { referenceCode: referenceCode },
-      include: {
-        services: {
-          include: { service: true },
-        },
-        transaction: {
-          include: {
-            paymentAccount: {
-              include: { paymentMethod: true },
+//     const booking = await prisma.booking.findUnique({
+//       where: { referenceCode: referenceCode },
+//       select: {
+//         id: true,
+//         referenceCode: true,
+//         checkIn: true,
+//         checkOut: true,
+//         totalPax: true,
+//         notes: true,
+//         customer: {
+//           select: {
+//             personalDetail: true,
+//           },
+//         },
+//         services: {
+//           include: { service: true },
+//         },
+//         bookingStatus: true,
+//         transaction: true,
+//       },
+//     });
+
+//     appAssert(booking, BAD_REQUEST, "Booking not found.");
+
+//     return res.json({
+//       referenceNo: booking.referenceCode,
+//       checkIn: booking.checkIn.toISOString(),
+//       checkOut: booking.checkOut.toISOString(),
+//       services: booking.services.map((s) => s.service.name),
+//       total: booking.transaction?.amount || 0,
+//       paymentMethod:
+//         booking.transaction?.paymentAccount?.paymentMethod?.name || "N/A",
+//       paymentAccountName:
+//         booking.transaction?.paymentAccount?.accountName || "N/A",
+//       paymentAccountNumber:
+//         booking.transaction?.paymentAccount?.accountNumber || "N/A",
+//       customerName: `${booking.customer.personalDetail?.firstName ?? ""} ${
+//         booking.customer.personalDetail?.lastName ?? ""
+//       }`,
+//       email: booking.customer.personalDetail?.email || "N/A",
+//       status: booking.bookingStatus.name,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching booking by ID:", error);
+//     return res
+//       .status(INTERNAL_SERVER_ERROR)
+//       .json({ error: "Failed to fetch booking" });
+//   }
+// };
+
+// Update Booking
+export const editBookingStatus = async (
+  referenceCode: string,
+  bookingStatus: string
+) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      referenceCode,
+    },
+  });
+  appAssert(booking, NOT_FOUND, "Booking not found");
+
+  const updatedBooking = await prisma.booking.update({
+    where: {
+      referenceCode,
+    },
+    data: {
+      bookingStatusId: Number(bookingStatus),
+    },
+  });
+
+  appAssert(updatedBooking, NOT_FOUND, "Booking not found");
+  return updatedBooking;
+};
+
+export const getBookingStatus = async () => {
+  return await prisma.bookingStatus.findMany();
+};
+
+export const getBookingByReferenceCode = async (referenceCode: string) => {
+  const booking = await prisma.booking.findFirst({
+    select: {
+      id: true,
+      referenceCode: true,
+      checkIn: true,
+      checkOut: true,
+      totalPax: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+      services: {
+        select: {
+          service: {
+            include: {
+              serviceCategory: true,
             },
           },
         },
-        customer: {
-          include: { personalDetail: true },
-        },
-        bookingStatus: true,
       },
-    });
+      customer: {
+        select: {
+          personalDetail: true,
+        },
+      },
+      bookingStatus: true,
+      transaction: {
+        include: {
+          paymentAccount: true,
+        },
+      },
+    },
+  });
 
-    appAssert(booking, BAD_REQUEST, "Booking not found.");
+  appAssert(booking, NOT_FOUND, "Booking not founds");
 
-    return res.json({
-      referenceNo: booking.referenceCode,
-      checkIn: booking.checkIn.toISOString(),
-      checkOut: booking.checkOut.toISOString(),
-      services: booking.services.map((s) => s.service.name),
-      total: booking.transaction?.amount || 0,
-      paymentMethod:
-        booking.transaction?.paymentAccount?.paymentMethod?.name || "N/A",
-      paymentAccountName:
-        booking.transaction?.paymentAccount?.accountName || "N/A",
-      paymentAccountNumber:
-        booking.transaction?.paymentAccount?.accountNumber || "N/A",
-      customerName: `${booking.customer.personalDetail?.firstName ?? ""} ${
-        booking.customer.personalDetail?.lastName ?? ""
-      }`,
-      email: booking.customer.personalDetail?.email || "N/A",
-      status: booking.bookingStatus.name,
-    });
-  } catch (error) {
-    console.error("Error fetching booking by ID:", error);
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch booking" });
-  }
+  return {
+    id: booking.id,
+    referenceCode: booking.referenceCode,
+    checkIn: booking.checkIn,
+    checkOut: booking.checkOut,
+    totalPax: booking.totalPax,
+    notes: booking.notes,
+    createdAt: booking.createdAt,
+    updatedAt: booking.updatedAt,
+    services: booking.services,
+    customer: {
+      id: booking.customer?.personalDetail?.id,
+      firstName: booking.customer?.personalDetail?.firstName,
+      lastName: booking.customer?.personalDetail?.lastName,
+      email: booking.customer?.personalDetail?.email,
+      phoneNumber: booking.customer?.personalDetail?.phoneNumber,
+      createdAt: booking.customer?.personalDetail?.createdAt,
+      updatedAt: booking.customer?.personalDetail?.updatedAt,
+    },
+    bookingStatus: booking.bookingStatus.name,
+    transaction: {
+      id: booking.transaction?.id,
+      proofOfPaymentImageUrl: booking.transaction?.proofOfPaymentImageUrl,
+      amount: booking.transaction?.amount,
+      createdAt: booking.transaction?.createdAt,
+      updatedAt: booking.transaction?.updatedAt,
+    },
+  };
 };
 
-// Update Booking
-export const editBookingStatus = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { bookingStatus, status, message } = req.body;
+export const getAllBooking = async () => {
+  const bookings = await prisma.booking.findMany({
+    select: {
+      id: true,
+      referenceCode: true,
+      checkIn: true,
+      checkOut: true,
+      totalPax: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+      services: {
+        select: {
+          service: true,
+        },
+      },
+      customer: {
+        select: {
+          personalDetail: true,
+        },
+      },
+      bookingStatus: true,
+      transaction: {
+        include: {
+          paymentAccount: true,
+        },
+      },
+    },
+  });
 
-    // Validate required fields
-    appAssert(id, BAD_REQUEST, "Booking ID is required");
-    appAssert(bookingStatus, BAD_REQUEST, "Booking status is required");
-
-    // Check if the booking exists
-    const booking = await prisma.booking.findUnique({
-      where: { id: Number(id) },
-    });
-
-    if (!booking) {
-      return res.status(BAD_REQUEST).json({ error: "Booking not found" });
-    }
-
-    // Update booking status
-    const updatedBookingStatus = await prisma.bookingStatus.update({
-      where: { id: booking.bookingStatusId },
-      data: { name: status, message: message || null },
-    });
-  } catch (error) {
-    console.error("Error updating statuses:", error);
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .json({ error: "Internal Server Error" });
-  }
+  return bookings.map((booking) => {
+    return {
+      id: booking.id,
+      referenceCode: booking.referenceCode,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      totalPax: booking.totalPax,
+      notes: booking.notes,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
+      services: booking.services,
+      customer: {
+        id: booking.customer?.personalDetail?.id,
+        firstName: booking.customer?.personalDetail?.firstName,
+        lastName: booking.customer?.personalDetail?.lastName,
+        email: booking.customer?.personalDetail?.email,
+        phoneNumber: booking.customer?.personalDetail?.phoneNumber,
+        createdAt: booking.customer?.personalDetail?.createdAt,
+        updatedAt: booking.customer?.personalDetail?.updatedAt,
+      },
+      bookingStatus: booking.bookingStatus.name,
+      transaction: {
+        id: booking.transaction?.id,
+        proofOfPaymentImageUrl: booking.transaction?.proofOfPaymentImageUrl,
+        amount: booking.transaction?.amount,
+        createdAt: booking.transaction?.createdAt,
+        updatedAt: booking.transaction?.updatedAt,
+      },
+    };
+  });
 };
