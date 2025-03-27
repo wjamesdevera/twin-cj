@@ -72,7 +72,7 @@ export default function PaymentDetails() {
   }, []);
 
   const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
-    (card: BookingCardData) => card.name === bookingData.selectedOption
+    (card: BookingCardData) => card.id === bookingData.selectedOption
   );
 
   const onSubmit = async (data: PaymentFormData) => {
@@ -86,10 +86,6 @@ export default function PaymentDetails() {
         alert("Please upload your proof of payment.");
         return;
       }
-
-      const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
-        (card: BookingCardData) => card.name === bookingData.selectedOption
-      );
 
       const formData = new FormData();
       formData.append("bookingData", JSON.stringify(bookingData));
@@ -131,7 +127,7 @@ export default function PaymentDetails() {
             imageSrc={
               (bookingData.bookingCards as BookingCardData[]).find(
                 (card: BookingCardData) =>
-                  card.name === bookingData.selectedOption
+                  card.id === bookingData.selectedOption
               )?.imageUrl || undefined
             }
             numberOfGuests={`${
@@ -140,7 +136,12 @@ export default function PaymentDetails() {
             type={
               bookingData.bookingType === "day-tour" ? "Day Tour" : "Overnight"
             }
-            packageType={bookingData.selectedOption}
+            packageType={
+              (bookingData.bookingCards as BookingCardData[]).find(
+                (card: BookingCardData) =>
+                  card.id === bookingData.selectedOption
+              )?.name || "Unknown"
+            }
             packagePrice={selectedCard?.price || 0}
             totalAmount={selectedCard?.price ? selectedCard.price * 0.5 : 0}
             bookingType={
