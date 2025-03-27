@@ -12,12 +12,24 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSWRMutation from "swr/mutation";
 import { updateDayTour } from "@/app/lib/api";
-import { dayTourSchema } from "../../add/form";
+import {
+  nameSchema,
+  descriptionSchema,
+  fileSchema,
+  priceSchema,
+} from "@/app/lib/zodSchemas";
 
 interface DayTourProps {
   id: string;
   defaultValues: DayTourFormData;
 }
+
+const dayTourSchema = z.object({
+  name: nameSchema,
+  description: descriptionSchema,
+  file: fileSchema.optional(),
+  price: priceSchema.or(z.number().gt(0).lte(100_000)),
+});
 
 type DayTourFormData = z.infer<typeof dayTourSchema>;
 
@@ -167,9 +179,7 @@ export default function EditDayTour({ id, defaultValues }: DayTourProps) {
             </div>
 
             <div className={styles.form_group}>
-              <label>
-                Upload Image
-              </label>
+              <label>Upload Image</label>
               <input
                 type="file"
                 onChange={(e) => {

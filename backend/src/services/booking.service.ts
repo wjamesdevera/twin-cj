@@ -273,11 +273,25 @@ export const createBooking = async (req: Request) => {
       },
     });
 
+    const services = bookingCards.map((card) => card.name);
+
     const { error } = await sendMail({
       to: customer.personalDetail?.email || "delivered@resend.dev",
       ...getBookingSuccessEmailTemplate(
         referenceCode,
-        `${customer.personalDetail?.firstName} ${customer.personalDetail?.lastName}`
+        `${customer.personalDetail?.firstName} ${customer.personalDetail?.lastName}`,
+        `${new Date(checkInDate).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
+        })} - ${new Date(checkOutDate).toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "long",
+          day: "2-digit",
+          year: "numeric",
+        })}`,
+        services
       ),
     });
 
@@ -370,7 +384,7 @@ export const getLatestBookings = async () => {
   }
 };
 
-export const getMonthlyBookings = async (req: Request, res: Response) => {
+export const getMonthlyBookings = async () => {
   const currentYear = new Date().getFullYear();
   const shortMonths = [
     "Jan",
@@ -409,61 +423,40 @@ export const getMonthlyBookings = async (req: Request, res: Response) => {
     }
     return monthlyBookingCount;
   });
+  return monthlyBookingCount;
+};
 
-  res.json({
-    monthlyBookingCount,
+export const getYearlyBookings = async () => {
+  const currentYear = new Date().getFullYear();
+
+  // Initialize an object to store yearly booking counts
+  const yearlyBookingCount: Record<number, number> = {};
+
+  // Populate initial structure with zero counts
+  for (let year = currentYear - 5; year <= currentYear; year++) {
+    yearlyBookingCount[year] = 0;
+  }
+
+  // Fetch all bookings for the last 5 years
+  const yearlyBookings = await prisma.booking.findMany({
+    where: {
+      checkIn: {
+        gte: new Date(`${currentYear - 5}-01-01T00:00:00.000Z`),
+        lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
+      },
+    },
+    select: { checkIn: true },
   });
 
-  // try {
-  //   const currentDate = new Date();
-  //   const startOfMonth = new Date(
-  //     currentDate.getFullYear(),
-  //     currentDate.getMonth(),
-  //     1
-  //   );
-  //   const endOfMonth = new Date(
-  //     currentDate.getFullYear(),
-  //     currentDate.getMonth() + 1,
-  //     0
-  //   );
+  // Count bookings per year
+  yearlyBookings.forEach(({ checkIn }) => {
+    const year = new Date(checkIn).getFullYear();
+    if (yearlyBookingCount[year] !== undefined) {
+      yearlyBookingCount[year]++;
+    }
+  });
 
-  //   // Fetch the bookings for the current month
-  //   const monthlyBookings = await prisma.booking.findMany({
-  //     where: {
-  //       checkIn: {
-  //         gte: startOfMonth,
-  //       },
-  //       checkOut: {
-  //         lte: endOfMonth,
-  //       },
-  //     },
-  //     select: {
-  //       checkIn: true,
-  //     },
-  //   });
-
-  //   const labels: string[] = [];
-  //   const values: number[] = [];
-
-  //   monthlyBookings.forEach((booking) => {
-  //     const checkInDate = new Date(booking.checkIn);
-  //     const formattedDate = checkInDate.toLocaleDateString();
-  //     const index = labels.indexOf(formattedDate);
-
-  //     if (index === -1) {
-  //       labels.push(formattedDate);
-  //       values.push(1);
-  //     } else {
-  //       values[index] += 1;
-  //     }
-  //   });
-
-  //   res.json({
-  //     ...monthlyBookings,
-  //   });
-  // } catch (error) {
-  //   console.error("Error fetching monthly bookings:", error);
-  // }
+  return yearlyBookingCount;
 };
 
 // Admin Side

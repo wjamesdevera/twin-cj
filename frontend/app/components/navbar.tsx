@@ -7,6 +7,7 @@ import Image from "next/image";
 import { navlist } from "@/app/constants/navlist";
 import twinCJLogo from "@/public/assets/twincj-logo.png";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface NavLinkProps {
   label: string;
@@ -49,6 +50,7 @@ const NavLinks = () => {
 };
 
 export default function Navbar() {
+  const router = useRouter();
   const [isNavActive, setIsNavActive] = useState(false);
 
   const toggleNav = () => {
@@ -94,7 +96,12 @@ export default function Navbar() {
             isNavActive ? styles.hidden : ""
           }`}
         >
-          <button className={styles.reserveBtn}>Book Now</button>
+          <button
+            className={styles.reserveBtn}
+            onClick={() => router.push("/booking")}
+          >
+            Book Now
+          </button>
         </div>
       </div>
     </div>

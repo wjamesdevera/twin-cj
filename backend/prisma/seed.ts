@@ -56,8 +56,8 @@ Additional Inclusions:
       price: 12_000,
       cabins: {
         create: {
-          maxCapacity: 15,
-          minCapacity: 20,
+          maxCapacity: 20,
+          minCapacity: 15,
         },
       },
       serviceCategory: {
@@ -85,8 +85,8 @@ Additional Inclusions:
       price: 6_000,
       cabins: {
         create: {
-          maxCapacity: 6,
-          minCapacity: 8,
+          maxCapacity: 8,
+          minCapacity: 6,
         },
       },
       serviceCategory: {
@@ -117,8 +117,8 @@ Additional Inclusions:
         price: 3_500,
         cabins: {
           create: {
-            maxCapacity: 2,
-            minCapacity: 4,
+            maxCapacity: 4,
+            minCapacity: 2,
           },
         },
         serviceCategory: {

@@ -18,7 +18,7 @@ const ResultBanner: React.FC<ResultBannerProps> = ({ isSuccess }) => {
     <div className={isSuccess ? styles.successBanner : styles.failedBanner}>
       {isSuccess
         ? "Your email has been verified"
-        : "Verification failed: either verifcation link has been used or verification link has expired"}
+        : "Either verification link has been used or verification link has expired"}
     </div>
   );
 };

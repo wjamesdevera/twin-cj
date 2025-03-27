@@ -149,14 +149,6 @@ const DayTourTable: React.FC<DayTourTableProps> = ({
                       parseFloat(dayTour.rate).toFixed(2)
                     ).toLocaleString()}
                   </td>
-                  <td>{dayTour.additionalFeeType}</td>
-                  <td>{dayTour.additionalFeeDescription}</td>
-                  <td>
-                    ₱
-                    {Number(
-                      parseFloat(dayTour.additionalFeeAmount).toFixed(2)
-                    ).toLocaleString()}
-                  </td>
                   <td>{formatDate(dayTour.createdAt)}</td>
                   <td>{formatDate(dayTour.updatedAt)}</td>
                 </tr>

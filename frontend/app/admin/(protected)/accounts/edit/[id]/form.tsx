@@ -91,6 +91,7 @@ const Form: React.FC<EditUserFormArg> = ({
     openModal("Are you sure you want to save changes?", async () => {
       try {
         await trigger(data);
+        router.replace("/admin/accounts");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (error.message === "Email already in use") {

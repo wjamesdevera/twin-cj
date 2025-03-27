@@ -26,7 +26,7 @@ export default function UpdateCabin() {
         <div className={styles.back_arrow} onClick={() => router.back()}>
           <IoArrowBack />
         </div>
-        <h1 className={styles.title}>Edit Cabin: {id}</h1>
+        <h1 className={styles.title}>Edit Cabin</h1>
       </div>
       <CabinForm defaultValues={data ? data.data.cabin : null} id={id} />
     </div>

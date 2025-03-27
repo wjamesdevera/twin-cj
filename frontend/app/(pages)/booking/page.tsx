@@ -34,7 +34,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const Booking: React.FC = () => {
   const router = useRouter();
   const [bookingData, setBookingData] = useState({
-    selectedOption: "",
+    selectedOption: 0 as number,
     bookingType: null as string | null,
     bookingCards: [] as BookingCardData[],
     checkInDate: null as Date | null,
@@ -100,7 +100,7 @@ const Booking: React.FC = () => {
       firstName: bookingDetails.firstName,
       lastName: bookingDetails.lastName,
       bookingCards: bookingData.bookingCards.filter(
-        (card) => card.name === bookingData.selectedOption
+        (card) => card.id === bookingData.selectedOption
       ),
     };
     sessionStorage.setItem("bookingData", JSON.stringify(bookingPayload));
@@ -155,8 +155,8 @@ const Booking: React.FC = () => {
                     description={card.description}
                     price={`₱${card.price}`}
                     imageSrc={card.imageUrl}
-                    isSelected={bookingData.selectedOption === card.name}
-                    onSelect={() => handleChange("selectedOption", card.name)}
+                    isSelected={bookingData.selectedOption === card.id}
+                    onSelect={() => handleChange("selectedOption", card.id)}
                     disabled={
                       !bookingData.bookingType ||
                       bookingData.bookingCards.length === 0
@@ -190,8 +190,8 @@ const Booking: React.FC = () => {
                     description={card.description}
                     price={`₱${card.price}`}
                     imageSrc={card.imageUrl}
-                    isSelected={bookingData.selectedOption === card.name}
-                    onSelect={() => handleChange("selectedOption", card.name)}
+                    isSelected={bookingData.selectedOption === card.id}
+                    onSelect={() => handleChange("selectedOption", card.id)}
                     disabled={
                       !bookingData.bookingType ||
                       bookingData.bookingCards.length === 0

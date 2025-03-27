@@ -53,7 +53,8 @@ export const fileSchema = z
 export const priceSchema = z
   .string()
   .regex(/[0-9.]/, "Price must be a number")
-  .refine((price) => Number(price) >= 0, "Invalid price");
+  .refine((price) => Number(price) >= 0, "Invalid price")
+  .refine((price) => Number(price) <= 100_000, "Invalid price");
 
 export const capacitySchema = z
   .string()
@@ -63,7 +64,7 @@ export const capacitySchema = z
 export const descriptionSchema = z
   .string()
   .min(1, "Description is required")
-  .max(100, "Description should not exceed 100 characters")
+  .max(500, "Description should not exceed 500 characters")
   .refine((val) => val.trim().length > 0, "Description cannot be just spaces");
 
 export const optionalSchema = z
