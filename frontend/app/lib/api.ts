@@ -153,7 +153,7 @@ type Transaction = {
   updatedAt: string;
 };
 
-type BookingResponse = {
+export type BookingResponse = {
   id: number;
   referenceCode: string;
   checkIn: string;

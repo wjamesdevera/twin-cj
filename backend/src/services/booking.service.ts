@@ -760,7 +760,7 @@ export const getBookingStatuses = async () => {
 export const getBookingByReferenceCode = async (referenceCode: string) => {
   const booking = await prisma.booking.findFirst({
     where: {
-      referenceCode
+      referenceCode,
     },
     select: {
       id: true,
@@ -828,6 +828,9 @@ export const getBookingByReferenceCode = async (referenceCode: string) => {
 
 export const getAllBooking = async () => {
   const bookings = await prisma.booking.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
     select: {
       id: true,
       referenceCode: true,
@@ -953,16 +956,20 @@ export const getBookingStatus = async (referenceCode: string) => {
         serviceCategoryId: booking.service.serviceCategoryId,
         serviceCategory: booking.service.serviceCategory
           ? {
-            id: booking.service.serviceCategory.id,
-            categoryId: booking.service.serviceCategory.categoryId,
-            category: booking.service.serviceCategory.category
-              ? {
-                id: booking.service.serviceCategory.category.id,
-                name: booking.service.serviceCategory.category.name,
-                createdAt: booking.service.serviceCategory.category.createdAt,
-                updatedAt: booking.service.serviceCategory.category.updatedAt,
-              } : null,
-          } : null,
+              id: booking.service.serviceCategory.id,
+              categoryId: booking.service.serviceCategory.categoryId,
+              category: booking.service.serviceCategory.category
+                ? {
+                    id: booking.service.serviceCategory.category.id,
+                    name: booking.service.serviceCategory.category.name,
+                    createdAt:
+                      booking.service.serviceCategory.category.createdAt,
+                    updatedAt:
+                      booking.service.serviceCategory.category.updatedAt,
+                  }
+                : null,
+            }
+          : null,
       })),
       transaction: booking.transaction
         ? {
@@ -979,7 +986,6 @@ export const getBookingStatus = async (referenceCode: string) => {
     console.error("Error fetching booking status:", error);
   }
 };
-
 
 export const reuploadPaymentImage = async (
   referenceCode: string,
