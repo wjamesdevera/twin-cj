@@ -4,7 +4,11 @@ import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, NOT_FOUND } from "../constants/http";
 import { sendMail } from "../utils/sendMail";
-import { getBookingSuccessEmailTemplate } from "../utils/emailTemplates";
+import {
+  getBookingCancelledEmailTemplate,
+  getBookingRescheduledEmailTemplate,
+  getBookingSuccessEmailTemplate,
+} from "../utils/emailTemplates";
 import { ROOT_STATIC_URL } from "../constants/url";
 import path from "path";
 import fs from "fs";
@@ -727,7 +731,7 @@ export const editBookingStatus = async (
 
   appAssert(booking, NOT_FOUND, "Booking not found");
 
-  const updatedBookingStatus = await prisma.booking.update({
+  const updatedBooking = await prisma.booking.update({
     where: {
       referenceCode,
     },
@@ -739,10 +743,86 @@ export const editBookingStatus = async (
       },
       message: userMessage || null,
     },
+    include: {
+      customer: {
+        include: {
+          personalDetail: true,
+        },
+      },
+      services: {
+        include: {
+          service: true,
+        },
+      },
+    },
   });
 
-  appAssert(updatedBookingStatus, NOT_FOUND, "Booking not found");
-  return updatedBookingStatus;
+  appAssert(updatedBooking, NOT_FOUND, "Booking not found");
+
+  if (updatedBooking.customer?.personalDetail?.email) {
+    const services = updatedBooking.services.map(
+      (service) => service.service.name
+    );
+    const dateTime = `${new Date(updatedBooking.checkIn).toLocaleDateString(
+      "en-US",
+      {
+        weekday: "short",
+        month: "long",
+        day: "2-digit",
+        year: "numeric",
+      }
+    )} - ${new Date(updatedBooking.checkOut).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "long",
+      day: "2-digit",
+      year: "numeric",
+    })}`;
+
+    let emailTemplate;
+    switch (bookingStatus.toLowerCase()) {
+      case "cancelled":
+        emailTemplate = getBookingCancelledEmailTemplate(
+          referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
+          dateTime,
+          services,
+          bookingStatus,
+          userMessage
+        );
+        break;
+      case "rescheduled":
+        emailTemplate = getBookingRescheduledEmailTemplate(
+          referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
+          dateTime,
+          services,
+          bookingStatus,
+          userMessage
+        );
+        break;
+      default:
+        emailTemplate = getBookingSuccessEmailTemplate(
+          referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
+          dateTime,
+          services,
+          bookingStatus,
+          userMessage
+        );
+    }
+
+    const { error } = await sendMail({
+      to:
+        updatedBooking.customer.personalDetail.email || "delivered@resend.dev",
+      ...emailTemplate,
+    });
+
+    if (error) {
+      console.error("Error sending status update email:", error);
+    }
+  }
+
+  return updatedBooking;
 };
 
 export const getBookingStatuses = async () => {
