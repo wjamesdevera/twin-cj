@@ -131,6 +131,77 @@ Twin CJ Riverside Glamping Resort`,
 `,
 });
 
+export const getBookingApprovedEmailTemplate = (
+  referenceCode: string,
+  customerName: string,
+  dateTime: string,
+  services: string[],
+  bookingStatus?: string,
+  userMessage?: string | null
+) => ({
+  subject: "Booking Approved - Twin CJ Riverside Glamping Resort",
+  text: `Dear ${customerName},
+
+Great news! Your booking with Twin CJ Riverside Glamping Resort has been approved. We’re excited to welcome you!
+
+Booking Details:
+Reference Code: ${referenceCode}
+Date: ${dateTime}
+Services:
+${services.map((service) => `- ${service}`).join("\n")}
+${bookingStatus ? `Status: ${bookingStatus}` : ""}
+${userMessage ? `\nNote: ${userMessage}` : ""}
+
+If you have any questions or need assistance, please contact us at twincj.riversideresort@gmail.com.
+
+We look forward to your visit!
+
+Best Regards,
+Twin CJ Riverside Glamping Resort`,
+  html: `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking Approved</title>
+    <style>
+      body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+      .container { width: 80%; max-width: 600px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+      h2 { color: #2c3e50; }
+      p { color: #555; line-height: 1.6; }
+      .details { background-color: #f5f5f5; color: #555; font-size: 0.95em; padding: 3px 1rem; border-radius: 4px; }
+      .details > p > b { margin-right: 5px; }
+      .reference { font-size: 18px; font-weight: bold; color: #d35400; }
+      .footer { margin-top: 20px; font-size: 14px; color: #777; text-align: center; }
+      .contact-link { color: #3498db; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Booking Approved</h2>
+      <p>Dear <strong>${customerName}</strong>,</p>
+      <p>Great news! Your booking with <strong>Twin CJ Riverside Glamping Resort</strong> has been approved. We’re excited to welcome you!</p>
+      <p>Booking Details:</p>
+      <div class="details">
+        <p><b>Reference Code:</b><span class="reference">${referenceCode}</span></p>
+        <p><b>Date and Time:</b>${dateTime}</p>
+        <p><b>Service/s:</b></p>
+        <ul>${services.map((service) => `<li>${service}</li>`).join("")}</ul>
+        ${bookingStatus ? `<p><b>Status:</b> ${bookingStatus}</p>` : ""}
+        ${userMessage ? `<p><b>Note:</b> ${userMessage}</p>` : ""}
+      </div>
+      <p>If you have any questions or need assistance, please don’t hesitate to <a href="mailto:twincj.riversideresort@gmail.com" class="contact-link">contact us</a>.</p>
+      <p>We look forward to your visit!</p>
+      <p>Best Regards,</p>
+      <p><strong>Twin CJ Riverside Glamping Resort</strong></p>
+      <div class="footer">
+        <p>© 2025 Twin CJ Riverside Glamping Resort. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>`,
+});
+
 export const getBookingCancelledEmailTemplate = (
   referenceCode: string,
   customerName: string,

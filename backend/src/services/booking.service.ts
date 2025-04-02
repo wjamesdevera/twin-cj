@@ -5,6 +5,7 @@ import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, NOT_FOUND } from "../constants/http";
 import { sendMail } from "../utils/sendMail";
 import {
+  getBookingApprovedEmailTemplate,
   getBookingCancelledEmailTemplate,
   getBookingRescheduledEmailTemplate,
   getBookingSuccessEmailTemplate,
@@ -792,6 +793,16 @@ export const editBookingStatus = async (
         break;
       case "rescheduled":
         emailTemplate = getBookingRescheduledEmailTemplate(
+          referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
+          dateTime,
+          services,
+          bookingStatus,
+          userMessage
+        );
+        break;
+      case "approved":
+        emailTemplate = getBookingApprovedEmailTemplate(
           referenceCode,
           `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
           dateTime,
