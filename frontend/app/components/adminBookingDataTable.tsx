@@ -5,6 +5,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import Link from "next/link";
 import { options } from "../api";
 import { mutate } from "swr";
+import ConfirmModal from "@/app/components/confirm_modal";
 
 type ServiceCategory = {
   id: number;
@@ -74,6 +75,60 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     startDateFilter: "",
     endDateFilter: "",
   });
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentBooking, setCurrentBooking] = useState<BookingResponse | null>(
+    null
+  );
+  const [newStatus, setNewStatus] = useState<string>("");
+
+  // Open Modal
+
+  const openModalForStatusUpdate = (
+    booking: BookingResponse,
+    status: string
+  ) => {
+    setCurrentBooking(booking);
+    setNewStatus(status);
+    setIsModalOpen(true);
+  };
+
+  const handleEditStatus = async () => {
+    if (!currentBooking) return;
+
+    try {
+      const response = await fetch(
+        `${options.baseURL}/api/bookings/status/${currentBooking.referenceCode}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingStatus: newStatus,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update booking status");
+      }
+
+      mutate(
+        `${options.baseURL}/api/bookings/status/${currentBooking.referenceCode}`
+      );
+      console.log(`Booking ID: ${currentBooking.id} updated to ${newStatus}`);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      alert("Failed to update booking status. Please try again.");
+    }
+  };
+
+  const handleCancelModal = () => {
+    setIsModalOpen(false);
+  };
 
   const handleFilterChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -278,42 +333,9 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                     </span>
                     <select
                       defaultValue={booking.bookingStatus}
-                      onChange={async (
-                        e: React.ChangeEvent<HTMLSelectElement>
-                      ) => {
-                        const newStatus = e.target.value;
-
-                        try {
-                          const response = await fetch(
-                            `${options.baseURL}/api/bookings/status/${booking.referenceCode}`,
-                            {
-                              method: "PATCH",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({
-                                bookingStatus: newStatus,
-                              }),
-                            }
-                          );
-                          if (!response.ok) {
-                            throw new Error("Failed to update booking status");
-                          }
-                          mutate(
-                            `${options.baseURL}/api/bookings/status/${booking.referenceCode}`
-                          );
-                          console.log(
-                            `Booking ID: ${booking.id} updated to ${newStatus}`
-                          );
-                        } catch (error) {
-                          console.error(
-                            "Error updating booking status:",
-                            error
-                          );
-                          alert(
-                            "Failed to update booking status. Please try again."
-                          );
-                        }
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                        const selectedStatus = e.target.value;
+                        openModalForStatusUpdate(booking, selectedStatus);
                       }}
                     >
                       <option value={booking.bookingStatus} disabled>
@@ -329,6 +351,19 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
           </tbody>
         </table>
       </div>
+      {isModalOpen && (
+        <ConfirmModal
+          isOpen={isModalOpen}
+          onClose={handleCancelModal}
+          onConfirm={handleEditStatus}
+          title="Confirm Status Update"
+          confirmText="Update"
+          cancelText="Cancel"
+        >
+          Are you sure you want to update the status of this booking to "
+          {newStatus}"?
+        </ConfirmModal>
+      )}
     </div>
   );
 };

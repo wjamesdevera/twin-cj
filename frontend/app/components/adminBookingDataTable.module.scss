@@ -184,35 +184,6 @@
   padding: 12px;
 }
 
-/* Status Colors */
-.statusPending {
-  color: var(--color-sunset-orange-500);
-  font-weight: 500;
-}
-
-.statusActive {
-  color: #46733b;
-  font-weight: 500;
-}
-
-.statusCompleted {
-  color: #3b6273;
-  font-weight: 500;
-}
-
-.statusReupload {
-  background: rgb(102, 66, 0);
-  font-weight: 500;
-}
-.statusCancel {
-  background: rgb(176, 0, 0);
-  font-weight: 500;
-}
-.statusApproved {
-  background-color: #1a0880;
-  color: white;
-}
-
 /* Reference Link */
 .referenceLink {
   color: var(--color-sunset-orange-500);
