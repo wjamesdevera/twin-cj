@@ -3,6 +3,8 @@ import { DownloadTableExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Link from "next/link";
+import { options } from "../api";
+import { mutate } from "swr";
 
 type ServiceCategory = {
   id: number;
@@ -90,7 +92,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   };
 
   // Filter the bookings based on the filters
-  const filteredBookings = bookings.filter((booking) => {
+  const filteredBookings = bookings?.filter((booking) => {
     const searchLower = filters.searchTerm.toLowerCase();
 
     const matchesSearchTerm =
@@ -228,57 +230,102 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredBookings.map((booking: BookingResponse, index: number) => (
-              <tr key={index} className={styles.tableRow}>
-                <td className={styles.tableCell}>
-                  <Link
-                    href={`/admin/bookings/edit/${booking.referenceCode}`}
-                    className={styles.referenceLink}
+            {filteredBookings?.map(
+              (booking: BookingResponse, index: number) => (
+                <tr key={index} className={styles.tableRow}>
+                  <td className={styles.tableCell}>
+                    <Link
+                      href={`/admin/bookings/edit/${booking.referenceCode}`}
+                      className={styles.referenceLink}
+                    >
+                      {booking.referenceCode}
+                    </Link>
+                  </td>
+                  <td className={styles.tableCell}>
+                    {booking.services.map((service) => service.service.name)[0]}
+                  </td>
+                  <td className={styles.tableCell}>
+                    {formatDate(booking.checkIn)}
+                  </td>
+                  <td className={styles.tableCell}>
+                    {formatDate(booking.checkOut)}
+                  </td>
+                  <td className={styles.tableCell}>
+                    ₱
+                    {booking.transaction.amount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td
+                    className={styles.tableCell}
+                  >{`${booking.customer.firstName} ${booking.customer.lastName}`}</td>
+                  <td className={styles.tableCell}>{booking.customer.email}</td>
+                  <td
+                    className={`${styles.tableCell} ${
+                      booking.bookingStatus === "Pending"
+                        ? styles.statusPending
+                        : booking.bookingStatus === "Cancelled"
+                        ? styles.statusCancel
+                        : booking.bookingStatus === "Approved"
+                        ? styles.statusApproved
+                        : ""
+                    }`}
                   >
-                    {booking.referenceCode}
-                  </Link>
-                </td>
-                <td className={styles.tableCell}>
-                  {booking.services.map((service) => service.service.name)[0]}
-                </td>
-                <td className={styles.tableCell}>
-                  {formatDate(booking.checkIn)}
-                </td>
-                <td className={styles.tableCell}>
-                  {formatDate(booking.checkOut)}
-                </td>
-                <td className={styles.tableCell}>
-                  ₱
-                  {booking.transaction.amount.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </td>
-                <td
-                  className={styles.tableCell}
-                >{`${booking.customer.firstName} ${booking.customer.lastName}`}</td>
-                <td className={styles.tableCell}>{booking.customer.email}</td>
-                <td
-                  className={`${styles.tableCell} ${
-                    booking.bookingStatus === "pending"
-                      ? styles.statusPending
-                      : booking.bookingStatus === "active"
-                      ? styles.statusActive
-                      : booking.bookingStatus === "approved"
-                      ? styles.statusApproved
-                      : booking.bookingStatus === "reupload"
-                      ? styles.statusReupload
-                      : booking.bookingStatus === "cancel"
-                      ? styles.statusCancel
-                      : booking.bookingStatus === "completed"
-                      ? styles.statusCompleted
-                      : ""
-                  }`}
-                >
-                  {booking.bookingStatus}
-                </td>
-              </tr>
-            ))}
+                    {/* NOTE: This is needed for the conversion of booking status to excel */}
+                    <span className={styles.hiddenStatus}>
+                      {booking.bookingStatus}
+                    </span>
+                    <select
+                      defaultValue={booking.bookingStatus}
+                      onChange={async (
+                        e: React.ChangeEvent<HTMLSelectElement>
+                      ) => {
+                        const newStatus = e.target.value;
+
+                        try {
+                          const response = await fetch(
+                            `${options.baseURL}/api/bookings/status/${booking.referenceCode}`,
+                            {
+                              method: "PATCH",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                bookingStatus: newStatus,
+                              }),
+                            }
+                          );
+                          if (!response.ok) {
+                            throw new Error("Failed to update booking status");
+                          }
+                          mutate(
+                            `${options.baseURL}/api/bookings/status/${booking.referenceCode}`
+                          );
+                          console.log(
+                            `Booking ID: ${booking.id} updated to ${newStatus}`
+                          );
+                        } catch (error) {
+                          console.error(
+                            "Error updating booking status:",
+                            error
+                          );
+                          alert(
+                            "Failed to update booking status. Please try again."
+                          );
+                        }
+                      }}
+                    >
+                      <option value={booking.bookingStatus} disabled>
+                        {booking.bookingStatus}
+                      </option>
+                      <option value="Approved">Approved</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                  </td>
+                </tr>
+              )
+            )}
           </tbody>
         </table>
       </div>

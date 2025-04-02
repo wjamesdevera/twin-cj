@@ -34,11 +34,7 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const { data: bookingData, isLoading } = useSWR("key", getBooking, {
-    onSuccess: () => {
-      console.table(bookingData);
-    },
-  });
+  const { data: bookingData, isLoading } = useSWR("key", getBooking);
 
   useEffect(() => {
     const fetchBookings = async () => {

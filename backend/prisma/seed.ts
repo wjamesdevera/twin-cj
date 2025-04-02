@@ -137,19 +137,10 @@ Additional Inclusions:
         name: "Pending",
       },
       {
-        name: "Cancelled",
-      },
-      {
-        name: "Confirmed",
-      },
-      {
-        name: "Rejected",
-      },
-      {
         name: "Approved",
       },
       {
-        name: "Invalid",
+        name: "Cancelled",
       },
     ],
   });
