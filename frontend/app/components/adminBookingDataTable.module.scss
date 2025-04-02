@@ -239,6 +239,19 @@
   padding-left: 0;
 }
 
+//NOTE: hidden booking status
+.hiddenStatus {
+  display: none;
+}
+
+// Modal Text Area (paayos nalang ty)
+.messageTextarea {
+  max-height: 150px;
+  height: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
 @media (max-width: 1024px) {
   .tableContainer {
     width: 100%;
@@ -296,8 +309,4 @@
     width: 130px;
     font-size: 12px;
   }
-}
-
-.hiddenStatus {
-  display: none;
 }

@@ -8,6 +8,7 @@ import { getBookingSuccessEmailTemplate } from "../utils/emailTemplates";
 import { ROOT_STATIC_URL } from "../constants/url";
 import path from "path";
 import fs from "fs";
+import { messageSchema } from "../schemas/feedback.schema";
 
 interface ServiceCategory {
   id: number;
@@ -517,22 +518,6 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
       amount,
     } = req.body;
 
-    console.log("Received booking data:", {
-      firstName,
-      lastName,
-      contactNumber,
-      email,
-      checkInDate,
-      checkOutDate,
-      selectedPackage,
-      paymentAccountName,
-      paymentAccountNumber,
-      paymentMethod,
-      proofOfPayment,
-      totalPax,
-      amount,
-    });
-
     appAssert(email, BAD_REQUEST, "Email is required.");
     appAssert(firstName, BAD_REQUEST, "First name is required.");
     appAssert(lastName, BAD_REQUEST, "Last name is required.");
@@ -731,7 +716,8 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
 // Update Booking
 export const editBookingStatus = async (
   referenceCode: string,
-  bookingStatus: string
+  bookingStatus: string,
+  userMessage: string | null
 ) => {
   const booking = await prisma.booking.findFirst({
     where: {
@@ -740,20 +726,6 @@ export const editBookingStatus = async (
   });
 
   appAssert(booking, NOT_FOUND, "Booking not found");
-
-  // let status = await prisma.bookingStatus.findUnique({
-  //   where: {
-  //     name: bookingStatus,
-  //   },
-  // });
-
-  // if (!status) {
-  //   status = await prisma.bookingStatus.create({
-  //     data: {
-  //       name: bookingStatus,
-  //     },
-  //   });
-  // }
 
   const updatedBookingStatus = await prisma.booking.update({
     where: {
@@ -765,6 +737,7 @@ export const editBookingStatus = async (
           name: bookingStatus,
         },
       },
+      message: userMessage || null,
     },
   });
 

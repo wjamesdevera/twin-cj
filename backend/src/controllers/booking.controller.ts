@@ -172,8 +172,9 @@ export const getBookingByIdHandler = catchErrors(
 export const updateBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { bookingStatus } = req.body;
-    const booking = await editBookingStatus(id, bookingStatus);
+    const { bookingStatus, message } = req.body;
+
+    const booking = await editBookingStatus(id, bookingStatus, message);
     res.status(OK).json(booking);
   }
 );
@@ -190,7 +191,7 @@ export const getBookingStatusHandler = catchErrors(
     const { referenceCode } = req.params;
 
     const bookingStatus = await getBookingStatus(referenceCode);
-    
+
     return res.status(OK).json(bookingStatus);
   }
 );
@@ -202,7 +203,10 @@ export const reuploadPaymentImageHandler = catchErrors(
 
     appAssert(file, BAD_REQUEST, "No file uploaded");
 
-    const proofOfPaymentImageUrl = await reuploadPaymentImage(referenceCode, file!);
+    const proofOfPaymentImageUrl = await reuploadPaymentImage(
+      referenceCode,
+      file!
+    );
 
     return response.status(OK).json({
       status: "success",

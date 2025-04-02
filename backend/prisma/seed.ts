@@ -142,6 +142,9 @@ Additional Inclusions:
       {
         name: "Cancelled",
       },
+      {
+        name: "Rescheduled",
+      },
     ],
   });
 

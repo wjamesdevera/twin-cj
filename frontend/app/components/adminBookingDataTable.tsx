@@ -83,12 +83,20 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   );
   const [newStatus, setNewStatus] = useState<string>("");
 
+  // Message state for cancellation/rescheduled booking
+  const [userMessage, setUserMessage] = useState<string>("");
+
   // Notification State
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationType, setNotificationType] = useState<"success" | "error">(
     "success"
   );
+
+  // Handle
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setUserMessage(e.target.value);
+  };
 
   // Open Modal
   const openModalForStatusUpdate = (
@@ -100,7 +108,29 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     setIsModalOpen(true);
   };
 
-  const handleEditStatus = async () => {
+  const getModalMessage = (status: string) => {
+    if (status === "Cancelled" || status === "Rescheduled") {
+      return (
+        <>
+          <label className={styles.messageLabel}>
+            Are you sure you want to update the status of this booking to "
+            {status}"? <br />
+          </label>
+          <textarea
+            id="userMessage"
+            name="userMessage"
+            value={userMessage}
+            onChange={handleMessageChange}
+            className={styles.messageTextarea}
+            placeholder="State your reason for cancellation/rescheduling here"
+          />
+        </>
+      );
+    }
+    return `Are you sure you want to update the status of this booking to "${status}"?`;
+  };
+
+  const handleEditStatus = async (userMessage: string) => {
     if (!currentBooking) return;
 
     try {
@@ -113,6 +143,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
           },
           body: JSON.stringify({
             bookingStatus: newStatus,
+            message: userMessage.trim() ? userMessage : null,
           }),
         }
       );
@@ -131,6 +162,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       setIsNotificationOpen(true);
 
       setIsModalOpen(false);
+      setUserMessage("");
     } catch (error) {
       console.error("Error updating booking status:", error);
 
@@ -145,6 +177,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
   const handleCancelModal = () => {
     setIsModalOpen(false);
+    setUserMessage("");
   };
 
   const handleFilterChange = (
@@ -259,12 +292,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                 className={styles.filterSelect}
               >
                 <option value="all">All</option>
-                <option value="pending">Pending</option>
-                <option value="active">Active</option>
                 <option value="approved">Approved</option>
-                <option value="reupload">Reupload</option>
-                <option value="cancel">Cancel</option>
-                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="rescheduled">Rescheduled</option>
               </select>
             </div>
 
@@ -360,6 +391,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                       </option>
                       <option value="Approved">Approved</option>
                       <option value="Cancelled">Cancelled</option>
+                      <option value="Rescheduled">Rescheduled</option>
                     </select>
                   </td>
                 </tr>
@@ -373,13 +405,12 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
         <ConfirmModal
           isOpen={isModalOpen}
           onClose={handleCancelModal}
-          onConfirm={handleEditStatus}
+          onConfirm={() => handleEditStatus(userMessage || "")}
           title="Confirm Status Update"
           confirmText="Update"
           cancelText="Cancel"
         >
-          Are you sure you want to update the status of this booking to "
-          {newStatus}"?
+          {getModalMessage(newStatus)}
         </ConfirmModal>
       )}
 
