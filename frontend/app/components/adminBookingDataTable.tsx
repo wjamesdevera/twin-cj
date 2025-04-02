@@ -6,6 +6,7 @@ import Link from "next/link";
 import { options } from "../api";
 import { mutate } from "swr";
 import ConfirmModal from "@/app/components/confirm_modal";
+import NotificationModal from "@/app/components/notification_modal";
 
 type ServiceCategory = {
   id: number;
@@ -67,7 +68,6 @@ interface BookingTableProps {
 
 const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   const tableRef = useRef<HTMLTableElement | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     searchTerm: "",
     statusFilter: "all",
@@ -83,8 +83,14 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   );
   const [newStatus, setNewStatus] = useState<string>("");
 
-  // Open Modal
+  // Notification State
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState<"success" | "error">(
+    "success"
+  );
 
+  // Open Modal
   const openModalForStatusUpdate = (
     booking: BookingResponse,
     status: string
@@ -118,11 +124,22 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       mutate(
         `${options.baseURL}/api/bookings/status/${currentBooking.referenceCode}`
       );
-      console.log(`Booking ID: ${currentBooking.id} updated to ${newStatus}`);
+
+      // Show success notification
+      setNotificationMessage("Booking status updated successfully.");
+      setNotificationType("success");
+      setIsNotificationOpen(true);
+
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error updating booking status:", error);
-      alert("Failed to update booking status. Please try again.");
+
+      // Show error notification
+      setNotificationMessage(
+        "Failed to update booking status. Please try again."
+      );
+      setNotificationType("error");
+      setIsNotificationOpen(true);
     }
   };
 
@@ -351,6 +368,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
           </tbody>
         </table>
       </div>
+
       {isModalOpen && (
         <ConfirmModal
           isOpen={isModalOpen}
@@ -364,6 +382,14 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
           {newStatus}"?
         </ConfirmModal>
       )}
+
+      {/* Notification Modal */}
+      <NotificationModal
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        message={notificationMessage}
+        type={notificationType}
+      />
     </div>
   );
 };
