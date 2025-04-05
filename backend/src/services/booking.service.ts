@@ -50,6 +50,13 @@ export const checkAvailability = async (
         booking: {
           checkIn: { lte: new Date(checkOutDate) },
           checkOut: { gte: new Date(checkInDate) },
+          bookingStatus: {
+            NOT: {
+              name: {
+                in: ["Cancelled", "Rescheduled"],
+              },
+            },
+          },
         },
       },
       select: { serviceId: true },
@@ -119,6 +126,13 @@ export const getServicesByCategory = async (
         booking: {
           checkIn: { lte: checkOut },
           checkOut: { gte: checkIn },
+          bookingStatus: {
+            NOT: {
+              name: {
+                in: ["Cancelled", "Rescheduled"],
+              },
+            },
+          },
         },
       },
       select: {
