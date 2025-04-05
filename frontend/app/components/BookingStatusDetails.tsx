@@ -32,7 +32,6 @@ const BookingStatusDetails = ({
     });
   };
 
-  // Common details component for statuses that show booking info
   const BookingDetails = () => (
     <>
       <div className={`${styles["booking-status-details-container-sub"]}`}>

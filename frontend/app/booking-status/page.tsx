@@ -193,6 +193,7 @@ export default function Home() {
           totalPax={bookingData?.totalPax}
           checkIn={bookingData?.checkIn}
           checkOut={bookingData?.checkOut}
+          note={bookingData?.notes}
         />
       )}
 

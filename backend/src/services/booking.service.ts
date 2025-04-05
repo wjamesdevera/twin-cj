@@ -655,69 +655,6 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
   }
 };
 
-// export const editBooking = async (req: Request, res: Response) => {
-//   try {
-//     const { bookingId } = req.params;
-//     const {
-//       checkInDate,
-//       checkOutDate,
-//       bookingCards,
-//       specialRequest,
-//       totalPax,
-//     } = req.body;
-
-//     appAssert(bookingId, BAD_REQUEST, "Booking ID is required.");
-//     appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
-//     appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
-//     appAssert(Array.isArray(bookingCards), BAD_REQUEST, "Invalid services.");
-
-//     // Find existing booking
-//     const booking = await prisma.booking.findUnique({
-//       where: { id: Number(bookingId) },
-//       include: { services: true },
-//     });
-
-//     appAssert(booking, BAD_REQUEST, "Booking not found.");
-
-//     // Check new availability
-//     const availableServices = await checkAvailability(
-//       checkInDate,
-//       checkOutDate
-//     );
-//     const selectedServices = bookingCards.map(
-//       (card: { id: number }) => card.id
-//     );
-
-//     const isAvailable = selectedServices.every((id) =>
-//       availableServices.some((service) => service.id === id)
-//     );
-
-//     appAssert(
-//       isAvailable,
-//       BAD_REQUEST,
-//       "One or more services are not available."
-//     );
-
-//     // Update Booking
-//     const updatedBooking = await prisma.booking.update({
-//       where: { id: Number(bookingId) },
-//       data: {
-//         checkIn: new Date(checkInDate),
-//         checkOut: new Date(checkOutDate),
-//         totalPax,
-//         notes: specialRequest || "",
-//       },
-//     });
-
-//     return res.json({
-//       message: "Booking updated successfully",
-//       updatedBooking,
-//     });
-//   } catch (error) {
-//     console.error("Error updating booking:", error);
-//   }
-// };
-
 // Update Booking
 export const editBookingStatus = async (
   referenceCode: string,
@@ -772,12 +709,15 @@ export const editBookingStatus = async (
         day: "2-digit",
         year: "numeric",
       }
-    )} - ${new Date(updatedBooking.checkOut).toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "long",
-      day: "2-digit",
-      year: "numeric",
-    })}`;
+    )} 4:00 PM - ${new Date(updatedBooking.checkOut).toLocaleDateString(
+      "en-US",
+      {
+        weekday: "short",
+        month: "long",
+        day: "2-digit",
+        year: "numeric",
+      }
+    )} 12:00 PM`;
 
     let emailTemplate;
     switch (bookingStatus.toLowerCase()) {
@@ -807,8 +747,7 @@ export const editBookingStatus = async (
           `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
           dateTime,
           services,
-          bookingStatus,
-          userMessage
+          bookingStatus
         );
         break;
       default:
@@ -817,8 +756,7 @@ export const editBookingStatus = async (
           `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
           dateTime,
           services,
-          bookingStatus,
-          userMessage
+          bookingStatus
         );
     }
 

@@ -136,8 +136,7 @@ export const getBookingApprovedEmailTemplate = (
   customerName: string,
   dateTime: string,
   services: string[],
-  bookingStatus?: string,
-  userMessage?: string | null
+  bookingStatus?: string
 ) => ({
   subject: "Booking Approved - Twin CJ Riverside Glamping Resort",
   text: `Dear ${customerName},
@@ -150,7 +149,6 @@ Date: ${dateTime}
 Services:
 ${services.map((service) => `- ${service}`).join("\n")}
 ${bookingStatus ? `Status: ${bookingStatus}` : ""}
-${userMessage ? `\nNote: ${userMessage}` : ""}
 
 If you have any questions or need assistance, please contact us at twincj.riversideresort@gmail.com.
 
@@ -188,7 +186,7 @@ Twin CJ Riverside Glamping Resort`,
         <p><b>Service/s:</b></p>
         <ul>${services.map((service) => `<li>${service}</li>`).join("")}</ul>
         ${bookingStatus ? `<p><b>Status:</b> ${bookingStatus}</p>` : ""}
-        ${userMessage ? `<p><b>Note:</b> ${userMessage}</p>` : ""}
+    
       </div>
       <p>If you have any questions or need assistance, please don’t hesitate to <a href="mailto:twincj.riversideresort@gmail.com" class="contact-link">contact us</a>.</p>
       <p>We look forward to your visit!</p>
@@ -221,7 +219,7 @@ Date: ${dateTime}
 Services:
 ${services.map((service) => `- ${service}`).join("\n")}
 ${bookingStatus ? `Status: ${bookingStatus}` : ""}
-${userMessage ? `\nReason: ${userMessage}` : ""}
+${userMessage ? `\nReason for Cancellation: ${userMessage}` : ""}
 
 If you have any questions or concerns, please don't hesitate to contact us at twincj.riversideresort@gmail.com.
 
@@ -259,7 +257,11 @@ Twin CJ Riverside Glamping Resort`,
         <p><b>Service/s:</b></p>
         <ul>${services.map((service) => `<li>${service}</li>`).join("")}</ul>
         ${bookingStatus ? `<p><b>Status:</b> ${bookingStatus}</p>` : ""}
-        ${userMessage ? `<p><b>Reason:</b> ${userMessage}</p>` : ""}
+        ${
+          userMessage
+            ? `<p><b>Reason for Cancellation:</b> ${userMessage}</p>`
+            : ""
+        }
       </div>
       <p>If you have any questions or concerns, please don't hesitate to <a href="mailto:twincj.riversideresort@gmail.com" class="contact-link">contact us</a>.</p>
       <p>We hope to serve you again in the future.</p>
@@ -292,7 +294,7 @@ New Date: ${dateTime}
 Services:
 ${services.map((service) => `- ${service}`).join("\n")}
 ${bookingStatus ? `Status: ${bookingStatus}` : ""}
-${userMessage ? `\nNote: ${userMessage}` : ""}
+${userMessage ? `\nReason for Rescheduling: ${userMessage}` : ""}
 
 If you have any questions or need further assistance, please contact us at twincj.riversideresort@gmail.com.
 
@@ -326,11 +328,15 @@ Twin CJ Riverside Glamping Resort`,
       <p>Booking Details:</p>
       <div class="details">
         <p><b>Reference Code:</b><span class="reference">${referenceCode}</span></p>
-        <p><b>New Date and Time:</b>${dateTime}</p>
+        <p>You may reschedule your preferred date—up to one month in advance—through the Booking Status page or by contacting the administrators directly.</p>
         <p><b>Service/s:</b></p>
         <ul>${services.map((service) => `<li>${service}</li>`).join("")}</ul>
         ${bookingStatus ? `<p><b>Status:</b> ${bookingStatus}</p>` : ""}
-        ${userMessage ? `<p><b>Note:</b> ${userMessage}</p>` : ""}
+        ${
+          userMessage
+            ? `<p><b>Reason for Rescheduling:</b> ${userMessage}</p>`
+            : ""
+        }
       </div>
       <p>If you have any questions or need further assistance, please don't hesitate to <a href="mailto:twincj.riversideresort@gmail.com" class="contact-link">contact us</a>.</p>
       <p>We look forward to welcoming you!</p>
