@@ -26,6 +26,7 @@ import {
   getAllBooking,
 } from "../services/booking.service";
 import AppError from "../utils/AppError";
+import { error } from "node:console";
 
 export const getBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -175,6 +176,23 @@ export const updateBookingHandler = catchErrors(
     const { bookingStatus, message } = req.body;
 
     const booking = await editBookingStatus(id, bookingStatus, message);
+    res.status(OK).json(booking);
+  }
+);
+
+export const updateBookingDateHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { referenceCode } = req.params;
+    const { newCheckIn, newCheckOut } = req.body;
+
+    const booking = await prisma.booking.update({
+      where: { referenceCode: referenceCode },
+      data: {
+        checkIn: new Date(newCheckIn),
+        checkOut: new Date(newCheckOut),
+      },
+    });
+
     res.status(OK).json(booking);
   }
 );

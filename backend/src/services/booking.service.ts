@@ -774,6 +774,40 @@ export const editBookingStatus = async (
   return updatedBooking;
 };
 
+export const editBookingDates = async (
+  referenceCode: string,
+  newCheckIn: string,
+  newCheckOut: string
+) => {
+  console.log("editBookingDates called with:", {
+    referenceCode,
+    newCheckIn,
+    newCheckOut,
+  });
+  const booking = await prisma.booking.findFirst({
+    where: {
+      referenceCode,
+    },
+    select: {
+      referenceCode: true,
+    },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not found");
+
+  const updatedBookingDate = await prisma.booking.update({
+    where: {
+      referenceCode,
+    },
+    data: {
+      checkIn: new Date(),
+      checkOut: new Date(),
+    },
+  });
+
+  return updatedBookingDate;
+};
+
 export const getBookingStatuses = async () => {
   return await prisma.bookingStatus.findMany();
 };

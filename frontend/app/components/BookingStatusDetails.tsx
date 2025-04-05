@@ -1,4 +1,6 @@
+import { useState } from "react";
 import styles from "./BookingStatusDetails.module.scss";
+import { options } from "../api";
 
 interface BookingStatusDetailsProps {
   status: string;
@@ -8,6 +10,7 @@ interface BookingStatusDetailsProps {
   totalPax?: number;
   checkIn?: string;
   checkOut?: string;
+  notes?: string | null;
 }
 
 const BookingStatusDetails = ({
@@ -100,7 +103,7 @@ const BookingStatusDetails = ({
     </>
   );
 
-  switch (status.toLowerCase()) {
+  switch (status?.toLowerCase()) {
     case "approved":
       return (
         <section className={`${styles["booking-status-details-section"]}`}>
@@ -198,82 +201,6 @@ const BookingStatusDetails = ({
         </section>
       );
 
-    case "reupload":
-      return (
-        <section className={`${styles["booking-status-details-section"]}`}>
-          <div className={`${styles["booking-status-details-container"]}`}>
-            <div
-              className={`${styles["booking-status-details-container-heading"]}`}
-            >
-              <h3>Oops! There Was an Issue With Your Booking</h3>
-              <h4>
-                Your booking request requires a new payment screenshot due to
-                verification issues.
-              </h4>
-            </div>
-            <hr />
-            <div
-              className={`${styles["booking-status-details-container-sub"]}`}
-            >
-              <div className={`${styles["booking-status-details-left"]}`}>
-                <p>
-                  <b>Status: </b>
-                  <span style={{ color: "red", fontStyle: "italic" }}>
-                    Re-upload Payment Screenshot
-                  </span>
-                </p>
-                <p>
-                  <b>Reference Number: </b>
-                  <span>{referenceCode || "N/A"}</span>
-                </p>
-                <p>
-                  <b>Reason for Rejection: </b>
-                </p>
-                <p>
-                  The payment screenshot provided was unclear, incomplete, or
-                  incorrect.
-                </p>
-              </div>
-              <div
-                className={`${styles["booking-status-details-container-divider"]}`}
-              ></div>
-              <div className={`${styles["booking-status-details-right"]}`}>
-                <p>
-                  <b>What You Can Do Next:</b>
-                </p>
-                <p>
-                  <b>Double-check Your Payment Details</b>
-                </p>
-                <ol>
-                  <li>
-                    Ensure the screenshot clearly shows the transaction ID,
-                    amount paid, and payment date.
-                  </li>
-                </ol>
-                <p>
-                  <b>Re-upload the Correct Screenshot</b>
-                </p>
-                <ol>
-                  <li>
-                    Use the button below to upload a new payment proof for
-                    verification.
-                  </li>
-                </ol>
-                <p>
-                  <b>Contact Us</b>
-                </p>
-                <ol>
-                  <li>
-                    If you believe this was a mistake, reach out to us for
-                    assistance.
-                  </li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-
     case "cancelled":
       return (
         <section className={`${styles["booking-status-details-section"]}`}>
@@ -350,6 +277,45 @@ const BookingStatusDetails = ({
       );
 
     case "rescheduled":
+      const [newCheckIn, setNewCheckIn] = useState(checkIn || "");
+      const [newCheckOut, setNewCheckOut] = useState(checkOut || "");
+
+      const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNewCheckIn(e.target.value);
+      };
+
+      const handleCheckOutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNewCheckOut(e.target.value);
+      };
+
+      const handleSubmit = async () => {
+        try {
+          const response = await fetch(
+            `${options.baseURL}/api/bookings/dates/${referenceCode}`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                referenceCode,
+                newCheckIn,
+                newCheckOut,
+              }),
+            }
+          );
+
+          if (response.ok) {
+            alert("New dates submitted successfully!");
+          } else {
+            alert("Failed to submit new dates. Please try again.");
+          }
+        } catch (error) {
+          console.error("Error submitting new dates:", error);
+          alert("An error occurred. Please try again.");
+        }
+      };
+
       return (
         <section className={`${styles["booking-status-details-section"]}`}>
           <div className={`${styles["booking-status-details-container"]}`}>
@@ -392,14 +358,33 @@ const BookingStatusDetails = ({
                   <b>No. of Guests: </b>
                   <span>{totalPax || 0}</span>
                 </p>
-                <p>
-                  <b>New Check-In: </b>
-                  <span>{formatDate(checkIn)}</span>
-                </p>
-                <p>
-                  <b>New Check-Out: </b>
-                  <span>{formatDate(checkOut)}</span>
-                </p>
+                <div>
+                  <label htmlFor="newCheckIn">
+                    <b>Select New Check-In Date:</b>
+                  </label>
+                  <input
+                    type="date"
+                    id="newCheckIn"
+                    name="newCheckIn"
+                    className={styles["date-picker"]}
+                    value={newCheckIn}
+                    onChange={handleCheckInChange}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="newCheckOut">
+                    <b>Select New Check-Out Date:</b>
+                  </label>
+                  <input
+                    type="date"
+                    id="newCheckOut"
+                    name="newCheckOut"
+                    className={styles["date-picker"]}
+                    value={newCheckOut}
+                    onChange={handleCheckOutChange}
+                  />
+                </div>
+                <button onClick={handleSubmit}>Reschedule</button>
               </div>
               <div
                 className={`${styles["booking-status-details-container-divider"]}`}
