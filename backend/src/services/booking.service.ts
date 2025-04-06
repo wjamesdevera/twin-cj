@@ -803,39 +803,140 @@ export const editBookingDates = async (
   referenceCode: string,
   newCheckIn: string,
   newCheckOut: string
-) => {
-  const booking = await prisma.booking.findFirst({
-    where: {
-      referenceCode,
-    },
-    select: {
-      referenceCode: true,
-      services: {
-        select: {
-          serviceId: true,
+): Promise<{
+  updatedBookingDate?: Awaited<ReturnType<typeof prisma.booking.update>>;
+  unavailableServices?: { id: string; name: string }[];
+}> => {
+  try {
+    const newCheckInDate = new Date(newCheckIn);
+    const newCheckOutDate = new Date(newCheckOut);
+
+    if (
+      !newCheckIn ||
+      !newCheckOut ||
+      isNaN(newCheckInDate.getTime()) ||
+      isNaN(newCheckOutDate.getTime())
+    ) {
+      throw new Error("Invalid or missing date format provided");
+    }
+
+    if (newCheckInDate >= newCheckOutDate) {
+      throw new Error("Check-in date must be before check-out date");
+    }
+
+    const booking = await prisma.booking.findFirst({
+      where: { referenceCode },
+      select: {
+        id: true,
+        checkIn: true,
+        checkOut: true,
+        services: {
+          select: {
+            serviceId: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  appAssert(booking, NOT_FOUND, "Booking not found");
+    if (!booking) {
+      throw new Error("Booking not found");
+    }
 
-  const updatedBookingDate = await prisma.booking.update({
-    where: {
-      referenceCode,
-    },
-    data: {
-      checkIn: new Date(newCheckIn),
-      checkOut: new Date(newCheckOut),
-      bookingStatus: {
-        connect: {
-          name: "Pending",
+    // Validate duration consistency
+    const originalDuration = Math.round(
+      (booking.checkOut.getTime() - booking.checkIn.getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+    const newDuration = Math.round(
+      (newCheckOutDate.getTime() - newCheckInDate.getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+
+    if (newDuration !== originalDuration) {
+      throw new Error(
+        `Duration mismatch: original (${originalDuration} days) vs new (${newDuration} days)`
+      );
+    }
+
+    const serviceIds = booking.services.map((s) => s.serviceId);
+
+    const conflicts = await prisma.bookingService.findMany({
+      where: {
+        serviceId: { in: serviceIds },
+        booking: {
+          id: { not: booking.id },
+          OR: [
+            {
+              checkIn: { lte: newCheckOutDate },
+              checkOut: { gte: newCheckInDate },
+            },
+          ],
+          bookingStatus: {
+            name: { notIn: ["Cancelled", "Rescheduled"] },
+          },
         },
       },
-    },
-  });
+      select: {
+        service: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
 
-  return updatedBookingDate;
+    if (conflicts.length > 0) {
+      console.log("Conflicts detected:", conflicts);
+      const unavailableServices = conflicts.map((conflict) => ({
+        id: conflict.service.id.toString(),
+        name: conflict.service.name,
+      }));
+      return { unavailableServices };
+    }
+
+    // Update the booking if no conflicts
+    const updatedBookingDate = await prisma.booking.update({
+      where: { referenceCode },
+      data: {
+        checkIn: newCheckInDate,
+        checkOut: newCheckOutDate,
+        bookingStatus: {
+          connect: { name: "Pending" },
+        },
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        referenceCode: true,
+        checkIn: true,
+        checkOut: true,
+        totalPax: true,
+        notes: true,
+        message: true,
+        createdAt: true,
+        updatedAt: true,
+        customerId: true,
+        bookingStatusId: true,
+        transactionId: true,
+        bookingStatus: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    return { updatedBookingDate };
+  } catch (error) {
+    console.error("Error in editBookingDates:", error);
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error(
+      "Failed to update booking dates due to an unexpected error"
+    );
+  }
 };
 
 export const getBookingStatuses = async () => {

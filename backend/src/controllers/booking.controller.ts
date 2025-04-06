@@ -23,6 +23,7 @@ import {
   getBookingStatus,
   getBookingByReferenceCode,
   getAllBooking,
+  editBookingDates,
 } from "../services/booking.service";
 
 export const getBookingHandler = catchErrors(
@@ -182,15 +183,13 @@ export const updateBookingDateHandler = catchErrors(
     const { referenceCode } = req.params;
     const { newCheckIn, newCheckOut } = req.body;
 
-    const booking = await prisma.booking.update({
-      where: { referenceCode: referenceCode },
-      data: {
-        checkIn: new Date(newCheckIn),
-        checkOut: new Date(newCheckOut),
-      },
-    });
+    const result = await editBookingDates(
+      referenceCode,
+      newCheckIn,
+      newCheckOut
+    );
 
-    res.status(OK).json(booking);
+    res.status(OK).json(result.updatedBookingDate);
   }
 );
 
@@ -210,6 +209,3 @@ export const getBookingStatusHandler = catchErrors(
     return res.status(OK).json(bookingStatus);
   }
 );
-function getUnavailableDatesForService(arg0: number) {
-  throw new Error("Function not implemented.");
-}

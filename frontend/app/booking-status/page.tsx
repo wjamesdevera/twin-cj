@@ -6,7 +6,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import BookingStatusDetails from "../components/BookingStatusDetails";
 import BookingStatusReference from "@/app/components/BookingStatusReference";
-import BookingStatusDetailsReupload from "../components/BookingStatusReupload";
 import Hero from "../components/Hero";
 import styles from "../page.module.scss";
 import useSWRMutation from "swr/mutation";
@@ -93,6 +92,7 @@ interface BookingData {
   bookingStatus?: BookingStatus;
   referenceCode: string;
   services: Array<{
+    id: number;
     name: string;
     serviceCategory: {
       category: {
@@ -127,51 +127,44 @@ export default function Home() {
     trigger,
     data: bookingData,
     isMutating,
-  } = useSWRMutation(
-    "key",
-    (key, { arg }: { arg: CheckBookingStatus }) =>
-      getBookingStatuses(arg.referenceCode),
-    {
-      onSuccess: () => {
-        console.log(bookingData);
-      },
-    }
+  } = useSWRMutation("key", (key, { arg }: { arg: CheckBookingStatus }) =>
+    getBookingStatuses(arg.referenceCode)
   );
 
   // const fetchBookingData = async (referenceCode: CheckBookingStatus) => {
   //   await trigger(referenceCode);
-    // try {
-    //   const response = await fetch(
-    //     `http://localhost:8080/api/bookings/status/${referenceCode}`
-    //   );
-    //   if (!response.ok) throw new Error("Failed to fetch booking data.");
+  // try {
+  //   const response = await fetch(
+  //     `http://localhost:8080/api/bookings/status/${referenceCode}`
+  //   );
+  //   if (!response.ok) throw new Error("Failed to fetch booking data.");
 
-    //   const text = await response.text();
-    //   if (!text) {
-    //     setBookingData({
-    //       bookingStatus: { name: "Invalid" },
-    //       referenceCode,
-    //       services: [],
-    //       totalPax: 0,
-    //       checkIn: "",
-    //       checkOut: "",
-    //     });
-    //     return;
-    //   }
+  //   const text = await response.text();
+  //   if (!text) {
+  //     setBookingData({
+  //       bookingStatus: { name: "Invalid" },
+  //       referenceCode,
+  //       services: [],
+  //       totalPax: 0,
+  //       checkIn: "",
+  //       checkOut: "",
+  //     });
+  //     return;
+  //   }
 
-    //   const data: BookingData = JSON.parse(text);
-    //   setBookingData(data);
-    // } catch (error) {
-    //   console.error("Error occurred during fetch:", error);
-    //   setBookingData({
-    //     bookingStatus: { name: "Invalid" },
-    //     referenceCode,
-    //     services: [],
-    //     totalPax: 0,
-    //     checkIn: "",
-    //     checkOut: "",
-    //   });
-    // }
+  //   const data: BookingData = JSON.parse(text);
+  //   setBookingData(data);
+  // } catch (error) {
+  //   console.error("Error occurred during fetch:", error);
+  //   setBookingData({
+  //     bookingStatus: { name: "Invalid" },
+  //     referenceCode,
+  //     services: [],
+  //     totalPax: 0,
+  //     checkIn: "",
+  //     checkOut: "",
+  //   });
+  // }
   // };
 
   useEffect(() => {
@@ -179,7 +172,7 @@ export default function Home() {
       setValue("referenceCode", referenceCode);
       trigger({ referenceCode });
     }
-  }, [referenceCode, setValue, trigger]);  
+  }, [referenceCode, setValue, trigger]);
 
   const fetchBookingData = async (data: CheckBookingStatus) => {
     await trigger(data);
@@ -212,6 +205,7 @@ export default function Home() {
           checkOut={bookingData?.checkOut}
           note={bookingData?.notes}
           message={bookingData?.message}
+          bookingData={bookingData}
         />
       )}
 

@@ -5,6 +5,7 @@ import { options } from "../api";
 interface BookingStatusDetailsProps {
   status: string;
   referenceCode?: string;
+  serviceId?: number;
   service?: string;
   category?: string;
   totalPax?: number;
@@ -12,6 +13,11 @@ interface BookingStatusDetailsProps {
   checkOut?: string;
   notes?: string | null;
   message?: string;
+  bookingData?: {
+    services?: {
+      id: string;
+    }[];
+  };
 }
 
 const BookingStatusDetails = ({
@@ -23,6 +29,7 @@ const BookingStatusDetails = ({
   checkIn,
   checkOut,
   message,
+  bookingData,
 }: BookingStatusDetailsProps) => {
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
@@ -233,9 +240,7 @@ const BookingStatusDetails = ({
                 <p>
                   <b>Reason for Cancellation: </b>
                 </p>
-                <p>
-                  {message}
-                </p>
+                <p>{message}</p>
               </div>
               <div
                 className={`${styles["booking-status-details-container-divider"]}`}
@@ -280,16 +285,36 @@ const BookingStatusDetails = ({
     case "rescheduled":
       const [newCheckIn, setNewCheckIn] = useState(checkIn || "");
       const [newCheckOut, setNewCheckOut] = useState(checkOut || "");
+      const [isDateChanged, setIsDateChanged] = useState(false);
+      const [unavailableServices, setUnavailableServices] = useState<
+        { id: string; name: string }[]
+      >([]);
+
+      const serviceId = bookingData?.services?.[0]?.id || null;
 
       const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNewCheckIn(e.target.value);
+        const newDate = e.target.value;
+        setNewCheckIn(newDate);
+        setIsDateChanged(newDate !== checkIn || newCheckOut !== checkOut);
       };
 
       const handleCheckOutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNewCheckOut(e.target.value);
+        const newDate = e.target.value;
+        setNewCheckOut(newDate);
+        setIsDateChanged(newCheckIn !== checkIn || newDate !== checkOut);
       };
 
       const handleSubmit = async () => {
+        if (!newCheckIn || !newCheckOut) {
+          alert("Please select both check-in and check-out dates.");
+          return;
+        }
+
+        if (new Date(newCheckIn) >= new Date(newCheckOut)) {
+          alert("Check-out date must be later than check-in date.");
+          return;
+        }
+
         try {
           const response = await fetch(
             `${options.baseURL}/api/bookings/dates/${referenceCode}`,
@@ -306,10 +331,25 @@ const BookingStatusDetails = ({
             }
           );
 
+          const result = await response.json();
+
           if (response.ok) {
+            setUnavailableServices([]);
             alert("New dates submitted successfully!");
           } else {
-            alert("Failed to submit new dates. Please try again.");
+            if (result.unavailableServices) {
+              setUnavailableServices(result.unavailableServices);
+              alert(
+                `The following services are unavailable for the selected dates: ${result.unavailableServices
+                  .map((s: { name: string }) => s.name)
+                  .join(", ")}`
+              );
+            } else {
+              alert(
+                result.message ||
+                  "Failed to submit new dates. Please try again."
+              );
+            }
           }
         } catch (error) {
           console.error("Error submitting new dates:", error);
@@ -435,7 +475,7 @@ const BookingStatusDetails = ({
       );
 
     default:
-      return null; // Or a fallback UI if needed
+      return null;
   }
 };
 
