@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,7 @@ import styles from "../page.module.scss";
 import useSWRMutation from "swr/mutation";
 import { getBookingStatuses } from "../lib/api";
 import { Loading } from "../components/loading";
+import { useSearchParams } from "next/navigation";
 
 // Temporary Schema (remove upon integrating the centralized zod file)
 type Category = {
@@ -110,9 +111,13 @@ type CheckBookingStatus = z.infer<typeof bookingSchema>;
 export default function Home() {
   // const [bookingData, setBookingData] = useState<BookingData | null>(null);
 
+  const searchParams = useSearchParams();
+  const referenceCode = searchParams.get("referenceCode");
+
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(bookingSchema), // Replace with the centralized zod schema/file
@@ -133,8 +138,8 @@ export default function Home() {
     }
   );
 
-  const fetchBookingData = async (referenceCode: CheckBookingStatus) => {
-    await trigger(referenceCode);
+  // const fetchBookingData = async (referenceCode: CheckBookingStatus) => {
+  //   await trigger(referenceCode);
     // try {
     //   const response = await fetch(
     //     `http://localhost:8080/api/bookings/status/${referenceCode}`
@@ -167,6 +172,17 @@ export default function Home() {
     //     checkOut: "",
     //   });
     // }
+  // };
+
+  useEffect(() => {
+    if (referenceCode) {
+      setValue("referenceCode", referenceCode);
+      trigger({ referenceCode });
+    }
+  }, [referenceCode, setValue, trigger]);  
+
+  const fetchBookingData = async (data: CheckBookingStatus) => {
+    await trigger(data);
   };
 
   return isMutating ? (

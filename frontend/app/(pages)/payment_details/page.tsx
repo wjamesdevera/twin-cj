@@ -100,6 +100,9 @@ export default function PaymentDetails() {
 
       if (!response.ok) throw new Error("Failed to confirm booking");
 
+      const responseData = await response.json();
+      const referenceCode = responseData.result.referenceCode;
+
       //NOTE: subject to change
       Swal.fire({
         title: "Booking Successful!",
@@ -107,7 +110,7 @@ export default function PaymentDetails() {
         draggable: true,
       }).then(() => {
         sessionStorage.removeItem("bookingData");
-        window.location.href = "http://localhost:3000/";
+        window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
       });
     } catch (error) {
       console.error("Error confirming booking:", error);
