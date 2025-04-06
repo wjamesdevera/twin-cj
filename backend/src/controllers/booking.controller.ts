@@ -14,7 +14,6 @@ import {
   getServicesByCategory,
   createBooking,
   getBookingStatuses,
-  reuploadPaymentImage,
   checkAvailability,
   getLatestBookings,
   getMonthlyBookings,
@@ -25,8 +24,6 @@ import {
   getBookingByReferenceCode,
   getAllBooking,
 } from "../services/booking.service";
-import AppError from "../utils/AppError";
-import { error } from "node:console";
 
 export const getBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -170,13 +167,30 @@ export const getBookingByIdHandler = catchErrors(
   }
 );
 
-export const updateBookingHandler = catchErrors(
+export const updateBookingStatusHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const { bookingStatus, message } = req.body;
 
     const booking = await editBookingStatus(id, bookingStatus, message);
     res.status(OK).json(booking);
+  }
+);
+
+export const getUnavailableDatesHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { serviceId } = req.params;
+
+    appAssert(serviceId, BAD_REQUEST, "Missing service ID");
+
+    const unavailableDates = await getUnavailableDatesForService(
+      Number(serviceId)
+    );
+
+    return res.status(OK).json({
+      status: "success",
+      data: unavailableDates,
+    });
   }
 );
 
@@ -213,22 +227,6 @@ export const getBookingStatusHandler = catchErrors(
     return res.status(OK).json(bookingStatus);
   }
 );
-
-export const reuploadPaymentImageHandler = catchErrors(
-  async (request: Request, response: Response) => {
-    const { referenceCode } = request.params;
-    const file = request.file;
-
-    appAssert(file, BAD_REQUEST, "No file uploaded");
-
-    const proofOfPaymentImageUrl = await reuploadPaymentImage(
-      referenceCode,
-      file!
-    );
-
-    return response.status(OK).json({
-      status: "success",
-      proofOfPaymentImageUrl,
-    });
-  }
-);
+function getUnavailableDatesForService(arg0: number) {
+  throw new Error("Function not implemented.");
+}
