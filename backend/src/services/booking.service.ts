@@ -419,7 +419,7 @@ export const getMonthlyBookings = async () => {
   const yearlyBookings = await prisma.booking.findMany({
     where: {
       checkIn: {
-        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`), // Start of the year
+        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
         lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
       },
     },
@@ -788,22 +788,77 @@ export const editBookingStatus = async (
   return updatedBooking;
 };
 
+export const getUnavailableDates = async (referenceCode: string) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      referenceCode,
+    },
+    select: {
+      services: {
+        select: {
+          serviceId: true,
+        },
+      },
+    },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not found");
+
+  const serviceIds = booking.services.map((s) => s.serviceId);
+
+  const overlappingBookings = await prisma.booking.findMany({
+    where: {
+      services: {
+        some: {
+          serviceId: { in: serviceIds },
+        },
+      },
+      bookingStatus: {
+        NOT: {
+          name: {
+            in: ["Cancelled", "Rescheduled"],
+          },
+        },
+      },
+    },
+    select: {
+      checkIn: true,
+      checkOut: true,
+    },
+  });
+
+  const unavailableDates = new Set<string>();
+
+  overlappingBookings.forEach(({ checkIn, checkOut }) => {
+    const current = new Date(checkIn);
+    const end = new Date(checkOut);
+
+    while (current <= end) {
+      const dateStr = current.toISOString().split("T")[0];
+      unavailableDates.add(dateStr);
+      current.setDate(current.getDate() + 1);
+    }
+  });
+
+  return Array.from(unavailableDates);
+};
+
 export const editBookingDates = async (
   referenceCode: string,
   newCheckIn: string,
   newCheckOut: string
 ) => {
-  console.log("editBookingDates called with:", {
-    referenceCode,
-    newCheckIn,
-    newCheckOut,
-  });
   const booking = await prisma.booking.findFirst({
     where: {
       referenceCode,
     },
     select: {
       referenceCode: true,
+      services: {
+        select: {
+          serviceId: true,
+        },
+      },
     },
   });
 
@@ -814,8 +869,13 @@ export const editBookingDates = async (
       referenceCode,
     },
     data: {
-      checkIn: new Date(),
-      checkOut: new Date(),
+      checkIn: new Date(newCheckIn),
+      checkOut: new Date(newCheckOut),
+      bookingStatus: {
+        connect: {
+          name: "Pending",
+        },
+      },
     },
   });
 
@@ -1054,51 +1114,4 @@ export const getBookingStatus = async (referenceCode: string) => {
   } catch (error) {
     console.error("Error fetching booking status:", error);
   }
-};
-
-export const reuploadPaymentImage = async (
-  referenceCode: string,
-  file: Express.Multer.File
-) => {
-  appAssert(file, BAD_REQUEST, "No file uploaded");
-
-  const booking = await prisma.booking.findUnique({
-    where: { referenceCode },
-    include: { transaction: true },
-  });
-
-  appAssert(booking, NOT_FOUND, "Booking not found");
-  appAssert(booking.transaction, NOT_FOUND, "Transaction not found");
-
-  const oldImageUrl = booking.transaction.proofOfPaymentImageUrl;
-  const proofOfPaymentImageUrl = `${ROOT_STATIC_URL}/${file.filename}`;
-
-  await prisma.transaction.update({
-    where: { id: booking.transactionId },
-    data: { proofOfPaymentImageUrl },
-  });
-
-  const pendingStatus = await prisma.bookingStatus.findUnique({
-    where: { name: "Pending" },
-  });
-
-  appAssert(pendingStatus, NOT_FOUND, "Pending status not found");
-
-  await prisma.booking.update({
-    where: { referenceCode },
-    data: { bookingStatusId: pendingStatus.id },
-  });
-
-  if (oldImageUrl) {
-    const oldImagePath = path.join(
-      __dirname,
-      "../../uploads",
-      path.basename(oldImageUrl)
-    );
-    if (fs.existsSync(oldImagePath)) {
-      fs.unlinkSync(oldImagePath);
-    }
-  }
-
-  return proofOfPaymentImageUrl;
 };

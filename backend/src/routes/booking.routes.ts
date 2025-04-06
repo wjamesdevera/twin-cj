@@ -9,12 +9,11 @@ import {
   getYearlyBookingsHandler,
   viewBookingsHandler,
   createWalkInBookingHandler,
-  updateBookingHandler,
   getBookingByIdHandler,
   getBookingStatusesHandler,
   getBookingStatusHandler,
-  reuploadPaymentImageHandler,
   updateBookingDateHandler,
+  updateBookingStatusHandler,
 } from "../controllers/booking.controller";
 import { getMonthlyBookings } from "../services/booking.service";
 
@@ -37,12 +36,8 @@ router.post(
 router.get("/status/:referenceCode", getBookingStatusHandler);
 router.get("/statuses", getBookingStatusesHandler);
 router.get("/:referenceCode", getBookingByIdHandler);
-router.patch("/status/:id", updateBookingHandler);
-router.put(
-  "/status/:referenceCode",
-  upload.single("file"),
-  reuploadPaymentImageHandler
-);
+router.patch("/status/:id", updateBookingStatusHandler);
+
 router.patch("/dates/:referenceCode", updateBookingDateHandler);
 
 export default router;
