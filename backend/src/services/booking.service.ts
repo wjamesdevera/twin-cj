@@ -222,11 +222,22 @@ export const createBooking = async (req: Request) => {
     const totalGuest =
       (parsedBookingData.guestCounts?.adults || 0) +
       (parsedBookingData.guestCounts?.children || 0);
+    
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    const duration = checkOut.getTime() - checkIn.getTime();
+    const numberOfNights = Math.ceil(duration / (1000 * 60 * 60 * 24));
 
     const amount = (bookingCards ?? []).reduce(
       (total: number, card: { price: string }) => {
         const cardPrice = parseFloat(card.price);
-        return isNaN(cardPrice) ? total : total + cardPrice;
+
+        if (numberOfNights > 1) {
+          let additionalCardPrice = (cardPrice + 500) * (numberOfNights - 1);
+          return (cardPrice + additionalCardPrice)/2;
+        } else {
+          return isNaN(cardPrice) ? total/2 : (total + cardPrice)/2;
+        }
       },
       0
     );
