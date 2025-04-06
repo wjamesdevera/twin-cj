@@ -1064,6 +1064,7 @@ export const getBookingStatus = async (referenceCode: string) => {
       checkOut: booking.checkOut,
       totalPax: booking.totalPax,
       notes: booking.notes,
+      message: booking.message,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
       customerId: booking.customerId,

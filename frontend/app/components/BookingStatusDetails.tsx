@@ -11,6 +11,7 @@ interface BookingStatusDetailsProps {
   checkIn?: string;
   checkOut?: string;
   notes?: string | null;
+  message?: string;
 }
 
 const BookingStatusDetails = ({
@@ -21,6 +22,7 @@ const BookingStatusDetails = ({
   totalPax,
   checkIn,
   checkOut,
+  message,
 }: BookingStatusDetailsProps) => {
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
@@ -232,8 +234,7 @@ const BookingStatusDetails = ({
                   <b>Reason for Cancellation: </b>
                 </p>
                 <p>
-                  Your booking was cancelled at your request or by an
-                  administrator.
+                  {message}
                 </p>
               </div>
               <div

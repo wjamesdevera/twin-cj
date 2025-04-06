@@ -100,6 +100,7 @@ interface BookingData {
     };
   }>;
   totalPax: number;
+  message: string;
   checkIn: string;
   checkOut: string;
 }
@@ -194,6 +195,7 @@ export default function Home() {
           checkIn={bookingData?.checkIn}
           checkOut={bookingData?.checkOut}
           note={bookingData?.notes}
+          message={bookingData?.message}
         />
       )}
 
