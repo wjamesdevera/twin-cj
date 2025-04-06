@@ -113,10 +113,29 @@ export default function WalkInForm() {
     const selectedPackage = availablePackages.find(
       (pkg) => pkg.id.toString() === watch("selectedPackageId")
     );
+
     if (selectedPackage) {
-      const halfPrice = selectedPackage.price / 2;
-      setSelectedPackagePrice(halfPrice);
-      setValue("amount", halfPrice.toString());
+      if (packageType === "day-tour") {
+        const halfPrice = selectedPackage.price / 2;
+        setSelectedPackagePrice(halfPrice);
+        setValue("amount", halfPrice.toString());
+      } else if (packageType === "cabins") {
+        const checkIn = new Date(checkInDate);
+        const checkOut = new Date(checkOutDate);
+        const duration = checkOut.getTime() - checkIn.getTime();
+        const numberOfNights = Math.ceil(duration / (1000 * 60 * 60 * 24));
+
+        if (numberOfNights > 1) {
+          let additionalCardPrice = (selectedPackage.price + 500) * (numberOfNights - 1);
+          let finalPrice = (selectedPackage.price + additionalCardPrice) / 2;
+          setSelectedPackagePrice(finalPrice);
+          setValue("amount", finalPrice.toString());
+        } else {
+          const halfPrice = selectedPackage.price / 2;
+          setSelectedPackagePrice(halfPrice);
+          setValue("amount", halfPrice.toString());
+        }
+      }
     } else {
       setSelectedPackagePrice(null);
       setValue("amount", "");
