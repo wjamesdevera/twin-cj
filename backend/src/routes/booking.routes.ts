@@ -15,7 +15,6 @@ import {
   updateBookingDateHandler,
   updateBookingStatusHandler,
 } from "../controllers/booking.controller";
-import { getMonthlyBookings } from "../services/booking.service";
 
 const router = Router();
 

@@ -222,7 +222,7 @@ export const createBooking = async (req: Request) => {
     const totalGuest =
       (parsedBookingData.guestCounts?.adults || 0) +
       (parsedBookingData.guestCounts?.children || 0);
-    
+
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
     const duration = checkOut.getTime() - checkIn.getTime();
@@ -234,9 +234,9 @@ export const createBooking = async (req: Request) => {
 
         if (numberOfNights > 1) {
           let additionalCardPrice = (cardPrice + 500) * (numberOfNights - 1);
-          return (cardPrice + additionalCardPrice)/2;
+          return (cardPrice + additionalCardPrice) / 2;
         } else {
-          return isNaN(cardPrice) ? total/2 : (total + cardPrice)/2;
+          return isNaN(cardPrice) ? total / 2 : (total + cardPrice) / 2;
         }
       },
       0
@@ -797,61 +797,6 @@ export const editBookingStatus = async (
   }
 
   return updatedBooking;
-};
-
-export const getUnavailableDates = async (referenceCode: string) => {
-  const booking = await prisma.booking.findFirst({
-    where: {
-      referenceCode,
-    },
-    select: {
-      services: {
-        select: {
-          serviceId: true,
-        },
-      },
-    },
-  });
-
-  appAssert(booking, NOT_FOUND, "Booking not found");
-
-  const serviceIds = booking.services.map((s) => s.serviceId);
-
-  const overlappingBookings = await prisma.booking.findMany({
-    where: {
-      services: {
-        some: {
-          serviceId: { in: serviceIds },
-        },
-      },
-      bookingStatus: {
-        NOT: {
-          name: {
-            in: ["Cancelled", "Rescheduled"],
-          },
-        },
-      },
-    },
-    select: {
-      checkIn: true,
-      checkOut: true,
-    },
-  });
-
-  const unavailableDates = new Set<string>();
-
-  overlappingBookings.forEach(({ checkIn, checkOut }) => {
-    const current = new Date(checkIn);
-    const end = new Date(checkOut);
-
-    while (current <= end) {
-      const dateStr = current.toISOString().split("T")[0];
-      unavailableDates.add(dateStr);
-      current.setDate(current.getDate() + 1);
-    }
-  });
-
-  return Array.from(unavailableDates);
 };
 
 export const editBookingDates = async (

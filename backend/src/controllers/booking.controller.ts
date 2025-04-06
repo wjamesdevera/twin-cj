@@ -177,23 +177,6 @@ export const updateBookingStatusHandler = catchErrors(
   }
 );
 
-export const getUnavailableDatesHandler = catchErrors(
-  async (req: Request, res: Response) => {
-    const { serviceId } = req.params;
-
-    appAssert(serviceId, BAD_REQUEST, "Missing service ID");
-
-    const unavailableDates = await getUnavailableDatesForService(
-      Number(serviceId)
-    );
-
-    return res.status(OK).json({
-      status: "success",
-      data: unavailableDates,
-    });
-  }
-);
-
 export const updateBookingDateHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { referenceCode } = req.params;
