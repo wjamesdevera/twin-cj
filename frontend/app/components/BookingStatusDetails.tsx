@@ -315,6 +315,19 @@ const BookingStatusDetails = ({
           return;
         }
 
+        if (newCheckIn === checkIn && newCheckOut === checkOut) {
+          alert("No changes made to the dates.");
+          return;
+        }
+
+        // if (
+        //   checkIn?.length &&
+        //   checkOut?.length !== newCheckIn?.length &&
+        //   newCheckOut?.length
+        // ) {
+        //   alert("Invalid date range");
+        // }
+
         try {
           const response = await fetch(
             `${options.baseURL}/api/bookings/dates/${referenceCode}`,
@@ -353,7 +366,6 @@ const BookingStatusDetails = ({
           }
         } catch (error) {
           console.error("Error submitting new dates:", error);
-          alert("An error occurred. Please try again.");
         }
       };
 

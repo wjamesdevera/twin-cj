@@ -195,7 +195,8 @@ export const updateBookingDateHandler = catchErrors(
 
 export const getBookingStatusesHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const bookingStatus = await getBookingStatuses();
+    const { referenceCode } = request.params;
+    const bookingStatus = await getBookingStatuses(referenceCode);
     response.status(OK).json(bookingStatus);
   }
 );
