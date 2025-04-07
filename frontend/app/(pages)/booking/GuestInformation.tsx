@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./guestinformation.module.scss";
 import BookingButton from "../../components/BookingButton";
 import TermsAndConditions from "../../components/TermsandConditions";
@@ -10,31 +10,29 @@ import {
 } from "@/app/lib/zodSchemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Swal from "sweetalert2";
+import { options } from "@/app/api";
+import NotificationModal from "@/app/components/notification_modal";
 
-const guestInformationSchema = z
-  .object({
-    firstName: nameSchema,
-    lastName: nameSchema,
-    contactNumber: phoneNumberSchema,
-    email: emailSchema,
-    retypeEmail: z.string(),
-    specialRequest: z
-      .string()
-      .regex(/^[a-zA-Z0-9 ]*$/)
-      .optional(),
-    isTermsChecked: z.boolean().refine((value) => value === true, {
-      message:
-        "You must accept the Terms and Conditions and Privacy Policy to proceed.",
-    }),
-    isPrivacyChecked: z.boolean().refine((value) => value === true, {
-      message:
-        "You must accept the Terms and Conditions and Privacy Policy to proceed.",
-    }),
-  })
-  .refine((g) => g.email === g.retypeEmail, {
-    path: ["retypeEmail"],
-    message: "Email does not match",
-  });
+const guestInformationSchema = z.object({
+  firstName: nameSchema,
+  lastName: nameSchema,
+  contactNumber: phoneNumberSchema,
+  email: emailSchema,
+
+  specialRequest: z
+    .string()
+    .regex(/^[a-zA-Z0-9 ]*$/)
+    .optional(),
+  isTermsChecked: z.boolean().refine((value) => value === true, {
+    message:
+      "You must accept the Terms and Conditions and Privacy Policy to proceed.",
+  }),
+  isPrivacyChecked: z.boolean().refine((value) => value === true, {
+    message:
+      "You must accept the Terms and Conditions and Privacy Policy to proceed.",
+  }),
+});
 
 type GuestInformationFormData = z.infer<typeof guestInformationSchema>;
 
@@ -63,7 +61,58 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
       isPrivacyChecked: false,
     },
   });
-  // State for form fields
+
+  const [otpSent, setOtpSent] = useState(false);
+
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState<"success" | "error">(
+    "success"
+  );
+
+  const handleSendOTP = async (email: string) => {
+    try {
+      const response = await fetch(`${options.baseURL}/api/bookings/send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send OTP");
+
+      setOtpSent(true);
+      setNotificationMessage("Please check your email for the OTP.");
+      setNotificationType("success");
+      setIsNotificationOpen(true);
+
+      setTimeout(() => {
+        const otpVerificationUrl = `/booking/verify_otp?page=1&email=${email}`;
+        window.open(otpVerificationUrl, "_blank");
+      }, 2000);
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to send OTP. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.action === "enablePaymentButton") {
+        setIsEmailVerified(true);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   const handleConfirmBookingClick = (data: GuestInformationFormData) => {
     const bookingDetails = {
@@ -134,19 +183,16 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
             {errors.email && (
               <p className={styles.errorText}>{errors.email.message}</p>
             )}
+            <button
+              type="button"
+              className={styles.sendOtpButton}
+              onClick={() => handleSendOTP(watch("email"))}
+              disabled={!watch("email")}
+            >
+              Verify Email
+            </button>
           </div>
-          <div className={styles.field}>
-            <label>Re-type Email</label>
-            <input
-              type="email"
-              placeholder="Re-type your Email"
-              {...register("retypeEmail")}
-              className={errors.retypeEmail ? styles.errorInput : ""}
-            />
-            {errors.retypeEmail && (
-              <p className={styles.errorText}>{errors.retypeEmail.message}</p>
-            )}
-          </div>
+          <div className={styles.field}></div>
         </div>
         <div className={styles.field}>
           <label>Special Request</label>
@@ -165,7 +211,7 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
               disabled={true}
               {...register("isTermsChecked")}
               className={styles.checkbox}
-              readOnly // prevents the user to uncheck the checkbox
+              readOnly
             />{" "}
             I have read and agree to the{" "}
             <TermsAndConditions
@@ -190,8 +236,22 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
           </label>
         </div>
         {/* Disable the button unless all fields are filled and both checkboxes are checked */}
-        <BookingButton text="Proceed to Payment" />
+        <BookingButton
+          text="Proceed to Payment"
+          disabled={
+            !isEmailVerified ||
+            Object.keys(errors).length > 0 ||
+            !watch("isTermsChecked") ||
+            !watch("isPrivacyChecked")
+          }
+        />
       </form>
+      <NotificationModal
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        message={notificationMessage}
+        type={notificationType}
+      />
     </div>
   );
 };

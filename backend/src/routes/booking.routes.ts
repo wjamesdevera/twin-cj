@@ -14,6 +14,8 @@ import {
   getBookingStatusHandler,
   updateBookingDateHandler,
   updateBookingStatusHandler,
+  sendOtpHandler,
+  verifyOtpHandler,
 } from "../controllers/booking.controller";
 
 const router = Router();
@@ -38,5 +40,7 @@ router.get("/:referenceCode", getBookingByIdHandler);
 router.patch("/status/:id", updateBookingStatusHandler);
 
 router.patch("/dates/:referenceCode", updateBookingDateHandler);
+router.post("/send-otp", sendOtpHandler);
+router.post("/verify-otp", verifyOtpHandler);
 
 export default router;

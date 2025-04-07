@@ -24,7 +24,9 @@ import {
   getBookingByReferenceCode,
   getAllBooking,
   editBookingDates,
+  sendOtp,
 } from "../services/booking.service";
+import { validateOTP } from "../utils/otpGenerator";
 
 export const getBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -207,5 +209,55 @@ export const getBookingStatusHandler = catchErrors(
     const bookingStatus = await getBookingStatus(referenceCode);
 
     return res.status(OK).json(bookingStatus);
+  }
+);
+
+export const sendOtpHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    appAssert(
+      email && typeof email === "string",
+      BAD_REQUEST,
+      "A valid email is required."
+    );
+
+    try {
+      await sendOtp(email);
+      return res.status(OK).json({ message: "OTP sent successfully." });
+    } catch (error) {
+      console.error("OTP Send Error:", error);
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ error: "Failed to send OTP." });
+    }
+  }
+);
+
+export const verifyOtpHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(BAD_REQUEST).json({
+        status: "error",
+        message: "Email and OTP are required.",
+      });
+    }
+
+    const isValid = validateOTP(email, otp);
+
+    if (!isValid) {
+      return res.status(BAD_REQUEST).json({
+        status: "error",
+        message: "Invalid or expired OTP.",
+      });
+    }
+
+    return res.status(OK).json({
+      status: "success",
+      message: "OTP verified successfully.",
+      success: true,
+    });
   }
 );
