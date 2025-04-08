@@ -37,8 +37,18 @@ export const messageSchema = z
   .max(500, "Message should not exceed 500 characters")
   .refine((val) => val.trim().length > 0, "Message cannot be just spaces");
 
+export const fileSchema = z
+  .instanceof(File, { message: "Image upload is required" })
+  .refine((file) => file.size > 0, "File is required")
+  .refine((file) => file.size <= 1024 * 1024, "File size must be less than 1MB")
+  .refine(
+    (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
+    "Invalid File Type"
+  );
+
 export const paymentSchema = z.object({
   paymentMethod: z.string().nonempty("Payment method is required"),
+  proofOfPayment: fileSchema,
 });
 
 export const walkinSchema = z.object({
@@ -63,14 +73,6 @@ export const walkinSchema = z.object({
   bookingStatus: z.enum(["approve", "reject", "cancel"]), 
 });
 
-export const fileSchema = z
-  .instanceof(File, { message: "Image upload is required" })
-  .refine((file) => file.size > 0, "File is required")
-  .refine((file) => file.size <= 1024 * 1024, "File size must be less than 1MB")
-  .refine(
-    (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
-    "Invalid File Type"
-  );
 
 export const priceSchema = z
   .string()
