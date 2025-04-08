@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import styles from "./bookings.module.scss";
 import BookingTable from "@/app/components/adminBookingDataTable";
