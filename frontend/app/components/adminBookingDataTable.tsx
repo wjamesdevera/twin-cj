@@ -212,6 +212,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     const date = new Date(dateString);
     return date.toISOString().slice(0, 10);
   };
+  const formatDateToStartOfDay = (date: Date) => {
+    date.setHours(0, 0, 0, 0);
+    return date;
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -233,7 +237,22 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       booking.bookingStatus.toLowerCase() ===
         filters.serviceFilter.toLowerCase();
 
-    return matchesSearchTerm && matchesStatus && matchesService;
+    const startDate = filters.startDateFilter
+      ? formatDateToStartOfDay(new Date(filters.startDateFilter))
+      : null;
+    const endDate = filters.endDateFilter
+      ? formatDateToStartOfDay(new Date(filters.endDateFilter))
+      : null;
+
+    const matchesDateRange =
+      (!startDate ||
+        formatDateToStartOfDay(new Date(booking.checkIn)) >= startDate) &&
+      (!endDate ||
+        formatDateToStartOfDay(new Date(booking.checkIn)) <= endDate);
+
+    return (
+      matchesSearchTerm && matchesStatus && matchesService && matchesDateRange
+    );
   });
 
   // Paginate the bookings
