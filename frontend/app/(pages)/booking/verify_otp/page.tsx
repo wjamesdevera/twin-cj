@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
@@ -20,14 +20,60 @@ const VerifyOtp: React.FC = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const [otpValid, setOtpValid] = useState(false);
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<OtpFormData>({
     resolver: zodResolver(otpSchema),
   });
+
+  useEffect(() => {
+    register("otp");
+  }, [register]);
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^[0-9]*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    const otpValue = newOtp.join("");
+    setValue("otp", otpValue, { shouldValidate: true });
+
+    if (value && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData("text/plain").slice(0, 6);
+    if (/^[0-9]+$/.test(pasteData)) {
+      const newOtp = [...otp];
+      for (let i = 0; i < pasteData.length; i++) {
+        if (i < 6) {
+          newOtp[i] = pasteData[i];
+        }
+      }
+      setOtp(newOtp);
+      setValue("otp", newOtp.join(""), { shouldValidate: true });
+      if (pasteData.length < 6) {
+        otpInputRefs.current[pasteData.length]?.focus();
+      }
+    }
+  };
 
   if (!email) {
     return <p>Missing Email</p>;
@@ -86,27 +132,72 @@ const VerifyOtp: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <h2>Verify OTP</h2>
-      <p>
-        We sent an OTP to your email: <strong>{email}</strong>
-      </p>
+      <div className={styles.card}>
+        <h2 className={styles.title}>Verify Your Email</h2>
+        <p className={styles.subtitle}>
+          We've sent a 6-digit code to{" "}
+          <span className={styles.email}>{email}</span>
+        </p>
 
-      <form onSubmit={handleSubmit(handleVerifyOtp)}>
-        <div>
-          <label>Enter OTP</label>
-          <input
-            type="text"
-            placeholder="Enter OTP"
-            {...register("otp")}
-            maxLength={6}
-          />
-          {errors.otp && <p style={{ color: "red" }}>{errors.otp.message}</p>}
-        </div>
+        <form onSubmit={handleSubmit(handleVerifyOtp)} className={styles.form}>
+          <div className={styles.otpContainer}>
+            <label className={styles.otpLabel}>Enter OTP Code</label>
+            <div className={styles.otpInputs}>
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  onPaste={handlePaste}
+                  ref={(el) => {
+                    otpInputRefs.current[index] = el;
+                  }}
+                  className={`${styles.otpInput} ${
+                    errors.otp ? styles.error : ""
+                  }`}
+                  disabled={otpValid}
+                  autoFocus={index === 0}
+                />
+              ))}
+            </div>
+            {errors.otp && (
+              <p className={styles.errorText}>{errors.otp.message}</p>
+            )}
+          </div>
 
-        <button type="submit" disabled={otpValid}>
-          Verify OTP
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={otpValid}
+            className={styles.submitButton}
+          >
+            {otpValid ? "Verified!" : "Verify OTP"}
+          </button>
+
+          {/* RESEND OTP SECTION */}
+
+          <p className={styles.resendText}>
+            Didn't receive your code?{" "}
+            <a
+              href="#"
+              className={styles.resendLink}
+              onClick={(e) => {
+                e.preventDefault();
+                // add resend OTP functionality here (if ever kaya pa):
+                // 1. add countdown state (120 seconds) -- optional nalang siguro to
+                // 2. make API call to resend OTP
+                // 3. show success and error message (like swal ganon)
+                // 4. disable button during countdown -- optional nalang din siguro to
+              }}
+            >
+              Resend OTP
+            </a>
+          </p>
+        </form>
+      </div>
     </div>
   );
 };
