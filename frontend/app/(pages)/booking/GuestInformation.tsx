@@ -91,7 +91,7 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
       setIsNotificationOpen(true);
 
       setTimeout(() => {
-        const otpVerificationUrl = `/booking/verify_otp?page=1&email=${email}`;
+        const otpVerificationUrl = `/verify_otp?page=1&email=${email}`;
         window.open(otpVerificationUrl, "_blank");
       }, 2000);
     } catch (error) {
