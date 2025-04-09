@@ -54,8 +54,6 @@ const BookingsChart: React.FC = () => {
         const { monthlyBookingCount, yearlyBookingCount } =
           await response.json();
 
-        console.log("Fetched data:", monthlyBookingCount || yearlyBookingCount);
-
         const newData = {
           labels: Object.keys(monthlyBookingCount || yearlyBookingCount),
           datasets: [

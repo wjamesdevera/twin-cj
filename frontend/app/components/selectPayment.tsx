@@ -52,7 +52,7 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({
         className={styles.file}
         id="file"
         type="file"
-        accept=".jpg,.jpeg"
+        accept=".jpg,.jpeg,.png,.heic,.webp"
         onChange={(e) => {
           if (e.target.files?.[0]) {
             setValue("proofOfPayment", e.target.files[0]); // Manually set value

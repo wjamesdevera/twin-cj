@@ -9,13 +9,14 @@ import {
   getYearlyBookingsHandler,
   viewBookingsHandler,
   createWalkInBookingHandler,
-  updateBookingHandler,
   getBookingByIdHandler,
   getBookingStatusesHandler,
   getBookingStatusHandler,
-  reuploadPaymentImageHandler,
+  updateBookingDateHandler,
+  updateBookingStatusHandler,
+  sendOtpHandler,
+  verifyOtpHandler,
 } from "../controllers/booking.controller";
-import { getMonthlyBookings } from "../services/booking.service";
 
 const router = Router();
 
@@ -28,15 +29,18 @@ router.get("/yearly", getYearlyBookingsHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
-router.post("/walk-in", upload.single("file"), createWalkInBookingHandler);
+router.post(
+  "/walk-in",
+  upload.single("proofOfPayment"),
+  createWalkInBookingHandler
+);
 router.get("/status/:referenceCode", getBookingStatusHandler);
 router.get("/statuses", getBookingStatusesHandler);
 router.get("/:referenceCode", getBookingByIdHandler);
-router.patch("/status/:id", updateBookingHandler);
-router.put(
-  "/status/:referenceCode",
-  upload.single("file"),
-  reuploadPaymentImageHandler
-);
+router.patch("/status/:id", updateBookingStatusHandler);
+
+router.patch("/dates/:referenceCode", updateBookingDateHandler);
+router.post("/send-otp", sendOtpHandler);
+router.post("/verify-otp", verifyOtpHandler);
 
 export default router;

@@ -73,12 +73,22 @@ export default function PaymentDetails() {
   const onSubmit = async (data: PaymentFormData) => {
     try {
       if (!bookingData) {
-        alert("No booking data found. Please try again.");
+        Swal.fire({
+          title: "No Booking Data",
+          text: "No booking data found. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
         return;
       }
 
       if (!data.proofOfPayment) {
-        alert("Please upload your proof of payment.");
+        Swal.fire({
+          title: "Missing Proof of Payment",
+          text: "Please upload your proof of payment to proceed.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
         return;
       }
 
@@ -95,6 +105,9 @@ export default function PaymentDetails() {
 
       if (!response.ok) throw new Error("Failed to confirm booking");
 
+      const responseData = await response.json();
+      const referenceCode = responseData.result.referenceCode;
+
       //NOTE: subject to change
       Swal.fire({
         title: "Booking Successful!",
@@ -102,7 +115,7 @@ export default function PaymentDetails() {
         draggable: true,
       }).then(() => {
         sessionStorage.removeItem("bookingData");
-        window.location.href = "http://localhost:3000/";
+        window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
       });
     } catch (error) {
       console.error("Error confirming booking:", error);
@@ -151,8 +164,6 @@ export default function PaymentDetails() {
             email={bookingData.email}
             contactNumber={bookingData.contactNumber}
             downPayment={selectedCard?.price ? selectedCard.price * 0.5 : 0}
-            paymentMethod="Credit Card"
-            status="Pending"
           />
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container3}`}
