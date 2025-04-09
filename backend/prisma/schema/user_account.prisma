@@ -11,8 +11,6 @@ model UserAccount {
 
     userAccountStatus UserAccountStatus? @relation(fields: [statusId], references: [id])
     statusId          Int?               @unique @map("user_account_status_id")
-    AuthRole          AuthRole?          @relation(fields: [authRoleId], references: [id])
-    authRoleId        Int?
 
     passwordResetToken PasswordResetToken[]
     session            Session[]
