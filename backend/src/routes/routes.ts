@@ -6,7 +6,7 @@ import inquiryRoutes from "./inquiry.routes";
 import serviceRoutes from "./service.routes";
 import sessionRoutes from "./session.routes";
 import bookingRoutes from "./booking.routes";
-import feedbackRoutes from "./feedback.routes"
+import feedbackRoutes from "./feedback.routes";
 import { authenticate } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/upload";
 
@@ -26,7 +26,7 @@ router.use("/sessions", sessionRoutes);
 router.use("/users", authenticate, userRoutes);
 router.use("/services", serviceRoutes);
 router.use("/inquiry", inquiryRoutes);
-router.use("/feedback", feedbackRoutes)
+router.use("/feedbacks", feedbackRoutes);
 router.use("/services", serviceRoutes);
 router.use("/bookings", bookingRoutes);
 
