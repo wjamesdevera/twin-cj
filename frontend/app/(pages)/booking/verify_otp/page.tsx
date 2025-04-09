@@ -48,7 +48,7 @@ const VerifyOtp: React.FC = () => {
 
   useEffect(() => {
     const storedCooldown = parseInt(
-      localStorage.getItem("resendCooldown") || "10"
+      localStorage.getItem("resendCooldown") || "120"
     );
 
     setResendCooldown(storedCooldown);
