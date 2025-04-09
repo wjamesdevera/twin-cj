@@ -131,42 +131,6 @@ export default function Home() {
     getBookingStatuses(arg.referenceCode)
   );
 
-  // const fetchBookingData = async (referenceCode: CheckBookingStatus) => {
-  //   await trigger(referenceCode);
-  // try {
-  //   const response = await fetch(
-  //     `http://localhost:8080/api/bookings/status/${referenceCode}`
-  //   );
-  //   if (!response.ok) throw new Error("Failed to fetch booking data.");
-
-  //   const text = await response.text();
-  //   if (!text) {
-  //     setBookingData({
-  //       bookingStatus: { name: "Invalid" },
-  //       referenceCode,
-  //       services: [],
-  //       totalPax: 0,
-  //       checkIn: "",
-  //       checkOut: "",
-  //     });
-  //     return;
-  //   }
-
-  //   const data: BookingData = JSON.parse(text);
-  //   setBookingData(data);
-  // } catch (error) {
-  //   console.error("Error occurred during fetch:", error);
-  //   setBookingData({
-  //     bookingStatus: { name: "Invalid" },
-  //     referenceCode,
-  //     services: [],
-  //     totalPax: 0,
-  //     checkIn: "",
-  //     checkOut: "",
-  //   });
-  // }
-  // };
-
   useEffect(() => {
     if (referenceCode) {
       setValue("referenceCode", referenceCode);
@@ -208,19 +172,6 @@ export default function Home() {
           bookingData={bookingData}
         />
       )}
-
-      {/* {bookingData?.bookingStatus?.name === "Invalid" && (
-        <BookingStatusDetails status="Invalid" />
-      )} */}
-      {/* {bookingData?.bookingStatus?.name === "Approved" && <BookingStatusPrintButton />} */}
-      {/* {bookingData?.bookingStatus?.name === "Reupload" && (
-        <BookingStatusDetailsReupload
-          referenceCode={bookingData?.referenceCode}
-          onReuploadSuccess={() =>
-            fetchBookingData({ referenceCode: bookingData?.referenceCode })
-          }
-        />
-      )} */}
     </div>
   );
 }

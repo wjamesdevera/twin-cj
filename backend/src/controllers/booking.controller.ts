@@ -9,7 +9,6 @@ import {
   NOT_FOUND,
   OK,
 } from "../constants/http";
-import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
 import {
   getServicesByCategory,
   createBooking,
@@ -195,7 +194,8 @@ export const updateBookingDateHandler = catchErrors(
 
 export const getBookingStatusesHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const bookingStatus = await getBookingStatuses();
+    const { referenceCode } = request.params;
+    const bookingStatus = await getBookingStatuses(referenceCode);
     response.status(OK).json(bookingStatus);
   }
 );
