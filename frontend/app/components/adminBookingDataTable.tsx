@@ -192,6 +192,92 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     }
   };
 
+  const handleEditDate = async () => {
+    const { checkIn: newCheckIn, checkOut: newCheckOut } = editedDates;
+
+    const calculateDuration = (checkIn: string, checkOut: string) => {
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
+      const duration = Math.ceil(
+        (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24)
+      );
+      return duration;
+    };
+
+    const originalDuration = calculateDuration(
+      currentBooking?.checkIn ?? "",
+      currentBooking?.checkOut ?? ""
+    );
+    const newDuration = calculateDuration(newCheckIn, newCheckOut);
+
+    if (originalDuration !== newDuration) {
+      setNotificationMessage(
+        `Please select a date range that is ${originalDuration} day/s long.`
+      );
+      setNotificationType("error");
+      setIsNotificationOpen(true);
+      return;
+    }
+
+    if (
+      newCheckIn &&
+      currentBooking?.checkIn &&
+      new Date(newCheckIn).getTime() ===
+        new Date(currentBooking.checkIn).getTime() &&
+      newCheckOut &&
+      currentBooking?.checkOut &&
+      new Date(newCheckOut).getTime() ===
+        new Date(currentBooking.checkOut).getTime()
+    ) {
+      setNotificationMessage("No changes made to the dates.");
+      setNotificationType("error");
+      setIsNotificationOpen(true);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${options.baseURL}/api/bookings/dates/${currentBooking?.referenceCode}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            referenceCode: currentBooking?.referenceCode,
+            newCheckIn,
+            newCheckOut,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      // Handle response
+      if (response.ok) {
+        setUnavailableServices([]);
+        alert("New dates submitted successfully!");
+        // Optionally reset the date editor or perform any other action after successful submission
+        setExpandedRef(null);
+      } else {
+        if (result.unavailableServices) {
+          setUnavailableServices(result.unavailableServices);
+          alert(
+            `The following services are unavailable for the selected dates: ${result.unavailableServices
+              .map((s: Service) => s.name)
+              .join(", ")}`
+          );
+        } else {
+          alert(
+            result.message || "Failed to submit new dates. Please try again."
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting new dates:", error);
+    }
+  };
+
   const handleCancelModal = () => {
     setIsModalOpen(false);
     setUserMessage("");
@@ -280,6 +366,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [unavailableServices, setUnavailableServices] = useState<Service[]>([]);
 
   const openImageModal = (imageUrl: string) => {
     setModalImageUrl(imageUrl);
@@ -423,10 +510,13 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                 isOpen ? null : booking.referenceCode
                               );
                               if (!isOpen) {
+                                setCurrentBooking(booking);
                                 setEditedDates({
                                   checkIn: formatDate(booking.checkIn),
                                   checkOut: formatDate(booking.checkOut),
                                 });
+                              } else {
+                                setCurrentBooking(null);
                               }
                             }}
                           >
@@ -515,7 +605,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                 Check-In:
                                 <input
                                   type="date"
-                                  value={editedDates.checkIn}
+                                  value={editedDates.checkIn || ""}
                                   onChange={(e) =>
                                     setEditedDates((prev) => ({
                                       ...prev,
@@ -528,7 +618,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                 Check-Out:
                                 <input
                                   type="date"
-                                  value={editedDates.checkOut}
+                                  value={editedDates.checkOut || ""}
                                   onChange={(e) =>
                                     setEditedDates((prev) => ({
                                       ...prev,
@@ -541,41 +631,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                 <CustomButton
                                   type="button"
                                   label="Save Changes"
-                                  onClick={async () => {
-                                    try {
-                                      const response = await fetch(
-                                        `${options.baseURL}/api/bookings/dates/${booking.referenceCode}`,
-                                        {
-                                          method: "PATCH",
-                                          headers: {
-                                            "Content-Type": "application/json",
-                                          },
-                                          body: JSON.stringify({
-                                            checkIn: editedDates.checkIn,
-                                            checkOut: editedDates.checkOut,
-                                          }),
-                                        }
-                                      );
-
-                                      if (!response.ok)
-                                        throw new Error("Update failed");
-
-                                      setNotificationMessage(
-                                        "Booking dates updated."
-                                      );
-                                      setNotificationType("success");
-                                      setIsNotificationOpen(true);
-                                      setExpandedRef(null);
-                                      mutate(`${options.baseURL}/api/bookings`);
-                                    } catch (error) {
-                                      console.error(error);
-                                      setNotificationMessage(
-                                        "Failed to update dates."
-                                      );
-                                      setNotificationType("error");
-                                      setIsNotificationOpen(true);
-                                    }
-                                  }}
+                                  onClick={handleEditDate}
                                 />
 
                                 <CustomButton
