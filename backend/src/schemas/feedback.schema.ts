@@ -1,7 +1,9 @@
 import z from "zod";
+import { nameSchema } from "./service.schemas";
 
 export const feedbackSchema = z.object({
   referenceCode: z.string(),
+  name: nameSchema,
   feedback: z
     .string()
     .max(100, "Feedback should not exceed 100 characters")

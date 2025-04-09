@@ -1,5 +1,6 @@
 model Feedback {
     id   Int    @id @default(autoincrement()) @map("feedback_id")
+    name String @map("name")
     text String @map("text")
 
     booking Booking?

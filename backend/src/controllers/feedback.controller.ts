@@ -4,8 +4,6 @@ import { OK } from "../constants/http";
 
 export const sendFeedbackHandler = catchErrors(
     async (request: Request, response: Response) => {
-        response.status(OK).json({
-            message: "success"
-        })
+        const requestData = sendFeedBac
     }
 )
