@@ -1,0 +1,15 @@
+.header {
+  width: 100%;
+  height: 28rem;
+  overflow: hidden;
+  position: relative;
+
+  .image {
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+section.inquiry-form {
+  padding-top: 5rem;
+}

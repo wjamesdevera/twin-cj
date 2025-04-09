@@ -9,11 +9,13 @@ import {
   getBookingCancelledEmailTemplate,
   getBookingRescheduledEmailTemplate,
   getBookingSuccessEmailTemplate,
+  getOTPEmailTemplate,
 } from "../utils/emailTemplates";
 import { ROOT_STATIC_URL } from "../constants/url";
 import path from "path";
 import fs from "fs";
 import { messageSchema } from "../schemas/feedback.schema";
+import { generateOTP, storeOTP, validateOTP } from "../utils/otpGenerator";
 
 interface ServiceCategory {
   id: number;
@@ -1192,5 +1194,37 @@ export const getBookingStatus = async (referenceCode: string) => {
     };
   } catch (error) {
     console.error("Error fetching booking status:", error);
+  }
+};
+
+export const sendOtp = async (email: string) => {
+  const { otp, expiresAt } = generateOTP(5);
+  storeOTP(email, otp, expiresAt);
+
+  console.log("OTP:", otp, "Expires At:", expiresAt);
+  const { error } = await sendMail({
+    to: email || "delivered@resend.dev",
+    ...getOTPEmailTemplate(otp),
+  });
+
+  if (error) {
+    console.error("Failed to send OTP:", error);
+    throw new Error("Failed to send OTP");
+  }
+
+  return { success: true, message: "OTP sent successfully" };
+};
+
+export const verifyOtp = async (email: string, otp: string) => {
+  try {
+    const isValid = validateOTP(email, otp);
+
+    if (!isValid) {
+      throw new Error("Invalid or expired OTP");
+    }
+
+    return { success: true, message: "OTP verified successfully" };
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to verify OTP");
   }
 };

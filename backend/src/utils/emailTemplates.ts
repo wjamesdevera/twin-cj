@@ -429,3 +429,70 @@ Message: ${data.message}`,
   </body>
 </html>`,
 });
+
+export const getOTPEmailTemplate = (otp: string) => ({
+  subject: "Your One-Time Pin (OTP) - Twin CJ Riverside Glamping Resort",
+  text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+  html: `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your OTP Code</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 80%;
+        max-width: 600px;
+        margin: 20px auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        color: #2c3e50;
+      }
+      p {
+        color: #555;
+        line-height: 1.6;
+      }
+      .otp {
+        font-size: 24px;
+        font-weight: bold;
+        color: #d35400;
+        text-align: center;
+        margin: 20px 0;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #777;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Your One-Time Password (OTP)</h2>
+      <p>
+        Use the following OTP to complete your verification. This OTP is valid
+        for 5 minutes.
+      </p>
+      <div class="otp">${otp}</div>
+      <p>
+        If you did not request this OTP, please ignore this email or contact
+        support.
+      </p>
+      <div class="footer">
+        <p>&copy; 2025 Twin CJ Riverside Glamping Resort. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>`,
+});
