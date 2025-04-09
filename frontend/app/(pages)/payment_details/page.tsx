@@ -159,8 +159,6 @@ export default function PaymentDetails() {
             email={bookingData.email}
             contactNumber={bookingData.contactNumber}
             downPayment={selectedCard?.price ? selectedCard.price * 0.5 : 0}
-            paymentMethod="Credit Card"
-            status="Pending"
           />
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container3}`}
