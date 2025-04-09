@@ -54,7 +54,7 @@ export default function faqs() {
                   >
                     •
                   </span>
-                  We accept both PDF and JPG file formats for image uploads.
+                  We accept JPG, JPEG, PNG, and HEIC file formats for image uploads.
                 </p>
               </div>
             ),
