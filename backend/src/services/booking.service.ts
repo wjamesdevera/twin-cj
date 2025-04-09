@@ -522,6 +522,7 @@ export const viewBookings = async (req: Request, res: Response) => {
       customerName: `${booking.customer.personalDetail?.firstName} ${booking.customer.personalDetail?.lastName}`,
       email: booking.customer.personalDetail?.email,
       status: booking.bookingStatus.name,
+      proofOfPayment: booking.transaction?.proofOfPaymentImageUrl,
     }));
 
     return {
@@ -822,9 +823,11 @@ export const editBookingDates = async (
       throw new Error("Invalid or missing date format provided");
     }
 
-    if (newCheckInDate >= newCheckOutDate) {
-      throw new Error("Check-in date must be before check-out date");
-    }
+    appAssert(
+      newCheckInDate <= newCheckOutDate,
+      BAD_REQUEST,
+      "Invalid date range provided"
+    );
 
     const booking = await prisma.booking.findFirst({
       where: { referenceCode },
@@ -889,7 +892,13 @@ export const editBookingDates = async (
     });
 
     if (conflicts.length > 0) {
-      console.log("Conflicts detected:", conflicts);
+      console.log(
+        "Conflict booked service:",
+        conflicts,
+        newCheckIn + " to ",
+        newCheckOut
+      );
+
       const unavailableServices = conflicts.map((conflict) => ({
         id: conflict.service.id.toString(),
         name: conflict.service.name,
@@ -941,8 +950,21 @@ export const editBookingDates = async (
   }
 };
 
-export const getBookingStatuses = async () => {
-  return await prisma.bookingStatus.findMany();
+export const getBookingStatuses = async (referenceCode: string) => {
+  const response = await prisma.booking.findUnique({
+    where: { referenceCode },
+    include: {
+      bookingStatus: true,
+      services: true,
+      transaction: true,
+      customer: true,
+    },
+  });
+
+  return {
+    ...response,
+    message: response?.message || null,
+  };
 };
 
 export const getBookingByReferenceCode = async (referenceCode: string) => {
