@@ -442,13 +442,6 @@ const BookingStatusDetails = ({
                     Verify the new dates work for you and contact us if there’s
                     an issue.
                   </li>
-                  <li>
-                    Bring a valid ID and updated booking confirmation for
-                    verification.
-                  </li>
-                  <li>
-                    Arrive at least ten minutes before your new scheduled time.
-                  </li>
                 </ol>
               </div>
             </div>
