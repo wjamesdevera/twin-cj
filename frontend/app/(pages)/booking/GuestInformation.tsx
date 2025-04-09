@@ -62,6 +62,8 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
     },
   });
 
+  const isEmailValid = emailSchema.safeParse(watch("email")).success;
+
   const [otpSent, setOtpSent] = useState(false);
 
   const [isEmailVerified, setIsEmailVerified] = useState(false);
@@ -174,25 +176,30 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
         <div className={styles.row}>
           <div className={styles.field}>
             <label>Email</label>
-            <input
-              type="email"
-              placeholder="Type your Email"
-              {...register("email")}
-              className={errors.email ? styles.errorInput : ""}
-            />
+            <div className={styles.emailContainer}>
+              <input
+                type="email"
+                placeholder="Type your Email"
+                {...register("email")}
+                className={errors.email ? styles.errorInput : ""}
+              />
+
+              <button
+                type="button"
+                className={styles.sendOtpButton}
+                onClick={() => handleSendOTP(watch("email"))}
+                disabled={!isEmailValid}
+              >
+                Verify Email
+              </button>
+            </div>
             {errors.email && (
               <p className={styles.errorText}>{errors.email.message}</p>
             )}
-            <button
-              type="button"
-              className={styles.sendOtpButton}
-              onClick={() => handleSendOTP(watch("email"))}
-              disabled={!watch("email")}
-            >
-              Verify Email
-            </button>
           </div>
-          <div className={styles.field}></div>
+          {/* <div className={styles.field}>
+           
+          </div> */}
         </div>
         <div className={styles.field}>
           <label>Special Request</label>

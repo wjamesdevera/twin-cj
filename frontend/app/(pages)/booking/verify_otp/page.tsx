@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { options } from "@/app/api";
+import { useRouter } from "next/navigation";
+import styles from "./page.module.scss";
 
 const otpSchema = z.object({
   otp: z.string().length(6, { message: "OTP must be exactly 6 characters" }),
@@ -83,7 +85,7 @@ const VerifyOtp: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "400px", margin: "auto" }}>
+    <div className={styles.container}>
       <h2>Verify OTP</h2>
       <p>
         We sent an OTP to your email: <strong>{email}</strong>
