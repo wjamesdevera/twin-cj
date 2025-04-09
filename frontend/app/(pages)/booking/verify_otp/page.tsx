@@ -44,14 +44,6 @@ const VerifyOtp: React.FC = () => {
     register("otp");
   }, [register]);
 
-  // useEffect(() => {
-  //   const storedCooldown = parseInt(
-  //     localStorage.getItem("resendCooldown") || "120"
-  //   );
-
-  //   setResendCooldown(storedCooldown);
-  // }, []);
-
   const handleOtpChange = (index: number, value: string) => {
     if (!/^[0-9]*$/.test(value)) return;
 
