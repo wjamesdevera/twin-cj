@@ -401,7 +401,7 @@ const BookingStatusDetails = ({
                 </p>
                 <div>
                   <label htmlFor="newCheckIn">
-                    <b>Select New Check-In Date:</b>
+                    <b>Select New Check-In Date:</b>&nbsp;
                   </label>
                   <input
                     type="date"
@@ -414,7 +414,7 @@ const BookingStatusDetails = ({
                 </div>
                 <div>
                   <label htmlFor="newCheckOut">
-                    <b>Select New Check-Out Date:</b>
+                    <b>Select New Check-Out Date:</b>&nbsp;
                   </label>
                   <input
                     type="date"
@@ -425,7 +425,7 @@ const BookingStatusDetails = ({
                     onChange={handleCheckOutChange}
                   />
                 </div>
-                <button onClick={handleSubmit}>Reschedule</button>
+                <button className={styles["btn-reschedule"]} onClick={handleSubmit}>Reschedule</button>
               </div>
               <div
                 className={`${styles["booking-status-details-container-divider"]}`}
