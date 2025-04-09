@@ -188,6 +188,12 @@ export const updateBookingDateHandler = catchErrors(
       newCheckOut
     );
 
+    if (result.unavailableServices) {
+      return res.status(BAD_REQUEST).json({
+        message: "The service is unavailable on the date provided.",
+      });
+    }
+
     res.status(OK).json(result.updatedBookingDate);
   }
 );
