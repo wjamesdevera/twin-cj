@@ -61,6 +61,13 @@
   margin: 10px;
 }
 
+.error {
+  color: red;
+  font-style: italic;
+  font-size: var(--text-size-xs);
+  margin-top: 0.25rem;
+}
+
 .fileUpload input[type="file"] {
   display: none;
 }
@@ -79,7 +86,8 @@
 }
 
 .uploadSubtext {
-  font-size: var(--text-size-sm);
+  font-size: var(--text-size-xs);
+  line-height: 1.5;
   color: #000;
   font-family: "Open Sans";
   font-weight: 300;
@@ -123,5 +131,31 @@
     min-width: 200px;
     max-width: 600px;
     padding: 25px 30px;
+  }
+}
+
+.file {
+  display: block;
+  width: 100%;
+  font-size: var(--text-size-base);
+  line-height: var(--text-line-height-base);
+  background: #fff;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 1px solid rgba(22, 22, 22, 0.4);
+  color: rgba(22, 22, 22, 0.4);
+  overflow: hidden;
+
+  &::file-selector-button {
+    border: none;
+    outline: none;
+    padding: 0.5rem 0.875rem;
+    color: var(--color-neutral-600);
+    background-color: var(--color-neutral-300);
+    z-index: -1;
+  }
+
+  &:focus {
+    outline: none;
   }
 }

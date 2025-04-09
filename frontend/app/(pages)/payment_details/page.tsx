@@ -15,9 +15,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Swal from "sweetalert2";
 
-type PaymentFormData = z.infer<typeof paymentSchema> & {
-  proofOfPayment: File | null;
-};
+type PaymentFormData = z.infer<typeof paymentSchema>;
 
 interface BookingCardData {
   id: number;
@@ -46,17 +44,14 @@ export default function PaymentDetails() {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentSchema),
     defaultValues: {
       paymentMethod: bookingData?.paymentMethod || "",
-      proofOfPayment: null,
+      proofOfPayment: undefined,
     },
   });
-
-  const paymentMethod = watch("paymentMethod");
-  const proofOfPayment = watch("proofOfPayment");
 
   useEffect(() => {
     const handleResize = () => {
@@ -78,12 +73,22 @@ export default function PaymentDetails() {
   const onSubmit = async (data: PaymentFormData) => {
     try {
       if (!bookingData) {
-        alert("No booking data found. Please try again.");
+        Swal.fire({
+          title: "No Booking Data",
+          text: "No booking data found. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
         return;
       }
 
       if (!data.proofOfPayment) {
-        alert("Please upload your proof of payment.");
+        Swal.fire({
+          title: "Missing Proof of Payment",
+          text: "Please upload your proof of payment to proceed.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
         return;
       }
 
@@ -122,7 +127,7 @@ export default function PaymentDetails() {
     <div className={styles.paymentContainer}>
       <PaymentDetailsHeader />
       <BackBtn className={styles.backBtn} />
-      <div className={styles.paymentDetails}>
+      <form className={styles.paymentDetails}>
         <h2 className={styles.paymentDetailsTitle}>Payment Details</h2>
         <div className={styles.paymentContainers}>
           <PricingContainer
@@ -186,18 +191,9 @@ export default function PaymentDetails() {
           />
           <SelectPayment
             className={`${styles.leftContainer} ${styles.container4}`}
-            paymentMethod={paymentMethod}
-            proofOfPayment={proofOfPayment ?? null}
-            handleSubmit={handleSubmit(onSubmit)}
-            setPaymentMethod={(method: string) =>
-              setValue("paymentMethod", method)
-            }
-            setProofOfPayment={(file: File | null) => {
-              console.log("Proof of Payment file:", file);
-              if (file) setValue("proofOfPayment", file);
-            }}
-            error={errors.proofOfPayment?.message ?? ""}
-            setError={() => {}}
+            register={register}
+            errors={errors}
+            setValue={setValue}
           />
           <PaymentContainer
             className={`${styles.rightContainer} ${styles.container5}`}
@@ -229,7 +225,7 @@ export default function PaymentDetails() {
           text="CONFIRM BOOKING"
           onClick={handleSubmit(onSubmit)}
         />
-      </div>
+      </form>
     </div>
   );
 }
