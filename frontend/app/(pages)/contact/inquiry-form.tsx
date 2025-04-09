@@ -286,13 +286,13 @@ const InquiryForm: React.FC = () => {
                 ? styles["success-input"]
                 : ""
             }`}
-            maxLength={500}
+            maxLength={400}
           />
           {errors.message && (
             <p className={styles["error-text"]}>{errors.message.message}</p>
           )}
           <p className={styles["char-count"]}>
-            {watch("message").length}/500 characters
+            {watch("message").length}/400 characters
           </p>
         </div>
         <div className={styles["button-group"]}>
