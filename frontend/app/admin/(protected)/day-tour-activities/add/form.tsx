@@ -134,14 +134,14 @@ export default function DayTourForm() {
               <label>
                 Description <span className={styles.required}>*</span>
               </label>
-              <textarea {...register("description")} maxLength={501} placeholder="Enter the description" />
+              <textarea {...register("description")} maxLength={400} placeholder="Enter the description" />
               {errors.description && (
                 <span className={styles.error}>
                   {errors.description.message}
                 </span>
               )}
               <p className={styles["char-count"]}>
-                {watch("description")?.length || 0}/500 characters
+                {watch("description")?.length || 0}/400 characters
               </p>
             </div>
           </div>
