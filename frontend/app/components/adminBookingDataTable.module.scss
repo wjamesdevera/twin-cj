@@ -1,3 +1,4 @@
+
 .headerContainer {
   display: flex;
   justify-content: space-between;
@@ -10,14 +11,13 @@
   padding: 20px 40px;
   margin: 0 auto;
   position: relative; 
+
 }
 
 .table_wrapper {
   width: 100%;
-  max-height: 66.4vh;  
   margin: 0;
   padding: 30px;
-
   border-radius: 12px;
 }
 
@@ -26,7 +26,6 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 60px;
-
   gap: 20px;
 }
 
@@ -343,8 +342,6 @@
       }
     }
   }
-
- 
 }
 
 .dateEditorButtons {
@@ -378,12 +375,9 @@
 
 .imageModalContent {
   position: relative;
-
-
   overflow: hidden;
   padding: 50px;
   text-align: center;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -424,6 +418,7 @@
   padding: 15px;
   width: 100%;
   margin-top: 20px;
+  margin-bottom: 40px;
 }
 
 .paginationButton {
@@ -546,6 +541,7 @@
 @media (max-width: 1024px) {
   .tableContainer {
     width: 100%;
+    overflow-x: auto;
   }
 
   .table {
