@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { DownloadTableExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import CustomButton from "@/app/components/custom_button";
 import Link from "next/link";
 import { options } from "../api";
 import { mutate } from "swr";
@@ -66,6 +67,8 @@ interface BookingTableProps {
   bookings: BookingResponse[] | undefined;
 }
 
+const ITEMS_PER_PAGE = 5;
+
 const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   const tableRef = useRef<HTMLTableElement | null>(null);
   const [filters, setFilters] = useState({
@@ -123,6 +126,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             onChange={handleMessageChange}
             className={styles.messageTextarea}
             placeholder="State your reason for cancellation/rescheduling here"
+            required
           />
         </>
       );
@@ -132,6 +136,19 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
   const handleEditStatus = async (userMessage: string) => {
     if (!currentBooking) return;
+
+    // Check if a message is required (for Cancelled or Rescheduled status)
+    if (
+      (newStatus === "Cancelled" || newStatus === "Rescheduled") &&
+      !userMessage.trim()
+    ) {
+      setNotificationMessage(
+        "Please provide a reason for cancellation or rescheduling."
+      );
+      setNotificationType("error");
+      setIsNotificationOpen(true);
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -196,7 +213,8 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     return date.toISOString().slice(0, 10);
   };
 
-  // Filter the bookings based on the filters
+  const [currentPage, setCurrentPage] = useState(1);
+
   const filteredBookings = bookings?.filter((booking) => {
     const searchLower = filters.searchTerm.toLowerCase();
 
@@ -217,6 +235,41 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
     return matchesSearchTerm && matchesStatus && matchesService;
   });
+
+  // Paginate the bookings
+  const totalPages = Math.ceil(
+    (filteredBookings?.length || 0) / ITEMS_PER_PAGE
+  );
+
+  const paginatedBookings = (filteredBookings || []).slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const [expandedRef, setExpandedRef] = useState<string | null>(null);
+  const [editedDates, setEditedDates] = useState<{
+    checkIn: string;
+    checkOut: string;
+  }>({ checkIn: "", checkOut: "" });
+
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  const openImageModal = (imageUrl: string) => {
+    setModalImageUrl(imageUrl);
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setIsImageModalOpen(false);
+  };
 
   return (
     <div className={styles.tableContainer}>
@@ -318,88 +371,256 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             </div> */}
           </div>
         </div>
+        <div className={styles.scrollableTableWrapper}>
+          <table ref={tableRef} className={styles.table}>
+            <thead className={styles.tableHead}>
+              <tr>
+                <th>Reference No.</th>
+                <th>Service</th>
+                <th>Image</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Down Payment</th>
+                <th>Customer Name</th>
+                <th>Email</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedBookings?.map(
+                (booking: BookingResponse, index: number) => {
+                  const isExpanded = expandedRef === booking.referenceCode;
 
-        <table ref={tableRef} className={styles.table}>
-          <thead className={styles.tableHead}>
-            <tr>
-              <th>Reference No.</th>
-              <th>Service</th>
-              <th>Check-In</th>
-              <th>Check-Out</th>
-              <th>Down Payment</th>
-              <th>Customer Name</th>
-              <th>Email</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredBookings?.map(
-              (booking: BookingResponse, index: number) => (
-                <tr key={index} className={styles.tableRow}>
-                  <td className={styles.tableCell}>
-                    <Link
-                      href={`/admin/bookings/edit/${booking.referenceCode}`}
-                      className={styles.referenceLink}
-                    >
-                      {booking.referenceCode}
-                    </Link>
-                  </td>
-                  <td className={styles.tableCell}>
-                    {booking.services.map((service) => service.service.name)[0]}
-                  </td>
-                  <td className={styles.tableCell}>
-                    {formatDate(booking.checkIn)}
-                  </td>
-                  <td className={styles.tableCell}>
-                    {formatDate(booking.checkOut)}
-                  </td>
-                  <td className={styles.tableCell}>
-                    ₱
-                    {booking.transaction.amount.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </td>
-                  <td
-                    className={styles.tableCell}
-                  >{`${booking.customer.firstName} ${booking.customer.lastName}`}</td>
-                  <td className={styles.tableCell}>{booking.customer.email}</td>
-                  <td
-                    className={`${styles.tableCell} ${
-                      booking.bookingStatus === "Pending"
-                        ? styles.statusPending
-                        : booking.bookingStatus === "Cancelled"
-                        ? styles.statusCancel
-                        : booking.bookingStatus === "Approved"
-                        ? styles.statusApproved
-                        : ""
-                    }`}
-                  >
-                    {/* NOTE: This is needed for the conversion of booking status to excel */}
-                    <span className={styles.hiddenStatus}>
-                      {booking.bookingStatus}
-                    </span>
-                    <select
-                      defaultValue={booking.bookingStatus}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                        const selectedStatus = e.target.value;
-                        openModalForStatusUpdate(booking, selectedStatus);
-                      }}
-                    >
-                      <option value={booking.bookingStatus} disabled>
-                        {booking.bookingStatus}
-                      </option>
-                      <option value="Approved">Approved</option>
-                      <option value="Cancelled">Cancelled</option>
-                      <option value="Rescheduled">Rescheduled</option>
-                    </select>
-                  </td>
-                </tr>
-              )
-            )}
-          </tbody>
-        </table>
+                  return (
+                    <React.Fragment key={index}>
+                      <tr className={styles.tableRow}>
+                        <td className={styles.tableCell}>
+                          <button
+                            className={styles.referenceLink}
+                            onClick={() => {
+                              const isOpen =
+                                expandedRef === booking.referenceCode;
+                              setExpandedRef(
+                                isOpen ? null : booking.referenceCode
+                              );
+                              if (!isOpen) {
+                                setEditedDates({
+                                  checkIn: formatDate(booking.checkIn),
+                                  checkOut: formatDate(booking.checkOut),
+                                });
+                              }
+                            }}
+                          >
+                            {booking.referenceCode}
+                          </button>
+                        </td>
+                        <td className={styles.tableCell}>
+                          {
+                            booking.services.map(
+                              (service) => service.service.name
+                            )[0]
+                          }
+                        </td>
+                        <td className={styles.tableCell}>
+                          <img
+                            src={booking.services[0].service.imageUrl}
+                            alt="Service"
+                            className={styles.thumbnailImage}
+                            onClick={(e) => {
+                              openImageModal(
+                                booking.services[0].service.imageUrl
+                              );
+                            }}
+                          />
+                        </td>
+                        <td className={styles.tableCell}>
+                          {formatDate(booking.checkIn)}
+                        </td>
+                        <td className={styles.tableCell}>
+                          {formatDate(booking.checkOut)}
+                        </td>
+                        <td className={styles.tableCell}>
+                          ₱
+                          {booking.transaction.amount.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}
+                        </td>
+                        <td className={styles.tableCell}>
+                          {`${booking.customer.firstName} ${booking.customer.lastName}`}
+                        </td>
+                        <td className={styles.tableCell}>
+                          {booking.customer.email}
+                        </td>
+                        <td
+                          className={`${styles.tableCell} ${
+                            booking.bookingStatus === "Pending"
+                              ? styles.statusPending
+                              : booking.bookingStatus === "Cancelled"
+                              ? styles.statusCancel
+                              : booking.bookingStatus === "Approved"
+                              ? styles.statusApproved
+                              : ""
+                          }`}
+                        >
+                          <span className={styles.hiddenStatus}>
+                            {booking.bookingStatus}
+                          </span>
+                          <select
+                            defaultValue={booking.bookingStatus}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLSelectElement>
+                            ) => {
+                              const selectedStatus = e.target.value;
+                              openModalForStatusUpdate(booking, selectedStatus);
+                            }}
+                          >
+                            <option value={booking.bookingStatus} disabled>
+                              {booking.bookingStatus}
+                            </option>
+                            <option value="Approved">Approved</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Rescheduled">Rescheduled</option>
+                          </select>
+                        </td>
+                      </tr>
+
+                      {isExpanded && (
+                        <tr className={styles.accordionRow}>
+                          <td colSpan={8} className={styles.accordionContent}>
+                            <div className={styles.dateEditor}>
+                              <label>
+                                Check-In:
+                                <input
+                                  type="date"
+                                  value={editedDates.checkIn}
+                                  onChange={(e) =>
+                                    setEditedDates((prev) => ({
+                                      ...prev,
+                                      checkIn: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </label>
+                              <label>
+                                Check-Out:
+                                <input
+                                  type="date"
+                                  value={editedDates.checkOut}
+                                  onChange={(e) =>
+                                    setEditedDates((prev) => ({
+                                      ...prev,
+                                      checkOut: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </label>
+                              <div className={styles.dateEditorButtons}>
+                                <CustomButton
+                                  type="button"
+                                  label="Save Changes"
+                                  onClick={async () => {
+                                    try {
+                                      const response = await fetch(
+                                        `${options.baseURL}/api/bookings/dates/${booking.referenceCode}`,
+                                        {
+                                          method: "PATCH",
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                          },
+                                          body: JSON.stringify({
+                                            checkIn: editedDates.checkIn,
+                                            checkOut: editedDates.checkOut,
+                                          }),
+                                        }
+                                      );
+
+                                      if (!response.ok)
+                                        throw new Error("Update failed");
+
+                                      setNotificationMessage(
+                                        "Booking dates updated."
+                                      );
+                                      setNotificationType("success");
+                                      setIsNotificationOpen(true);
+                                      setExpandedRef(null);
+                                      mutate(`${options.baseURL}/api/bookings`);
+                                    } catch (error) {
+                                      console.error(error);
+                                      setNotificationMessage(
+                                        "Failed to update dates."
+                                      );
+                                      setNotificationType("error");
+                                      setIsNotificationOpen(true);
+                                    }
+                                  }}
+                                />
+
+                                <CustomButton
+                                  type="button"
+                                  label="Cancel"
+                                  variant="danger"
+                                  onClick={() => setExpandedRef(null)}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                }
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className={styles.paginationContainer}>
+          <button
+            className={`${styles.paginationButton} ${
+              currentPage === 1 ? styles.disabled : ""
+            }`}
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+
+          <span className={styles.pageNumber}>
+            {currentPage} / {totalPages}
+          </span>
+
+          <button
+            className={`${styles.paginationButton} ${
+              currentPage === totalPages ? styles.disabled : ""
+            }`}
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
       </div>
+      {isImageModalOpen && modalImageUrl && (
+        <div className={styles.imageModal}>
+          <div className={styles.imageModalContent}>
+            <span className={styles.closeButton} onClick={closeImageModal}>
+              &times;
+            </span>
+
+            <div className={styles.imageWrapper}>
+              <img
+                src={modalImageUrl}
+                alt="Service"
+                className={styles.modalImage}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {isModalOpen && (
         <ConfirmModal
@@ -414,7 +635,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
         </ConfirmModal>
       )}
 
-      {/* Notification Modal */}
       <NotificationModal
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
