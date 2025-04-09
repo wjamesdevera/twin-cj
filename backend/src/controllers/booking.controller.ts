@@ -9,7 +9,6 @@ import {
   NOT_FOUND,
   OK,
 } from "../constants/http";
-import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
 import {
   getServicesByCategory,
   createBooking,

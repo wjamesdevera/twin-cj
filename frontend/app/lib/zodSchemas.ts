@@ -51,15 +51,6 @@ export const paymentSchema = z.object({
   proofOfPayment: fileSchema,
 });
 
-export const fileSchema = z
-  .instanceof(File, { message: "Image upload is required" })
-  .refine((file) => file.size > 0, "File is required")
-  .refine((file) => file.size <= 1024 * 1024, "File size must be less than 1MB")
-  .refine(
-    (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
-    "Invalid File Type"
-  );
-
 export const walkinSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
