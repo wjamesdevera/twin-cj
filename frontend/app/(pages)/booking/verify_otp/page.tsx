@@ -22,9 +22,7 @@ const VerifyOtp: React.FC = () => {
 
   const [otpValid, setOtpValid] = useState(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
-  const [resendCooldown, setResendCooldown] = useState<number>(() => {
-    return parseInt(localStorage.getItem("resendCooldown") || "0");
-  });
+  const [resendCooldown, setResendCooldown] = useState<number>(120);
   const [isResending, setIsResending] = useState(false);
   const [otpResent, setOtpResent] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -46,13 +44,13 @@ const VerifyOtp: React.FC = () => {
     register("otp");
   }, [register]);
 
-  useEffect(() => {
-    const storedCooldown = parseInt(
-      localStorage.getItem("resendCooldown") || "120"
-    );
+  // useEffect(() => {
+  //   const storedCooldown = parseInt(
+  //     localStorage.getItem("resendCooldown") || "120"
+  //   );
 
-    setResendCooldown(storedCooldown);
-  }, []);
+  //   setResendCooldown(storedCooldown);
+  // }, []);
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^[0-9]*$/.test(value)) return;
