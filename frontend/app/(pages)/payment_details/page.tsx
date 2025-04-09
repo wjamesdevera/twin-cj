@@ -78,12 +78,22 @@ export default function PaymentDetails() {
   const onSubmit = async (data: PaymentFormData) => {
     try {
       if (!bookingData) {
-        alert("No booking data found. Please try again.");
+        Swal.fire({
+          title: "No Booking Data",
+          text: "No booking data found. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
         return;
       }
 
       if (!data.proofOfPayment) {
-        alert("Please upload your proof of payment.");
+        Swal.fire({
+          title: "Missing Proof of Payment",
+          text: "Please upload your proof of payment to proceed.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
         return;
       }
 
@@ -193,7 +203,6 @@ export default function PaymentDetails() {
               setValue("paymentMethod", method)
             }
             setProofOfPayment={(file: File | null) => {
-              console.log("Proof of Payment file:", file);
               if (file) setValue("proofOfPayment", file);
             }}
             error={errors.proofOfPayment?.message ?? ""}
