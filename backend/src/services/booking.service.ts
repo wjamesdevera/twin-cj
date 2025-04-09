@@ -520,6 +520,7 @@ export const viewBookings = async (req: Request, res: Response) => {
       customerName: `${booking.customer.personalDetail?.firstName} ${booking.customer.personalDetail?.lastName}`,
       email: booking.customer.personalDetail?.email,
       status: booking.bookingStatus.name,
+      proofOfPayment: booking.transaction?.proofOfPaymentImageUrl,
     }));
 
     return {

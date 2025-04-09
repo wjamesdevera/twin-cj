@@ -137,7 +137,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   const handleEditStatus = async (userMessage: string) => {
     if (!currentBooking) return;
 
-    // Check if a message is required (for Cancelled or Rescheduled status)
     if (
       (newStatus === "Cancelled" || newStatus === "Rescheduled") &&
       !userMessage.trim()
@@ -192,22 +191,23 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     }
   };
 
+  const calculateDuration = (checkIn: string, checkOut: string) => {
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const duration = Math.ceil(
+      (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24)
+    );
+    return duration;
+  };
+
+  const originalDuration = calculateDuration(
+    currentBooking?.checkIn ?? "",
+    currentBooking?.checkOut ?? ""
+  );
+
   const handleEditDate = async () => {
     const { checkIn: newCheckIn, checkOut: newCheckOut } = editedDates;
 
-    const calculateDuration = (checkIn: string, checkOut: string) => {
-      const checkInDate = new Date(checkIn);
-      const checkOutDate = new Date(checkOut);
-      const duration = Math.ceil(
-        (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24)
-      );
-      return duration;
-    };
-
-    const originalDuration = calculateDuration(
-      currentBooking?.checkIn ?? "",
-      currentBooking?.checkOut ?? ""
-    );
     const newDuration = calculateDuration(newCheckIn, newCheckOut);
 
     if (originalDuration !== newDuration) {
@@ -256,8 +256,9 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       // Handle response
       if (response.ok) {
         setUnavailableServices([]);
-        alert("New dates submitted successfully!");
-        // Optionally reset the date editor or perform any other action after successful submission
+        setNotificationMessage("Schedule has been updated.");
+        setNotificationType("success");
+        setIsNotificationOpen(true);
         setExpandedRef(null);
       } else {
         if (result.unavailableServices) {
@@ -377,6 +378,12 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     setIsImageModalOpen(false);
   };
 
+  const addDays = (dateStr: string, days: number) => {
+    const date = new Date(dateStr);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().split("T")[0];
+  };
+
   return (
     <div className={styles.tableContainer}>
       <div className={styles.table_wrapper}>
@@ -457,24 +464,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                 <option value="rescheduled">Rescheduled</option>
               </select>
             </div>
-
-            {/* Service Filter
-            <div className={styles.filterForm}>
-              <label htmlFor="serviceFilter" className={styles.filterLabel}>
-                Filter by Service:
-              </label>
-              <select
-                id="serviceFilter"
-                name="serviceFilter"
-                value={filters.serviceFilter}
-                onChange={handleFilterChange}
-                className={styles.filterSelect}
-              >
-                <option value="all">All</option>
-                <option value="day tour">Day Tour</option>
-                <option value="cabin">Cabin</option>
-              </select>
-            </div> */}
           </div>
         </div>
         <div className={styles.scrollableTableWrapper}>
@@ -483,7 +472,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
               <tr>
                 <th>Reference No.</th>
                 <th>Service</th>
-                <th>Image</th>
+                <th>Proof of Payment</th>
                 <th>Check-In</th>
                 <th>Check-Out</th>
                 <th>Down Payment</th>
@@ -531,16 +520,24 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                           }
                         </td>
                         <td className={styles.tableCell}>
-                          <img
-                            src={booking.services[0].service.imageUrl}
-                            alt="Service"
-                            className={styles.thumbnailImage}
-                            onClick={(e) => {
-                              openImageModal(
-                                booking.services[0].service.imageUrl
-                              );
-                            }}
-                          />
+                          {booking.transaction?.proofOfPaymentImageUrl && (
+                            <img
+                              src={`http://localhost:8080/uploads/${booking.transaction.proofOfPaymentImageUrl
+                                .split(/[\\/]/)
+                                .pop()}`}
+                              alt="Proof of Payment"
+                              className={styles.thumbnailImage}
+                              onClick={() => {
+                                const fileName =
+                                  booking.transaction.proofOfPaymentImageUrl
+                                    .split(/[\\/]/)
+                                    .pop();
+                                openImageModal(
+                                  `http://localhost:8080/uploads/${fileName}`
+                                );
+                              }}
+                            />
+                          )}
                         </td>
                         <td className={styles.tableCell}>
                           {formatDate(booking.checkIn)}
@@ -606,12 +603,15 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                 <input
                                   type="date"
                                   value={editedDates.checkIn || ""}
-                                  onChange={(e) =>
+                                  min={editedDates.checkOut}
+                                  onChange={(e) => {
+                                    const newCheckIn = e.target.value;
                                     setEditedDates((prev) => ({
                                       ...prev,
-                                      checkIn: e.target.value,
-                                    }))
-                                  }
+                                      checkIn: newCheckIn,
+                                      checkOut: "",
+                                    }));
+                                  }}
                                 />
                               </label>
                               <label>
@@ -619,6 +619,15 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                 <input
                                   type="date"
                                   value={editedDates.checkOut || ""}
+                                  min={editedDates.checkIn || ""}
+                                  max={
+                                    editedDates.checkIn
+                                      ? addDays(
+                                          editedDates.checkIn,
+                                          originalDuration
+                                        )
+                                      : ""
+                                  }
                                   onChange={(e) =>
                                     setEditedDates((prev) => ({
                                       ...prev,
