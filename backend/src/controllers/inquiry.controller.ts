@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
 import { OK } from "../constants/http";
-import { sendFeedbackSchema } from "../schemas/feedback.schema";
+import { sendInquirySchema } from "../schemas/feedback.schema";
 import { sendFeedback } from "../services/inquiry.service";
 
 export const sendInquiryHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const data = sendFeedbackSchema.parse(request.body);
+    const data = sendInquirySchema.parse(request.body);
 
     await sendFeedback(data);
 
