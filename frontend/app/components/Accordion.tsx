@@ -12,11 +12,13 @@ interface AccordionItem {
 interface AccordionProps {
   items: AccordionItem[];
   initialOpenIndex?: number; // the index of the item that's initially opened
+  className?: string;
 }
 
 const Accordion: React.FC<AccordionProps> = ({
   items,
   initialOpenIndex = null,
+  className = "",
 }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [selections, setSelections] = useState<{ [key: number]: boolean }>({});
@@ -59,7 +61,7 @@ const Accordion: React.FC<AccordionProps> = ({
   };
 
   return (
-    <div className={styles.accordion}>
+    <div className={`${styles.accordion} ${className}`}>
       {items.map((item, index) => (
         <div
           key={index}
