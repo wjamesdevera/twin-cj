@@ -255,9 +255,9 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     );
   });
 
-  // Paginate the bookings
-  const totalPages = Math.ceil(
-    (filteredBookings?.length || 0) / ITEMS_PER_PAGE
+  const totalPages = Math.max(
+    1,
+    Math.ceil((filteredBookings?.length || 0) / ITEMS_PER_PAGE)
   );
 
   const paginatedBookings = (filteredBookings || []).slice(
@@ -600,10 +600,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
         <div className={styles.paginationContainer}>
           <button
             className={`${styles.paginationButton} ${
-              currentPage === 1 ? styles.disabled : ""
+              currentPage === 1 || totalPages === 1 ? styles.disabled : ""
             }`}
             onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
+            disabled={currentPage === 1 || totalPages === 1}
           >
             Previous
           </button>
@@ -614,10 +614,12 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
           <button
             className={`${styles.paginationButton} ${
-              currentPage === totalPages ? styles.disabled : ""
+              currentPage === totalPages || totalPages === 1
+                ? styles.disabled
+                : ""
             }`}
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || totalPages === 1}
           >
             Next
           </button>
