@@ -7,8 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { options } from "@/app/api";
-import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
+import NotificationModal from "@/app/components/notification_modal";
 
 const otpSchema = z.object({
   otp: z.string().length(6, { message: "OTP must be exactly 6 characters" }),
@@ -19,8 +19,18 @@ type OtpFormData = z.infer<typeof otpSchema>;
 const VerifyOtp: React.FC = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
+
   const [otpValid, setOtpValid] = useState(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
+  const [resendCooldown, setResendCooldown] = useState<number>(() => {
+    return parseInt(localStorage.getItem("resendCooldown") || "0");
+  });
+  const [isResending, setIsResending] = useState(false);
+  const [otpResent, setOtpResent] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalType, setModalType] = useState<"success" | "error">("success");
+
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const {
@@ -35,6 +45,14 @@ const VerifyOtp: React.FC = () => {
   useEffect(() => {
     register("otp");
   }, [register]);
+
+  useEffect(() => {
+    const storedCooldown = parseInt(
+      localStorage.getItem("resendCooldown") || "10"
+    );
+
+    setResendCooldown(storedCooldown);
+  }, []);
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^[0-9]*$/.test(value)) return;
@@ -51,6 +69,66 @@ const VerifyOtp: React.FC = () => {
     }
   };
 
+  const handleResendOtp = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!email || resendCooldown > 0 || isResending) return;
+
+    try {
+      setIsResending(true);
+      const response = await fetch(`${options.baseURL}/api/bookings/send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) throw new Error("Failed to resend OTP");
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setModalMessage("A new OTP has been sent to your email.");
+        setModalType("success");
+        setShowModal(true);
+        setResendCooldown(120);
+        setOtp(Array(6).fill(""));
+        setValue("otp", "");
+        setOtpResent(true);
+        localStorage.setItem("resendCooldown", (120).toString());
+      } else {
+        Swal.fire({
+          title: "Verification Failed",
+          text: "Incorrect OTP. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      Swal.fire("Error", "Something went wrong while resending OTP.", "error");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => {
+        setResendCooldown((prevCooldown) => {
+          const newCooldown = prevCooldown - 1;
+
+          localStorage.setItem("resendCooldown", newCooldown.toString());
+          return newCooldown;
+        });
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    } else {
+      localStorage.removeItem("resendCooldown");
+    }
+  }, [resendCooldown]);
+
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       otpInputRefs.current[index - 1]?.focus();
@@ -60,6 +138,7 @@ const VerifyOtp: React.FC = () => {
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const pasteData = e.clipboardData.getData("text/plain").slice(0, 6);
+
     if (/^[0-9]+$/.test(pasteData)) {
       const newOtp = [...otp];
       for (let i = 0; i < pasteData.length; i++) {
@@ -69,6 +148,7 @@ const VerifyOtp: React.FC = () => {
       }
       setOtp(newOtp);
       setValue("otp", newOtp.join(""), { shouldValidate: true });
+
       if (pasteData.length < 6) {
         otpInputRefs.current[pasteData.length]?.focus();
       }
@@ -105,6 +185,8 @@ const VerifyOtp: React.FC = () => {
           icon: "success",
           confirmButtonText: "Email Verified",
         }).then(() => {
+          localStorage.removeItem("resendCooldown");
+
           if (window.opener) {
             window.opener.postMessage({ action: "enablePaymentButton" }, "*");
           }
@@ -183,21 +265,27 @@ const VerifyOtp: React.FC = () => {
             Didn't receive your code?{" "}
             <a
               href="#"
-              className={styles.resendLink}
+              className={`${styles.resendLink} ${
+                resendCooldown > 0 || isResending ? styles.disabled : ""
+              }`}
               onClick={(e) => {
                 e.preventDefault();
-                // add resend OTP functionality here (if ever kaya pa):
-                // 1. add countdown state (120 seconds) -- optional nalang siguro to
-                // 2. make API call to resend OTP
-                // 3. show success and error message (like swal ganon)
-                // 4. disable button during countdown -- optional nalang din siguro to
+                handleResendOtp(e);
               }}
             >
-              Resend OTP
+              {resendCooldown > 0
+                ? `Resend in ${resendCooldown}s`
+                : "Resend OTP"}
             </a>
           </p>
         </form>
       </div>
+      <NotificationModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        message={modalMessage}
+        type={modalType}
+      />
     </div>
   );
 };
