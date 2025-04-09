@@ -10,7 +10,7 @@ interface sendFeedbackParams {
   message: string;
 }
 
-export const sendFeedback = async (data: sendFeedbackParams) => {
+export const sendInquiry = async (data: sendFeedbackParams) => {
   const feedbackReceiver = config.feedbackReceiver;
   await sendMail({
     to: feedbackReceiver,
