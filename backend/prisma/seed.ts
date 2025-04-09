@@ -206,6 +206,23 @@ Additional Inclusions:
       },
     });
   }
+
+  await prisma.feedback.createMany({
+    data: [
+      {
+        name: faker.person.fullName(),
+        text: "This platform has completely streamlined our workflow. The UI is intuitive and the performance is rock solid.",
+      },
+      {
+        name: faker.person.fullName(),
+        text: "Excellent support team and fast response times. We were able to get up and running in less than a day.",
+      },
+      {
+        name: faker.person.fullName(),
+        text: "I’ve tried several tools before, but this one really stands out in terms of flexibility and ease of use.",
+      },
+    ],
+  });
 }
 
 main()

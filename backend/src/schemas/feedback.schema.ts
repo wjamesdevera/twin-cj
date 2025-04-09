@@ -6,7 +6,7 @@ export const feedbackSchema = z.object({
   name: nameSchema,
   feedback: z
     .string()
-    .max(100, "Feedback should not exceed 100 characters")
+    .max(200, "Feedback should not exceed 200 characters")
     .refine((val) => val.trim().length > 0, "Description cannot be just spaces")
     .optional(),
 });

@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
+
+  & > * {
+    flex: 1;
+  }
+}
+
+@media (width >= 40rem) {
+  .wrapper {
+    flex-direction: row;
+  }
+}
+
+@media (width >= 64rem) {
+}
