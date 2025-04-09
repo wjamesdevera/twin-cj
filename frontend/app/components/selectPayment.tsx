@@ -65,7 +65,7 @@ const SelectPayment: React.FC<SelectPaymentProps> = ({
         <input
           id={fileInputId !== undefined ? fileInputId.toString() : undefined}
           type="file"
-          accept=".jpg,.jpeg"
+          accept=".jpg,.jpeg,.png,.heic,.webp"
           onChange={handleFileChange}
         />
         <span className={styles.uploadText}>
