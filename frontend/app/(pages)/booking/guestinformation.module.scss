@@ -119,6 +119,11 @@
   overflow: hidden;
 }
 
+.required {
+  color: red;
+  margin-left: 0.5rem;
+}
+
 .checkboxRow {
   display: flex;
   flex-direction: column;

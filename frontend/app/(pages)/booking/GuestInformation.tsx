@@ -136,7 +136,9 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
       >
         <div className={styles.row}>
           <div className={styles.field}>
-            <label>First Name</label>
+            <label>
+              First Name <span className={styles.required}>*</span>
+            </label>
             <input
               type="text"
               placeholder="First Name"
@@ -148,7 +150,9 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
             )}
           </div>
           <div className={styles.field}>
-            <label>Last Name</label>
+            <label>
+              Last Name <span className={styles.required}>*</span>
+            </label>
             <input
               type="text"
               placeholder="Last Name"
@@ -160,7 +164,9 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
             )}
           </div>
           <div className={styles.field}>
-            <label>Contact Number</label>
+            <label>
+              Contact Number <span className={styles.required}>*</span>
+            </label>
             <input
               type="text"
               placeholder="09123456789"
@@ -175,7 +181,9 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
         </div>
         <div className={styles.row}>
           <div className={styles.field}>
-            <label>Email</label>
+            <label>
+              Email <span className={styles.required}>*</span>
+            </label>
             <div className={styles.emailContainer}>
               <input
                 type="email"
@@ -197,9 +205,6 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
               <p className={styles.errorText}>{errors.email.message}</p>
             )}
           </div>
-          {/* <div className={styles.field}>
-           
-          </div> */}
         </div>
         <div className={styles.field}>
           <label>Special Request</label>
