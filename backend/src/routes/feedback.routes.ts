@@ -1,8 +1,7 @@
 import { Router } from "express";
-import { sendFeedbackHandler } from "../controllers/feedback.controller";
 
 const router = Router();
 
-router.post("", sendFeedbackHandler);
+router.post("",);
 
 export default router;
