@@ -260,6 +260,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
         setNotificationType("success");
         setIsNotificationOpen(true);
         setExpandedRef(null);
+        window.location.reload();
       } else {
         if (result.unavailableServices) {
           setUnavailableServices(result.unavailableServices);
