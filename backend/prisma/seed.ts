@@ -145,6 +145,9 @@ Additional Inclusions:
       {
         name: "Rescheduled",
       },
+      {
+        name: "Completed",
+      },
     ],
   });
 
