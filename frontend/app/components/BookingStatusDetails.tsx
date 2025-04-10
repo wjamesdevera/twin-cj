@@ -419,6 +419,10 @@ const BookingStatusDetails = ({
                   <b>Reference Number: </b>
                   <span>{referenceCode || "N/A"}</span>
                 </p>
+                <p>
+                  <b>Reason for Rescheduling: </b>
+                </p>
+                <p>{message}</p>
                 {category === "day-tour" ? (
                   <p>
                     <b>Package: </b>
