@@ -5,6 +5,7 @@ model Booking {
   checkOut      DateTime @map("check_out")
   totalPax      Int      @map("total_pax")
   notes         String?  @map("notes")
+  message       String?  @map("message")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -20,8 +21,8 @@ model Booking {
   transactionId String       @unique @map("transaction_id")
   transaction   Transaction? @relation(fields: [transactionId], references: [id])
 
-  feedbackId Int? @unique @map("feedback_id")
-  feedback Feedback? @relation(fields: [feedbackId], references: [id])
+  feedbackId Int?      @unique @map("feedback_id")
+  feedback   Feedback? @relation(fields: [feedbackId], references: [id])
 
   @@map("bookings")
 }

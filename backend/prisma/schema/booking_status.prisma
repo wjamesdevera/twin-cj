@@ -1,12 +1,11 @@
 model BookingStatus {
     id        Int      @id @default(autoincrement()) @map("booking_status_id")
     name      String   @unique
-    message   String?  @map("message")
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
     // Relations
-     bookings        Booking[]    
+    bookings        Booking[]    
 
     @@map("booking_statuses")
 }

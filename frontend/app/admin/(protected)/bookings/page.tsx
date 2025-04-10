@@ -6,9 +6,10 @@ import styles from "./bookings.module.scss";
 import BookingTable from "@/app/components/adminBookingDataTable";
 import { Loading } from "@/app/components/loading";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+import { getBooking } from "@/app/lib/api";
 
 interface Booking {
-  id: number;
   referenceNo: string;
   checkIn: string;
   checkOut: string;
@@ -32,6 +33,8 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const { data: bookingData, isLoading } = useSWR("key", getBooking);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -67,23 +70,20 @@ export default function Page() {
     return <Loading />;
   }
 
-  return (
+  return isLoading ? (
+    <Loading />
+  ) : (
     <div className={styles.dashboardContainer}>
       <div className={styles.dashboardContent}>
         <div className={styles.bookingTable}>
-          <BookingTable
-            bookings={
-              responseData?.data.map((booking) => ({
-                ...booking,
-                checkIn: formatDate(booking.checkIn),
-                checkOut: formatDate(booking.checkOut),
-                total: parseFloat(formatAmount(booking.total)),
-              })) || []
-            }
-          />
+          <BookingTable bookings={bookingData} />
         </div>
       </div>
-      <div className={styles.floatingIcon} style={{ cursor: "pointer" }}>
+      <div
+        className={styles.floatingIcon}
+        onClick={() => router.push("/admin/bookings/add")}
+        style={{ cursor: "pointer" }}
+      >
         <svg
           width="61"
           height="57"

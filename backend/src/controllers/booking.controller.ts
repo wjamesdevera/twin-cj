@@ -14,7 +14,6 @@ import {
   getServicesByCategory,
   createBooking,
   getBookingStatuses,
-  reuploadPaymentImage,
   checkAvailability,
   getLatestBookings,
   getMonthlyBookings,
@@ -24,8 +23,10 @@ import {
   getBookingStatus,
   getBookingByReferenceCode,
   getAllBooking,
+  editBookingDates,
+  sendOtp,
 } from "../services/booking.service";
-import AppError from "../utils/AppError";
+import { validateOTP } from "../utils/otpGenerator";
 
 export const getBookingHandler = catchErrors(
   async (req: Request, res: Response) => {
@@ -169,12 +170,28 @@ export const getBookingByIdHandler = catchErrors(
   }
 );
 
-export const updateBookingHandler = catchErrors(
+export const updateBookingStatusHandler = catchErrors(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { bookingStatus } = req.body;
-    const booking = await editBookingStatus(id, bookingStatus);
+    const { bookingStatus, message } = req.body;
+
+    const booking = await editBookingStatus(id, bookingStatus, message);
     res.status(OK).json(booking);
+  }
+);
+
+export const updateBookingDateHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { referenceCode } = req.params;
+    const { newCheckIn, newCheckOut } = req.body;
+
+    const result = await editBookingDates(
+      referenceCode,
+      newCheckIn,
+      newCheckOut
+    );
+
+    res.status(OK).json(result.updatedBookingDate);
   }
 );
 
@@ -190,23 +207,57 @@ export const getBookingStatusHandler = catchErrors(
     const { referenceCode } = req.params;
 
     const bookingStatus = await getBookingStatus(referenceCode);
-    
+
     return res.status(OK).json(bookingStatus);
   }
 );
 
-export const reuploadPaymentImageHandler = catchErrors(
-  async (request: Request, response: Response) => {
-    const { referenceCode } = request.params;
-    const file = request.file;
+export const sendOtpHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
 
-    appAssert(file, BAD_REQUEST, "No file uploaded");
+    appAssert(
+      email && typeof email === "string",
+      BAD_REQUEST,
+      "A valid email is required."
+    );
 
-    const proofOfPaymentImageUrl = await reuploadPaymentImage(referenceCode, file!);
+    try {
+      await sendOtp(email);
+      return res.status(OK).json({ message: "OTP sent successfully." });
+    } catch (error) {
+      console.error("OTP Send Error:", error);
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ error: "Failed to send OTP." });
+    }
+  }
+);
 
-    return response.status(OK).json({
+export const verifyOtpHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(BAD_REQUEST).json({
+        status: "error",
+        message: "Email and OTP are required.",
+      });
+    }
+
+    const isValid = validateOTP(email, otp);
+
+    if (!isValid) {
+      return res.status(BAD_REQUEST).json({
+        status: "error",
+        message: "Invalid or expired OTP.",
+      });
+    }
+
+    return res.status(OK).json({
       status: "success",
-      proofOfPaymentImageUrl,
+      message: "OTP verified successfully.",
+      success: true,
     });
   }
 );

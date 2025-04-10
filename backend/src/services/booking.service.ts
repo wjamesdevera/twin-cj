@@ -4,10 +4,18 @@ import { generateReferenceCode } from "../utils/referenceCodeGenerator";
 import appAssert from "../utils/appAssert";
 import { BAD_REQUEST, NOT_FOUND } from "../constants/http";
 import { sendMail } from "../utils/sendMail";
-import { getBookingSuccessEmailTemplate } from "../utils/emailTemplates";
+import {
+  getBookingApprovedEmailTemplate,
+  getBookingCancelledEmailTemplate,
+  getBookingRescheduledEmailTemplate,
+  getBookingSuccessEmailTemplate,
+  getOTPEmailTemplate,
+} from "../utils/emailTemplates";
 import { ROOT_STATIC_URL } from "../constants/url";
 import path from "path";
 import fs from "fs";
+import { messageSchema } from "../schemas/feedback.schema";
+import { generateOTP, storeOTP, validateOTP } from "../utils/otpGenerator";
 
 interface ServiceCategory {
   id: number;
@@ -44,6 +52,13 @@ export const checkAvailability = async (
         booking: {
           checkIn: { lte: new Date(checkOutDate) },
           checkOut: { gte: new Date(checkInDate) },
+          bookingStatus: {
+            NOT: {
+              name: {
+                in: ["Cancelled", "Rescheduled"],
+              },
+            },
+          },
         },
       },
       select: { serviceId: true },
@@ -113,6 +128,13 @@ export const getServicesByCategory = async (
         booking: {
           checkIn: { lte: checkOut },
           checkOut: { gte: checkIn },
+          bookingStatus: {
+            NOT: {
+              name: {
+                in: ["Cancelled", "Rescheduled"],
+              },
+            },
+          },
         },
       },
       select: {
@@ -203,10 +225,21 @@ export const createBooking = async (req: Request) => {
       (parsedBookingData.guestCounts?.adults || 0) +
       (parsedBookingData.guestCounts?.children || 0);
 
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    const duration = checkOut.getTime() - checkIn.getTime();
+    const numberOfNights = Math.ceil(duration / (1000 * 60 * 60 * 24));
+
     const amount = (bookingCards ?? []).reduce(
       (total: number, card: { price: string }) => {
         const cardPrice = parseFloat(card.price);
-        return isNaN(cardPrice) ? total : total + cardPrice;
+
+        if (numberOfNights > 1) {
+          let additionalCardPrice = (cardPrice + 500) * (numberOfNights - 1);
+          return (cardPrice + additionalCardPrice) / 2;
+        } else {
+          return isNaN(cardPrice) ? total / 2 : (total + cardPrice) / 2;
+        }
       },
       0
     );
@@ -399,7 +432,7 @@ export const getMonthlyBookings = async () => {
   const yearlyBookings = await prisma.booking.findMany({
     where: {
       checkIn: {
-        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`), // Start of the year
+        gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
         lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
       },
     },
@@ -454,7 +487,7 @@ export const viewBookings = async (req: Request, res: Response) => {
   try {
     const bookings = await prisma.booking.findMany({
       orderBy: {
-        checkIn: "desc",
+        createdAt: "desc",
       },
       include: {
         services: {
@@ -516,22 +549,6 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
       totalPax,
       amount,
     } = req.body;
-
-    console.log("Received booking data:", {
-      firstName,
-      lastName,
-      contactNumber,
-      email,
-      checkInDate,
-      checkOutDate,
-      selectedPackage,
-      paymentAccountName,
-      paymentAccountNumber,
-      paymentMethod,
-      proofOfPayment,
-      totalPax,
-      amount,
-    });
 
     appAssert(email, BAD_REQUEST, "Email is required.");
     appAssert(firstName, BAD_REQUEST, "First name is required.");
@@ -603,11 +620,21 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
       },
     });
 
+    let paymentStatus = await prisma.paymentStatus.findFirst({
+      where: { name: "Pending" },
+    });
+
+    if (!paymentStatus) {
+      paymentStatus = await prisma.paymentStatus.create({
+        data: { name: "Pending" },
+      });
+    }
+
     // Create Transaction
     const transaction = await prisma.transaction.create({
       data: {
         amount: parseFloat(amount),
-        proofOfPaymentImageUrl: proofOfPayment,
+        proofOfPaymentImageUrl: req.file?.path,
         paymentAccountId: paymentAccount.id,
       },
     });
@@ -655,79 +682,18 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
   }
 };
 
-export const editBooking = async (req: Request, res: Response) => {
-  try {
-    const { bookingId } = req.params;
-    const {
-      checkInDate,
-      checkOutDate,
-      bookingCards,
-      specialRequest,
-      totalPax,
-    } = req.body;
-
-    appAssert(bookingId, BAD_REQUEST, "Booking ID is required.");
-    appAssert(checkInDate, BAD_REQUEST, "Check-in date is required.");
-    appAssert(checkOutDate, BAD_REQUEST, "Check-out date is required.");
-    appAssert(Array.isArray(bookingCards), BAD_REQUEST, "Invalid services.");
-
-    // Find existing booking
-    const booking = await prisma.booking.findUnique({
-      where: { id: Number(bookingId) },
-      include: { services: true },
-    });
-
-    appAssert(booking, BAD_REQUEST, "Booking not found.");
-
-    // Check new availability
-    const availableServices = await checkAvailability(
-      checkInDate,
-      checkOutDate
-    );
-    const selectedServices = bookingCards.map(
-      (card: { id: number }) => card.id
-    );
-
-    const isAvailable = selectedServices.every((id) =>
-      availableServices.some((service) => service.id === id)
-    );
-
-    appAssert(
-      isAvailable,
-      BAD_REQUEST,
-      "One or more services are not available."
-    );
-
-    // Update Booking
-    const updatedBooking = await prisma.booking.update({
-      where: { id: Number(bookingId) },
-      data: {
-        checkIn: new Date(checkInDate),
-        checkOut: new Date(checkOutDate),
-        totalPax,
-        notes: specialRequest || "",
-      },
-    });
-
-    return res.json({
-      message: "Booking updated successfully",
-      updatedBooking,
-    });
-  } catch (error) {
-    console.error("Error updating booking:", error);
-  }
-};
-
 // Update Booking
 export const editBookingStatus = async (
   referenceCode: string,
-  bookingStatus: string
+  bookingStatus: string,
+  userMessage: string | null
 ) => {
   const booking = await prisma.booking.findFirst({
     where: {
       referenceCode,
     },
   });
+
   appAssert(booking, NOT_FOUND, "Booking not found");
 
   const updatedBooking = await prisma.booking.update({
@@ -735,12 +701,244 @@ export const editBookingStatus = async (
       referenceCode,
     },
     data: {
-      bookingStatusId: Number(bookingStatus),
+      bookingStatus: {
+        connect: {
+          name: bookingStatus,
+        },
+      },
+      message: userMessage || null,
+    },
+    include: {
+      customer: {
+        include: {
+          personalDetail: true,
+        },
+      },
+      services: {
+        include: {
+          service: true,
+        },
+      },
     },
   });
 
   appAssert(updatedBooking, NOT_FOUND, "Booking not found");
+
+  if (updatedBooking.customer?.personalDetail?.email) {
+    const services = updatedBooking.services.map(
+      (service) => service.service.name
+    );
+    const dateTime = `${new Date(updatedBooking.checkIn).toLocaleDateString(
+      "en-US",
+      {
+        weekday: "short",
+        month: "long",
+        day: "2-digit",
+        year: "numeric",
+      }
+    )} 4:00 PM - ${new Date(updatedBooking.checkOut).toLocaleDateString(
+      "en-US",
+      {
+        weekday: "short",
+        month: "long",
+        day: "2-digit",
+        year: "numeric",
+      }
+    )} 12:00 PM`;
+
+    let emailTemplate;
+    switch (bookingStatus.toLowerCase()) {
+      case "cancelled":
+        emailTemplate = getBookingCancelledEmailTemplate(
+          referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
+          dateTime,
+          services,
+          bookingStatus,
+          userMessage
+        );
+        break;
+      case "rescheduled":
+        emailTemplate = getBookingRescheduledEmailTemplate(
+          referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
+          dateTime,
+          services,
+          bookingStatus,
+          userMessage
+        );
+        break;
+      case "approved":
+        emailTemplate = getBookingApprovedEmailTemplate(
+          referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
+          dateTime,
+          services,
+          bookingStatus
+        );
+        break;
+      default:
+        emailTemplate = getBookingSuccessEmailTemplate(
+          referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`,
+          dateTime,
+          services,
+          bookingStatus
+        );
+    }
+
+    const { error } = await sendMail({
+      to:
+        updatedBooking.customer.personalDetail.email || "delivered@resend.dev",
+      ...emailTemplate,
+    });
+
+    if (error) {
+      console.error("Error sending status update email:", error);
+    }
+  }
+
   return updatedBooking;
+};
+
+export const editBookingDates = async (
+  referenceCode: string,
+  newCheckIn: string,
+  newCheckOut: string
+): Promise<{
+  updatedBookingDate?: Awaited<ReturnType<typeof prisma.booking.update>>;
+  unavailableServices?: { id: string; name: string }[];
+}> => {
+  try {
+    const newCheckInDate = new Date(newCheckIn);
+    const newCheckOutDate = new Date(newCheckOut);
+
+    if (
+      !newCheckIn ||
+      !newCheckOut ||
+      isNaN(newCheckInDate.getTime()) ||
+      isNaN(newCheckOutDate.getTime())
+    ) {
+      throw new Error("Invalid or missing date format provided");
+    }
+
+    if (newCheckInDate >= newCheckOutDate) {
+      throw new Error("Check-in date must be before check-out date");
+    }
+
+    const booking = await prisma.booking.findFirst({
+      where: { referenceCode },
+      select: {
+        id: true,
+        checkIn: true,
+        checkOut: true,
+        services: {
+          select: {
+            serviceId: true,
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      throw new Error("Booking not found");
+    }
+
+    // Validate duration consistency
+    const originalDuration = Math.round(
+      (booking.checkOut.getTime() - booking.checkIn.getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+    const newDuration = Math.round(
+      (newCheckOutDate.getTime() - newCheckInDate.getTime()) /
+        (1000 * 60 * 60 * 24)
+    );
+
+    if (newDuration !== originalDuration) {
+      throw new Error(
+        `Duration mismatch: original (${originalDuration} days) vs new (${newDuration} days)`
+      );
+    }
+
+    const serviceIds = booking.services.map((s) => s.serviceId);
+
+    const conflicts = await prisma.bookingService.findMany({
+      where: {
+        serviceId: { in: serviceIds },
+        booking: {
+          id: { not: booking.id },
+          OR: [
+            {
+              checkIn: { lte: newCheckOutDate },
+              checkOut: { gte: newCheckInDate },
+            },
+          ],
+          bookingStatus: {
+            name: { notIn: ["Cancelled", "Rescheduled"] },
+          },
+        },
+      },
+      select: {
+        service: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (conflicts.length > 0) {
+      console.log("Conflicts detected:", conflicts);
+      const unavailableServices = conflicts.map((conflict) => ({
+        id: conflict.service.id.toString(),
+        name: conflict.service.name,
+      }));
+      return { unavailableServices };
+    }
+
+    // Update the booking if no conflicts
+    const updatedBookingDate = await prisma.booking.update({
+      where: { referenceCode },
+      data: {
+        checkIn: newCheckInDate,
+        checkOut: newCheckOutDate,
+        bookingStatus: {
+          connect: { name: "Pending" },
+        },
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        referenceCode: true,
+        checkIn: true,
+        checkOut: true,
+        totalPax: true,
+        notes: true,
+        message: true,
+        createdAt: true,
+        updatedAt: true,
+        customerId: true,
+        bookingStatusId: true,
+        transactionId: true,
+        bookingStatus: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    return { updatedBookingDate };
+  } catch (error) {
+    console.error("Error in editBookingDates:", error);
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error(
+      "Failed to update booking dates due to an unexpected error"
+    );
+  }
 };
 
 export const getBookingStatuses = async () => {
@@ -750,7 +948,7 @@ export const getBookingStatuses = async () => {
 export const getBookingByReferenceCode = async (referenceCode: string) => {
   const booking = await prisma.booking.findFirst({
     where: {
-      referenceCode
+      referenceCode,
     },
     select: {
       id: true,
@@ -818,6 +1016,9 @@ export const getBookingByReferenceCode = async (referenceCode: string) => {
 
 export const getAllBooking = async () => {
   const bookings = await prisma.booking.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
     select: {
       id: true,
       referenceCode: true,
@@ -911,6 +1112,7 @@ export const getBookingStatus = async (referenceCode: string) => {
       checkOut: booking.checkOut,
       totalPax: booking.totalPax,
       notes: booking.notes,
+      message: booking.message,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
       customerId: booking.customerId,
@@ -943,16 +1145,20 @@ export const getBookingStatus = async (referenceCode: string) => {
         serviceCategoryId: booking.service.serviceCategoryId,
         serviceCategory: booking.service.serviceCategory
           ? {
-            id: booking.service.serviceCategory.id,
-            categoryId: booking.service.serviceCategory.categoryId,
-            category: booking.service.serviceCategory.category
-              ? {
-                id: booking.service.serviceCategory.category.id,
-                name: booking.service.serviceCategory.category.name,
-                createdAt: booking.service.serviceCategory.category.createdAt,
-                updatedAt: booking.service.serviceCategory.category.updatedAt,
-              } : null,
-          } : null,
+              id: booking.service.serviceCategory.id,
+              categoryId: booking.service.serviceCategory.categoryId,
+              category: booking.service.serviceCategory.category
+                ? {
+                    id: booking.service.serviceCategory.category.id,
+                    name: booking.service.serviceCategory.category.name,
+                    createdAt:
+                      booking.service.serviceCategory.category.createdAt,
+                    updatedAt:
+                      booking.service.serviceCategory.category.updatedAt,
+                  }
+                : null,
+            }
+          : null,
       })),
       transaction: booking.transaction
         ? {
@@ -970,50 +1176,34 @@ export const getBookingStatus = async (referenceCode: string) => {
   }
 };
 
+export const sendOtp = async (email: string) => {
+  const { otp, expiresAt } = generateOTP(5);
+  storeOTP(email, otp, expiresAt);
 
-export const reuploadPaymentImage = async (
-  referenceCode: string,
-  file: Express.Multer.File
-) => {
-  appAssert(file, BAD_REQUEST, "No file uploaded");
-
-  const booking = await prisma.booking.findUnique({
-    where: { referenceCode },
-    include: { transaction: true },
+  console.log("OTP:", otp, "Expires At:", expiresAt);
+  const { error } = await sendMail({
+    to: email || "delivered@resend.dev",
+    ...getOTPEmailTemplate(otp),
   });
 
-  appAssert(booking, NOT_FOUND, "Booking not found");
-  appAssert(booking.transaction, NOT_FOUND, "Transaction not found");
-
-  const oldImageUrl = booking.transaction.proofOfPaymentImageUrl;
-  const proofOfPaymentImageUrl = `${ROOT_STATIC_URL}/${file.filename}`;
-
-  await prisma.transaction.update({
-    where: { id: booking.transactionId },
-    data: { proofOfPaymentImageUrl },
-  });
-
-  const pendingStatus = await prisma.bookingStatus.findUnique({
-    where: { name: "Pending" },
-  });
-
-  appAssert(pendingStatus, NOT_FOUND, "Pending status not found");
-
-  await prisma.booking.update({
-    where: { referenceCode },
-    data: { bookingStatusId: pendingStatus.id },
-  });
-
-  if (oldImageUrl) {
-    const oldImagePath = path.join(
-      __dirname,
-      "../../uploads",
-      path.basename(oldImageUrl)
-    );
-    if (fs.existsSync(oldImagePath)) {
-      fs.unlinkSync(oldImagePath);
-    }
+  if (error) {
+    console.error("Failed to send OTP:", error);
+    throw new Error("Failed to send OTP");
   }
 
-  return proofOfPaymentImageUrl;
+  return { success: true, message: "OTP sent successfully" };
+};
+
+export const verifyOtp = async (email: string, otp: string) => {
+  try {
+    const isValid = validateOTP(email, otp);
+
+    if (!isValid) {
+      throw new Error("Invalid or expired OTP");
+    }
+
+    return { success: true, message: "OTP verified successfully" };
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to verify OTP");
+  }
 };

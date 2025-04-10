@@ -155,7 +155,7 @@ type Transaction = {
   updatedAt: string;
 };
 
-type BookingResponse = {
+export type BookingResponse = {
   id: number;
   referenceCode: string;
   checkIn: string;
@@ -266,3 +266,5 @@ type SendFeedbackSchema = z.infer<typeof feedbackSchema>;
 
 export const sendFeedbacks = async (data: SendFeedbackSchema) =>
   API.post("/api/feedbacks", data);
+export const getBooking = async () =>
+  API.get<BookingResponse[]>(`/api/bookings/`);

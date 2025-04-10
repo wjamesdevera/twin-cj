@@ -19,4 +19,8 @@ export const navlist = [
     label: "Contact Us",
     href: "/contact",
   },
+  {
+    label: "FAQs",
+    href: "/faqs",
+  },
 ];

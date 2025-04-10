@@ -27,7 +27,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             <th>Service</th>
             <th>Check-In</th>
             <th>Check-Out</th>
-            <th>Total</th>
+            <th>Down Payment</th>
             <th>Customer Name</th>
             <th>Email</th>
             <th>Status</th>
