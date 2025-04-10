@@ -1,6 +1,14 @@
 import { useState } from "react";
 import styles from "./BookingStatusDetails.module.scss";
 import { options } from "../api";
+import NotificationModal from "./notification_modal";
+import { mutate } from "swr";
+import { format } from "path";
+
+interface Service {
+  id: string;
+  name: string;
+}
 
 interface BookingStatusDetailsProps {
   status: string;
@@ -290,6 +298,12 @@ const BookingStatusDetails = ({
         { id: string; name: string }[]
       >([]);
 
+      const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+      const [notificationMessage, setNotificationMessage] = useState("");
+      const [notificationType, setNotificationType] = useState<
+        "success" | "error"
+      >("success");
+
       const serviceId = bookingData?.services?.[0]?.id || null;
 
       const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -304,14 +318,26 @@ const BookingStatusDetails = ({
         setIsDateChanged(newCheckIn !== checkIn || newDate !== checkOut);
       };
 
-      const handleSubmit = async () => {
-        if (!newCheckIn || !newCheckOut) {
-          alert("Please select both check-in and check-out dates.");
-          return;
-        }
+      const calculateDuration = (checkIn: string, checkOut: string) => {
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        const duration = Math.ceil(
+          (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24)
+        );
+        return duration;
+      };
 
-        if (new Date(newCheckIn) >= new Date(newCheckOut)) {
-          alert("Check-out date must be later than check-in date.");
+      const originalDuration = calculateDuration(newCheckIn, newCheckOut);
+
+      const handleSubmit = async () => {
+        const newDuration = calculateDuration(newCheckIn, newCheckOut);
+
+        if (originalDuration !== newDuration) {
+          setNotificationMessage(
+            `Please select a date range that is ${originalDuration} day/s long.`
+          );
+          setNotificationType("error");
+          setIsNotificationOpen(true);
           return;
         }
 
@@ -335,15 +361,15 @@ const BookingStatusDetails = ({
 
           if (response.ok) {
             setUnavailableServices([]);
-            alert("New dates submitted successfully!");
+            setNotificationMessage("Schedule has been updated.");
+            setNotificationType("success");
+            setIsNotificationOpen(true);
+            mutate("");
           } else {
-            if (result.unavailableServices) {
-              setUnavailableServices(result.unavailableServices);
-              alert(
-                `The following services are unavailable for the selected dates: ${result.unavailableServices
-                  .map((s: { name: string }) => s.name)
-                  .join(", ")}`
-              );
+            if (result.message) {
+              setNotificationMessage(result.message);
+              setNotificationType("error");
+              setIsNotificationOpen(true);
             } else {
               alert(
                 result.message ||
@@ -353,9 +379,18 @@ const BookingStatusDetails = ({
           }
         } catch (error) {
           console.error("Error submitting new dates:", error);
-          alert("An error occurred. Please try again.");
         }
       };
+
+      const addDays = (dateStr: string, days: number) => {
+        const date = new Date(dateStr);
+        date.setDate(date.getDate() + days);
+        return date.toISOString().split("T")[0];
+      };
+
+      console.log(newCheckIn); // Check the input value
+      console.log("og", originalDuration); // Check the duration
+      console.log(addDays(newCheckIn, originalDuration));
 
       return (
         <section className={`${styles["booking-status-details-section"]}`}>
@@ -384,6 +419,10 @@ const BookingStatusDetails = ({
                   <b>Reference Number: </b>
                   <span>{referenceCode || "N/A"}</span>
                 </p>
+                <p>
+                  <b>Reason for Rescheduling: </b>
+                </p>
+                <p>{message}</p>
                 {category === "day-tour" ? (
                   <p>
                     <b>Package: </b>
@@ -409,6 +448,7 @@ const BookingStatusDetails = ({
                     name="newCheckIn"
                     className={styles["date-picker"]}
                     value={newCheckIn}
+                    min={new Date(checkOut || "").toISOString().split("T")[0]}
                     onChange={handleCheckInChange}
                   />
                 </div>
@@ -422,6 +462,10 @@ const BookingStatusDetails = ({
                     name="newCheckOut"
                     className={styles["date-picker"]}
                     value={newCheckOut}
+                    min={new Date(checkOut || "").toISOString().split("T")[0]}
+                    // max={
+                    //   newCheckIn ? addDays(newCheckIn, originalDuration) : ""
+                    // }
                     onChange={handleCheckOutChange}
                   />
                 </div>
@@ -446,6 +490,12 @@ const BookingStatusDetails = ({
               </div>
             </div>
           </div>
+          <NotificationModal
+            isOpen={isNotificationOpen}
+            onClose={() => setIsNotificationOpen(false)}
+            message={notificationMessage}
+            type={notificationType}
+          />
         </section>
       );
 
@@ -473,3 +523,14 @@ const BookingStatusDetails = ({
 };
 
 export default BookingStatusDetails;
+function setNotificationMessage(arg0: string) {
+  throw new Error("Function not implemented.");
+}
+
+function setNotificationType(arg0: string) {
+  throw new Error("Function not implemented.");
+}
+
+function setIsNotificationOpen(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}

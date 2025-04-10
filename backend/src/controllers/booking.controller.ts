@@ -9,7 +9,6 @@ import {
   NOT_FOUND,
   OK,
 } from "../constants/http";
-import { bookingSchema, personalDetailSchema } from "../schemas/booking.schema";
 import {
   getServicesByCategory,
   createBooking,
@@ -191,13 +190,20 @@ export const updateBookingDateHandler = catchErrors(
       newCheckOut
     );
 
+    if (result.unavailableServices) {
+      return res.status(BAD_REQUEST).json({
+        message: "The service is unavailable on the date provided.",
+      });
+    }
+
     res.status(OK).json(result.updatedBookingDate);
   }
 );
 
 export const getBookingStatusesHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const bookingStatus = await getBookingStatuses();
+    const { referenceCode } = request.params;
+    const bookingStatus = await getBookingStatuses(referenceCode);
     response.status(OK).json(bookingStatus);
   }
 );
