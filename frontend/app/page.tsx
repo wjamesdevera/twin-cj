@@ -237,6 +237,7 @@ export default function page() {
           </div>
         </section>
         <section className={`container`}>
+          <SectionHeader title="WHAT OUR CUSTOMERS SAY"></SectionHeader>
           <Feedbacks />
         </section>
       </main>
