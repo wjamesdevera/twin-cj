@@ -109,8 +109,6 @@ interface BookingData {
 type CheckBookingStatus = z.infer<typeof bookingSchema>;
 
 export default function Home() {
-  // const [bookingData, setBookingData] = useState<BookingData | null>(null);
-
   const searchParams = useSearchParams();
   const referenceCode = searchParams.get("referenceCode");
 
@@ -120,7 +118,7 @@ export default function Home() {
     setValue,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(bookingSchema), // Replace with the centralized zod schema/file
+    resolver: zodResolver(bookingSchema),
   });
 
   const {
@@ -167,9 +165,8 @@ export default function Home() {
           totalPax={bookingData?.totalPax}
           checkIn={bookingData?.checkIn}
           checkOut={bookingData?.checkOut}
-          note={bookingData?.notes}
+          notes={bookingData?.notes}
           message={bookingData?.message}
-          bookingData={bookingData}
         />
       )}
     </div>
