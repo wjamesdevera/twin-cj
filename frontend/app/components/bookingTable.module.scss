@@ -96,6 +96,12 @@
     text-decoration: underline;
   }
 }
+.referenceLinkDashboard {
+  all: unset; 
+  color: var(--color-sunset-orange-500); 
+  font-weight: 600; 
+
+}
 
 .table th:nth-child(1),
 .table td:nth-child(1) {

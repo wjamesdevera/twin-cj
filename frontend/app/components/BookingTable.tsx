@@ -37,12 +37,9 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
           {bookings.map((booking: Booking, index: number) => (
             <tr key={index} className={styles.tableRow}>
               <td className={styles.tableCell}>
-                <a
-                  href={`/booking/${booking.referenceNo}`}
-                  className={styles.referenceLink}
-                >
+                <span className={styles.referenceLinkDashboard}>
                   {booking.referenceNo}
-                </a>
+                </span>
               </td>
               <td className={styles.tableCell}>{booking.service}</td>
               <td className={styles.tableCell}>{booking.checkIn}</td>
