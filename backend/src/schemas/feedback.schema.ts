@@ -1,15 +1,12 @@
-import { z } from "zod";
-import { emailSchema } from "./auth.schema";
+import z from "zod";
+import { nameSchema } from "./service.schemas";
 
-export const fullNameSchema = z.string().max(255);
-export const contactNumberSchema = z.string().min(11).max(15);
-export const inquiryTypeSchema = z.string().max(255);
-export const messageSchema = z.string();
-
-export const sendFeedbackSchema = z.object({
-  fullName: fullNameSchema,
-  email: emailSchema,
-  contactNumber: contactNumberSchema,
-  inquiryType: inquiryTypeSchema,
-  message: messageSchema,
+export const feedbackSchema = z.object({
+  referenceCode: z.string(),
+  name: nameSchema,
+  feedback: z
+    .string()
+    .max(200, "Feedback should not exceed 200 characters")
+    .refine((val) => val.trim().length > 0, "Description cannot be just spaces")
+    .optional(),
 });

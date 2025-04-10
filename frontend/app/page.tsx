@@ -9,6 +9,7 @@ import SectionHeader from "./components/SectionHeader";
 import MainLayout from "./layouts/main.layout";
 import { useRouter } from "next/navigation";
 import { Parallax } from "react-parallax";
+import Feedbacks from "./components/feedback-container";
 
 const cabins = [
   {
@@ -234,6 +235,10 @@ export default function page() {
               </div>
             </div>
           </div>
+        </section>
+        <section className={`container`}>
+          <SectionHeader title="WHAT OUR CUSTOMERS SAY"></SectionHeader>
+          <Feedbacks />
         </section>
       </main>
     </MainLayout>

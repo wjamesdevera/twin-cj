@@ -1,0 +1,11 @@
+model Feedback {
+    id        Int      @id @default(autoincrement()) @map("feedback_id")
+    name      String   @map("name")
+    text      String   @map("text")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+    Booking   Booking? @relation(fields: [bookingId], references: [id])
+    bookingId Int?
+
+    @@map("feedbacks")
+}

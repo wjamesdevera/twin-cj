@@ -1,4 +1,6 @@
+import { z } from "zod";
 import API from "../api";
+import { feedbackSchema } from "../feedback/[referenceCode]/form";
 
 type LoginData = {
   email: string;
@@ -258,5 +260,11 @@ type IBookingResponse = {
 export const getBookingStatuses = async (referenceCode: string) =>
   API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
 
+export const getFeedbacks = async () => API.get("/api/feedbacks");
+
+type SendFeedbackSchema = z.infer<typeof feedbackSchema>;
+
+export const sendFeedbacks = async (data: SendFeedbackSchema) =>
+  API.post("/api/feedbacks", data);
 export const getBooking = async () =>
   API.get<BookingResponse[]>(`/api/bookings/`);

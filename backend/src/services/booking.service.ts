@@ -7,6 +7,7 @@ import { sendMail } from "../utils/sendMail";
 import {
   getBookingApprovedEmailTemplate,
   getBookingCancelledEmailTemplate,
+  getBookingCompleteEmailTemplate,
   getBookingRescheduledEmailTemplate,
   getBookingSuccessEmailTemplate,
   getOTPEmailTemplate,
@@ -14,7 +15,6 @@ import {
 import { ROOT_STATIC_URL } from "../constants/url";
 import path from "path";
 import fs from "fs";
-import { messageSchema } from "../schemas/feedback.schema";
 import { generateOTP, storeOTP, validateOTP } from "../utils/otpGenerator";
 
 interface ServiceCategory {
@@ -776,6 +776,12 @@ export const editBookingStatus = async (
           dateTime,
           services,
           bookingStatus
+        );
+        break;
+      case "completed":
+        emailTemplate = getBookingCompleteEmailTemplate(
+          updatedBooking.referenceCode,
+          `${updatedBooking.customer.personalDetail.firstName} ${updatedBooking.customer.personalDetail.lastName}`
         );
         break;
       default:

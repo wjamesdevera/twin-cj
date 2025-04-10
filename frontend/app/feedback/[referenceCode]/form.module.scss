@@ -1,0 +1,28 @@
+.container {
+  padding: 2rem;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.titleContainer {
+  text-align: center;
+}
+
+.titleText {
+  color: var(--color-sand-500);
+  font-size: var(--text-size-xl);
+  font-weight: 600;
+
+  &::after {
+    content: "";
+    display: block;
+    height: 2px;
+    width: 50%;
+    background-color: var(--color-sand-500);
+    margin: 1rem auto;
+  }
+}

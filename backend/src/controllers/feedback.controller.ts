@@ -1,19 +1,34 @@
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchErrors";
 import { OK } from "../constants/http";
-import { sendFeedbackSchema } from "../schemas/feedback.schema";
-import { sendFeedback } from "../services/feedback.service";
+import { feedbackSchema } from "../schemas/feedback.schema";
+import { getBookingByReferenceCode } from "../services/booking.service";
+import { getFeedbacks, sendFeedback } from "../services/feedback.service";
 
 export const sendFeedbackHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const data = sendFeedbackSchema.parse(request.body);
+    const requestData = feedbackSchema.parse(request.body);
 
-    await sendFeedback(data);
+    await getBookingByReferenceCode(requestData.referenceCode);
+
+    const feedback = await sendFeedback(requestData);
 
     response.status(OK).json({
       status: "success",
       data: {
-        message: "Feedback sent successfully",
+        feedback: feedback,
+      },
+    });
+  }
+);
+
+export const getFeedbackHandler = catchErrors(
+  async (request: Request, response: Response) => {
+    const feedbacks = await getFeedbacks();
+    response.status(OK).json({
+      status: "success",
+      data: {
+        feedbacks: feedbacks,
       },
     });
   }

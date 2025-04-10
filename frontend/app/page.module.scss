@@ -1,3 +1,23 @@
+.section-header {
+  color: var(--color-sand-500);
+  margin-top: 3rem;
+  text-align: center;
+  margin-bottom: 0.9rem !important;
+}
+
+.subtext {
+  font-size: var(--text-size-base);
+  text-transform: uppercase;
+
+  @media (max-width: 1024px) {
+    font-size: calc(var(--text-size-base) * 0.9);
+  }
+
+  @media (max-width: 768px) {
+    font-size: calc(var(--text-size-base) * 0.8);
+  }
+}
+
 .heroSection {
   position: relative;
   min-height: 100dvh;
