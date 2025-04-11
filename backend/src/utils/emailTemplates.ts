@@ -123,9 +123,7 @@ We’ve received your booking request, and it is currently pending confirmation.
       </div>
       <p>
         If you have any questions or need to make changes to your request, feel free to reply to this 
-        <a href="mailto:twincj.riversideresort@gmail.com" class="contact-link"
-          >email</a
-        >.
+        email
         or reach out to us directly
       </p>
       <p>Thank you for your interest — we look forward to hosting you!</p>
