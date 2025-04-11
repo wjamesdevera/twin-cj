@@ -18,12 +18,22 @@ export const sendFeedback = async (data: FeedbackData) => {
   return feedback;
 };
 
-export const getFeedbacks = async () => {
-  const feedbacks = await prisma.feedback.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export const getFeedbacks = async (limit?: number) => {
+  let feedbacks: any[] = [];
+  if (limit) {
+    feedbacks = await prisma.feedback.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+    });
+  } else {
+    feedbacks = await prisma.feedback.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
 
   return feedbacks;
 };
