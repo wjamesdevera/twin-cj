@@ -458,7 +458,7 @@ const BookingStatusDetails = ({
                     id="newCheckIn"
                     name="newCheckIn"
                     className={styles["date-picker"]}
-                    value={editedDates.checkIn || ""}
+                    value={newCheckIn?.split("T")[0]}
                     min={addDays(checkOut || "", 1)}
                     onChange={(e) =>
                       setEditedDates((prev) => ({
@@ -477,7 +477,7 @@ const BookingStatusDetails = ({
                     id="newCheckOut"
                     name="newCheckOut"
                     className={styles["date-picker"]}
-                    value={editedDates.checkOut || ""}
+                    value={newCheckOut?.split("T")[0]}
                     min={editedDates.checkIn || ""}
                     max={getMaxCheckOut()}
                     onChange={(e) =>
