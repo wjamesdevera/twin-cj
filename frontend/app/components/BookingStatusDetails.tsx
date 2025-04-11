@@ -313,12 +313,20 @@ const BookingStatusDetails = ({
       const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.value;
         setNewCheckIn(newDate);
+        setEditedDates((prev) => ({
+          ...prev,
+          checkIn: newDate,
+        }));
         setIsDateChanged(newDate !== checkIn || newCheckOut !== checkOut);
       };
 
       const handleCheckOutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.value;
         setNewCheckOut(newDate);
+        setEditedDates((prev) => ({
+          ...prev,
+          checkOut: newDate,
+        }));
         setIsDateChanged(newCheckIn !== checkIn || newDate !== checkOut);
       };
 
@@ -463,12 +471,7 @@ const BookingStatusDetails = ({
                     className={styles["date-picker"]}
                     value={newCheckIn?.split("T")[0]}
                     min={addDays(checkOut || "", 1)}
-                    onChange={(e) =>
-                      setEditedDates((prev) => ({
-                        ...prev,
-                        checkIn: e.target.value,
-                      }))
-                    }
+                    onChange={handleCheckInChange}
                   />
                 </div>
                 <div>
@@ -483,12 +486,7 @@ const BookingStatusDetails = ({
                     value={newCheckOut?.split("T")[0]}
                     min={editedDates.checkIn || ""}
                     max={getMaxCheckOut()}
-                    onChange={(e) =>
-                      setEditedDates((prev) => ({
-                        ...prev,
-                        checkOut: e.target.value,
-                      }))
-                    }
+                    onChange={handleCheckOutChange}
                   />
                 </div>
                 <button
