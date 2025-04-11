@@ -258,12 +258,9 @@ type IBookingResponse = {
   transaction: ITransaction;
 };
 
-export const getBookingStatuses = async (referenceCode: string) => {
-  const response = await API.get<IBookingResponse>(
-    `/api/bookings/status/${referenceCode}`
-  );
-  return response.data;
-};
+export const getBookingStatuses = async (referenceCode: string) =>
+  await API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
+// return response;
 
 export const getFeedbacks = async () => API.get("/api/feedbacks");
 

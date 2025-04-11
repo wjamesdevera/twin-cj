@@ -123,11 +123,13 @@ export default function Home() {
 
   const {
     trigger,
-    data: bookingData,
+    data: bookingResponse,
     isMutating,
   } = useSWRMutation("key", (key, { arg }: { arg: CheckBookingStatus }) =>
     getBookingStatuses(arg.referenceCode)
   );
+
+  const bookingData = bookingResponse || bookingResponse;
 
   useEffect(() => {
     if (referenceCode) {
@@ -156,19 +158,17 @@ export default function Home() {
         fetchBookingData={fetchBookingData}
       />
 
-      {bookingData && (
-        <BookingStatusDetails
-          status={bookingData.bookingStatus.name}
-          referenceCode={bookingData?.referenceCode}
-          service={bookingData?.services[0]?.name}
-          category={bookingData?.services[0]?.serviceCategory?.category.name}
-          totalPax={bookingData?.totalPax}
-          checkIn={bookingData?.checkIn}
-          checkOut={bookingData?.checkOut}
-          notes={bookingData?.notes}
-          message={bookingData?.message}
-        />
-      )}
+      <BookingStatusDetails
+        status={bookingData?.bookingStatus?.name}
+        referenceCode={bookingData?.referenceCode}
+        service={bookingData?.services[0]?.name}
+        category={bookingData?.services[0]?.serviceCategory?.category.name}
+        totalPax={bookingData?.totalPax}
+        checkIn={bookingData?.checkIn}
+        checkOut={bookingData?.checkOut}
+        notes={bookingData?.notes}
+        message={bookingData?.message}
+      />
     </div>
   );
 }
