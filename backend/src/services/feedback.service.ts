@@ -2,7 +2,8 @@ import { z } from "zod";
 import { feedbackSchema } from "../schemas/feedback.schema";
 import { prisma } from "../config/db";
 import appAssert from "../utils/appAssert";
-import { INTERNAL_SERVER_ERROR } from "../constants/http";
+import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "../constants/http";
+import { idSchema } from "../schemas/auth.schema";
 
 type FeedbackData = z.infer<typeof feedbackSchema>;
 export const sendFeedback = async (data: FeedbackData) => {
@@ -22,8 +23,14 @@ export const getFeedbacks = async (limit?: number) => {
   let feedbacks: any[] = [];
   if (limit) {
     feedbacks = await prisma.feedback.findMany({
+      where: {
+        statusId: 2,
+      },
       orderBy: {
         createdAt: "desc",
+      },
+      include: {
+        status: true,
       },
       take: limit,
     });
@@ -32,8 +39,45 @@ export const getFeedbacks = async (limit?: number) => {
       orderBy: {
         createdAt: "desc",
       },
+      include: {
+        status: true,
+      },
     });
   }
 
-  return feedbacks;
+  return feedbacks.map((feedback) => ({
+    id: feedback.id,
+    name: feedback.name,
+    text: feedback.text,
+    createdAt: feedback.createdAt,
+    updatedAt: feedback.updatedAt,
+    status: feedback.status.name,
+  }));
+};
+
+export const updateFeedbackStatus = async (id: number, statusId: number) => {
+  const feedbackStatus = await prisma.feedbackStatus.findUnique({
+    where: {
+      id: statusId,
+    },
+  });
+
+  appAssert(feedbackStatus, NOT_FOUND, "Status id not found");
+
+  const updatedFeedback = await prisma.feedback.update({
+    where: {
+      id,
+    },
+    data: {
+      statusId: feedbackStatus.id,
+    },
+  });
+
+  appAssert(
+    updateFeedbackStatus,
+    INTERNAL_SERVER_ERROR,
+    "Failed to update status"
+  );
+
+  return updatedFeedback;
 };
