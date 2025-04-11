@@ -22,20 +22,28 @@ export const getBookingSuccessEmailTemplate = (
   status?: string,
   message?: string | null
 ) => ({
-  subject: "Booking Confirmation - Twin CJ Riverside Glamping Resort ",
+  subject:
+    "Your Booking Request is Pending – Twin CJ Riverside Glamping Resort",
   text: `Dear ${customerName},
+  Thank you for choosing Twin CJ Riverside Glamping Resort!
 
-Thank you for booking your stay with Twin CJ Riverside Glamping Resort. We are looking forward to your visit.
+We’ve received your booking request, and it is currently pending confirmation. A member of our team will review the details and get back to you shortly to confirm availability.
 
-Your reference code for your booking is: ${referenceCode} 
+Booking Request Details:
 
-If you have any questions please don't hesitate to contact us.
+Reference Code: ${referenceCode}
+Requested Dates: ${dateTime}
+Requested Accommodation: ${services.map((service) => `<li>${service}</li>`)}
 
-We hope you enjoy your stay with us!
+Please note: This is not a confirmed reservation at this stage. We’ll contact you soon with an update.
 
-Best Regards,
+If you have any questions or need to make changes to your request, feel free to reply to this email or reach out to us directly.
 
-Twin CJ Riverside Glamping Resort`,
+Thank you for your interest — we look forward to hosting you!
+
+Warm regards,
+Twin CJ Riverside Glamping Resort
+`,
   html: `<!DOCTYPE html>
 <html>
   <head>
@@ -100,26 +108,27 @@ Twin CJ Riverside Glamping Resort`,
       <h2>Booking Confirmation</h2>
       <p>Dear <strong>${customerName}</strong>,</p>
       <p>
-        Thank you for booking your stay with
-        <strong>Twin CJ Riverside Glamping Resort</strong>. We are looking
-        forward to your visit.
+      Thank you for choosing Twin CJ Riverside Glamping Resort!
       </p>
-      <p>Booking Details:</p>
+We’ve received your booking request, and it is currently pending confirmation. A member of our team will review the details and get back to you shortly to confirm availability.
+      <p></p>
+      <p>Booking Request Details:</p>
       <div class="details">
         <p><b>Reference Code:</b><span class="reference">${referenceCode}</span></p>
-        <p><b>Date and Time:</b>${dateTime}</p>
-        <p><b>Service/s:</b></p>
+        <p><b>Requested Dates:</b>${dateTime}</p>
+        <p><b>Requested Accomodation:</b></p>
         <ul>
         ${services.map((service) => `<li>${service}</li>`)}
         </ul>
       </div>
       <p>
-        If you have any questions, please don't hesitate to
+        If you have any questions or need to make changes to your request, feel free to reply to this 
         <a href="mailto:twincj.riversideresort@gmail.com" class="contact-link"
-          >contact us</a
+          >email</a
         >.
+        or reach out to us directly
       </p>
-      <p>We hope you enjoy your stay with us!</p>
+      <p>Thank you for your interest — we look forward to hosting you!</p>
       <p>Best Regards,</p>
       <p><strong>Twin CJ Riverside Glamping Resort</strong></p>
       <div class="footer">
