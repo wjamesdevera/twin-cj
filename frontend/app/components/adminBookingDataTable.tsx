@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { DownloadTableExcel } from "react-export-table-to-excel";
+import { downloadExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import CustomButton from "@/app/components/custom_button";
@@ -385,20 +385,47 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     return date.toISOString().split("T")[0];
   };
 
+  const header = [
+    "Reference No.",
+    "Service",
+    "Check-in",
+    "Check-out",
+    "Down Payment",
+    "Customer Name",
+    "Email",
+    "Status",
+  ];
+
+  const body = bookings?.map((booking) => ({
+    referenceNo: booking.referenceCode,
+    service: booking.services.map((service) => service.service.name)[0],
+    checkIn: formatDate(booking.checkIn),
+    checkOut: formatDate(booking.checkOut),
+    downPayment: booking.transaction.amount,
+    customerName: `${booking.customer.firstName} ${booking.customer.lastName}`,
+    email: booking.customer.email,
+    status: booking.bookingStatus,
+  }));
+
+  const handleDownloadExcel = () => {
+    downloadExcel({
+      fileName: "Twin CJ Riverside Glamping Resort Bookings",
+      sheet: "bookings",
+      tablePayload: {
+        header,
+        body: body || [],
+      },
+    });
+  };
+
   return (
     <div className={styles.tableContainer}>
       <div className={styles.table_wrapper}>
         <div className={styles.headerContainer}>
           <h2 className={styles.tableTitle}>Bookings & Transactions</h2>
-          <DownloadTableExcel
-            filename="Twin CJ Booking Details"
-            sheet="bookings"
-            currentTableRef={tableRef.current}
-          >
-            <button className={styles.exportButton}>
-              <i className="fas fa-download"></i> Export
-            </button>
-          </DownloadTableExcel>
+          <button className={styles.exportButton} onClick={handleDownloadExcel}>
+            <i className="fas fa-download"></i> Export
+          </button>
         </div>
 
         <div className={styles.topContainer}>
