@@ -260,7 +260,7 @@ type IBookingResponse = {
 export const getBookingStatuses = async (referenceCode: string) =>
   API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
 
-export const getFeedbacks = async () => API.get("/api/feedbacks");
+export const getFeedbacks = async () => API.get("/api/feedbacks/?limit=3");
 
 type SendFeedbackSchema = z.infer<typeof feedbackSchema>;
 
