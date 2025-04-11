@@ -18,17 +18,22 @@ export const sendFeedback = async (data: FeedbackData) => {
   return feedback;
 };
 
-export const getFeedbacks = async () => {
-  const feedbacks = await prisma.feedback.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 20,
-  });
+export const getFeedbacks = async (limit?: number) => {
+  let feedbacks: any[] = [];
+  if (limit) {
+    feedbacks = await prisma.feedback.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+    });
+  } else {
+    feedbacks = await prisma.feedback.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
 
-  const top3byLength = feedbacks
-    .sort((a, b) => b.text.length - a.text.length)
-    .slice(0, 3);
-
-  return top3byLength;
+  return feedbacks;
 };
