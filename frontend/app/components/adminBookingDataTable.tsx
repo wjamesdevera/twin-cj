@@ -616,6 +616,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                               const selectedStatus = e.target.value;
                               openModalForStatusUpdate(booking, selectedStatus);
                             }}
+                            disabled={
+                              booking.bookingStatus.toLowerCase() ===
+                              "completed"
+                            }
                           >
                             <option value={booking.bookingStatus} disabled>
                               {booking.bookingStatus}
