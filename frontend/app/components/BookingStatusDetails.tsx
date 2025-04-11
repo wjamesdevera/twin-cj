@@ -449,6 +449,9 @@ const BookingStatusDetails = ({
                   <b>No. of Guests: </b>
                   <span>{totalPax || 0}</span>
                 </p>
+                <p>
+                  <b>Select your preferred Dates: </b>
+                </p>
                 <div>
                   <label htmlFor="newCheckIn">
                     <b>Check-In Date:</b>&nbsp;
