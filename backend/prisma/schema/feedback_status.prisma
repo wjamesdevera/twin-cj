@@ -1,0 +1,11 @@
+model FeedbackStatus {
+    id   Int    @id @default(autoincrement()) @map("feedback_status_id")
+    name String @map("name")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+    feedback Feedback[]
+
+    @@map("feedback_statuses")
+}
