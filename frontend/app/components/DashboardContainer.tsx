@@ -20,7 +20,7 @@ const DashboardContainer: React.FC<DashboardContainerProps> = ({
       </div>
 
       <div className={`${styles.card} ${styles.activeCard}`}>
-        <p className={styles.text}>Complete Reservations</p>
+        <p className={styles.text}>Completed Reservations</p>
         <h1 className={styles.number}>{activeReservations}</h1>
         <FaCheckCircle className={styles.icon} />
       </div>

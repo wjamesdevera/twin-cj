@@ -4,7 +4,10 @@ model Feedback {
     text      String   @map("text")
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-    Booking   Booking? @relation(fields: [bookingId], references: [id])
+
+    status    FeedbackStatus? @relation(fields: [statusId], references: [id])
+    statusId  Int?            @default(1) @map("feedback_status_id")
+    Booking   Booking?        @relation(fields: [bookingId], references: [id])
     bookingId Int?
 
     @@map("feedbacks")
