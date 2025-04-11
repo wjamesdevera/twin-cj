@@ -23,12 +23,7 @@ export const getFeedbacks = async () => {
     orderBy: {
       createdAt: "desc",
     },
-    take: 20,
   });
 
-  const top3byLength = feedbacks
-    .sort((a, b) => b.text.length - a.text.length)
-    .slice(0, 3);
-
-  return top3byLength;
+  return feedbacks;
 };
