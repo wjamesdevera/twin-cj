@@ -627,6 +627,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                             <option value="Approved">Approved</option>
                             <option value="Cancelled">Cancelled</option>
                             <option value="Rescheduled">Rescheduled</option>
+                            <option value="Completed">Completed</option>
                           </select>
                         </td>
                       </tr>
