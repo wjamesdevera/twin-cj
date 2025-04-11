@@ -9,6 +9,7 @@ import { FaAngleDown, FaAngleUp, FaRegPenToSquare } from "react-icons/fa6";
 import { LuCalendarDays } from "react-icons/lu";
 import { TbArrowBarToLeft, TbArrowBarToRight } from "react-icons/tb";
 import { FaCampground } from "react-icons/fa";
+import { MdOutlineComment } from "react-icons/md";
 import { FaSun } from "react-icons/fa";
 import twinCJLogo from "@/public/assets/admin-logo.svg";
 import { usePathname } from "next/navigation";
@@ -128,6 +129,13 @@ const NavList = ({ collapsed }: NavListProps) => {
         collapsed={collapsed}
         isActive={pathname.startsWith("/admin/accounts")}
         icon={<FaRegUser />}
+      />
+      <NavItem
+        href="/admin/feedbacks"
+        label="Feedbacks"
+        isActive={pathname.startsWith("/admin/feedbacks")}
+        icon={<MdOutlineComment />}
+        collapsed={collapsed}
       />
     </ul>
   );
