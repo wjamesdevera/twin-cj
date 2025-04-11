@@ -386,6 +386,8 @@ const BookingStatusDetails = ({
             setNotificationType("success");
             setIsNotificationOpen(true);
             mutate("");
+
+            window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
           } else {
             if (result.message) {
               setNotificationMessage(result.message);
