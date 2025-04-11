@@ -1,0 +1,141 @@
+"use client";
+import { getFeedbacksAdmin, updateFeedbackStatus } from "@/app/lib/api";
+import React, { useState } from "react";
+import useSWR from "swr";
+import s from "@/app/table.module.scss";
+import ts from "./feedback-table.module.scss";
+import { Loading } from "@/app/components/loading";
+import useSWRMutation from "swr/mutation";
+import { Box, Modal, Typography } from "@mui/material";
+import { TbBorderRadius } from "react-icons/tb";
+
+const formatDate = (isoString?: string) => {
+  if (!isoString) return "N/A";
+  return new Date(isoString).toLocaleDateString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+};
+
+const FeedbackStatusDropdown: React.FC<{
+  id: string;
+  defaultValue: string;
+}> = ({ id, defaultValue }) => {
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    borderRadius: 8,
+    boxShadow: 24,
+    p: 4,
+  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [statusId, setStatusId] = useState(defaultValue);
+  const handleOpen = () => setIsModalOpen(true);
+  const handleClose = () => setIsModalOpen(false);
+  const { trigger, isMutating } = useSWRMutation(
+    id,
+    (key: string, { arg }: { arg: { statusId: string } }) =>
+      updateFeedbackStatus(key, Number(arg.statusId)),
+    {
+      onSuccess: () => {
+        handleClose();
+      },
+    }
+  );
+  const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusId(e.target.value);
+    handleOpen();
+  };
+
+  const onConfirm = async () => {
+    await trigger({ statusId });
+  };
+
+  const onCancel = async () => {
+    setStatusId(defaultValue);
+    handleClose();
+  };
+
+  return (
+    <select
+      className={ts.select}
+      defaultValue={defaultValue}
+      onChange={handleChange}
+    >
+      <option value="1">For Review</option>
+      <option value="2">Approved</option>
+      <Modal
+        open={isModalOpen}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <h2 className={ts.modalTitle}>Confirm Status Change?</h2>
+          <div className={ts.button_container}>
+            <button
+              className={ts.confirm_btn}
+              onClick={onConfirm}
+              disabled={isMutating}
+            >
+              {isMutating ? "Updating..." : "Confirm"}
+            </button>
+            <button className={ts.cancel_btn} onClick={onCancel}>
+              Cancel
+            </button>
+          </div>
+        </Box>
+      </Modal>
+    </select>
+  );
+};
+
+const FeedbackTable = () => {
+  const { data, isLoading } = useSWR("feedback", getFeedbacksAdmin);
+  const headers = ["Author", "Feedback", "Created At", "Updated At", "Status"];
+  const { feedbacks } = data?.data || [];
+  return isLoading ? (
+    <Loading />
+  ) : (
+    <div className={s.table_container}>
+      <div className={s.table_wrapper}>
+        <table className={s.table}>
+          <thead>
+            <tr>
+              {headers.map((header, index) => (
+                <th key={index}>{header}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {feedbacks.map((feedback) => (
+              <tr key={feedback.id}>
+                <td>{feedback.name}</td>
+                <td>{feedback.text}</td>
+                <td>{formatDate(feedback.createdAt)}</td>
+                <td>{formatDate(feedback.updatedAt)}</td>
+                <td>
+                  <FeedbackStatusDropdown
+                    defaultValue={feedback.status.id}
+                    id={feedback.id}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default FeedbackTable;

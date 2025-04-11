@@ -45,14 +45,7 @@ export const getFeedbacks = async (limit?: number) => {
     });
   }
 
-  return feedbacks.map((feedback) => ({
-    id: feedback.id,
-    name: feedback.name,
-    text: feedback.text,
-    createdAt: feedback.createdAt,
-    updatedAt: feedback.updatedAt,
-    status: feedback.status.name,
-  }));
+  return feedbacks;
 };
 
 export const updateFeedbackStatus = async (id: number, statusId: number) => {
