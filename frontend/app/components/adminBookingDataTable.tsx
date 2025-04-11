@@ -343,9 +343,8 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     );
   });
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil((filteredBookings?.length || 0) / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(
+    (filteredBookings?.length || 0) / ITEMS_PER_PAGE
   );
 
   const paginatedBookings = (filteredBookings || []).slice(
@@ -698,33 +697,33 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             </tbody>
           </table>
         </div>
-        <div className={styles.paginationContainer}>
-          <button
-            className={`${styles.paginationButton} ${
-              currentPage === 1 || totalPages === 1 ? styles.disabled : ""
-            }`}
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1 || totalPages === 1}
-          >
-            Previous
-          </button>
+        {(filteredBookings?.length ?? 0) > 0 && (
+          <div className={styles.paginationContainer}>
+            <button
+              className={`${styles.paginationButton} ${
+                currentPage === 1 ? styles.disabled : ""
+              }`}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
 
-          <span className={styles.pageNumber}>
-            {currentPage} / {totalPages}
-          </span>
+            <span className={styles.pageNumber}>
+              {currentPage} / {totalPages}
+            </span>
 
-          <button
-            className={`${styles.paginationButton} ${
-              currentPage === totalPages || totalPages === 1
-                ? styles.disabled
-                : ""
-            }`}
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages || totalPages === 1}
-          >
-            Next
-          </button>
-        </div>
+            <button
+              className={`${styles.paginationButton} ${
+                currentPage === totalPages ? styles.disabled : ""
+              }`}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
       {isImageModalOpen && modalImageUrl && (
         <div className={styles.imageModal}>
