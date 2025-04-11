@@ -423,9 +423,14 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       <div className={styles.table_wrapper}>
         <div className={styles.headerContainer}>
           <h2 className={styles.tableTitle}>Bookings & Transactions</h2>
-          <button className={styles.exportButton} onClick={handleDownloadExcel}>
-            <i className="fas fa-download"></i> Export
-          </button>
+          <div>
+            <button
+              className={styles.exportButton}
+              onClick={handleDownloadExcel}
+            >
+              <i className="fas fa-download"></i> Export
+            </button>
+          </div>
         </div>
 
         <div className={styles.topContainer}>
