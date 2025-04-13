@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { DownloadTableExcel } from "react-export-table-to-excel";
+import { downloadExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import CustomButton from "@/app/components/custom_button";
@@ -343,9 +343,8 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     );
   });
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil((filteredBookings?.length || 0) / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(
+    (filteredBookings?.length || 0) / ITEMS_PER_PAGE
   );
 
   const paginatedBookings = (filteredBookings || []).slice(
@@ -385,20 +384,52 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     return date.toISOString().split("T")[0];
   };
 
+  const header = [
+    "Reference No.",
+    "Service",
+    "Check-in",
+    "Check-out",
+    "Down Payment",
+    "Customer Name",
+    "Email",
+    "Status",
+  ];
+
+  const body = bookings?.map((booking) => ({
+    referenceNo: booking.referenceCode,
+    service: booking.services.map((service) => service.service.name)[0],
+    checkIn: formatDate(booking.checkIn),
+    checkOut: formatDate(booking.checkOut),
+    downPayment: booking.transaction.amount,
+    customerName: `${booking.customer.firstName} ${booking.customer.lastName}`,
+    email: booking.customer.email,
+    status: booking.bookingStatus,
+  }));
+
+  const handleDownloadExcel = () => {
+    downloadExcel({
+      fileName: "Twin CJ Riverside Glamping Resort Bookings",
+      sheet: "bookings",
+      tablePayload: {
+        header,
+        body: body || [],
+      },
+    });
+  };
+
   return (
     <div className={styles.tableContainer}>
       <div className={styles.table_wrapper}>
         <div className={styles.headerContainer}>
           <h2 className={styles.tableTitle}>Bookings & Transactions</h2>
-          <DownloadTableExcel
-            filename="Twin CJ Booking Details"
-            sheet="bookings"
-            currentTableRef={tableRef.current}
-          >
-            <button className={styles.exportButton}>
+          <div>
+            <button
+              className={styles.exportButton}
+              onClick={handleDownloadExcel}
+            >
               <i className="fas fa-download"></i> Export
             </button>
-          </DownloadTableExcel>
+          </div>
         </div>
 
         <div className={styles.topContainer}>
@@ -584,6 +615,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                               const selectedStatus = e.target.value;
                               openModalForStatusUpdate(booking, selectedStatus);
                             }}
+                            disabled={
+                              booking.bookingStatus.toLowerCase() ===
+                              "completed"
+                            }
                           >
                             <option value={booking.bookingStatus} disabled>
                               {booking.bookingStatus}
@@ -591,6 +626,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                             <option value="Approved">Approved</option>
                             <option value="Cancelled">Cancelled</option>
                             <option value="Rescheduled">Rescheduled</option>
+                            <option value="Completed">Completed</option>
                           </select>
                         </td>
                       </tr>
@@ -662,34 +698,33 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             </tbody>
           </table>
         </div>
+        {(filteredBookings?.length ?? 0) > 0 && (
+          <div className={styles.paginationContainer}>
+            <button
+              className={`${styles.paginationButton} ${
+                currentPage === 1 ? styles.disabled : ""
+              }`}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
 
-        <div className={styles.paginationContainer}>
-          <button
-            className={`${styles.paginationButton} ${
-              currentPage === 1 || totalPages === 1 ? styles.disabled : ""
-            }`}
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1 || totalPages === 1}
-          >
-            Previous
-          </button>
+            <span className={styles.pageNumber}>
+              {currentPage} / {totalPages}
+            </span>
 
-          <span className={styles.pageNumber}>
-            {currentPage} / {totalPages}
-          </span>
-
-          <button
-            className={`${styles.paginationButton} ${
-              currentPage === totalPages || totalPages === 1
-                ? styles.disabled
-                : ""
-            }`}
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages || totalPages === 1}
-          >
-            Next
-          </button>
-        </div>
+            <button
+              className={`${styles.paginationButton} ${
+                currentPage === totalPages ? styles.disabled : ""
+              }`}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
       {isImageModalOpen && modalImageUrl && (
         <div className={styles.imageModal}>
