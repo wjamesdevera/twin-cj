@@ -82,6 +82,7 @@ export default function WalkInForm() {
       totalPax: "",
       amount: "",
     },
+
     mode: "onBlur",
   });
 
@@ -275,7 +276,22 @@ export default function WalkInForm() {
   const handleClear = () => {
     setConfirmMessage("Are you sure you want to clear the form? ");
     setConfirmAction(() => () => {
-      reset();
+      reset({
+        firstName: "",
+        lastName: "",
+        email: "",
+        contactNumber: "",
+        packageType: undefined,
+        selectedPackageId: "",
+        selectedPackageName: "",
+        checkInDate: "",
+        checkOutDate: "",
+        paymentAccountName: "",
+        paymentAccountNumber: "",
+        paymentMethod: "",
+        totalPax: "",
+        amount: "",
+      });
     });
     setIsConfirmModalOpen(true);
   };
