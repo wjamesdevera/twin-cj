@@ -205,6 +205,17 @@ Additional Inclusions:
     });
   }
 
+  await prisma.feedbackStatus.createMany({
+    data: [
+      {
+        name: "For Review",
+      },
+      {
+        name: "Approved",
+      },
+    ],
+  });
+
   await prisma.feedback.createMany({
     data: [
       {

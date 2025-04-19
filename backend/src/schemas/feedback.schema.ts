@@ -10,3 +10,7 @@ export const feedbackSchema = z.object({
     .refine((val) => val.trim().length > 0, "Description cannot be just spaces")
     .optional(),
 });
+
+export const updateFeedbackSchema = z.object({
+  statusId: z.number().gt(0),
+});

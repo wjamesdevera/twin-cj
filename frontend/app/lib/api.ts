@@ -262,11 +262,17 @@ export const getBookingStatuses = async (referenceCode: string) =>
   await API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
 // return response;
 
-export const getFeedbacks = async () => API.get("/api/feedbacks");
+export const getFeedbacks = async () =>
+  API.get("/api/feedbacks/?limit=3&approved=True");
 
 type SendFeedbackSchema = z.infer<typeof feedbackSchema>;
 
 export const sendFeedbacks = async (data: SendFeedbackSchema) =>
   API.post("/api/feedbacks", data);
+
+export const getFeedbacksAdmin = async () => API.get("/api/feedbacks");
 export const getBooking = async () =>
   API.get<BookingResponse[]>(`/api/bookings/`);
+
+export const updateFeedbackStatus = async (id: string, statusId: number) =>
+  API.patch(`/api/feedbacks/${id}`, { statusId });
