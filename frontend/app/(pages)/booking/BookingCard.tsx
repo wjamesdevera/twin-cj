@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import styles from "./bookingcard.module.scss";
 
 interface BookingCardProps {
@@ -47,4 +47,4 @@ const BookingCard: React.FC<BookingCardProps> = ({
   );
 };
 
-export default BookingCard;
+export default memo(BookingCard);

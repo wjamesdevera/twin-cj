@@ -108,11 +108,17 @@ const Booking: React.FC = () => {
     router.push("/payment_details");
   };
 
-  const handleChange = (key: string, value: any) => {
-    setBookingData((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+  const handleChange = (
+    key: keyof typeof bookingData,
+    value: (typeof bookingData)[keyof typeof bookingData]
+  ) => {
+    setBookingData((prev) => {
+      if (prev[key] === value) return prev;
+      return {
+        ...prev,
+        [key]: value,
+      };
+    });
   };
 
   if (error) return <Loading />;

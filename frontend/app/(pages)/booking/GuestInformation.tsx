@@ -56,6 +56,7 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
     formState: { errors },
   } = useForm<GuestInformationFormData>({
     resolver: zodResolver(guestInformationSchema),
+    mode: "onBlur",
     defaultValues: {
       isTermsChecked: false,
       isPrivacyChecked: false,
@@ -190,16 +191,18 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
                 placeholder="Type your Email"
                 {...register("email")}
                 className={errors.email ? styles.errorInput : ""}
+                readOnly={isEmailVerified}
               />
-
-              <button
-                type="button"
-                className={styles.sendOtpButton}
-                onClick={() => handleSendOTP(watch("email"))}
-                disabled={!isEmailValid}
-              >
-                Verify Email
-              </button>
+              {!isEmailVerified && (
+                <button
+                  type="button"
+                  className={styles.sendOtpButton}
+                  onClick={() => handleSendOTP(watch("email"))}
+                  disabled={!isEmailValid || otpSent}
+                >
+                  Verify Email
+                </button>
+              )}
             </div>
             {errors.email && (
               <p className={styles.errorText}>{errors.email.message}</p>
