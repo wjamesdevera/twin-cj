@@ -82,7 +82,7 @@ export default function WalkInForm() {
       totalPax: "",
       amount: "",
     },
-    mode: "onChange",
+    mode: "onBlur",
   });
 
   const router = useRouter();
@@ -126,7 +126,8 @@ export default function WalkInForm() {
         const numberOfNights = Math.ceil(duration / (1000 * 60 * 60 * 24));
 
         if (numberOfNights > 1) {
-          let additionalCardPrice = (selectedPackage.price + 500) * (numberOfNights - 1);
+          let additionalCardPrice =
+            (selectedPackage.price + 500) * (numberOfNights - 1);
           let finalPrice = (selectedPackage.price + additionalCardPrice) / 2;
           setSelectedPackagePrice(finalPrice);
           setValue("amount", finalPrice.toString());
@@ -356,26 +357,11 @@ export default function WalkInForm() {
         <div className={styles.left_column}>
           <div className={styles.form_group}>
             <label>
-              Check-in Date <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("checkInDate")}
-              type="date"
-              min={minDate}
-              onBlur={() => trigger("checkInDate")}
-            />
-            {errors.checkInDate && (
-              <p className={styles.error}>{errors.checkInDate?.message}</p>
-            )}
-          </div>
-
-          <div className={styles.form_group}>
-            <label>
               Resort Schedule <span className={styles.required}>*</span>
             </label>
             <select
               {...register("packageType")}
-              defaultValue=""
+              defaultValue="day-tour"
               onBlur={() => trigger("packageType")}
             >
               <option value="" disabled>
@@ -388,6 +374,23 @@ export default function WalkInForm() {
               <p className={styles.error}>{errors.packageType?.message}</p>
             )}
           </div>
+
+          {packageType === "cabins" && (
+            <div className={styles.form_group}>
+              <label>
+                Check-out Date <span className={styles.required}>*</span>
+              </label>
+              <input
+                {...register("checkOutDate")}
+                type="date"
+                min={minDate}
+                onBlur={() => trigger("checkOutDate")}
+              />
+              {errors.checkOutDate && (
+                <p className={styles.error}>{errors.checkOutDate?.message}</p>
+              )}
+            </div>
+          )}
 
           <div className={styles.form_group}>
             <label>
@@ -406,22 +409,21 @@ export default function WalkInForm() {
         </div>
 
         <div className={styles.right_column}>
-          {packageType === "cabins" && (
-            <div className={styles.form_group}>
-              <label>
-                Check-out Date <span className={styles.required}>*</span>
-              </label>
-              <input
-                {...register("checkOutDate")}
-                type="date"
-                min={minDate}
-                onBlur={() => trigger("checkOutDate")}
-              />
-              {errors.checkOutDate && (
-                <p className={styles.error}>{errors.checkOutDate?.message}</p>
-              )}
-            </div>
-          )}
+          <div className={styles.form_group}>
+            <label>
+              Check-in Date <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("checkInDate")}
+              type="date"
+              min={minDate}
+              onBlur={() => trigger("checkInDate")}
+            />
+            {errors.checkInDate && (
+              <p className={styles.error}>{errors.checkInDate?.message}</p>
+            )}
+          </div>
+
           {packageType && (
             <div className={styles.form_group}>
               <label>
