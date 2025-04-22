@@ -62,8 +62,6 @@ export const walkinSchema = z.object({
   selectedPackageName: z.string().min(1),
   checkInDate: z.string(),
   checkOutDate: z.string(),
-  paymentAccountName: z.string().min(1, "Payment account name is required"),
-  paymentAccountNumber: z.string().min(1, "Payment account number is required"),
   paymentMethod: z.string().min(1, "Payment method is required"),
   proofOfPayment: fileSchema,
   totalPax: z

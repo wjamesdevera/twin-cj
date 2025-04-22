@@ -615,8 +615,6 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
     // Create Payment Account
     const paymentAccount = await prisma.paymentAccount.create({
       data: {
-        accountName: paymentAccountName,
-        accountNumber: paymentAccountNumber,
         paymentMethodId: paymentMethodRecord.id,
       },
     });

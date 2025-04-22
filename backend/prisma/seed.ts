@@ -166,8 +166,6 @@ Additional Inclusions:
 
   const paymentAccount = await prisma.paymentAccount.create({
     data: {
-      accountName: faker.finance.accountName(),
-      accountNumber: faker.finance.accountNumber(),
       paymentMethodId: paymentMethod.id,
     },
   });

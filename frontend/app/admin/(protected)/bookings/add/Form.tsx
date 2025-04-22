@@ -22,8 +22,6 @@ type FormFields = {
   selectedPackageName: string;
   checkInDate: string;
   checkOutDate: string;
-  paymentAccountName: string;
-  paymentAccountNumber: string;
   paymentMethod: string;
   proofOfPayment?: File;
   totalPax: string;
@@ -76,8 +74,6 @@ export default function WalkInForm() {
       selectedPackageName: "",
       checkInDate: "",
       checkOutDate: "",
-      paymentAccountName: "",
-      paymentAccountNumber: "",
       paymentMethod: "",
       totalPax: "",
       amount: "",
@@ -270,8 +266,6 @@ export default function WalkInForm() {
         selectedPackageName: "",
         checkInDate: "",
         checkOutDate: "",
-        paymentAccountName: "",
-        paymentAccountNumber: "",
         paymentMethod: "",
         totalPax: "",
         amount: "",
@@ -515,49 +509,9 @@ export default function WalkInForm() {
               <p className={styles.error}>{errors.paymentMethod?.message}</p>
             )}
           </div>
-          <div className={styles.form_group}>
-            <label>
-              Payment Account Name <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("paymentAccountName")}
-              type="text"
-              onBlur={() => trigger("paymentAccountName")}
-            />
-            {errors.paymentAccountName && (
-              <p className={styles.error}>
-                {errors.paymentAccountName?.message}
-              </p>
-            )}
-          </div>
         </div>
 
         <div className={styles.right_column}>
-          <div className={styles.form_group}>
-            <label>
-              Payment Account Number <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("paymentAccountNumber")}
-              type="text"
-              inputMode="numeric"
-              pattern="\d*"
-              maxLength={16}
-              onInput={(e) => {
-                e.currentTarget.value = e.currentTarget.value.replace(
-                  /\D/g,
-                  ""
-                );
-              }}
-              onBlur={() => trigger("paymentAccountNumber")}
-            />
-
-            {errors.paymentAccountNumber && (
-              <p className={styles.error}>
-                {errors.paymentAccountNumber?.message}
-              </p>
-            )}
-          </div>
           <div className={styles.form_group}>
             <label>
               Proof of Payment <span className={styles.required}>*</span>
