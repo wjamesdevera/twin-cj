@@ -53,19 +53,6 @@ export default function Page() {
     fetchBookings();
   }, []);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const formatAmount = (amount: number) => {
-    return amount.toFixed(2);
-  };
-
   if (loading) {
     return <Loading />;
   }

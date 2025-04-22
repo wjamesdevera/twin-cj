@@ -189,55 +189,56 @@ export default function WalkInForm() {
     data?.data?.[packageType]?.services || [];
 
   const onSubmit = async (formData: FormFields) => {
-    console.log(formData);
-    if (formData.packageType === "day-tour") {
-      formData.checkOutDate = formData.checkInDate;
-    }
+    setConfirmMessage(
+      "Are you sure you want to add this booking? Any unsaved progress will be lost."
+    );
 
-    try {
-      const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === "proofOfPayment") {
-          if (value instanceof FileList) {
-            formDataToSend.append("proofOfPayment", value[0]);
+    setConfirmAction(() => async () => {
+      if (formData.packageType === "day-tour") {
+        formData.checkOutDate = formData.checkInDate;
+      }
+
+      try {
+        const formDataToSend = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          if (key === "proofOfPayment" && value instanceof File) {
+            formDataToSend.append("proofOfPayment", value);
+          } else {
+            formDataToSend.append(key, String(value));
           }
-        } else {
-          formDataToSend.append(key, String(value));
+        });
+
+        formDataToSend.append("selectedPackage", formData.selectedPackageId);
+        formDataToSend.append("packageType", formData.packageType);
+
+        const response = await fetch(
+          "http://localhost:8080/api/bookings/walk-in",
+          {
+            method: "POST",
+            body: formDataToSend,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(await response.text());
         }
-      });
 
-      // Log the FormData object for debugging
-      for (let [key, value] of formDataToSend.entries()) {
-        console.log(`${key}: ${value}`);
+        setNotificationMessage("Your booking has been successfully added.");
+        setNotificationType("success");
+        setIsNotificationModalOpen(true);
+
+        setTimeout(() => {
+          router.push("http://localhost:3000/admin/bookings");
+        }, 1500);
+      } catch (error: any) {
+        console.error("Error submitting booking:", error);
+        setNotificationMessage("Error submitting booking: " + error.message);
+        setNotificationType("error");
+        setIsNotificationModalOpen(true);
       }
+    });
 
-      formDataToSend.append("selectedPackage", formData.selectedPackageId);
-      formDataToSend.append("packageType", formData.packageType);
-
-      const response = await fetch(
-        "http://localhost:8080/api/bookings/walk-in",
-        {
-          method: "POST",
-          body: formDataToSend,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(await response.text());
-      }
-      setNotificationMessage("Your booking has been successfully added.");
-      setNotificationType("success");
-      setIsNotificationModalOpen(true);
-
-      setTimeout(() => {
-        router.push("http://localhost:3000/admin/bookings");
-      }, 1500);
-    } catch (error: any) {
-      console.error("Error submitting booking:", error);
-      setNotificationMessage("Error submitting booking: " + error.message);
-      setNotificationType("error");
-      setIsNotificationModalOpen(true);
-    }
+    setIsConfirmModalOpen(true);
   };
 
   const handleCancel = () => {
@@ -251,23 +252,6 @@ export default function WalkInForm() {
   };
 
   const handleAddBooking = async () => {
-    // const isValid = await trigger();
-
-    // const proofOfPayment = watch("proofOfPayment");
-
-    // if (
-    //   !isValid ||
-    //   !proofOfPayment ||
-    //   (proofOfPayment instanceof FileList && proofOfPayment.length === 0)
-    // ) {
-    //   setNotificationMessage(
-    //     "Please fill in all required fields and upload proof of payment."
-    //   );
-    //   setNotificationType("error");
-    //   setIsNotificationModalOpen(true);
-    //   return;
-    // }
-
     setConfirmMessage("Are you sure you want to add this booking?");
     setConfirmAction(() => () => handleSubmit(onSubmit));
     setIsConfirmModalOpen(true);
@@ -580,10 +564,12 @@ export default function WalkInForm() {
             </label>
             <input
               type="file"
-              // {...register("proofOfPayment")}
+              accept="image/*"
               onChange={(e) => {
-                if (e.target.files?.[0]) {
-                  setValue("proofOfPayment", e.target.files[0]); // Manually set value
+                const file = e.target.files?.[0];
+                if (file) {
+                  setValue("proofOfPayment", file);
+                  trigger("proofOfPayment");
                 }
               }}
             />
@@ -596,11 +582,7 @@ export default function WalkInForm() {
 
       <div className={styles.full_width}>
         <div className={styles.button_container}>
-          <CustomButton
-            type="submit"
-            label="Add Booking"
-            // onClick={handleAddBooking}
-          />
+          <CustomButton type="submit" label="Add Booking" />
           <CustomButton
             type="button"
             label="Clear"

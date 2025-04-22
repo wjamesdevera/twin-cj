@@ -38,6 +38,7 @@ export const messageSchema = z
   .refine((val) => val.trim().length > 0, "Message cannot be just spaces");
 
 export const fileSchema = z
+
   .instanceof(File, { message: "Image upload is required" })
   .refine((file) => file.size > 0, "File is required")
   .refine((file) => file.size <= 1024 * 1024, "File size must be less than 1MB")
@@ -70,7 +71,6 @@ export const walkinSchema = z.object({
     .min(1, "Total Pax must be at least 1")
     .max(30, "Total Pax must be at most 30"),
   amount: z.string().min(1, "Amount must be at least 1"),
-  bookingStatus: z.enum(["approve", "reject", "cancel"]),
 });
 
 export const priceSchema = z
