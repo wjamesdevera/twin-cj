@@ -369,40 +369,6 @@ export default function WalkInForm() {
             )}
           </div>
 
-          {packageType === "cabins" && (
-            <div className={styles.form_group}>
-              <label>
-                Check-out Date <span className={styles.required}>*</span>
-              </label>
-              <input
-                {...register("checkOutDate")}
-                type="date"
-                min={minDate}
-                onBlur={() => trigger("checkOutDate")}
-              />
-              {errors.checkOutDate && (
-                <p className={styles.error}>{errors.checkOutDate?.message}</p>
-              )}
-            </div>
-          )}
-
-          <div className={styles.form_group}>
-            <label>
-              Total Guests <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("totalPax")}
-              type="number"
-              min={1}
-              onBlur={() => trigger("totalPax")}
-            />
-            {errors.totalPax && (
-              <p className={styles.error}>{errors.totalPax?.message}</p>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.right_column}>
           <div className={styles.form_group}>
             <label>
               Check-in Date <span className={styles.required}>*</span>
@@ -417,7 +383,6 @@ export default function WalkInForm() {
               <p className={styles.error}>{errors.checkInDate?.message}</p>
             )}
           </div>
-
           {packageType && (
             <div className={styles.form_group}>
               <label>
@@ -464,6 +429,41 @@ export default function WalkInForm() {
               )}
             </div>
           )}
+        </div>
+
+        <div className={styles.right_column}>
+          <div className={styles.form_group}>
+            <label>
+              Total Guests <span className={styles.required}>*</span>
+            </label>
+            <input
+              {...register("totalPax")}
+              type="number"
+              min={1}
+              onBlur={() => trigger("totalPax")}
+            />
+            {errors.totalPax && (
+              <p className={styles.error}>{errors.totalPax?.message}</p>
+            )}
+          </div>
+
+          {packageType === "cabins" && (
+            <div className={styles.form_group}>
+              <label>
+                Check-out Date <span className={styles.required}>*</span>
+              </label>
+              <input
+                {...register("checkOutDate")}
+                type="date"
+                min={minDate}
+                onBlur={() => trigger("checkOutDate")}
+              />
+              {errors.checkOutDate && (
+                <p className={styles.error}>{errors.checkOutDate?.message}</p>
+              )}
+            </div>
+          )}
+
           <div className={styles.form_group}>
             <label>
               Amount <span className={styles.required}>*</span>
