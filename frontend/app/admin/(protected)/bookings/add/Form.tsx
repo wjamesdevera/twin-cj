@@ -141,13 +141,15 @@ export default function WalkInForm() {
   }, [packageType, watch("checkInDate"), watch("selectedPackageId")]);
 
   const today = new Date();
-  const minDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate()
-  )
-    .toISOString()
-    .split("T")[0];
+  const minDate = today.toISOString().split("T")[0];
+
+  const getNextDay = (dateStr: string) => {
+    const date = new Date(dateStr);
+    date.setDate(date.getDate() + 1);
+    return date.toISOString().split("T")[0];
+  };
+
+  const minCheckOutDate = checkInDate ? getNextDay(checkInDate) : minDate;
 
   const fetcher = async (url: string) => {
     try {
@@ -355,7 +357,7 @@ export default function WalkInForm() {
             </label>
             <select
               {...register("packageType")}
-              defaultValue="day-tour"
+              defaultValue=""
               onBlur={() => trigger("packageType")}
             >
               <option value="" disabled>
@@ -364,9 +366,6 @@ export default function WalkInForm() {
               <option value="day-tour">Day Tour</option>
               <option value="cabins">Overnight</option>
             </select>
-            {errors.packageType && (
-              <p className={styles.error}>{errors.packageType?.message}</p>
-            )}
           </div>
 
           <div className={styles.form_group}>
@@ -455,11 +454,11 @@ export default function WalkInForm() {
               <input
                 {...register("checkOutDate")}
                 type="date"
-                min={minDate}
+                min={minCheckOutDate}
                 onBlur={() => trigger("checkOutDate")}
               />
               {errors.checkOutDate && (
-                <p className={styles.error}>{errors.checkOutDate?.message}</p>
+                <p className={styles.error}>{errors.checkOutDate.message}</p>
               )}
             </div>
           )}
@@ -472,7 +471,12 @@ export default function WalkInForm() {
               {...register("amount")}
               type="number"
               min={1}
-              value={selectedPackagePrice !== null ? selectedPackagePrice : ""}
+              value={
+                (packageType === "cabins" && watch("checkOutDate")) ||
+                (packageType === "day-tour" && watch("checkInDate"))
+                  ? selectedPackagePrice ?? ""
+                  : ""
+              }
               readOnly
             />
             {errors.amount && (
