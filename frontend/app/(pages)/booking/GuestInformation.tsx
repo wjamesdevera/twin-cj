@@ -233,7 +233,7 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
               type="terms"
               onAgree={() => setValue("isTermsChecked", true)}
             />
-            .
+            .<span className={styles.required}>*</span>
           </label>
           <label>
             <input
@@ -247,7 +247,7 @@ const GuestInformation: React.FC<GuestInformationProps> = ({
               type="privacy"
               onAgree={() => setValue("isPrivacyChecked", true)}
             />
-            .
+            .<span className={styles.required}>*</span>
           </label>
         </div>
         {/* Disable the button unless all fields are filled and both checkboxes are checked */}

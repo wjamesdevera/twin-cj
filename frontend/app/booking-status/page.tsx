@@ -113,6 +113,7 @@ export default function Home() {
 
   const searchParams = useSearchParams();
   const referenceCode = searchParams.get("referenceCode");
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const {
     register,
@@ -139,6 +140,7 @@ export default function Home() {
   }, [referenceCode, setValue, trigger]);
 
   const fetchBookingData = async (data: CheckBookingStatus) => {
+    setHasSubmitted(true);
     await trigger(data);
   };
 
@@ -157,8 +159,7 @@ export default function Home() {
         errors={errors}
         fetchBookingData={fetchBookingData}
       />
-
-      {bookingData && (
+      {bookingData ? (
         <BookingStatusDetails
           status={bookingData.bookingStatus.name}
           referenceCode={bookingData?.referenceCode}
@@ -171,7 +172,9 @@ export default function Home() {
           message={bookingData?.message}
           bookingData={bookingData}
         />
-      )}
+      ) : hasSubmitted ? (
+        <BookingStatusDetails status="invalid" referenceCode="" />
+      ) : null}
     </div>
   );
 }

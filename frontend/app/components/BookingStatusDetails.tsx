@@ -21,11 +21,7 @@ interface BookingStatusDetailsProps {
   checkOut?: string;
   notes?: string | null;
   message?: string;
-  bookingData?: {
-    services?: {
-      id: string;
-    }[];
-  };
+  bookingData?: any;
 }
 
 const BookingStatusDetails = ({
@@ -39,9 +35,19 @@ const BookingStatusDetails = ({
   message,
   bookingData,
 }: BookingStatusDetailsProps) => {
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string, type?: "checkIn" | "checkOut") => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("en-US", {
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
+    if (type === "checkIn") date.setHours(16, 0);
+    if (type === "checkOut") date.setHours(12, 0);
+
+    return date.toLocaleString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
@@ -88,11 +94,11 @@ const BookingStatusDetails = ({
           </p>
           <p>
             <b>Check-In: </b>
-            <span>{formatDate(checkIn)}</span>
+            <span>{formatDate(checkIn, "checkIn")}</span>
           </p>
           <p>
             <b>Check-Out: </b>
-            <span>{formatDate(checkOut)}</span>
+            <span>{formatDate(checkOut, "checkOut")}</span>
           </p>
         </div>
         <div
@@ -185,11 +191,11 @@ const BookingStatusDetails = ({
                 </p>
                 <p>
                   <b>Check-In: </b>
-                  <span>{formatDate(checkIn)}</span>
+                  <span>{formatDate(checkIn, "checkIn")}</span>
                 </p>
                 <p>
                   <b>Check-Out: </b>
-                  <span>{formatDate(checkOut)}</span>
+                  <span>{formatDate(checkOut, "checkOut")}</span>
                 </p>
               </div>
               <div
@@ -388,10 +394,6 @@ const BookingStatusDetails = ({
         return date.toISOString().split("T")[0];
       };
 
-      console.log(newCheckIn); // Check the input value
-      console.log("og", originalDuration); // Check the duration
-      console.log(addDays(newCheckIn, originalDuration));
-
       return (
         <section className={`${styles["booking-status-details-section"]}`}>
           <div className={`${styles["booking-status-details-container"]}`}>
@@ -469,7 +471,12 @@ const BookingStatusDetails = ({
                     onChange={handleCheckOutChange}
                   />
                 </div>
-                <button className={styles["btn-reschedule"]} onClick={handleSubmit}>Reschedule</button>
+                <button
+                  className={styles["btn-reschedule"]}
+                  onClick={handleSubmit}
+                >
+                  Reschedule
+                </button>
               </div>
               <div
                 className={`${styles["booking-status-details-container-divider"]}`}
