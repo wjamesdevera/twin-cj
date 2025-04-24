@@ -190,12 +190,6 @@ export default function PaymentDetails() {
                       <span>09175599237</span>
                     </div>
                   </li>
-                  <li>
-                    <div className={styles.paymentMethod}>
-                      <strong>Bank Transfer:</strong>
-                      <span>XXXX-XXXX-XXXX-XXXX</span>
-                    </div>
-                  </li>
                 </ul>
                 <p className={styles.note}></p>
               </div>
