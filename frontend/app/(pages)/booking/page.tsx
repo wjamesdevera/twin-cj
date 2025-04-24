@@ -61,6 +61,7 @@ const Booking: React.FC = () => {
 
   // Set booking type based on check-in and check-out dates
   useEffect(() => {
+    // Ensure check-in and check-out dates are present
     if (bookingData.checkInDate && bookingData.checkOutDate) {
       const isSameDay =
         bookingData.checkInDate.toDateString() ===
@@ -68,10 +69,26 @@ const Booking: React.FC = () => {
 
       setIsDayTourLocked(isSameDay);
 
-      setBookingData((prev) => ({
-        ...prev,
-        bookingType: isSameDay ? "day-tour" : prev.bookingType || "cabins",
-      }));
+      setBookingData((prev) => {
+        if (isSameDay && prev.bookingType !== "day-tour") {
+          return {
+            ...prev,
+            bookingType: "day-tour",
+          };
+        }
+
+        if (!isSameDay && prev.bookingType === "day-tour") {
+          return {
+            ...prev,
+            bookingType: "cabins",
+          };
+        }
+
+        return {
+          ...prev,
+          bookingType: prev.bookingType || "cabins",
+        };
+      });
     }
   }, [bookingData.checkInDate, bookingData.checkOutDate]);
 
@@ -132,10 +149,11 @@ const Booking: React.FC = () => {
           handleOptionSelect={(option) => {
             if (isDayTourLocked && bookingData.bookingType === "day-tour")
               return;
+
             if (!isDayTourLocked && option === "day-tour") return;
+
             handleChange("bookingType", option);
           }}
-          disabled={isDayTourLocked}
         />
       ),
     },
