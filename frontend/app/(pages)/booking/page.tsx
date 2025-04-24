@@ -9,6 +9,7 @@ import BookingCard from "@/app/(pages)/booking/BookingCard";
 import GuestInformation from "@/app/(pages)/booking/GuestInformation";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
+import styles from "./page.module.scss";
 
 interface AccordionItem {
   title: string;
@@ -169,7 +170,8 @@ const Booking: React.FC = () => {
                   marginBottom: "1rem",
                 }}
               >
-                Choose one Package Type (required)
+                Choose one Package Type (required){" "}
+                <span className={styles.required}>*</span>
               </p>
               {bookingData.bookingCards
                 .filter((card) => availableServices.includes(card.name))
@@ -204,7 +206,8 @@ const Booking: React.FC = () => {
                   marginBottom: "1rem",
                 }}
               >
-                Choose one cabin (required)
+                Choose one cabin (required){" "}
+                <span className={styles.required}>*</span>
               </p>
               {bookingData.bookingCards
                 .filter((card) => availableServices.includes(card.name))

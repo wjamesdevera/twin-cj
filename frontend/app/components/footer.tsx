@@ -35,21 +35,21 @@ const Footer: React.FC = () => {
                 Booking
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/facilities" className={styles.link}>
                 Facilities
               </Link>
-            </li>
-            <li>
+            </li> */}
+            {/* <li>
               <Link href="/about" className={styles.link}>
                 About
               </Link>
-            </li>
-            <li>
+            </li> */}
+            {/* <li>
               <Link href="/location" className={styles.link}>
                 Location
               </Link>
-            </li>
+            </li> */}
             <li>
               <Link href="/contact" className={styles.link}>
                 Contact Us
@@ -71,11 +71,18 @@ const Footer: React.FC = () => {
             </li>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fas fa-envelope`}></i>
-              <a href="mailto:twincj.riversideresort@gmail.com">twincj.riversideresort@gmail.com</a>
+              <a href="mailto:twincj.riversideresort@gmail.com">
+                twincj.riversideresort@gmail.com
+              </a>
             </li>
             <li className={`${styles.link} ${styles["contact-item"]}`}>
               <i className={`${styles.icon} fab fa-facebook`}></i>
-              <a href="https://www.facebook.com/twincjriversideresort" target="_blank">Twin CJ Riverside Glamping Resort</a>
+              <a
+                href="https://www.facebook.com/twincjriversideresort"
+                target="_blank"
+              >
+                Twin CJ Riverside Glamping Resort
+              </a>
             </li>
           </ul>
         </div>
