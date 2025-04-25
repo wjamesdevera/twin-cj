@@ -11,6 +11,9 @@ import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
 import NotificationModal from "@/app/components/notification_modal";
 import { z } from "zod";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 
 type FormFields = {
   firstName: string;
@@ -369,17 +372,29 @@ export default function WalkInForm() {
           </div>
 
           <div className={styles.form_group}>
-            <label>
-              Check-in Date <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("checkInDate")}
-              type="date"
-              min={minDate}
-              onBlur={() => trigger("checkInDate")}
-            />
-            {errors.checkInDate && (
-              <p className={styles.error}>{errors.checkInDate?.message}</p>
+            {packageType && (
+              <>
+                <label>
+                  Check-in Date <span className={styles.required}>*</span>
+                </label>
+                <DatePicker
+                  selected={checkInDate ? new Date(checkInDate) : null}
+                  onChange={(date: Date | null) => {
+                    if (date) {
+                      const formattedDate = format(date, "yyyy-MM-dd");
+                      setValue("checkInDate", formattedDate);
+                      trigger("checkInDate");
+                    }
+                  }}
+                  minDate={new Date(minDate)}
+                  dateFormat="MM/dd/yyyy"
+                  onBlur={() => trigger("checkInDate")}
+                  placeholderText="mm/dd/yyyy"
+                />
+                {errors.checkInDate && (
+                  <p className={styles.error}>{errors.checkInDate?.message}</p>
+                )}
+              </>
             )}
           </div>
           {packageType && (
@@ -451,11 +466,19 @@ export default function WalkInForm() {
               <label>
                 Check-out Date <span className={styles.required}>*</span>
               </label>
-              <input
-                {...register("checkOutDate")}
-                type="date"
-                min={minCheckOutDate}
+              <DatePicker
+                selected={checkOutDate ? new Date(checkOutDate) : null}
+                onChange={(date: Date | null) => {
+                  if (date) {
+                    const formattedDate = format(date, "yyyy-MM-dd");
+                    setValue("checkOutDate", formattedDate);
+                    trigger("checkOutDate");
+                  }
+                }}
+                minDate={new Date(minCheckOutDate)}
+                dateFormat="MM/dd/yyyy"
                 onBlur={() => trigger("checkOutDate")}
+                placeholderText="mm/dd/yyyy"
               />
               {errors.checkOutDate && (
                 <p className={styles.error}>{errors.checkOutDate.message}</p>
@@ -464,23 +487,27 @@ export default function WalkInForm() {
           )}
 
           <div className={styles.form_group}>
-            <label>
-              Amount <span className={styles.required}>*</span>
-            </label>
-            <input
-              {...register("amount")}
-              type="number"
-              min={1}
-              value={
-                (packageType === "cabins" && watch("checkOutDate")) ||
-                (packageType === "day-tour" && watch("checkInDate"))
-                  ? selectedPackagePrice ?? ""
-                  : ""
-              }
-              readOnly
-            />
-            {errors.amount && (
-              <p className={styles.error}>{errors.amount?.message}</p>
+            {packageType && (
+              <>
+                <label>
+                  Amount <span className={styles.required}>*</span>
+                </label>
+                <input
+                  {...register("amount")}
+                  type="number"
+                  min={1}
+                  value={
+                    (packageType === "cabins" && watch("checkOutDate")) ||
+                    (packageType === "day-tour" && watch("checkInDate"))
+                      ? selectedPackagePrice ?? ""
+                      : ""
+                  }
+                  readOnly
+                />
+                {errors.amount && (
+                  <p className={styles.error}>{errors.amount?.message}</p>
+                )}
+              </>
             )}
           </div>
         </div>
