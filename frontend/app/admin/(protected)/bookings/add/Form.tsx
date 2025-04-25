@@ -252,12 +252,6 @@ export default function WalkInForm() {
     setIsConfirmModalOpen(true);
   };
 
-  const handleAddBooking = async () => {
-    setConfirmMessage("Are you sure you want to add this booking?");
-    setConfirmAction(() => () => handleSubmit(onSubmit));
-    setIsConfirmModalOpen(true);
-  };
-
   const handleClear = () => {
     setConfirmMessage("Are you sure you want to clear the form? ");
     setConfirmAction(() => () => {

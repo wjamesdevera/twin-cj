@@ -675,10 +675,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                       const formattedDate = date
                                         .toISOString()
                                         .split("T")[0];
-                                      setEditedDates({
+                                      setEditedDates((prev) => ({
+                                        ...prev,
                                         checkIn: formattedDate,
-                                        checkOut: "",
-                                      });
+                                      }));
                                     }
                                   }}
                                   minDate={
