@@ -13,20 +13,26 @@ type Feedback = {
 
 const Feedbacks = () => {
   const { data, isLoading } = useSWR("feedback", getFeedbacks);
-
   const feedbacks = data?.data?.feedbacks || [];
-  return isLoading ? (
-    <Loading />
-  ) : (
+
+  if (isLoading) return <Loading />;
+
+  return (
     <div className={s.container}>
       <div className={s.wrapper}>
-        {feedbacks.map((feedback: Feedback) => (
-          <FeedbackCard
-            key={feedback.id}
-            text={feedback.text}
-            author={feedback.name}
-          />
-        ))}
+        {feedbacks.length === 0 ? (
+          <p className={s.noFeedbacks}>
+            There are no feedbacks available at the moment.
+          </p>
+        ) : (
+          feedbacks.map((feedback: Feedback) => (
+            <FeedbackCard
+              key={feedback.id}
+              text={feedback.text}
+              author={feedback.name}
+            />
+          ))
+        )}
       </div>
     </div>
   );
