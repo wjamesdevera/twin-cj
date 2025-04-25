@@ -398,14 +398,14 @@ export const getLatestBookings = async () => {
     const pendingReservations = allBookings.filter(
       (b) => b.bookingStatus.name === "Pending"
     ).length;
-    const completedReservations = allBookings.filter(
+    const activeReservations = allBookings.filter(
       (b) => b.bookingStatus.name === "Completed"
     ).length;
 
     return {
       bookings,
       pendingReservations,
-      completedReservations,
+      activeReservations,
     };
   } catch (error) {
     console.error("Error fetching latest bookings:", error);
