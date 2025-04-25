@@ -96,6 +96,16 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     "success"
   );
 
+  const [selectedStatuses, setSelectedStatuses] = useState<
+    Record<string, string>
+  >(
+    () =>
+      bookings?.reduce((acc, booking) => {
+        acc[booking.referenceCode] = booking.bookingStatus;
+        return acc;
+      }, {} as Record<string, string>) || {}
+  );
+
   // Handle
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserMessage(e.target.value);
@@ -281,6 +291,13 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
   };
 
   const handleCancelModal = () => {
+    if (currentBooking) {
+      setSelectedStatuses((prev) => ({
+        ...prev,
+        [currentBooking.referenceCode]: currentBooking.bookingStatus,
+      }));
+    }
+
     setIsModalOpen(false);
     setUserMessage("");
   };
@@ -608,11 +625,19 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                             {booking.bookingStatus}
                           </span>
                           <select
-                            defaultValue={booking.bookingStatus}
-                            onChange={(
-                              e: React.ChangeEvent<HTMLSelectElement>
-                            ) => {
+                            value={
+                              selectedStatuses[booking.referenceCode] ||
+                              booking.bookingStatus
+                            }
+                            onChange={(e) => {
                               const selectedStatus = e.target.value;
+
+                              // Save the temporary selection in state
+                              setSelectedStatuses((prev) => ({
+                                ...prev,
+                                [booking.referenceCode]: selectedStatus,
+                              }));
+
                               openModalForStatusUpdate(booking, selectedStatus);
                             }}
                             disabled={
