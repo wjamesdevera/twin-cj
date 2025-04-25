@@ -393,7 +393,7 @@ export const getLatestBookings = async () => {
       (b) => b.bookingStatus.name === "Pending"
     ).length;
     const activeReservations = latestBookings.filter(
-      (b) => b.bookingStatus.name === "Active"
+      (b) => b.bookingStatus.name === "Completed"
     ).length;
 
     return {
