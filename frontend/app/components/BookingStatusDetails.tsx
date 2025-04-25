@@ -3,7 +3,8 @@ import styles from "./BookingStatusDetails.module.scss";
 import { options } from "../api";
 import NotificationModal from "./notification_modal";
 import { mutate } from "swr";
-import { format } from "path";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
 
 interface Service {
   id: string;
@@ -314,20 +315,23 @@ const BookingStatusDetails = ({
         "success" | "error"
       >("success");
 
-      const serviceId = bookingData?.services?.[0]?.id || null;
+      const handleCheckInChange = (date: Date | null) => {
+        if (!date) return;
 
-      const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newDate = e.target.value;
+        const newDate = date.toISOString().split("T")[0];
         setNewCheckIn(newDate);
         setEditedDates((prev) => ({
           ...prev,
           checkIn: newDate,
         }));
+
         setIsDateChanged(newDate !== checkIn || newCheckOut !== checkOut);
       };
 
-      const handleCheckOutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newDate = e.target.value;
+      const handleCheckOutChange = (date: Date | null) => {
+        if (!date) return;
+
+        const newDate = date.toISOString().split("T")[0];
         setNewCheckOut(newDate);
         setEditedDates((prev) => ({
           ...prev,
@@ -416,7 +420,7 @@ const BookingStatusDetails = ({
         const date = new Date(dateStr);
         if (isNaN(date.getTime())) return "";
         date.setDate(date.getDate() + days);
-        return date.toISOString().split("T")[0];
+        return date;
       };
 
       return (
@@ -472,29 +476,33 @@ const BookingStatusDetails = ({
                   <label htmlFor="newCheckIn">
                     <b>Check-In Date:</b>&nbsp;
                   </label>
-                  <input
-                    type="date"
-                    id="newCheckIn"
-                    name="newCheckIn"
-                    className={styles["date-picker"]}
-                    value={newCheckIn?.split("T")[0]}
-                    min={addDays(checkOut || "", 1)}
+                  <DatePicker
+                    selected={newCheckIn ? new Date(newCheckIn) : null}
                     onChange={handleCheckInChange}
+                    minDate={
+                      checkOut
+                        ? new Date(addDays(new Date(checkOut).toISOString(), 1))
+                        : new Date()
+                    }
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="mm/dd/yyyy"
                   />
                 </div>
                 <div>
                   <label htmlFor="newCheckOut">
                     <b>Check-Out Date:</b>&nbsp;
                   </label>
-                  <input
-                    type="date"
-                    id="newCheckOut"
-                    name="newCheckOut"
-                    className={styles["date-picker"]}
-                    value={newCheckOut?.split("T")[0]}
-                    min={editedDates.checkIn || ""}
-                    max={getMaxCheckOut()}
+                  <DatePicker
+                    selected={newCheckOut ? new Date(newCheckOut) : null}
                     onChange={handleCheckOutChange}
+                    minDate={
+                      editedDates.checkIn
+                        ? new Date(editedDates.checkIn)
+                        : undefined
+                    }
+                    maxDate={getMaxCheckOut() || undefined}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="mm/dd/yyyy"
                   />
                 </div>
                 <button
@@ -556,14 +564,3 @@ const BookingStatusDetails = ({
 };
 
 export default BookingStatusDetails;
-function setNotificationMessage(arg0: string) {
-  throw new Error("Function not implemented.");
-}
-
-function setNotificationType(arg0: string) {
-  throw new Error("Function not implemented.");
-}
-
-function setIsNotificationOpen(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
