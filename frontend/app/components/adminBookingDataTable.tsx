@@ -674,6 +674,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                       checkOut: "",
                                     }));
                                   }}
+                                  disabled={
+                                    booking.bookingStatus.toLowerCase() ===
+                                    "completed"
+                                  }
                                 />
                               </label>
                               <label>
@@ -696,14 +700,21 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                       checkOut: e.target.value,
                                     }))
                                   }
+                                  disabled={
+                                    booking.bookingStatus.toLowerCase() ===
+                                    "completed"
+                                  }
                                 />
                               </label>
                               <div className={styles.dateEditorButtons}>
-                                <CustomButton
-                                  type="button"
-                                  label="Save Changes"
-                                  onClick={handleEditDate}
-                                />
+                                {booking.bookingStatus.toLowerCase() !==
+                                  "completed" && (
+                                  <CustomButton
+                                    type="button"
+                                    label="Save Changes"
+                                    onClick={handleEditDate}
+                                  />
+                                )}
 
                                 <CustomButton
                                   type="button"
