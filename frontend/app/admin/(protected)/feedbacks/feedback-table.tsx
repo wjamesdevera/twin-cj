@@ -68,6 +68,7 @@ const FeedbackStatusDropdown: React.FC<{
   return (
     <select
       className={ts.select}
+      value={statusId}
       defaultValue={defaultValue}
       onChange={handleChange}
     >
