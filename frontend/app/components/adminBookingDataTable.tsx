@@ -8,6 +8,8 @@ import { options } from "../api";
 import { mutate } from "swr";
 import ConfirmModal from "@/app/components/confirm_modal";
 import NotificationModal from "@/app/components/notification_modal";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 type ServiceCategory = {
   id: number;
@@ -662,48 +664,86 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                             <div className={styles.dateEditor}>
                               <label>
                                 Check-In:
-                                <input
-                                  type="date"
-                                  value={editedDates.checkIn || ""}
-                                  min={editedDates.checkOut}
-                                  onChange={(e) => {
-                                    const newCheckIn = e.target.value;
-                                    setEditedDates((prev) => ({
-                                      ...prev,
-                                      checkIn: newCheckIn,
-                                      checkOut: "",
-                                    }));
+                                <DatePicker
+                                  selected={
+                                    editedDates.checkIn
+                                      ? new Date(editedDates.checkIn)
+                                      : null
+                                  }
+                                  onChange={(date: Date | null) => {
+                                    if (date) {
+                                      const formattedDate = date
+                                        .toISOString()
+                                        .split("T")[0];
+                                      setEditedDates({
+                                        checkIn: formattedDate,
+                                        checkOut: "",
+                                      });
+                                    }
                                   }}
+                                  minDate={
+                                    editedDates.checkOut
+                                      ? new Date(editedDates.checkOut)
+                                      : undefined
+                                  }
                                   disabled={
                                     booking.bookingStatus.toLowerCase() ===
                                     "completed"
                                   }
+                                  dayClassName={(date) =>
+                                    booking.bookingStatus.toLowerCase() ===
+                                    "completed"
+                                      ? ""
+                                      : "bold-date"
+                                  }
+                                  dateFormat="yyyy-MM-dd"
                                 />
                               </label>
                               <label>
                                 Check-Out:
-                                <input
-                                  type="date"
-                                  value={editedDates.checkOut || ""}
-                                  min={editedDates.checkIn || ""}
-                                  max={
-                                    editedDates.checkIn
-                                      ? addDays(
-                                          editedDates.checkIn,
-                                          originalDuration
-                                        )
-                                      : ""
+                                <DatePicker
+                                  selected={
+                                    editedDates.checkOut
+                                      ? new Date(editedDates.checkOut)
+                                      : undefined
                                   }
-                                  onChange={(e) =>
+                                  onChange={(date: Date | null) => {
+                                    const formattedDate = date
+                                      ? date.toISOString().split("T")[0]
+                                      : ""; // Format as "YYYY-MM-DD"
                                     setEditedDates((prev) => ({
                                       ...prev,
-                                      checkOut: e.target.value,
-                                    }))
+                                      checkOut: formattedDate,
+                                    }));
+                                  }}
+                                  minDate={
+                                    editedDates.checkIn
+                                      ? new Date(editedDates.checkIn)
+                                      : undefined
+                                  }
+                                  maxDate={
+                                    editedDates.checkIn
+                                      ? new Date(
+                                          addDays(
+                                            new Date(editedDates.checkIn)
+                                              .toISOString()
+                                              .split("T")[0],
+                                            originalDuration
+                                          )
+                                        )
+                                      : undefined
                                   }
                                   disabled={
                                     booking.bookingStatus.toLowerCase() ===
                                     "completed"
                                   }
+                                  dayClassName={(date) =>
+                                    booking.bookingStatus.toLowerCase() ===
+                                    "completed"
+                                      ? ""
+                                      : "bold-date"
+                                  }
+                                  dateFormat="yyyy-MM-dd"
                                 />
                               </label>
                               <div className={styles.dateEditorButtons}>

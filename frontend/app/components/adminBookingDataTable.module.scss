@@ -127,7 +127,7 @@
   text-align: left;
   font-size: 16px;
   border-radius: 10px;
-  table-layout: fixed; 
+  table-layout: fixed;
 }
 
 .tableTitle {
@@ -156,7 +156,7 @@
   font-weight: 600;
   color: var(--color-sunset-orange-500);
   background-color: #ffffff;
-  text-align: left; 
+  text-align: left;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -172,10 +172,9 @@
 .table tbody td {
   padding: 12px;
   background-color: #ffffff;
-  text-align: left; 
-  word-wrap: break-word; 
+  text-align: left;
+  word-wrap: break-word;
   overflow-wrap: break-word;
-  
 }
 
 .table thead,
@@ -362,6 +361,10 @@
   width: 100%;
   height: auto;
   transition: transform 0.25s ease-in-out;
+}
+
+.bold-date {
+  font-weight: bold;
 }
 
 .paginationContainer {
