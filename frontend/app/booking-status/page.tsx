@@ -109,8 +109,6 @@ interface BookingData {
 type CheckBookingStatus = z.infer<typeof bookingSchema>;
 
 export default function Home() {
-  // const [bookingData, setBookingData] = useState<BookingData | null>(null);
-
   const searchParams = useSearchParams();
   const referenceCode = searchParams.get("referenceCode");
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -121,16 +119,18 @@ export default function Home() {
     setValue,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(bookingSchema), // Replace with the centralized zod schema/file
+    resolver: zodResolver(bookingSchema),
   });
 
   const {
     trigger,
-    data: bookingData,
+    data: bookingResponse,
     isMutating,
   } = useSWRMutation("key", (key, { arg }: { arg: CheckBookingStatus }) =>
     getBookingStatuses(arg.referenceCode)
   );
+
+  const bookingData = bookingResponse || bookingResponse;
 
   useEffect(() => {
     if (referenceCode) {

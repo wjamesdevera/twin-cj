@@ -299,6 +299,10 @@ const BookingStatusDetails = ({
     case "rescheduled":
       const [newCheckIn, setNewCheckIn] = useState(checkIn || "");
       const [newCheckOut, setNewCheckOut] = useState(checkOut || "");
+      const [editedDates, setEditedDates] = useState<{
+        checkIn: string;
+        checkOut: string;
+      }>({ checkIn: "", checkOut: "" });
       const [isDateChanged, setIsDateChanged] = useState(false);
       const [unavailableServices, setUnavailableServices] = useState<
         { id: string; name: string }[]
@@ -315,27 +319,44 @@ const BookingStatusDetails = ({
       const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.value;
         setNewCheckIn(newDate);
+        setEditedDates((prev) => ({
+          ...prev,
+          checkIn: newDate,
+        }));
         setIsDateChanged(newDate !== checkIn || newCheckOut !== checkOut);
       };
 
       const handleCheckOutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.value;
         setNewCheckOut(newDate);
+        setEditedDates((prev) => ({
+          ...prev,
+          checkOut: newDate,
+        }));
         setIsDateChanged(newCheckIn !== checkIn || newDate !== checkOut);
       };
 
       const calculateDuration = (checkIn: string, checkOut: string) => {
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
+
         const duration = Math.ceil(
           (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24)
         );
         return duration;
       };
 
-      const originalDuration = calculateDuration(newCheckIn, newCheckOut);
+      const originalDuration = calculateDuration(checkIn || "", checkOut || "");
+
+      const getMaxCheckOut = () => {
+        const baseDate = editedDates.checkIn || checkIn;
+        if (!baseDate) return "";
+        return addDays(editedDates.checkIn, originalDuration);
+      };
 
       const handleSubmit = async () => {
+        const { checkIn: newCheckIn, checkOut: newCheckOut } = editedDates;
+
         const newDuration = calculateDuration(newCheckIn, newCheckOut);
 
         if (originalDuration !== newDuration) {
@@ -371,6 +392,8 @@ const BookingStatusDetails = ({
             setNotificationType("success");
             setIsNotificationOpen(true);
             mutate("");
+
+            window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
           } else {
             if (result.message) {
               setNotificationMessage(result.message);
@@ -389,7 +412,9 @@ const BookingStatusDetails = ({
       };
 
       const addDays = (dateStr: string, days: number) => {
+        if (!dateStr) return "";
         const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return "";
         date.setDate(date.getDate() + days);
         return date.toISOString().split("T")[0];
       };
@@ -440,34 +465,35 @@ const BookingStatusDetails = ({
                   <b>No. of Guests: </b>
                   <span>{totalPax || 0}</span>
                 </p>
+                <p>
+                  <b>Select your preferred Dates: </b>
+                </p>
                 <div>
                   <label htmlFor="newCheckIn">
-                    <b>Select New Check-In Date:</b>&nbsp;
+                    <b>Check-In Date:</b>&nbsp;
                   </label>
                   <input
                     type="date"
                     id="newCheckIn"
                     name="newCheckIn"
                     className={styles["date-picker"]}
-                    value={newCheckIn}
-                    min={new Date(checkOut || "").toISOString().split("T")[0]}
+                    value={newCheckIn?.split("T")[0]}
+                    min={addDays(checkOut || "", 1)}
                     onChange={handleCheckInChange}
                   />
                 </div>
                 <div>
                   <label htmlFor="newCheckOut">
-                    <b>Select New Check-Out Date:</b>&nbsp;
+                    <b>Check-Out Date:</b>&nbsp;
                   </label>
                   <input
                     type="date"
                     id="newCheckOut"
                     name="newCheckOut"
                     className={styles["date-picker"]}
-                    value={newCheckOut}
-                    min={new Date(checkOut || "").toISOString().split("T")[0]}
-                    // max={
-                    //   newCheckIn ? addDays(newCheckIn, originalDuration) : ""
-                    // }
+                    value={newCheckOut?.split("T")[0]}
+                    min={editedDates.checkIn || ""}
+                    max={getMaxCheckOut()}
                     onChange={handleCheckOutChange}
                   />
                 </div>
