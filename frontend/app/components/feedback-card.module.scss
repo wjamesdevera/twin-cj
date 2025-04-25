@@ -4,8 +4,16 @@
   font-size: var(--text-size-base);
   line-height: 1.5;
   color: var(--color-neutral-500);
-  padding: 3rem 2rem;
+  padding: 3rem 4rem;
   border-radius: 0.5rem;
+
+  border: 3px solid var(--color-sand-600); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease; 
+}
+
+.container:hover {
+  transform: translateY(-4px); 
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); 
 }
 
 .wrapper {
@@ -18,7 +26,7 @@
 .feedback {
   display: -webkit-box;
   text-align: justify;
-  -webkit-line-clamp: 5; // 👈 Change this to however many lines you want
+  -webkit-line-clamp: 8; 
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
