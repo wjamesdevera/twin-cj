@@ -583,6 +583,8 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                 .pop()}`}
                               alt="Proof of Payment"
                               className={styles.thumbnailImage}
+                              width={500}
+                              height={500}
                               onClick={() => {
                                 const fileName =
                                   booking.transaction.proofOfPaymentImageUrl
@@ -817,6 +819,8 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             <div className={styles.imageWrapper}>
               <Image
                 src={modalImageUrl}
+                width={500}
+                height={500}
                 alt="Service"
                 className={styles.modalImage}
               />
