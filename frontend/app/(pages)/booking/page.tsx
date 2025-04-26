@@ -10,6 +10,7 @@ import GuestInformation from "@/app/(pages)/booking/GuestInformation";
 import { useRouter } from "next/navigation";
 import { Loading } from "@/app/components/loading";
 import styles from "./page.module.scss";
+import { options } from "@/app/api";
 
 interface AccordionItem {
   title: string;
@@ -53,7 +54,7 @@ const Booking: React.FC = () => {
     data: Record<string, BookingTypeData>;
   }>(
     bookingData.bookingType
-      ? `http://localhost:8080/api/bookings?type=${
+      ? `${options.baseURL}/api/bookings?type=${
           bookingData.bookingType
         }&checkInDate=${bookingData.checkInDate?.toISOString()}&checkOutDate=${bookingData.checkOutDate?.toISOString()}`
       : null,
