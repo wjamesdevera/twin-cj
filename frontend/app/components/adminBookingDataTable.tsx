@@ -129,8 +129,8 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       return (
         <>
           <label className={styles.messageLabel}>
-            Are you sure you want to update the status of this booking to "
-            {status}"? <br />
+            Are you sure you want to update the status of this booking to &quot;
+            {status}&quot;? <br />
           </label>
           <textarea
             id="userMessage"
