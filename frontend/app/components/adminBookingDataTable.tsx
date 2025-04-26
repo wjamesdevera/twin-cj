@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { downloadExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -435,13 +436,20 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       },
     });
   };
+  const router = useRouter();
 
   return (
     <div className={styles.tableContainer}>
       <div className={styles.table_wrapper}>
         <div className={styles.headerContainer}>
           <h2 className={styles.tableTitle}>Bookings & Transactions</h2>
-          <div>
+          <div className={styles.buttonGroup}>
+            <button
+              className={styles.exportButton}
+              onClick={() => router.push("/admin/bookings/add")}
+            >
+              <i className="fas fa-plus"></i> Add
+            </button>
             <button
               className={styles.exportButton}
               onClick={handleDownloadExcel}

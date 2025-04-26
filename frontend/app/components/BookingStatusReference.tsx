@@ -38,7 +38,11 @@ const BookingStatusReference: React.FC<Props> = ({
 
       <section className={styles["booking-status-reference-section"]}>
         <div className={styles["booking-status-input-container"]}>
-          <p>Please Enter Your Reference Number</p>
+          <p>
+            Please Enter Your Reference Number{" "}
+            <span className={styles.required}>*</span>
+          </p>
+
           <form onSubmit={handleSubmit(fetchBookingData)}>
             <input
               type="text"
