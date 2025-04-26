@@ -211,8 +211,8 @@ export default function faqs() {
                   >
                     •
                   </span>
-                  We require 50% initial payment through online wallets like
-                  GCash or PayMaya. The remaining balance can be settled in cash
+                  We require 50% initial payment through online wallets like GCash.
+                  The remaining balance can be settled in cash
                   upon arrival.
                 </p>
               </div>
