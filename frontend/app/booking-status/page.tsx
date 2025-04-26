@@ -14,97 +14,97 @@ import { Loading } from "../components/loading";
 import { useSearchParams } from "next/navigation";
 
 // Temporary Schema (remove upon integrating the centralized zod file)
-type Category = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
+// type Category = {
+//   id: number;
+//   name: string;
+//   createdAt: string;
+//   updatedAt: string;
+// };
 
-type ServiceCategory = {
-  id: number;
-  categoryId: number;
-  category: Category;
-};
+// type ServiceCategory = {
+//   id: number;
+//   categoryId: number;
+//   category: Category;
+// };
 
-type Service = {
-  id: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  createdAt: string;
-  updatedAt: string;
-  serviceCategoryId: number;
-  serviceCategory: ServiceCategory;
-};
+// type Service = {
+//   id: number;
+//   name: string;
+//   description: string;
+//   imageUrl: string;
+//   price: number;
+//   createdAt: string;
+//   updatedAt: string;
+//   serviceCategoryId: number;
+//   serviceCategory: ServiceCategory;
+// };
 
-type Customer = {
-  id: number;
-  personalDetailId: string;
-  createdAt: string;
-  updatedAt: string;
-};
+// type Customer = {
+//   id: number;
+//   personalDetailId: string;
+//   createdAt: string;
+//   updatedAt: string;
+// };
 
-type BookingStatuses = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
+// type BookingStatuses = {
+//   id: number;
+//   name: string;
+//   createdAt: string;
+//   updatedAt: string;
+// };
 
-type Transaction = {
-  id: string;
-  proofOfPaymentImageUrl: string;
-  amount: number;
-  createdAt: string;
-  updatedAt: string;
-  paymentAccountId: number;
-};
+// type Transaction = {
+//   id: string;
+//   proofOfPaymentImageUrl: string;
+//   amount: number;
+//   createdAt: string;
+//   updatedAt: string;
+//   paymentAccountId: number;
+// };
 
-type BookingResponse = {
-  id: number;
-  referenceCode: string;
-  checkIn: string;
-  checkOut: string;
-  totalPax: number;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-  customerId: number;
-  bookingStatusId: number;
-  transactionId: string;
-  customer: Customer;
-  bookingStatus: BookingStatuses;
-  services: Service[];
-  transaction: Transaction;
-};
+// type BookingResponse = {
+//   id: number;
+//   referenceCode: string;
+//   checkIn: string;
+//   checkOut: string;
+//   totalPax: number;
+//   notes: string | null;
+//   createdAt: string;
+//   updatedAt: string;
+//   customerId: number;
+//   bookingStatusId: number;
+//   transactionId: string;
+//   customer: Customer;
+//   bookingStatus: BookingStatuses;
+//   services: Service[];
+//   transaction: Transaction;
+// }
 
 const bookingSchema = z.object({
   referenceCode: z.string().min(1, "Reference Code is required"),
 });
 
-interface BookingStatus {
-  name: string;
-}
+// interface BookingStatus {
+//   name: string;
+// }
 
-interface BookingData {
-  bookingStatus?: BookingStatus;
-  referenceCode: string;
-  services: Array<{
-    id: number;
-    name: string;
-    serviceCategory: {
-      category: {
-        name: string;
-      };
-    };
-  }>;
-  totalPax: number;
-  message: string;
-  checkIn: string;
-  checkOut: string;
-}
+// interface BookingData {
+//   bookingStatus?: BookingStatus;
+//   referenceCode: string;
+//   services: Array<{
+//     id: number;
+//     name: string;
+//     serviceCategory: {
+//       category: {
+//         name: string;
+//       };
+//     };
+//   }>;
+//   totalPax: number;
+//   message: string;
+//   checkIn: string;
+//   checkOut: string;
+// }
 
 type CheckBookingStatus = z.infer<typeof bookingSchema>;
 
