@@ -131,7 +131,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleApplyGuests = (counts: { adults: number; children: number }) => {
     setGuestCounts(counts);
@@ -163,12 +162,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       return;
     }
 
-    setIsLoading(true);
-
-    const queryParams = new URLSearchParams({
-      checkInDate: new Date(checkInDate).toISOString(),
-      checkOutDate: new Date(checkOutDate).toISOString(),
-    }).toString();
     const url = `http://localhost:8080/api/bookings?type=cabins&checkInDate=${checkInDate.toISOString()}&checkOutDate=${checkOutDate.toISOString()}&_=${new Date().getTime()}`;
 
     try {
@@ -203,8 +196,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       }
     } catch (error) {
       console.error("Error fetching availability:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
