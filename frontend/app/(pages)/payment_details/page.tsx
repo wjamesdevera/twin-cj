@@ -77,7 +77,7 @@ export default function PaymentDetails() {
 
   const onSubmit = async (data: PaymentFormData) => {
     setConfirmMessage(
-      "Are you sure you want to confirm your booking? Please ensure that all details are correct before proceeding."
+      "Are you sure you want to confirm your booking?"
     );
     setConfirmAction(() => async () => {
       try {
