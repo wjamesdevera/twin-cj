@@ -14,6 +14,7 @@ import { z } from "zod";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import { options } from "@/app/api";
 
 type FormFields = {
   firstName: string;
@@ -171,7 +172,7 @@ export default function WalkInForm() {
   // fetch available services
   const { data, error } = useSWR<BookingResponse>(
     packageType && checkInDate
-      ? `http://localhost:8080/api/bookings?type=${encodeURIComponent(
+      ? `${options.baseURL}/api/bookings?type=${encodeURIComponent(
           packageType
         )}&checkInDate=${
           checkInDate ? new Date(checkInDate).toISOString() : ""
@@ -213,7 +214,7 @@ export default function WalkInForm() {
         formDataToSend.append("packageType", formData.packageType);
 
         const response = await fetch(
-          "http://localhost:8080/api/bookings/walk-in",
+          `${options.baseURL}/api/bookings/walk-in`,
           {
             method: "POST",
             body: formDataToSend,
@@ -229,7 +230,7 @@ export default function WalkInForm() {
         setIsNotificationModalOpen(true);
 
         setTimeout(() => {
-          router.push("http://localhost:3000/admin/bookings");
+          router.push("/admin/bookings");
         }, 1500);
       } catch (error: any) {
         console.error("Error submitting booking:", error);
@@ -247,7 +248,7 @@ export default function WalkInForm() {
       "Are you sure you want to cancel? Any unsaved progress will be lost."
     );
     setConfirmAction(
-      () => () => router.push("http://localhost:3000/admin/bookings")
+      () => () => router.push("/admin/bookings")
     );
     setIsConfirmModalOpen(true);
   };
