@@ -6,8 +6,7 @@ import s from "@/app/table.module.scss";
 import ts from "./feedback-table.module.scss";
 import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
-import { Box, Modal, Typography } from "@mui/material";
-import { TbBorderRadius } from "react-icons/tb";
+import { Box, Modal } from "@mui/material";
 
 const formatDate = (isoString?: string) => {
   if (!isoString) return "N/A";
