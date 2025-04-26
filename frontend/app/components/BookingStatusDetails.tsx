@@ -22,6 +22,7 @@ interface BookingStatusDetailsProps {
   checkOut?: string;
   notes?: string | null;
   message?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bookingData?: any;
 }
 
