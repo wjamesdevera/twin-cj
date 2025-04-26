@@ -8,6 +8,7 @@ import { Loading } from "@/app/components/loading";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { getBooking } from "@/app/lib/api";
+import { options } from "@/app/api";
 
 interface Booking {
   referenceNo: string;
@@ -40,7 +41,7 @@ export default function Page() {
     const fetchBookings = async () => {
       try {
         const response = await axios.get<BookingResponse>(
-          "http://localhost:8080/api/bookings/view-bookings"
+          `${options.baseURL}/api/bookings/view-bookings`
         );
         setResponseData(response.data);
       } catch (error) {
