@@ -1,7 +1,6 @@
 import React from "react";
 import styles from "./selectPayment.module.scss";
 import { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
-import { Button } from "@mui/material";
 
 interface SelectPaymentProps {
   className?: string;
