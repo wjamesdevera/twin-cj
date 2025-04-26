@@ -1,10 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import useSWR from "swr";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import { z } from "zod";
@@ -94,8 +92,10 @@ export default function EditBooking({
     defaultValues: {},
   });
 
-  const { trigger } = useSWRMutation("edit", (key, { arg }: { arg: EditBookingData }) =>
-    editBookingStatus(referenceNo, arg)
+  const { trigger } = useSWRMutation(
+    "edit",
+    (key, { arg }: { arg: EditBookingData }) =>
+      editBookingStatus(referenceNo, arg)
   );
 
   const onSubmit = async (formData: EditBookingData) => {
