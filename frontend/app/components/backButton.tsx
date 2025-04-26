@@ -9,7 +9,7 @@ interface BackButtonProps {
   className?: string;
 }
 
-export default function backButton({ className }: BackButtonProps) {
+export default function BackButton({ className }: BackButtonProps) {
   const router = useRouter();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
