@@ -24,6 +24,7 @@ import {
   getAllBooking,
   editBookingDates,
   sendOtp,
+  getUnavailableDates,
 } from "../services/booking.service";
 import { validateOTP } from "../utils/otpGenerator";
 
@@ -215,6 +216,22 @@ export const getBookingStatusHandler = catchErrors(
     const bookingStatus = await getBookingStatus(referenceCode);
 
     return res.status(OK).json(bookingStatus);
+  }
+);
+
+export const getUnavailableDatesHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    const { referenceCode } = req.params;
+
+    if (!referenceCode || typeof referenceCode !== "string") {
+      return res
+        .status(400)
+        .json({ message: "Missing or invalid reference code" });
+    }
+
+    const unavailableDates = await getUnavailableDates(referenceCode);
+
+    res.status(OK).json({ unavailableDates });
   }
 );
 

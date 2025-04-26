@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./BookingStatusDetails.module.scss";
 import { options } from "../api";
 import NotificationModal from "./notification_modal";
@@ -311,9 +311,37 @@ const BookingStatusDetails = ({
 
       const [isNotificationOpen, setIsNotificationOpen] = useState(false);
       const [notificationMessage, setNotificationMessage] = useState("");
+      const [unavailableDates, setUnavailableDates] = useState<string[]>([]);
       const [notificationType, setNotificationType] = useState<
         "success" | "error"
       >("success");
+
+      useEffect(() => {
+        const fetchUnavailableDates = async () => {
+          try {
+            const response = await fetch(
+              `${options.baseURL}/api/bookings/unavailable-dates/${referenceCode}`,
+              {
+                method: "GET",
+              }
+            );
+            const result = await response.json();
+
+            if (response.ok) {
+              const formattedDates = Array.isArray(result.unavailableDates)
+                ? result.unavailableDates
+                : [];
+              setUnavailableDates(formattedDates);
+            } else {
+              console.error("Failed to fetch unavailable dates:", result);
+            }
+          } catch (error) {
+            console.error("Error fetching unavailable dates:", error);
+          }
+        };
+
+        fetchUnavailableDates();
+      }, [options.baseURL, referenceCode]);
 
       const handleCheckInChange = (date: Date | null) => {
         if (!date) return;
@@ -486,6 +514,15 @@ const BookingStatusDetails = ({
                     }
                     dateFormat="yyyy-MM-dd"
                     placeholderText="mm/dd/yyyy"
+                    excludeDates={
+                      unavailableDates && unavailableDates.length > 0
+                        ? unavailableDates.map((date) => {
+                            const dateOnly = date.split("T")[0];
+                            const parsedDate = new Date(dateOnly);
+                            return parsedDate;
+                          })
+                        : []
+                    }
                   />
                 </div>
                 <div>

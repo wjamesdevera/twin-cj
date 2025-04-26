@@ -960,6 +960,72 @@ export const editBookingDates = async (
   }
 };
 
+export const getUnavailableDates = async (referenceCode: string) => {
+  appAssert(referenceCode, BAD_REQUEST, "Reference code is required");
+
+  const booking = await prisma.booking.findFirst({
+    where: { referenceCode },
+    select: {
+      id: true,
+      services: {
+        select: {
+          serviceId: true,
+        },
+      },
+    },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not found");
+
+  const serviceIds = booking.services
+    ? booking.services.map((s) => s.serviceId)
+    : [];
+
+  if (serviceIds.length === 0) {
+    console.log("No services found for this booking.");
+    return [];
+  }
+
+  const conflicts = await prisma.bookingService.findMany({
+    where: {
+      serviceId: { in: serviceIds },
+      booking: {
+        id: { not: booking.id },
+        bookingStatus: {
+          name: { notIn: ["Cancelled", "Rescheduled"] },
+        },
+      },
+    },
+    select: {
+      booking: {
+        select: {
+          checkIn: true,
+          checkOut: true,
+        },
+      },
+    },
+  });
+
+  const conflictDates: string[] = [];
+  for (const conflict of conflicts) {
+    if (
+      conflict.booking &&
+      conflict.booking.checkIn &&
+      conflict.booking.checkOut
+    ) {
+      let currentDate = new Date(conflict.booking.checkIn);
+      while (currentDate <= conflict.booking.checkOut) {
+        conflictDates.push(currentDate.toISOString());
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+  }
+
+  console.log("Conflict booked service:" + conflictDates);
+
+  return conflictDates;
+};
+
 export const getBookingStatuses = async (referenceCode: string) => {
   const response = await prisma.booking.findUnique({
     where: { referenceCode },

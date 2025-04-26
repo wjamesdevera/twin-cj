@@ -16,6 +16,7 @@ import {
   updateBookingStatusHandler,
   sendOtpHandler,
   verifyOtpHandler,
+  getUnavailableDatesHandler,
 } from "../controllers/booking.controller";
 
 const router = Router();
@@ -26,6 +27,7 @@ router.get("/check-availability", checkAvailabilityHandler);
 router.get("/latest-bookings", getLatestBookingsHandler);
 router.get("/monthly", getMonthlyBookingsHandler);
 router.get("/yearly", getYearlyBookingsHandler);
+router.get("/unavailable-dates/:referenceCode", getUnavailableDatesHandler);
 
 // Admin Side
 router.get("/view-bookings", viewBookingsHandler);
