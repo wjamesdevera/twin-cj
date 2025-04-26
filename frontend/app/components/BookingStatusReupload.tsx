@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./BookingStatusReupload.module.scss";
+import { options } from "../api";
 
 interface Props {
   referenceCode: string;
@@ -36,7 +37,7 @@ const BookingStatusReupload: React.FC<Props> = ({ referenceCode, onReuploadSucce
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/bookings/status/${referenceCode}`, {
+      const response = await fetch(`${options.baseURL}/api/bookings/status/${referenceCode}`, {
         method: "PUT",
         body: formData,
       });
