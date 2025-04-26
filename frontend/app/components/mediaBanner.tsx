@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./mediaBanner.module.scss";
+import Image from "next/image";
 
 interface MediaBannerProps {
   mediaSrc: string;
@@ -20,7 +21,11 @@ const MediaBanner: React.FC<MediaBannerProps> = ({
           {altText}
         </video>
       ) : (
-        <img src={mediaSrc} alt={altText || "Media"} className={styles.media} />
+        <Image
+          src={mediaSrc}
+          alt={altText || "Media"}
+          className={styles.media}
+        />
       )}
     </div>
   );
