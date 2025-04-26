@@ -268,7 +268,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
       // Handle response
       if (response.ok) {
-        setUnavailableServices([]);
         setNotificationMessage("Schedule has been updated.");
         setNotificationType("success");
         setIsNotificationOpen(true);
@@ -276,7 +275,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
         window.location.reload();
       } else {
         if (result.unavailableServices) {
-          setUnavailableServices(result.unavailableServices);
           alert(
             `The following services are unavailable for the selected dates: ${result.unavailableServices
               .map((s: Service) => s.name)
@@ -387,7 +385,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [unavailableServices, setUnavailableServices] = useState<Service[]>([]);
 
   const openImageModal = (imageUrl: string) => {
     setModalImageUrl(imageUrl);
@@ -698,7 +695,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                     booking.bookingStatus.toLowerCase() ===
                                     "completed"
                                   }
-                                  dayClassName={(date) =>
+                                  dayClassName={() =>
                                     booking.bookingStatus.toLowerCase() ===
                                     "completed"
                                       ? ""
@@ -745,7 +742,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                     booking.bookingStatus.toLowerCase() ===
                                     "completed"
                                   }
-                                  dayClassName={(date) =>
+                                  dayClassName={() =>
                                     booking.bookingStatus.toLowerCase() ===
                                     "completed"
                                       ? ""
