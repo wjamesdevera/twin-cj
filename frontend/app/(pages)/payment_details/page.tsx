@@ -124,7 +124,7 @@ export default function PaymentDetails() {
           draggable: true,
         }).then(() => {
           sessionStorage.removeItem("bookingData");
-          window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
+          window.location.href = `/booking-status?referenceCode=${referenceCode}`;
         });
       } catch (error) {
         console.error("Error confirming booking:", error);
