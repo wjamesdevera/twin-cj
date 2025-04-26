@@ -108,6 +108,13 @@
   }
 }
 
+input:read-only {
+  background-color: lightgray !important;
+  border: 1px solid #bdbcbc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .errorText {
   color: red;
   font-style: italic;

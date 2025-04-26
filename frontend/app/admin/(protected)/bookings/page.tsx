@@ -39,7 +39,7 @@ export default function Page() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await axios.get(
+        const response = await axios.get<BookingResponse>(
           "http://localhost:8080/api/bookings/view-bookings"
         );
         setResponseData(response.data);
@@ -51,24 +51,13 @@ export default function Page() {
     };
 
     fetchBookings();
-  }, []);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const formatAmount = (amount: number) => {
-    return amount.toFixed(2);
-  };
+  }, [bookingData]);
 
   if (loading) {
     return <Loading />;
   }
+
+  console.log("Booking Data:", bookingData?.data);
 
   return isLoading ? (
     <Loading />

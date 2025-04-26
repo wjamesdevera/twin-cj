@@ -240,6 +240,7 @@ type ITransaction = {
 };
 
 type IBookingResponse = {
+  message: string | undefined;
   id: number;
   referenceCode: string;
   checkIn: string;
@@ -258,7 +259,8 @@ type IBookingResponse = {
 };
 
 export const getBookingStatuses = async (referenceCode: string) =>
-  API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
+  await API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
+// return response;
 
 export const getFeedbacks = async () =>
   API.get("/api/feedbacks/?limit=3&approved=True");

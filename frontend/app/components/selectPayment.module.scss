@@ -85,6 +85,14 @@
   padding-right: 5px;
 }
 
+.file {
+  margin: 8px 0 1px 8px;
+}
+
+.labelFile {
+  margin: 13px 0 0 12px;
+}
+
 .uploadSubtext {
   font-size: var(--text-size-xs);
   line-height: 1.5;
@@ -92,7 +100,15 @@
   font-family: "Open Sans";
   font-weight: 300;
   font-style: italic;
-  margin-left: 8px;
+  margin: 10px 0 0 12px;
+}
+
+.error {
+  color: red;
+  font-size: 13px;
+  margin-top: 5px;
+  display: block;
+  padding-left: 10px;
 }
 
 @media screen and (max-width: 1550px) {

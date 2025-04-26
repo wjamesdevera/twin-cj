@@ -14,6 +14,7 @@ import { paymentSchema } from "../../lib/zodSchemas";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Swal from "sweetalert2";
+import ConfirmModal from "@/app/components/confirm_modal";
 
 type PaymentFormData = z.infer<typeof paymentSchema>;
 
@@ -31,13 +32,17 @@ export default function PaymentDetails() {
   const [isMobileScreen, setIsMobileScreen] = useState(false);
   const [isTabletScreen, setIsTabletScreen] = useState(false);
 
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState<() => void>(
+    () => () => {}
+  );
+
   const storedBookingData = sessionStorage.getItem("bookingData");
   const bookingData = storedBookingData ? JSON.parse(storedBookingData) : {};
 
   if (!storedBookingData) {
     console.error("No booking data found in session storage.");
-  } else {
-    const parsedData = JSON.parse(storedBookingData);
   }
 
   const {
@@ -71,56 +76,63 @@ export default function PaymentDetails() {
   );
 
   const onSubmit = async (data: PaymentFormData) => {
-    try {
-      if (!bookingData) {
-        Swal.fire({
-          title: "No Booking Data",
-          text: "No booking data found. Please try again.",
-          icon: "error",
-          confirmButtonText: "OK",
+    setConfirmMessage(
+      "Are you sure you want to confirm your booking? Please ensure that all details are correct before proceeding."
+    );
+    setConfirmAction(() => async () => {
+      try {
+        if (!bookingData) {
+          Swal.fire({
+            title: "No Booking Data",
+            text: "No booking data found. Please try again.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+
+        if (!data.proofOfPayment) {
+          Swal.fire({
+            title: "Missing Proof of Payment",
+            text: "Please upload your proof of payment to proceed.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          });
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("bookingData", JSON.stringify(bookingData));
+        formData.append("paymentMethod", data.paymentMethod);
+        formData.append("contactNumber", bookingData.contactNumber || "");
+        formData.append("file", data.proofOfPayment);
+
+        const response = await fetch(`${options.baseURL}/api/bookings`, {
+          method: "POST",
+          body: formData,
         });
-        return;
-      }
 
-      if (!data.proofOfPayment) {
+        if (!response.ok) throw new Error("Failed to confirm booking");
+
+        const responseData = await response.json();
+        const referenceCode = responseData.result.referenceCode;
+
+        //NOTE: subject to change
         Swal.fire({
-          title: "Missing Proof of Payment",
-          text: "Please upload your proof of payment to proceed.",
-          icon: "warning",
-          confirmButtonText: "OK",
+          title: "Booking Successful!",
+          icon: "success",
+          draggable: true,
+        }).then(() => {
+          sessionStorage.removeItem("bookingData");
+          window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
         });
-        return;
+      } catch (error) {
+        console.error("Error confirming booking:", error);
+        alert("Failed to confirm booking. Please try again.");
       }
+    });
 
-      const formData = new FormData();
-      formData.append("bookingData", JSON.stringify(bookingData));
-      formData.append("paymentMethod", data.paymentMethod);
-      formData.append("contactNumber", bookingData.contactNumber || "");
-      formData.append("file", data.proofOfPayment);
-
-      const response = await fetch(`${options.baseURL}/api/bookings`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Failed to confirm booking");
-
-      const responseData = await response.json();
-      const referenceCode = responseData.result.referenceCode;
-
-      //NOTE: subject to change
-      Swal.fire({
-        title: "Booking Successful!",
-        icon: "success",
-        draggable: true,
-      }).then(() => {
-        sessionStorage.removeItem("bookingData");
-        window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
-      });
-    } catch (error) {
-      console.error("Error confirming booking:", error);
-      alert("Failed to confirm booking. Please try again.");
-    }
+    setIsConfirmModalOpen(true);
   };
 
   return (
@@ -178,12 +190,6 @@ export default function PaymentDetails() {
                       <span>09175599237</span>
                     </div>
                   </li>
-                  <li>
-                    <div className={styles.paymentMethod}>
-                      <strong>Bank Transfer:</strong>
-                      <span>XXXX-XXXX-XXXX-XXXX</span>
-                    </div>
-                  </li>
                 </ul>
                 <p className={styles.note}></p>
               </div>
@@ -226,6 +232,17 @@ export default function PaymentDetails() {
           onClick={handleSubmit(onSubmit)}
         />
       </form>
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={() => {
+          confirmAction();
+          setIsConfirmModalOpen(false);
+        }}
+        title={confirmMessage}
+        confirmText="Yes"
+        cancelText="No"
+      />
     </div>
   );
 }

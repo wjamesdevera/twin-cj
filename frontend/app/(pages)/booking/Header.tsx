@@ -228,7 +228,9 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 
         <div className={styles["booking-form"]}>
           <div className={styles["form-field-group"]}>
-            <label className={styles["form-label"]}>Check in</label>
+            <label className={styles["form-label"]}>
+              Check in <span className={styles.required}>*</span>
+            </label>
             <DatePicker
               selected={checkInDate}
               onChange={(date: Date | null) => setCheckInDate(date)}
@@ -240,7 +242,9 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
           </div>
 
           <div className={styles["form-field-group"]}>
-            <label className={styles["form-label"]}>Check out</label>
+            <label className={styles["form-label"]}>
+              Check out <span className={styles.required}>*</span>
+            </label>
             <DatePicker
               selected={checkOutDate}
               onChange={(date: Date | null) => setCheckOutDate(date)}
@@ -252,7 +256,9 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
           </div>
 
           <div className={styles["form-field-group"]}>
-            <label className={styles["form-label"]}>No. of Guests</label>
+            <label className={styles["form-label"]}>
+              No. of Guests <span className={styles.required}>*</span>
+            </label>
             <GuestsDropdown
               guestCounts={guestCounts}
               onApply={handleApplyGuests}

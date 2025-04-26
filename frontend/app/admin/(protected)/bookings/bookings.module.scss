@@ -9,5 +9,7 @@
 }
 
 .floatingIcon:hover {
-  transform: scale(1.1);
+  height: 80px;
+  width: 70px;
+  transition: transform 0.2s ease-in-out;
 }

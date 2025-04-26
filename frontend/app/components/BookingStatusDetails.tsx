@@ -3,7 +3,8 @@ import styles from "./BookingStatusDetails.module.scss";
 import { options } from "../api";
 import NotificationModal from "./notification_modal";
 import { mutate } from "swr";
-import { format } from "path";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
 
 interface Service {
   id: string;
@@ -21,11 +22,7 @@ interface BookingStatusDetailsProps {
   checkOut?: string;
   notes?: string | null;
   message?: string;
-  bookingData?: {
-    services?: {
-      id: string;
-    }[];
-  };
+  bookingData?: any;
 }
 
 const BookingStatusDetails = ({
@@ -39,9 +36,19 @@ const BookingStatusDetails = ({
   message,
   bookingData,
 }: BookingStatusDetailsProps) => {
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string, type?: "checkIn" | "checkOut") => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("en-US", {
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
+    if (type === "checkIn") date.setHours(16, 0);
+    if (type === "checkOut") date.setHours(12, 0);
+
+    return date.toLocaleString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
@@ -88,11 +95,11 @@ const BookingStatusDetails = ({
           </p>
           <p>
             <b>Check-In: </b>
-            <span>{formatDate(checkIn)}</span>
+            <span>{formatDate(checkIn, "checkIn")}</span>
           </p>
           <p>
             <b>Check-Out: </b>
-            <span>{formatDate(checkOut)}</span>
+            <span>{formatDate(checkOut, "checkOut")}</span>
           </p>
         </div>
         <div
@@ -185,11 +192,11 @@ const BookingStatusDetails = ({
                 </p>
                 <p>
                   <b>Check-In: </b>
-                  <span>{formatDate(checkIn)}</span>
+                  <span>{formatDate(checkIn, "checkIn")}</span>
                 </p>
                 <p>
                   <b>Check-Out: </b>
-                  <span>{formatDate(checkOut)}</span>
+                  <span>{formatDate(checkOut, "checkOut")}</span>
                 </p>
               </div>
               <div
@@ -293,6 +300,10 @@ const BookingStatusDetails = ({
     case "rescheduled":
       const [newCheckIn, setNewCheckIn] = useState(checkIn || "");
       const [newCheckOut, setNewCheckOut] = useState(checkOut || "");
+      const [editedDates, setEditedDates] = useState<{
+        checkIn: string;
+        checkOut: string;
+      }>({ checkIn: "", checkOut: "" });
       const [isDateChanged, setIsDateChanged] = useState(false);
       const [unavailableServices, setUnavailableServices] = useState<
         { id: string; name: string }[]
@@ -304,32 +315,52 @@ const BookingStatusDetails = ({
         "success" | "error"
       >("success");
 
-      const serviceId = bookingData?.services?.[0]?.id || null;
+      const handleCheckInChange = (date: Date | null) => {
+        if (!date) return;
 
-      const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newDate = e.target.value;
+        const newDate = date.toISOString().split("T")[0];
         setNewCheckIn(newDate);
+        setEditedDates((prev) => ({
+          ...prev,
+          checkIn: newDate,
+        }));
+
         setIsDateChanged(newDate !== checkIn || newCheckOut !== checkOut);
       };
 
-      const handleCheckOutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newDate = e.target.value;
+      const handleCheckOutChange = (date: Date | null) => {
+        if (!date) return;
+
+        const newDate = date.toISOString().split("T")[0];
         setNewCheckOut(newDate);
+        setEditedDates((prev) => ({
+          ...prev,
+          checkOut: newDate,
+        }));
         setIsDateChanged(newCheckIn !== checkIn || newDate !== checkOut);
       };
 
       const calculateDuration = (checkIn: string, checkOut: string) => {
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
+
         const duration = Math.ceil(
           (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 3600 * 24)
         );
         return duration;
       };
 
-      const originalDuration = calculateDuration(newCheckIn, newCheckOut);
+      const originalDuration = calculateDuration(checkIn || "", checkOut || "");
+
+      const getMaxCheckOut = () => {
+        const baseDate = editedDates.checkIn || checkIn;
+        if (!baseDate) return "";
+        return addDays(editedDates.checkIn, originalDuration);
+      };
 
       const handleSubmit = async () => {
+        const { checkIn: newCheckIn, checkOut: newCheckOut } = editedDates;
+
         const newDuration = calculateDuration(newCheckIn, newCheckOut);
 
         if (originalDuration !== newDuration) {
@@ -365,6 +396,8 @@ const BookingStatusDetails = ({
             setNotificationType("success");
             setIsNotificationOpen(true);
             mutate("");
+
+            window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
           } else {
             if (result.message) {
               setNotificationMessage(result.message);
@@ -383,14 +416,12 @@ const BookingStatusDetails = ({
       };
 
       const addDays = (dateStr: string, days: number) => {
+        if (!dateStr) return "";
         const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return "";
         date.setDate(date.getDate() + days);
-        return date.toISOString().split("T")[0];
+        return date;
       };
-
-      console.log(newCheckIn); // Check the input value
-      console.log("og", originalDuration); // Check the duration
-      console.log(addDays(newCheckIn, originalDuration));
 
       return (
         <section className={`${styles["booking-status-details-section"]}`}>
@@ -438,38 +469,48 @@ const BookingStatusDetails = ({
                   <b>No. of Guests: </b>
                   <span>{totalPax || 0}</span>
                 </p>
+                <p>
+                  <b>Select your preferred Dates: </b>
+                </p>
                 <div>
                   <label htmlFor="newCheckIn">
-                    <b>Select New Check-In Date:</b>&nbsp;
+                    <b>Check-In Date:</b>&nbsp;
                   </label>
-                  <input
-                    type="date"
-                    id="newCheckIn"
-                    name="newCheckIn"
-                    className={styles["date-picker"]}
-                    value={newCheckIn}
-                    min={new Date(checkOut || "").toISOString().split("T")[0]}
+                  <DatePicker
+                    selected={newCheckIn ? new Date(newCheckIn) : null}
                     onChange={handleCheckInChange}
+                    minDate={
+                      checkOut
+                        ? new Date(addDays(new Date(checkOut).toISOString(), 1))
+                        : new Date()
+                    }
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="mm/dd/yyyy"
                   />
                 </div>
                 <div>
                   <label htmlFor="newCheckOut">
-                    <b>Select New Check-Out Date:</b>&nbsp;
+                    <b>Check-Out Date:</b>&nbsp;
                   </label>
-                  <input
-                    type="date"
-                    id="newCheckOut"
-                    name="newCheckOut"
-                    className={styles["date-picker"]}
-                    value={newCheckOut}
-                    min={new Date(checkOut || "").toISOString().split("T")[0]}
-                    // max={
-                    //   newCheckIn ? addDays(newCheckIn, originalDuration) : ""
-                    // }
+                  <DatePicker
+                    selected={newCheckOut ? new Date(newCheckOut) : null}
                     onChange={handleCheckOutChange}
+                    minDate={
+                      editedDates.checkIn
+                        ? new Date(editedDates.checkIn)
+                        : undefined
+                    }
+                    maxDate={getMaxCheckOut() || undefined}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="mm/dd/yyyy"
                   />
                 </div>
-                <button className={styles["btn-reschedule"]} onClick={handleSubmit}>Reschedule</button>
+                <button
+                  className={styles["btn-reschedule"]}
+                  onClick={handleSubmit}
+                >
+                  Reschedule
+                </button>
               </div>
               <div
                 className={`${styles["booking-status-details-container-divider"]}`}
@@ -523,14 +564,3 @@ const BookingStatusDetails = ({
 };
 
 export default BookingStatusDetails;
-function setNotificationMessage(arg0: string) {
-  throw new Error("Function not implemented.");
-}
-
-function setNotificationType(arg0: string) {
-  throw new Error("Function not implemented.");
-}
-
-function setIsNotificationOpen(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}

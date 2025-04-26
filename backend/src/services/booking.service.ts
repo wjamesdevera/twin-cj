@@ -376,6 +376,12 @@ export const getLatestBookings = async () => {
       },
     });
 
+    const allBookings = await prisma.booking.findMany({
+      include: {
+        bookingStatus: true,
+      },
+    });
+
     const bookings = latestBookings.map((booking) => ({
       referenceNo: booking.referenceCode,
       checkIn: booking.checkIn.toISOString(),
@@ -389,11 +395,11 @@ export const getLatestBookings = async () => {
       status: booking.bookingStatus.name,
     }));
 
-    const pendingReservations = latestBookings.filter(
+    const pendingReservations = allBookings.filter(
       (b) => b.bookingStatus.name === "Pending"
     ).length;
-    const activeReservations = latestBookings.filter(
-      (b) => b.bookingStatus.name === "Active"
+    const activeReservations = allBookings.filter(
+      (b) => b.bookingStatus.name === "Completed"
     ).length;
 
     return {
@@ -615,8 +621,6 @@ export const createWalkInBooking = async (req: Request, res: Response) => {
     // Create Payment Account
     const paymentAccount = await prisma.paymentAccount.create({
       data: {
-        accountName: paymentAccountName,
-        accountNumber: paymentAccountNumber,
         paymentMethodId: paymentMethodRecord.id,
       },
     });

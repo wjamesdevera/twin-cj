@@ -17,7 +17,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const options = [
-  "Feedback",
   "General Inquiry",
   "Reservations",
   "Activities",
