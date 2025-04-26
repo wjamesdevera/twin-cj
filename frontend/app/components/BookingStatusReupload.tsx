@@ -8,7 +8,10 @@ interface Props {
   onReuploadSuccess: () => void;
 }
 
-const BookingStatusReupload: React.FC<Props> = ({ referenceCode, onReuploadSuccess }) => {
+const BookingStatusReupload: React.FC<Props> = ({
+  referenceCode,
+  onReuploadSuccess,
+}) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,7 +28,9 @@ const BookingStatusReupload: React.FC<Props> = ({ referenceCode, onReuploadSucce
   };
 
   const handleUpload = async () => {
-    if (!window.confirm("Are you sure you want to upload this new payment proof?")) {
+    if (
+      !window.confirm("Are you sure you want to upload this new payment proof?")
+    ) {
       return;
     }
 
@@ -36,31 +41,40 @@ const BookingStatusReupload: React.FC<Props> = ({ referenceCode, onReuploadSucce
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/bookings/status/${referenceCode}`, {
-        method: "PUT",
-        body: formData,
-      });
-      
+      await fetch(
+        `http://localhost:8080/api/bookings/status/${referenceCode}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+
       alert("Payment proof reuploaded successfully!");
       setSelectedFile(null);
 
       onReuploadSuccess();
     } catch (error) {
       console.error("Error during file upload:", error);
-    } finally {
-      
     }
   };
 
   return (
     <section className={`${styles["booking-status-reupload-section"]}`}>
       <div className={`${styles["booking-status-reupload-container"]}`}>
-        <div className={`${styles["booking-status-reupload-container-heading"]}`}>
+        <div
+          className={`${styles["booking-status-reupload-container-heading"]}`}
+        >
           <h3>Re-Upload Payment Screenshot</h3>
-          <h4>Please note that your reservation is not secured until the payment is verified.</h4>
+          <h4>
+            Please note that your reservation is not secured until the payment
+            is verified.
+          </h4>
         </div>
         <div className={`${styles["booking-status-reupload-container-sub"]}`}>
-          <label className={`${styles["booking-status-reupload-label"]}`} htmlFor="reupload-input">
+          <label
+            className={`${styles["booking-status-reupload-label"]}`}
+            htmlFor="reupload-input"
+          >
             <i className="fas fa-arrow-up-from-bracket"></i>&nbsp;&nbsp;Upload
           </label>
           <input
