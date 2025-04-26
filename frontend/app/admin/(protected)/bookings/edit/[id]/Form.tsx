@@ -103,7 +103,7 @@ export default function EditBooking({
   };
 
   const handleCancel = () => {
-    router.push("http://localhost:3000/admin/bookings");
+    router.push("/admin/bookings");
   };
 
   console.log(defaultValues.services.map((service) => service.service.name));
