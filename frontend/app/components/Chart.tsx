@@ -32,6 +32,7 @@ const options = {
 };
 
 const BookingsChart: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [chartData, setChartData] = useState<any>(null);
   const [filter, setFilter] = useState("monthly");
 
