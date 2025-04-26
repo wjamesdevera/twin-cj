@@ -29,7 +29,12 @@ const PricingContainer: React.FC<PricingContainerProps> = ({
     <div className={`${styles.pricingContainer} ${className}`} style={style}>
       <div className={styles.banner}>
         <div className={styles.pricingImg}>
-          <Image src={imageSrc ? imageSrc : ""} alt="image" />
+          <Image
+            src={imageSrc ? imageSrc : ""}
+            alt="image"
+            width={500}
+            height={500}
+          />
         </div>
 
         <div className={styles.pricingHeader}>
