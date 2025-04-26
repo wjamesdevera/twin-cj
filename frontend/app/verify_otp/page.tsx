@@ -204,7 +204,7 @@ const VerifyOtp: React.FC = () => {
       <div className={styles.card}>
         <h2 className={styles.title}>Verify Your Email</h2>
         <p className={styles.subtitle}>
-          We've sent a 6-digit code to{" "}
+          We&apos;ve sent a 6-digit code to{" "}
           <span className={styles.email}>{email}</span>
         </p>
 
@@ -249,7 +249,7 @@ const VerifyOtp: React.FC = () => {
           {/* RESEND OTP SECTION */}
 
           <p className={styles.resendText}>
-            Didn't receive your code?{" "}
+            Didn&apos;t receive your code?{" "}
             <a
               href="#"
               className={`${styles.resendLink} ${
