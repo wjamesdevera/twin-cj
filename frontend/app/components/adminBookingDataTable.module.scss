@@ -7,9 +7,12 @@
 
 .tableContainer {
   width: 100%;
-  padding: 20px 40px;
+  padding: 20px 40px 100px 40px;
   margin: 0 auto;
   position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .table_wrapper {
@@ -463,6 +466,14 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
+}
+
+.noBookingsMessage {
+  text-align: center;
+  color: #b8b8b8;
+  font-weight: bold;
+  font-size: 1.25rem;
+  padding: 2rem 0;
 }
 
 @media (max-width: 1352px) {

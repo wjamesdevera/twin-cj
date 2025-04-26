@@ -1,4 +1,5 @@
 "use client";
+
 import { getFeedbacksAdmin, updateFeedbackStatus } from "@/app/lib/api";
 import React, { useState } from "react";
 import useSWR from "swr";
@@ -6,8 +7,20 @@ import s from "@/app/table.module.scss";
 import ts from "./feedback-table.module.scss";
 import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
-import { Box, Modal, Typography } from "@mui/material";
-import { TbBorderRadius } from "react-icons/tb";
+import { Box, Modal } from "@mui/material";
+
+const ITEMS_PER_PAGE = 10;
+
+interface Feedback {
+  id: string;
+  name: string;
+  text: string;
+  createdAt: string;
+  updatedAt: string;
+  status: {
+    id: string;
+  };
+}
 
 const formatDate = (isoString?: string) => {
   if (!isoString) return "N/A";
@@ -37,10 +50,13 @@ const FeedbackStatusDropdown: React.FC<{
     boxShadow: 24,
     p: 4,
   };
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusId, setStatusId] = useState(defaultValue);
+
   const handleOpen = () => setIsModalOpen(true);
   const handleClose = () => setIsModalOpen(false);
+
   const { trigger, isMutating } = useSWRMutation(
     id,
     (key: string, { arg }: { arg: { statusId: string } }) =>
@@ -51,7 +67,8 @@ const FeedbackStatusDropdown: React.FC<{
       },
     }
   );
-  const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusId(e.target.value);
     handleOpen();
   };
@@ -60,20 +77,18 @@ const FeedbackStatusDropdown: React.FC<{
     await trigger({ statusId });
   };
 
-  const onCancel = async () => {
+  const onCancel = () => {
     setStatusId(defaultValue);
     handleClose();
   };
 
   return (
-    <select
-      className={ts.select}
-      value={statusId}
-      defaultValue={defaultValue}
-      onChange={handleChange}
-    >
-      <option value="1">For Review</option>
-      <option value="2">Approved</option>
+    <>
+      <select className={ts.select} value={statusId} onChange={handleChange}>
+        <option value="1">For Review</option>
+        <option value="2">Approved</option>
+      </select>
+
       <Modal
         open={isModalOpen}
         onClose={handleClose}
@@ -96,17 +111,28 @@ const FeedbackStatusDropdown: React.FC<{
           </div>
         </Box>
       </Modal>
-    </select>
+    </>
   );
 };
 
 const FeedbackTable = () => {
   const { data, isLoading } = useSWR("feedback", getFeedbacksAdmin);
+  const { feedbacks = [] }: { feedbacks: Feedback[] } = data?.data || {};
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(feedbacks.length / ITEMS_PER_PAGE);
+
+  const paginatedFeedbacks = feedbacks.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   const headers = ["Author", "Feedback", "Created At", "Updated At", "Status"];
-  const { feedbacks } = data?.data || [];
-  return isLoading ? (
-    <Loading />
-  ) : (
+
+  if (isLoading) return <Loading />;
+
+  return (
     <div className={s.table_container}>
       <div className={s.table_wrapper}>
         <table className={s.table}>
@@ -118,7 +144,7 @@ const FeedbackTable = () => {
             </tr>
           </thead>
           <tbody>
-            {feedbacks.map((feedback) => (
+            {paginatedFeedbacks.map((feedback: Feedback) => (
               <tr key={feedback.id}>
                 <td>{feedback.name}</td>
                 <td>{feedback.text}</td>
@@ -135,6 +161,29 @@ const FeedbackTable = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {feedbacks.length > 0 && (
+        <div className={s.pagination}>
+          <button
+            className={s.page_button}
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            Previous
+          </button>
+          <span className={s.page_info}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className={s.page_button}
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

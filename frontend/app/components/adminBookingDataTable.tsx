@@ -82,17 +82,14 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     endDateFilter: "",
   });
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<BookingResponse | null>(
     null
   );
   const [newStatus, setNewStatus] = useState<string>("");
 
-  // Message state for cancellation/rescheduled booking
   const [userMessage, setUserMessage] = useState<string>("");
 
-  // Notification State
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationType, setNotificationType] = useState<"success" | "error">(
@@ -109,12 +106,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       }, {} as Record<string, string>) || {}
   );
 
-  // Handle
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserMessage(e.target.value);
   };
 
-  // Open Modal
   const openModalForStatusUpdate = (
     booking: BookingResponse,
     status: string
@@ -327,7 +322,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredBookings = bookings?.filter((booking) => {
+  const filteredBookings = (bookings || []).filter((booking) => {
     const searchLower = filters.searchTerm.toLowerCase();
 
     const matchesSearchTerm =
@@ -372,7 +367,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Handle page change
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -521,266 +515,276 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                 <option value="pending">Pending</option>
                 <option value="cancelled">Cancelled</option>
                 <option value="rescheduled">Rescheduled</option>
+                <option value="completed">Completed</option>
               </select>
             </div>
           </div>
         </div>
         <div className={styles.scrollableTableWrapper}>
-          <table ref={tableRef} className={styles.table}>
-            <thead className={styles.tableHead}>
-              <tr>
-                <th>Reference No.</th>
-                <th>Service</th>
-                <th>Proof of Payment</th>
-                <th>Check-In</th>
-                <th>Check-Out</th>
-                <th>Down Payment</th>
-                <th>Customer Name</th>
-                <th>Email</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedBookings?.map(
-                (booking: BookingResponse, index: number) => {
-                  const isExpanded = expandedRef === booking.referenceCode;
+          {filteredBookings.length === 0 ? (
+            <div className={styles.noBookingsMessage}>
+              There are currently no bookings available
+            </div>
+          ) : (
+            <table ref={tableRef} className={styles.table}>
+              <thead className={styles.tableHead}>
+                <tr>
+                  <th>Reference No.</th>
+                  <th>Service</th>
+                  <th>Proof of Payment</th>
+                  <th>Check-In</th>
+                  <th>Check-Out</th>
+                  <th>Down Payment</th>
+                  <th>Customer Name</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedBookings?.map(
+                  (booking: BookingResponse, index: number) => {
+                    const isExpanded = expandedRef === booking.referenceCode;
 
-                  return (
-                    <React.Fragment key={index}>
-                      <tr className={styles.tableRow}>
-                        <td className={styles.tableCell}>
-                          <button
-                            className={styles.referenceLink}
-                            onClick={() => {
-                              const isOpen =
-                                expandedRef === booking.referenceCode;
-                              setExpandedRef(
-                                isOpen ? null : booking.referenceCode
-                              );
-                              if (!isOpen) {
-                                setCurrentBooking(booking);
-                                setEditedDates({
-                                  checkIn: formatDate(booking.checkIn),
-                                  checkOut: formatDate(booking.checkOut),
-                                });
-                              } else {
-                                setCurrentBooking(null);
-                              }
-                            }}
-                          >
-                            {booking.referenceCode}
-                          </button>
-                        </td>
-                        <td className={styles.tableCell}>
-                          {
-                            booking.services.map(
-                              (service) => service.service.name
-                            )[0]
-                          }
-                        </td>
-                        <td className={styles.tableCell}>
-                          {booking.transaction?.proofOfPaymentImageUrl && (
-                            <img
-                              src={`http://localhost:8080/uploads/${booking.transaction.proofOfPaymentImageUrl
-                                .split(/[\\/]/)
-                                .pop()}`}
-                              alt="Proof of Payment"
-                              className={styles.thumbnailImage}
+                    return (
+                      <React.Fragment key={index}>
+                        <tr className={styles.tableRow}>
+                          <td className={styles.tableCell}>
+                            <button
+                              className={styles.referenceLink}
                               onClick={() => {
-                                const fileName =
-                                  booking.transaction.proofOfPaymentImageUrl
-                                    .split(/[\\/]/)
-                                    .pop();
-                                openImageModal(
-                                  `http://localhost:8080/uploads/${fileName}`
+                                const isOpen =
+                                  expandedRef === booking.referenceCode;
+                                setExpandedRef(
+                                  isOpen ? null : booking.referenceCode
+                                );
+                                if (!isOpen) {
+                                  setCurrentBooking(booking);
+                                  setEditedDates({
+                                    checkIn: formatDate(booking.checkIn),
+                                    checkOut: formatDate(booking.checkOut),
+                                  });
+                                } else {
+                                  setCurrentBooking(null);
+                                }
+                              }}
+                            >
+                              {booking.referenceCode}
+                            </button>
+                          </td>
+                          <td className={styles.tableCell}>
+                            {
+                              booking.services.map(
+                                (service) => service.service.name
+                              )[0]
+                            }
+                          </td>
+                          <td className={styles.tableCell}>
+                            {booking.transaction?.proofOfPaymentImageUrl && (
+                              <img
+                                src={`http://localhost:8080/uploads/${booking.transaction.proofOfPaymentImageUrl
+                                  .split(/[\\/]/)
+                                  .pop()}`}
+                                alt="Proof of Payment"
+                                className={styles.thumbnailImage}
+                                onClick={() => {
+                                  const fileName =
+                                    booking.transaction.proofOfPaymentImageUrl
+                                      .split(/[\\/]/)
+                                      .pop();
+                                  openImageModal(
+                                    `http://localhost:8080/uploads/${fileName}`
+                                  );
+                                }}
+                              />
+                            )}
+                          </td>
+                          <td className={styles.tableCell}>
+                            {formatDate(booking.checkIn)}
+                          </td>
+                          <td className={styles.tableCell}>
+                            {formatDate(booking.checkOut)}
+                          </td>
+                          <td className={styles.tableCell}>
+                            ₱
+                            {booking.transaction.amount.toLocaleString(
+                              undefined,
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }
+                            )}
+                          </td>
+                          <td className={styles.tableCell}>
+                            {`${booking.customer.firstName} ${booking.customer.lastName}`}
+                          </td>
+                          <td className={styles.tableCell}>
+                            {booking.customer.email}
+                          </td>
+                          <td
+                            className={`${styles.tableCell} ${
+                              booking.bookingStatus === "Pending"
+                                ? styles.statusPending
+                                : booking.bookingStatus === "Cancelled"
+                                ? styles.statusCancel
+                                : booking.bookingStatus === "Approved"
+                                ? styles.statusApproved
+                                : ""
+                            }`}
+                          >
+                            <span className={styles.hiddenStatus}>
+                              {booking.bookingStatus}
+                            </span>
+                            <select
+                              value={
+                                selectedStatuses[booking.referenceCode] ||
+                                booking.bookingStatus
+                              }
+                              onChange={(e) => {
+                                const selectedStatus = e.target.value;
+
+                                // Save the temporary selection in state
+                                setSelectedStatuses((prev) => ({
+                                  ...prev,
+                                  [booking.referenceCode]: selectedStatus,
+                                }));
+
+                                openModalForStatusUpdate(
+                                  booking,
+                                  selectedStatus
                                 );
                               }}
-                            />
-                          )}
-                        </td>
-                        <td className={styles.tableCell}>
-                          {formatDate(booking.checkIn)}
-                        </td>
-                        <td className={styles.tableCell}>
-                          {formatDate(booking.checkOut)}
-                        </td>
-                        <td className={styles.tableCell}>
-                          ₱
-                          {booking.transaction.amount.toLocaleString(
-                            undefined,
-                            {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            }
-                          )}
-                        </td>
-                        <td className={styles.tableCell}>
-                          {`${booking.customer.firstName} ${booking.customer.lastName}`}
-                        </td>
-                        <td className={styles.tableCell}>
-                          {booking.customer.email}
-                        </td>
-                        <td
-                          className={`${styles.tableCell} ${
-                            booking.bookingStatus === "Pending"
-                              ? styles.statusPending
-                              : booking.bookingStatus === "Cancelled"
-                              ? styles.statusCancel
-                              : booking.bookingStatus === "Approved"
-                              ? styles.statusApproved
-                              : ""
-                          }`}
-                        >
-                          <span className={styles.hiddenStatus}>
-                            {booking.bookingStatus}
-                          </span>
-                          <select
-                            value={
-                              selectedStatuses[booking.referenceCode] ||
-                              booking.bookingStatus
-                            }
-                            onChange={(e) => {
-                              const selectedStatus = e.target.value;
-
-                              // Save the temporary selection in state
-                              setSelectedStatuses((prev) => ({
-                                ...prev,
-                                [booking.referenceCode]: selectedStatus,
-                              }));
-
-                              openModalForStatusUpdate(booking, selectedStatus);
-                            }}
-                            disabled={
-                              booking.bookingStatus.toLowerCase() ===
-                              "completed"
-                            }
-                          >
-                            <option value={booking.bookingStatus} disabled>
-                              {booking.bookingStatus}
-                            </option>
-                            <option value="Approved">Approved</option>
-                            <option value="Cancelled">Cancelled</option>
-                            <option value="Rescheduled">Rescheduled</option>
-                            <option value="Completed">Completed</option>
-                          </select>
-                        </td>
-                      </tr>
-
-                      {isExpanded && (
-                        <tr className={styles.accordionRow}>
-                          <td colSpan={8} className={styles.accordionContent}>
-                            <div className={styles.dateEditor}>
-                              <label>
-                                Check-In:
-                                <DatePicker
-                                  selected={
-                                    editedDates.checkIn
-                                      ? new Date(editedDates.checkIn)
-                                      : null
-                                  }
-                                  onChange={(date: Date | null) => {
-                                    if (date) {
-                                      const formattedDate = date
-                                        .toISOString()
-                                        .split("T")[0];
-                                      setEditedDates((prev) => ({
-                                        ...prev,
-                                        checkIn: formattedDate,
-                                      }));
-                                    }
-                                  }}
-                                  minDate={
-                                    editedDates.checkOut
-                                      ? new Date(editedDates.checkOut)
-                                      : undefined
-                                  }
-                                  disabled={
-                                    booking.bookingStatus.toLowerCase() ===
-                                    "completed"
-                                  }
-                                  dayClassName={(date) =>
-                                    booking.bookingStatus.toLowerCase() ===
-                                    "completed"
-                                      ? ""
-                                      : "bold-date"
-                                  }
-                                  dateFormat="yyyy-MM-dd"
-                                />
-                              </label>
-                              <label>
-                                Check-Out:
-                                <DatePicker
-                                  selected={
-                                    editedDates.checkOut
-                                      ? new Date(editedDates.checkOut)
-                                      : undefined
-                                  }
-                                  onChange={(date: Date | null) => {
-                                    const formattedDate = date
-                                      ? date.toISOString().split("T")[0]
-                                      : ""; // Format as "YYYY-MM-DD"
-                                    setEditedDates((prev) => ({
-                                      ...prev,
-                                      checkOut: formattedDate,
-                                    }));
-                                  }}
-                                  minDate={
-                                    editedDates.checkIn
-                                      ? new Date(editedDates.checkIn)
-                                      : undefined
-                                  }
-                                  maxDate={
-                                    editedDates.checkIn
-                                      ? new Date(
-                                          addDays(
-                                            new Date(editedDates.checkIn)
-                                              .toISOString()
-                                              .split("T")[0],
-                                            originalDuration
-                                          )
-                                        )
-                                      : undefined
-                                  }
-                                  disabled={
-                                    booking.bookingStatus.toLowerCase() ===
-                                    "completed"
-                                  }
-                                  dayClassName={(date) =>
-                                    booking.bookingStatus.toLowerCase() ===
-                                    "completed"
-                                      ? ""
-                                      : "bold-date"
-                                  }
-                                  dateFormat="yyyy-MM-dd"
-                                />
-                              </label>
-                              <div className={styles.dateEditorButtons}>
-                                {booking.bookingStatus.toLowerCase() !==
-                                  "completed" && (
-                                  <CustomButton
-                                    type="button"
-                                    label="Save Changes"
-                                    onClick={handleEditDate}
-                                  />
-                                )}
-
-                                <CustomButton
-                                  type="button"
-                                  label="Cancel"
-                                  variant="danger"
-                                  onClick={() => setExpandedRef(null)}
-                                />
-                              </div>
-                            </div>
+                              disabled={
+                                booking.bookingStatus.toLowerCase() ===
+                                "completed"
+                              }
+                            >
+                              <option value={booking.bookingStatus} disabled>
+                                {booking.bookingStatus}
+                              </option>
+                              <option value="Approved">Approved</option>
+                              <option value="Cancelled">Cancelled</option>
+                              <option value="Rescheduled">Rescheduled</option>
+                              <option value="Completed">Completed</option>
+                            </select>
                           </td>
                         </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
+
+                        {isExpanded && (
+                          <tr className={styles.accordionRow}>
+                            <td colSpan={8} className={styles.accordionContent}>
+                              <div className={styles.dateEditor}>
+                                <label>
+                                  Check-In:
+                                  <DatePicker
+                                    selected={
+                                      editedDates.checkIn
+                                        ? new Date(editedDates.checkIn)
+                                        : null
+                                    }
+                                    onChange={(date: Date | null) => {
+                                      if (date) {
+                                        const formattedDate = date
+                                          .toISOString()
+                                          .split("T")[0];
+                                        setEditedDates((prev) => ({
+                                          ...prev,
+                                          checkIn: formattedDate,
+                                        }));
+                                      }
+                                    }}
+                                    minDate={
+                                      editedDates.checkOut
+                                        ? new Date(editedDates.checkOut)
+                                        : undefined
+                                    }
+                                    disabled={
+                                      booking.bookingStatus.toLowerCase() ===
+                                      "completed"
+                                    }
+                                    dayClassName={(date) =>
+                                      booking.bookingStatus.toLowerCase() ===
+                                      "completed"
+                                        ? ""
+                                        : "bold-date"
+                                    }
+                                    dateFormat="yyyy-MM-dd"
+                                  />
+                                </label>
+                                <label>
+                                  Check-Out:
+                                  <DatePicker
+                                    selected={
+                                      editedDates.checkOut
+                                        ? new Date(editedDates.checkOut)
+                                        : undefined
+                                    }
+                                    onChange={(date: Date | null) => {
+                                      const formattedDate = date
+                                        ? date.toISOString().split("T")[0]
+                                        : "";
+                                      setEditedDates((prev) => ({
+                                        ...prev,
+                                        checkOut: formattedDate,
+                                      }));
+                                    }}
+                                    minDate={
+                                      editedDates.checkIn
+                                        ? new Date(editedDates.checkIn)
+                                        : undefined
+                                    }
+                                    maxDate={
+                                      editedDates.checkIn
+                                        ? new Date(
+                                            addDays(
+                                              new Date(editedDates.checkIn)
+                                                .toISOString()
+                                                .split("T")[0],
+                                              originalDuration
+                                            )
+                                          )
+                                        : undefined
+                                    }
+                                    disabled={
+                                      booking.bookingStatus.toLowerCase() ===
+                                      "completed"
+                                    }
+                                    dayClassName={(date) =>
+                                      booking.bookingStatus.toLowerCase() ===
+                                      "completed"
+                                        ? ""
+                                        : "bold-date"
+                                    }
+                                    dateFormat="yyyy-MM-dd"
+                                  />
+                                </label>
+                                <div className={styles.dateEditorButtons}>
+                                  {booking.bookingStatus.toLowerCase() !==
+                                    "completed" && (
+                                    <CustomButton
+                                      type="button"
+                                      label="Save Changes"
+                                      onClick={handleEditDate}
+                                    />
+                                  )}
+
+                                  <CustomButton
+                                    type="button"
+                                    label="Cancel"
+                                    variant="danger"
+                                    onClick={() => setExpandedRef(null)}
+                                  />
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  }
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
         {(filteredBookings?.length ?? 0) > 0 && (
           <div className={styles.paginationContainer}>
