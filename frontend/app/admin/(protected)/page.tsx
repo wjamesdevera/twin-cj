@@ -68,6 +68,7 @@ const Page = () => {
           activeReservations: latestBookingData.activeReservations,
         });
         setLoading(false);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         setError("An error occurred while fetching bookings");
         setLoading(false);
