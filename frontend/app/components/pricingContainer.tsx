@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./pricingContainer.module.scss";
+import Image from "next/image";
 
 interface PricingContainerProps {
   className?: string;
@@ -28,7 +29,7 @@ const PricingContainer: React.FC<PricingContainerProps> = ({
     <div className={`${styles.pricingContainer} ${className}`} style={style}>
       <div className={styles.banner}>
         <div className={styles.pricingImg}>
-          <img src={imageSrc} alt="image" />
+          <Image src={imageSrc ? imageSrc : ""} alt="image" />
         </div>
 
         <div className={styles.pricingHeader}>
