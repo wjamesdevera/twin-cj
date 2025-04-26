@@ -4,13 +4,13 @@ import { downloadExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import CustomButton from "@/app/components/custom_button";
-import Link from "next/link";
 import { options } from "../api";
 import { mutate } from "swr";
 import ConfirmModal from "@/app/components/confirm_modal";
 import NotificationModal from "@/app/components/notification_modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Image from "next/image";
 
 type ServiceCategory = {
   id: number;
@@ -580,7 +580,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                         </td>
                         <td className={styles.tableCell}>
                           {booking.transaction?.proofOfPaymentImageUrl && (
-                            <img
+                            <Image
                               src={`http://localhost:8080/uploads/${booking.transaction.proofOfPaymentImageUrl
                                 .split(/[\\/]/)
                                 .pop()}`}
@@ -818,7 +818,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
             </span>
 
             <div className={styles.imageWrapper}>
-              <img
+              <Image
                 src={modalImageUrl}
                 alt="Service"
                 className={styles.modalImage}
