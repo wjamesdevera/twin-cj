@@ -48,7 +48,12 @@ export const getBookingHandler = catchErrors(
 
     const bookings = await getAllBooking();
 
-    res.status(OK).json(bookings);
+    res.status(OK).json({
+      status: "success",
+      data: {
+        bookings,
+      },
+    });
   }
 );
 
