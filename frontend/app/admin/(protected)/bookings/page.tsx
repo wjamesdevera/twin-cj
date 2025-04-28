@@ -10,13 +10,15 @@ import { getBooking } from "@/app/lib/api";
 export default function Page() {
   const { data: bookingData, isLoading } = useSWR("key", getBooking);
 
+  const { bookings } = bookingData ? bookingData.data : { bookings: [] };
+
   return isLoading ? (
     <Loading />
   ) : (
     <div className={styles.dashboardContainer}>
       <div className={styles.dashboardContent}>
         <div className={styles.bookingTable}>
-          <BookingTable bookings={bookingData} />
+          <BookingTable bookings={bookings} />
         </div>
       </div>
     </div>

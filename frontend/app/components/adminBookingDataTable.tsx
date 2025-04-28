@@ -103,7 +103,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     Record<string, string>
   >(
     () =>
-      bookings?.reduce((acc, booking) => {
+      bookings?.reduce((acc, booking: BookingResponse) => {
         acc[booking.referenceCode] = booking.bookingStatus;
         return acc;
       }, {} as Record<string, string>) || {}
@@ -325,7 +325,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredBookings = bookings?.filter((booking) => {
+  const filteredBookings = bookings?.filter((booking: BookingResponse) => {
     const searchLower = filters.searchTerm.toLowerCase();
 
     const matchesSearchTerm =
