@@ -13,98 +13,9 @@ import { getBookingStatuses } from "../lib/api";
 import { Loading } from "../components/loading";
 import { useSearchParams } from "next/navigation";
 
-// Temporary Schema (remove upon integrating the centralized zod file)
-// type Category = {
-//   id: number;
-//   name: string;
-//   createdAt: string;
-//   updatedAt: string;
-// };
-
-// type ServiceCategory = {
-//   id: number;
-//   categoryId: number;
-//   category: Category;
-// };
-
-// type Service = {
-//   id: number;
-//   name: string;
-//   description: string;
-//   imageUrl: string;
-//   price: number;
-//   createdAt: string;
-//   updatedAt: string;
-//   serviceCategoryId: number;
-//   serviceCategory: ServiceCategory;
-// };
-
-// type Customer = {
-//   id: number;
-//   personalDetailId: string;
-//   createdAt: string;
-//   updatedAt: string;
-// };
-
-// type BookingStatuses = {
-//   id: number;
-//   name: string;
-//   createdAt: string;
-//   updatedAt: string;
-// };
-
-// type Transaction = {
-//   id: string;
-//   proofOfPaymentImageUrl: string;
-//   amount: number;
-//   createdAt: string;
-//   updatedAt: string;
-//   paymentAccountId: number;
-// };
-
-// type BookingResponse = {
-//   id: number;
-//   referenceCode: string;
-//   checkIn: string;
-//   checkOut: string;
-//   totalPax: number;
-//   notes: string | null;
-//   createdAt: string;
-//   updatedAt: string;
-//   customerId: number;
-//   bookingStatusId: number;
-//   transactionId: string;
-//   customer: Customer;
-//   bookingStatus: BookingStatuses;
-//   services: Service[];
-//   transaction: Transaction;
-// }
-
 const bookingSchema = z.object({
   referenceCode: z.string().min(1, "Reference Code is required"),
 });
-
-// interface BookingStatus {
-//   name: string;
-// }
-
-// interface BookingData {
-//   bookingStatus?: BookingStatus;
-//   referenceCode: string;
-//   services: Array<{
-//     id: number;
-//     name: string;
-//     serviceCategory: {
-//       category: {
-//         name: string;
-//       };
-//     };
-//   }>;
-//   totalPax: number;
-//   message: string;
-//   checkIn: string;
-//   checkOut: string;
-// }
 
 type CheckBookingStatus = z.infer<typeof bookingSchema>;
 
@@ -126,11 +37,18 @@ export default function Home() {
     trigger,
     data: bookingResponse,
     isMutating,
-  } = useSWRMutation("key", (key, { arg }: { arg: CheckBookingStatus }) =>
-    getBookingStatuses(arg.referenceCode)
+  } = useSWRMutation(
+    "key",
+    (key, { arg }: { arg: CheckBookingStatus }) =>
+      getBookingStatuses(arg.referenceCode),
+    {
+      onSuccess: () => {
+        console.log(bookingResponse);
+      },
+    }
   );
 
-  const bookingData = bookingResponse || bookingResponse;
+  const { bookingStatus } = bookingResponse ? bookingResponse.data : {};
 
   useEffect(() => {
     if (referenceCode) {
@@ -159,18 +77,17 @@ export default function Home() {
         errors={errors}
         fetchBookingData={fetchBookingData}
       />
-      {bookingData ? (
+      {bookingStatus ? (
         <BookingStatusDetails
-          status={bookingData.bookingStatus.name}
-          referenceCode={bookingData?.referenceCode}
-          service={bookingData?.services[0]?.name}
-          category={bookingData?.services[0]?.serviceCategory?.category.name}
-          totalPax={bookingData?.totalPax}
-          checkIn={bookingData?.checkIn}
-          checkOut={bookingData?.checkOut}
-          note={bookingData?.notes}
-          message={bookingData?.message}
-          bookingData={bookingData}
+          status={bookingStatus.bookingStatus.name}
+          referenceCode={bookingStatus?.referenceCode}
+          service={bookingStatus?.services[0]?.name}
+          category={bookingStatus?.services[0]?.serviceCategory?.category.name}
+          totalPax={bookingStatus?.totalPax}
+          checkIn={bookingStatus?.checkIn}
+          checkOut={bookingStatus?.checkOut}
+          message={bookingStatus?.message}
+          bookingData={bookingStatus}
         />
       ) : hasSubmitted ? (
         <BookingStatusDetails status="invalid" referenceCode="" />

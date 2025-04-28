@@ -190,75 +190,8 @@ export const editBookingStatus = async (
   bookingStatus: { bookingStatus: string }
 ) => API.patch(`/api/bookings/status/${referenceCode}`, bookingStatus);
 
-type ICategory = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type IServiceCategory = {
-  id: number;
-  categoryId: number;
-  category: ICategory;
-};
-
-type IService = {
-  id: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  createdAt: string;
-  updatedAt: string;
-  serviceCategoryId: number;
-  serviceCategory: IServiceCategory;
-};
-
-type ICustomer = {
-  id: number;
-  personalDetailId: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type IBookingStatus = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type ITransaction = {
-  id: string;
-  proofOfPaymentImageUrl: string;
-  amount: number;
-  createdAt: string;
-  updatedAt: string;
-  paymentAccountId: number;
-};
-
-type IBookingResponse = {
-  message: string | undefined;
-  id: number;
-  referenceCode: string;
-  checkIn: string;
-  checkOut: string;
-  totalPax: number;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-  customerId: number;
-  bookingStatusId: number;
-  transactionId: string;
-  customer: ICustomer;
-  bookingStatus: IBookingStatus;
-  services: IService[];
-  transaction: ITransaction;
-};
-
 export const getBookingStatuses = async (referenceCode: string) =>
-  await API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
+  await API.get(`/api/bookings/status/${referenceCode}`);
 // return response;
 
 export const getFeedbacks = async () =>
