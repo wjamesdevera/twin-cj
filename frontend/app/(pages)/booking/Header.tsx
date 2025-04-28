@@ -5,6 +5,7 @@ import headerImage from "@/public/assets/header.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
+import { options } from "@/app/api";
 
 type GuestType = "adults" | "children";
 type Action = "increment" | "decrement";
@@ -162,7 +163,9 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       return;
     }
 
-    const url = `http://localhost:8080/api/bookings?type=cabins&checkInDate=${checkInDate.toISOString()}&checkOutDate=${checkOutDate.toISOString()}&_=${new Date().getTime()}`;
+    const url = `${
+      options.baseURL
+    }/api/bookings?type=cabins&checkInDate=${checkInDate.toISOString()}&checkOutDate=${checkOutDate.toISOString()}&_=${new Date().getTime()}`;
 
     try {
       const response = await fetch(url, {

@@ -77,7 +77,7 @@ export default function PaymentDetails() {
 
   const onSubmit = async (data: PaymentFormData) => {
     setConfirmMessage(
-      "Are you sure you want to confirm your booking? Please ensure that all details are correct before proceeding."
+      "Are you sure you want to confirm your booking?"
     );
     setConfirmAction(() => async () => {
       try {
@@ -124,7 +124,7 @@ export default function PaymentDetails() {
           draggable: true,
         }).then(() => {
           sessionStorage.removeItem("bookingData");
-          window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
+          window.location.href = `/booking-status?referenceCode=${referenceCode}`;
         });
       } catch (error) {
         console.error("Error confirming booking:", error);

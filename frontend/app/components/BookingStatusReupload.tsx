@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./BookingStatusReupload.module.scss";
+import { options } from "../api";
 
 interface Props {
   referenceCode: string;
@@ -41,13 +42,10 @@ const BookingStatusReupload: React.FC<Props> = ({
     formData.append("file", selectedFile);
 
     try {
-      await fetch(
-        `http://localhost:8080/api/bookings/status/${referenceCode}`,
-        {
-          method: "PUT",
-          body: formData,
-        }
-      );
+      await fetch(`${options.baseURL}/api/bookings/status/${referenceCode}`, {
+        method: "PUT",
+        body: formData,
+      });
 
       alert("Payment proof reuploaded successfully!");
       setSelectedFile(null);

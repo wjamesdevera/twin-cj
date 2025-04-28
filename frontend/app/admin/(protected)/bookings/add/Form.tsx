@@ -194,7 +194,7 @@ export default function WalkInForm() {
         formDataToSend.append("packageType", formData.packageType);
 
         const response = await fetch(
-          "http://localhost:8080/api/bookings/walk-in",
+          `${options.baseURL}/api/bookings/walk-in`,
           {
             method: "POST",
             body: formDataToSend,
@@ -210,7 +210,7 @@ export default function WalkInForm() {
         setIsNotificationModalOpen(true);
 
         setTimeout(() => {
-          router.push("http://localhost:3000/admin/bookings");
+          router.push("/admin/bookings");
         }, 1500);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -228,9 +228,7 @@ export default function WalkInForm() {
     setConfirmMessage(
       "Are you sure you want to cancel? Any unsaved progress will be lost."
     );
-    setConfirmAction(
-      () => () => router.push("http://localhost:3000/admin/bookings")
-    );
+    setConfirmAction(() => () => router.push("/admin/bookings"));
     setIsConfirmModalOpen(true);
   };
 

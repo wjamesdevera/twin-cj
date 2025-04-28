@@ -578,7 +578,9 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                         <td className={styles.tableCell}>
                           {booking.transaction?.proofOfPaymentImageUrl && (
                             <Image
-                              src={`http://localhost:8080/uploads/${booking.transaction.proofOfPaymentImageUrl
+                              src={`${
+                                options.baseURL
+                              }/uploads/${booking.transaction.proofOfPaymentImageUrl
                                 .split(/[\\/]/)
                                 .pop()}`}
                               alt="Proof of Payment"
@@ -591,7 +593,7 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                     .split(/[\\/]/)
                                     .pop();
                                 openImageModal(
-                                  `http://localhost:8080/uploads/${fileName}`
+                                  `${options.baseURL}/uploads/${fileName}`
                                 );
                               }}
                             />
