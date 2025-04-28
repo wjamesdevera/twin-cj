@@ -57,7 +57,12 @@ const Booking: React.FC = () => {
           bookingData.bookingType
         }&checkInDate=${bookingData.checkInDate?.toISOString()}&checkOutDate=${bookingData.checkOutDate?.toISOString()}`
       : null,
-    fetcher
+    fetcher,
+    {
+      onSuccess: () => {
+        console.log(data);
+      },
+    }
   );
 
   // Set booking type based on check-in and check-out dates
@@ -109,6 +114,7 @@ const Booking: React.FC = () => {
     }
   }, [data, bookingData.bookingType]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleConfirmBooking = (bookingDetails: any) => {
     const bookingPayload = {
       ...bookingData,
