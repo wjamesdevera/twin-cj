@@ -1,5 +1,5 @@
 import { z } from "zod";
-import API from "../api";
+import API, { get } from "../api";
 import { feedbackSchema } from "../feedback/[referenceCode]/form";
 type LoginData = {
   email: string;
@@ -43,6 +43,21 @@ type SendFeedbackData = {
   message: string;
 };
 
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserResponse {
+  user: User;
+}
+
 // Manage User API
 export const login = async (data: LoginData) =>
   API.post("/api/auth/login", data);
@@ -51,7 +66,7 @@ export const registerAccount = async (data: RegisterData) =>
   API.post("/api/auth/register", data);
 export const forgotPasword = async (data: ForgotPasswordData) =>
   API.post("/api/auth/password/forgot", data);
-export const getUser = async () => API.get("/api/users");
+export const getUser = async () => await get<UserResponse>("/api/users");
 export const resetPassword = async (data: ResetPasswordData) =>
   API.post("/api/auth/password/reset", data);
 export const changePassword = async (data: ChangePasswordData) =>

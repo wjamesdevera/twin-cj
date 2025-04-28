@@ -1,7 +1,9 @@
+import { Suspense } from "react";
+
 export default function VerifyOtpLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>{children}</>;
+  return <Suspense>{children}</Suspense>;
 }
