@@ -271,8 +271,7 @@ export const sendFeedbacks = async (data: SendFeedbackSchema) =>
   API.post("/api/feedbacks", data);
 
 export const getFeedbacksAdmin = async () => API.get("/api/feedbacks");
-export const getBooking = async () =>
-  API.get(`/api/bookings/`).then((res) => res.data);
+export const getBooking = async () => API.get(`/api/bookings/`);
 
 export const updateFeedbackStatus = async (id: string, statusId: number) =>
   API.patch(`/api/feedbacks/${id}`, { statusId });
