@@ -218,7 +218,12 @@ export const getBookingStatusHandler = catchErrors(
 
     const bookingStatus = await getBookingStatus(referenceCode);
 
-    return res.status(OK).json(bookingStatus);
+    return res.status(OK).json({
+      status: "success",
+      data: {
+        bookingStatus,
+      },
+    });
   }
 );
 
