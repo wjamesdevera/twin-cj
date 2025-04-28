@@ -902,13 +902,7 @@ export const editBookingDates = async (
     });
 
     if (conflicts.length > 0) {
-      console.log(
-        "Conflict booked service:",
-        conflicts,
-        newCheckIn + " to ",
-        newCheckOut
-      );
-
+      // Return the unavailable services
       const unavailableServices = conflicts.map((conflict) => ({
         id: conflict.service.id.toString(),
         name: conflict.service.name,
@@ -982,7 +976,6 @@ export const getUnavailableDates = async (referenceCode: string) => {
     : [];
 
   if (serviceIds.length === 0) {
-    console.log("No services found for this booking.");
     return [];
   }
 
@@ -1020,8 +1013,6 @@ export const getUnavailableDates = async (referenceCode: string) => {
       }
     }
   }
-
-  console.log("Conflict booked service:" + conflictDates);
 
   return conflictDates;
 };
@@ -1278,7 +1269,6 @@ export const sendOtp = async (email: string) => {
   const { otp, expiresAt } = generateOTP(5);
   storeOTP(email, otp, expiresAt);
 
-  console.log("OTP:", otp, "Expires At:", expiresAt);
   const { error } = await sendMail({
     to: email || "delivered@resend.dev",
     ...getOTPEmailTemplate(otp),
