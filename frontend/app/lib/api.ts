@@ -1,7 +1,6 @@
 import { z } from "zod";
 import API from "../api";
 import { feedbackSchema } from "../feedback/[referenceCode]/form";
-
 type LoginData = {
   email: string;
   password: string;
@@ -183,7 +182,7 @@ type BookingStatus = {
 };
 // Booking Status API
 
-export const getBookingStatus = async () =>
+export const getBookingStatus = () =>
   API.get<BookingStatus[]>("/api/bookings/statuses");
 
 export const editBookingStatus = async (
