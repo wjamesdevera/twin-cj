@@ -15,6 +15,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import useSWRMutation from "swr/mutation";
 import { getAvailableServices } from "@/app/lib/api";
+import { options } from "@/app/api";
 
 type FormFields = {
   firstName: string;
