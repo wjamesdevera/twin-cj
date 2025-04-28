@@ -7,24 +7,24 @@ import {
   Poppins,
 } from "next/font/google";
 
-export const poppins = Poppins({
+const poppins = Poppins({
   variable: "--font-poppins",
   weight: ["400", "600"],
   subsets: ["latin"],
 });
 
-export const openSans = Open_Sans({
+const openSans = Open_Sans({
   variable: "--font-open-sans",
   subsets: ["latin"],
 });
 
-export const abrilFatface = Abril_Fatface({
+const abrilFatface = Abril_Fatface({
   variable: "--font-abril-fatface",
   weight: "400",
   subsets: ["latin"],
 });
 
-export const poltawskiNowy = Poltawski_Nowy({
+const poltawskiNowy = Poltawski_Nowy({
   variable: "--font-poltawski-nowy",
   subsets: ["latin"],
 });

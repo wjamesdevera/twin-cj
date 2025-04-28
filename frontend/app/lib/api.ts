@@ -272,7 +272,26 @@ export const sendFeedbacks = async (data: SendFeedbackSchema) =>
 
 export const getFeedbacksAdmin = async () => API.get("/api/feedbacks");
 export const getBooking = async () =>
-  API.get<BookingResponse[]>(`/api/bookings/`);
+  API.get(`/api/bookings/`).then((res) => res.data);
 
 export const updateFeedbackStatus = async (id: string, statusId: number) =>
   API.patch(`/api/feedbacks/${id}`, { statusId });
+
+interface GetAvailableServicesParams {
+  packageType: string;
+  checkInDate: string;
+  checkOutDate: string;
+}
+
+export const getAvailableServices = async (data: GetAvailableServicesParams) =>
+  API.get(
+    `/api/bookings?type=${encodeURIComponent(data.packageType)}&checkInDate=${
+      data.checkInDate ? new Date(data.checkInDate).toISOString() : ""
+    }&checkOutDate=${
+      data.packageType === "cabins" && data.checkOutDate
+        ? new Date(data.checkOutDate).toISOString()
+        : data.checkInDate
+        ? new Date(data.checkInDate).toISOString()
+        : ""
+    }`
+  );
