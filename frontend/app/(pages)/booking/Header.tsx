@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
 import { options } from "@/app/api";
+import { format } from "date-fns";
 
 type GuestType = "adults" | "children";
 type Action = "increment" | "decrement";
@@ -146,6 +147,9 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       return;
     }
 
+    // const formattedCheckInDate = format(checkInDate, "yyyy-MM-dd");
+    // const formattedCheckOutDate = format(checkOutDate, "yyyy-MM-dd");
+
     //NOTE:
     if (checkInDate > checkOutDate) {
       Swal.fire({
@@ -227,10 +231,15 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
             </label>
             <DatePicker
               selected={checkInDate}
-              onChange={(date: Date | null) => setCheckInDate(date)}
+              onChange={(date: Date | null) => {
+                if (date) {
+                  const formattedDate = format(date, "yyyy-MM-dd");
+                  setCheckInDate(new Date(formattedDate));
+                }
+              }}
               placeholderText="Select check-in date"
               className={styles["form-input"]}
-              dateFormat="MMMM d, yyyy"
+              dateFormat="MM/dd/yyyy"
               minDate={new Date()}
             />
           </div>
@@ -241,10 +250,15 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
             </label>
             <DatePicker
               selected={checkOutDate}
-              onChange={(date: Date | null) => setCheckOutDate(date)}
+              onChange={(date: Date | null) => {
+                if (date) {
+                  const formattedDate = format(date, "yyyy-MM-dd");
+                  setCheckOutDate(new Date(formattedDate));
+                }
+              }}
               placeholderText="Select check-out date"
               className={styles["form-input"]}
-              dateFormat="MMMM d, yyyy"
+              dateFormat="MM/dd/yyyy"
               minDate={checkInDate || new Date()}
             />
           </div>
