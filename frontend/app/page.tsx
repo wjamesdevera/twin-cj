@@ -199,9 +199,11 @@ export default function page() {
                   backdrop. For inquiries, feel free to message us on our
                   Facebook page!
                 </p>
-                <Button variant="outline" className={styles["outline"]}>
-                  Book Now
-                </Button>
+                <Link href="/booking">
+                  <Button variant="outline" className={styles["outline"]}>
+                    Book Now
+                  </Button>
+                </Link>
               </div>
               <div className={styles["img-area"]}>
                 <Image src="/assets/home_gazebo.jpg" alt="Gazebo" fill />
@@ -230,9 +232,11 @@ export default function page() {
                   Let your creativity shine as you create timeless memories in a
                   truly enchanting environment!
                 </p>
-                <Button variant="outline" className={styles["outline"]}>
-                  Book Now
-                </Button>
+                <Link href="/booking">
+                  <Button variant="outline" className={styles["outline"]}>
+                    Book Now
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
