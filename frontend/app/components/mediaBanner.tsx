@@ -25,6 +25,7 @@ const MediaBanner: React.FC<MediaBannerProps> = ({
           src={mediaSrc}
           alt={altText || "Media"}
           className={styles.media}
+          fill
         />
       )}
     </div>
