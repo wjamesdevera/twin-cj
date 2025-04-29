@@ -374,3 +374,10 @@
     }
   }
 }
+@media (max-width: 768px) {
+  .why-choose-us-section .two-column .text-area .title::after {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+}
+
