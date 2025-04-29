@@ -147,9 +147,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       return;
     }
 
-    // const formattedCheckInDate = format(checkInDate, "yyyy-MM-dd");
-    // const formattedCheckOutDate = format(checkOutDate, "yyyy-MM-dd");
-
     //NOTE:
     if (checkInDate > checkOutDate) {
       Swal.fire({
