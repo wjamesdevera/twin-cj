@@ -237,7 +237,7 @@
   .wrapper {
     display: flex;
     flex-direction: column;
-    gap: 4rem;
+
   }
 
   .header-description {
@@ -302,7 +302,7 @@
   }
 }
 
-@media (width >= 48rem) {
+@media (width >= 72.5rem) {
   .subtext {
     font-size: var(--text-size-base);
     line-height: var(--text-line-height-base);
@@ -352,6 +352,7 @@
     .img-right {
       grid-template-areas: "text img";
       text-align: left;
+      gap: 4rem;
 
       .title {
         &::after {
@@ -364,6 +365,7 @@
     .img-left {
       grid-template-areas: "img text";
       text-align: right;
+      margin-top:  4rem;
 
       .title {
         &::after {
@@ -374,10 +376,11 @@
     }
   }
 }
-@media (max-width: 768px) {
+@media (max-width: 1161px) {
   .why-choose-us-section .two-column .text-area .title::after {
     margin-left: 0 !important;
     margin-right: auto !important;
   }
+  
 }
 
