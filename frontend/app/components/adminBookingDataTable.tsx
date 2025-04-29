@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { downloadExcel } from "react-export-table-to-excel";
 import styles from "./adminBookingDataTable.module.scss";
@@ -81,6 +81,9 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     startDateFilter: "",
     endDateFilter: "",
   });
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
