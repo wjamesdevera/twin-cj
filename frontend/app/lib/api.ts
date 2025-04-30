@@ -82,7 +82,7 @@ export const verifyEmail = async (code: string) =>
 
 // Manage Feedback
 export const sendFeedback = async (data: SendFeedbackData) =>
-  API.post("/api/feedbacks", data);
+  API.post("/api/inquiry", data);
 
 // Cabins API
 export const createCabin = async (data: FormData) =>
