@@ -22,7 +22,7 @@ const formSchema = z
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     path: ["confirmPassword"],
-    message: "Password do not mathc",
+    message: "Password do not match",
   });
 
 type FormData = z.infer<typeof formSchema>;
