@@ -15,6 +15,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Swal from "sweetalert2";
 import ConfirmModal from "@/app/components/confirm_modal";
+import { useRouter } from "next/navigation";
+import { Loading } from "@/app/components/loading";
 
 type PaymentFormData = z.infer<typeof paymentSchema>;
 
@@ -24,6 +26,21 @@ interface BookingCardData {
   description: string;
   price: number;
   imageUrl: string;
+}
+
+interface BookingData {
+  bookingCards: BookingCardData[];
+  selectedOption: number;
+  bookingType: "day-tour" | "overnight";
+  firstName: string;
+  lastName: string;
+  email: string;
+  contactNumber: string;
+  guestCounts: {
+    adults: number;
+    children: number;
+  };
+  paymentMethod?: string;
 }
 
 export default function PaymentDetails() {
@@ -38,12 +55,20 @@ export default function PaymentDetails() {
     () => () => {}
   );
 
-  const storedBookingData = sessionStorage.getItem("bookingData");
-  const bookingData = storedBookingData ? JSON.parse(storedBookingData) : {};
+  const [bookingData, setBookingData] = useState<BookingData | null>(null);
 
-  if (!storedBookingData) {
-    console.error("No booking data found in session storage.");
-  }
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedBookingData = sessionStorage.getItem("bookingData");
+      if (storedBookingData) {
+        setBookingData(JSON.parse(storedBookingData));
+      } else {
+        router.push("/booking");
+      }
+    }
+  }, [router]);
 
   const {
     register,
@@ -71,14 +96,16 @@ export default function PaymentDetails() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const selectedCard = (bookingData.bookingCards as BookingCardData[]).find(
-    (card: BookingCardData) => card.id === bookingData.selectedOption
+  if (!bookingData) {
+    return <Loading />;
+  }
+
+  const selectedCard = (bookingData?.bookingCards as BookingCardData[]).find(
+    (card: BookingCardData) => card.id === bookingData?.selectedOption
   );
 
   const onSubmit = async (data: PaymentFormData) => {
-    setConfirmMessage(
-      "Are you sure you want to confirm your booking?"
-    );
+    setConfirmMessage("Are you sure you want to confirm your booking?");
     setConfirmAction(() => async () => {
       try {
         if (!bookingData) {
@@ -145,36 +172,37 @@ export default function PaymentDetails() {
           <PricingContainer
             className={`${styles.rightContainer} ${styles.container1}`}
             imageSrc={
-              (bookingData.bookingCards as BookingCardData[]).find(
+              (bookingData?.bookingCards as BookingCardData[]).find(
                 (card: BookingCardData) =>
-                  card.id === bookingData.selectedOption
+                  card.id === bookingData?.selectedOption
               )?.imageUrl || undefined
             }
             numberOfGuests={`${
-              bookingData.guestCounts.adults + bookingData.guestCounts.children
+              (bookingData?.guestCounts?.adults ?? 0) +
+              (bookingData?.guestCounts?.children ?? 0)
             } guest(s)`}
             type={
-              bookingData.bookingType === "day-tour" ? "Day Tour" : "Overnight"
+              bookingData?.bookingType === "day-tour" ? "Day Tour" : "Overnight"
             }
             packageType={
-              (bookingData.bookingCards as BookingCardData[]).find(
+              (bookingData?.bookingCards as BookingCardData[]).find(
                 (card: BookingCardData) =>
-                  card.id === bookingData.selectedOption
+                  card.id === bookingData?.selectedOption
               )?.name || "Unknown"
             }
             packagePrice={selectedCard?.price || 0}
             totalAmount={selectedCard?.price ? selectedCard.price * 0.5 : 0}
             bookingType={
-              bookingData.bookingType === "day-tour" ? "Day Tour" : "Overnight"
+              bookingData?.bookingType === "day-tour" ? "Day Tour" : "Overnight"
             }
           />
           <PaymentContainer
             className={`${styles.leftContainer} ${styles.container2}`}
             heading="Payment Information"
             subheading="Please take note of the following details for your payment."
-            fullName={`${bookingData.firstName} ${bookingData.lastName}`}
-            email={bookingData.email}
-            contactNumber={bookingData.contactNumber}
+            fullName={`${bookingData?.firstName} ${bookingData?.lastName}`}
+            email={bookingData?.email}
+            contactNumber={bookingData?.contactNumber}
             downPayment={selectedCard?.price ? selectedCard.price * 0.5 : 0}
           />
           <PaymentContainer
