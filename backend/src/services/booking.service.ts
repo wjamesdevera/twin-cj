@@ -902,13 +902,7 @@ export const editBookingDates = async (
     });
 
     if (conflicts.length > 0) {
-      console.log(
-        "Conflict booked service:",
-        conflicts,
-        newCheckIn + " to ",
-        newCheckOut
-      );
-
+      // Return the unavailable services
       const unavailableServices = conflicts.map((conflict) => ({
         id: conflict.service.id.toString(),
         name: conflict.service.name,
@@ -958,6 +952,69 @@ export const editBookingDates = async (
       "Failed to update booking dates due to an unexpected error"
     );
   }
+};
+
+export const getUnavailableDates = async (referenceCode: string) => {
+  appAssert(referenceCode, BAD_REQUEST, "Reference code is required");
+
+  const booking = await prisma.booking.findFirst({
+    where: { referenceCode },
+    select: {
+      id: true,
+      services: {
+        select: {
+          serviceId: true,
+        },
+      },
+    },
+  });
+
+  appAssert(booking, NOT_FOUND, "Booking not found");
+
+  const serviceIds = booking.services
+    ? booking.services.map((s) => s.serviceId)
+    : [];
+
+  if (serviceIds.length === 0) {
+    return [];
+  }
+
+  const conflicts = await prisma.bookingService.findMany({
+    where: {
+      serviceId: { in: serviceIds },
+      booking: {
+        id: { not: booking.id },
+        bookingStatus: {
+          name: { notIn: ["Cancelled", "Rescheduled"] },
+        },
+      },
+    },
+    select: {
+      booking: {
+        select: {
+          checkIn: true,
+          checkOut: true,
+        },
+      },
+    },
+  });
+
+  const conflictDates: string[] = [];
+  for (const conflict of conflicts) {
+    if (
+      conflict.booking &&
+      conflict.booking.checkIn &&
+      conflict.booking.checkOut
+    ) {
+      let currentDate = new Date(conflict.booking.checkIn);
+      while (currentDate <= conflict.booking.checkOut) {
+        conflictDates.push(currentDate.toISOString());
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+  }
+
+  return conflictDates;
 };
 
 export const getBookingStatuses = async () => {
@@ -1200,7 +1257,6 @@ export const sendOtp = async (email: string) => {
   const { otp, expiresAt } = generateOTP(5);
   storeOTP(email, otp, expiresAt);
 
-  console.log("OTP:", otp, "Expires At:", expiresAt);
   const { error } = await sendMail({
     to: email || "delivered@resend.dev",
     ...getOTPEmailTemplate(otp),

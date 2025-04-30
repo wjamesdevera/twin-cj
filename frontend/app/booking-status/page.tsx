@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,9 @@ import styles from "../page.module.scss";
 import useSWRMutation from "swr/mutation";
 import { getBookingStatuses } from "../lib/api";
 import { Loading } from "../components/loading";
-import { useSearchParams } from "next/navigation";
+import { format } from "date-fns";
+
+// Temporary Schema (remove upon integrating the centralized zod file)
 
 const bookingSchema = z.object({
   referenceCode: z.string().min(1, "Reference Code is required"),
@@ -19,17 +21,26 @@ const bookingSchema = z.object({
 
 type CheckBookingStatus = z.infer<typeof bookingSchema>;
 
+const formatDate = (dateString?: string, type?: "checkIn" | "checkOut") => {
+  if (!dateString) return "N/A";
+
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Invalid Date";
+
+  if (type === "checkIn") date.setHours(16, 0);
+  if (type === "checkOut") date.setHours(12, 0);
+
+  return format(date, "yyyy-MM-dd HH:mm:ss");
+};
+
 export default function Home() {
-  const searchParams = useSearchParams();
-  const referenceCode = searchParams.get("referenceCode");
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
-  } = useForm({
+  } = useForm<CheckBookingStatus>({
     resolver: zodResolver(bookingSchema),
   });
 
@@ -38,29 +49,22 @@ export default function Home() {
     data: bookingResponse,
     isMutating,
   } = useSWRMutation(
-    "key",
+    "booking-status",
     (key, { arg }: { arg: CheckBookingStatus }) =>
-      getBookingStatuses(arg.referenceCode),
-    {
-      onSuccess: () => {
-        console.log(bookingResponse);
-      },
-    }
+      getBookingStatuses(arg.referenceCode)
   );
 
   const { bookingStatus } = bookingResponse ? bookingResponse.data : {};
 
-  useEffect(() => {
-    if (referenceCode) {
-      setValue("referenceCode", referenceCode);
-      trigger({ referenceCode });
-    }
-  }, [referenceCode, setValue, trigger]);
+  const fetchBookingData = useCallback(
+    async (data: CheckBookingStatus) => {
+      setHasSubmitted(true);
+      await trigger(data);
+    },
+    [trigger]
+  );
 
-  const fetchBookingData = async (data: CheckBookingStatus) => {
-    setHasSubmitted(true);
-    await trigger(data);
-  };
+  if (isMutating) return <Loading />;
 
   return isMutating ? (
     <Loading />
@@ -84,8 +88,8 @@ export default function Home() {
           service={bookingStatus?.services[0]?.name}
           category={bookingStatus?.services[0]?.serviceCategory?.category.name}
           totalPax={bookingStatus?.totalPax}
-          checkIn={bookingStatus?.checkIn}
-          checkOut={bookingStatus?.checkOut}
+          checkIn={formatDate(bookingStatus?.checkIn)}
+          checkOut={formatDate(bookingStatus?.checkOut)}
           message={bookingStatus?.message}
           bookingData={bookingStatus}
         />

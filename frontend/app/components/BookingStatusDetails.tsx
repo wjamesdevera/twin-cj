@@ -5,6 +5,7 @@ import NotificationModal from "./notification_modal";
 import { mutate } from "swr";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
+import { useUnavailableDates } from "../hooks/useUnavailableDates";
 
 interface BookingStatusDetailsProps {
   status: string;
@@ -66,6 +67,11 @@ const BookingStatusDetails = ({
   const [notificationType, setNotificationType] = useState<"success" | "error">(
     "success"
   );
+
+  const { unavailableDates } = useUnavailableDates({
+    baseURL: options.baseURL,
+    referenceCode: referenceCode || "",
+  });
 
   const BookingDetails = () => (
     <>
@@ -473,6 +479,16 @@ const BookingStatusDetails = ({
                     }
                     dateFormat="yyyy-MM-dd"
                     placeholderText="mm/dd/yyyy"
+                    excludeDates={
+                      unavailableDates && unavailableDates.length > 0
+                        ? unavailableDates.map((date) => {
+                            const dateOnly = date.split("T")[0];
+                            const parsedDate = new Date(dateOnly);
+
+                            return parsedDate;
+                          })
+                        : []
+                    }
                   />
                 </div>
                 <div>
