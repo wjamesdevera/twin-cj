@@ -85,17 +85,14 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     setCurrentPage(1);
   }, [filters]);
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBooking, setCurrentBooking] = useState<BookingResponse | null>(
     null
   );
   const [newStatus, setNewStatus] = useState<string>("");
 
-  // Message state for cancellation/rescheduled booking
   const [userMessage, setUserMessage] = useState<string>("");
 
-  // Notification State
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationType, setNotificationType] = useState<"success" | "error">(
@@ -112,12 +109,10 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
       }, {} as Record<string, string>) || {}
   );
 
-  // Handle
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserMessage(e.target.value);
   };
 
-  // Open Modal
   const openModalForStatusUpdate = (
     booking: BookingResponse,
     status: string
@@ -373,7 +368,6 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
     currentPage * ITEMS_PER_PAGE
   );
 
-  // Handle page change
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -521,29 +515,35 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                 <option value="pending">Pending</option>
                 <option value="cancelled">Cancelled</option>
                 <option value="rescheduled">Rescheduled</option>
+                <option value="completed">Completed</option>
               </select>
             </div>
           </div>
         </div>
         <div className={styles.scrollableTableWrapper}>
-          <table ref={tableRef} className={styles.table}>
-            <thead className={styles.tableHead}>
-              <tr>
-                <th>Reference No.</th>
-                <th>Service</th>
-                <th>Proof of Payment</th>
-                <th>Check-In</th>
-                <th>Check-Out</th>
-                <th>Down Payment</th>
-                <th>Customer Name</th>
-                <th>Email</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedBookings?.map(
-                (booking: BookingResponse, index: number) => {
-                  const isExpanded = expandedRef === booking.referenceCode;
+          {filteredBookings?.length === 0 ? (
+            <div className={styles.noBookingsMessage}>
+              There are currently no bookings available
+            </div>
+          ) : (
+            <table ref={tableRef} className={styles.table}>
+              <thead className={styles.tableHead}>
+                <tr>
+                  <th>Reference No.</th>
+                  <th>Service</th>
+                  <th>Proof of Payment</th>
+                  <th>Check-In</th>
+                  <th>Check-Out</th>
+                  <th>Down Payment</th>
+                  <th>Customer Name</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedBookings?.map(
+                  (booking: BookingResponse, index: number) => {
+                    const isExpanded = expandedRef === booking.referenceCode;
 
                   return (
                     <React.Fragment key={index}>
@@ -646,29 +646,32 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                             onChange={(e) => {
                               const selectedStatus = e.target.value;
 
-                              // Save the temporary selection in state
-                              setSelectedStatuses((prev) => ({
-                                ...prev,
-                                [booking.referenceCode]: selectedStatus,
-                              }));
+                                // Save the temporary selection in state
+                                setSelectedStatuses((prev) => ({
+                                  ...prev,
+                                  [booking.referenceCode]: selectedStatus,
+                                }));
 
-                              openModalForStatusUpdate(booking, selectedStatus);
-                            }}
-                            disabled={
-                              booking.bookingStatus.toLowerCase() ===
-                              "completed"
-                            }
-                          >
-                            <option value={booking.bookingStatus} disabled>
-                              {booking.bookingStatus}
-                            </option>
-                            <option value="Approved">Approved</option>
-                            <option value="Cancelled">Cancelled</option>
-                            <option value="Rescheduled">Rescheduled</option>
-                            <option value="Completed">Completed</option>
-                          </select>
-                        </td>
-                      </tr>
+                                openModalForStatusUpdate(
+                                  booking,
+                                  selectedStatus
+                                );
+                              }}
+                              disabled={
+                                booking.bookingStatus.toLowerCase() ===
+                                "completed"
+                              }
+                            >
+                              <option value={booking.bookingStatus} disabled>
+                                {booking.bookingStatus}
+                              </option>
+                              <option value="Approved">Approved</option>
+                              <option value="Cancelled">Cancelled</option>
+                              <option value="Rescheduled">Rescheduled</option>
+                              <option value="Completed">Completed</option>
+                            </select>
+                          </td>
+                        </tr>
 
                       {isExpanded && (
                         <tr className={styles.accordionRow}>
@@ -768,23 +771,24 @@ const BookingTable: React.FC<BookingTableProps> = ({ bookings }) => {
                                   />
                                 )}
 
-                                <CustomButton
-                                  type="button"
-                                  label="Cancel"
-                                  variant="danger"
-                                  onClick={() => setExpandedRef(null)}
-                                />
+                                  <CustomButton
+                                    type="button"
+                                    label="Cancel"
+                                    variant="danger"
+                                    onClick={() => setExpandedRef(null)}
+                                  />
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  }
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
         {(filteredBookings?.length ?? 0) > 0 && (
           <div className={styles.paginationContainer}>
