@@ -48,7 +48,12 @@ export const getBookingHandler = catchErrors(
 
     const bookings = await getAllBooking();
 
-    res.status(OK).json(bookings);
+    res.status(OK).json({
+      status: "success",
+      data: {
+        bookings,
+      },
+    });
   }
 );
 
@@ -202,8 +207,7 @@ export const updateBookingDateHandler = catchErrors(
 
 export const getBookingStatusesHandler = catchErrors(
   async (request: Request, response: Response) => {
-    const { referenceCode } = request.params;
-    const bookingStatus = await getBookingStatuses(referenceCode);
+    const bookingStatus = await getBookingStatuses();
     response.status(OK).json(bookingStatus);
   }
 );
@@ -214,7 +218,12 @@ export const getBookingStatusHandler = catchErrors(
 
     const bookingStatus = await getBookingStatus(referenceCode);
 
-    return res.status(OK).json(bookingStatus);
+    return res.status(OK).json({
+      status: "success",
+      data: {
+        bookingStatus,
+      },
+    });
   }
 );
 

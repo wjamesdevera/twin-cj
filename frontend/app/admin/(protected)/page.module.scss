@@ -4,12 +4,13 @@
   overflow: hidden;
 
   section {
-    margin-top: 4rem;
-    width: 100%;
-    overflow-y: auto;
-    height: 100vh;
+  margin-top: 4rem;
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
+  width:100%;
   }
 }
+
 
 .dashboardContainer {
   min-height: 100vh;

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
 export const options = {
   baseURL: process.env.API_ORIGIN || "http://localhost:8080",
@@ -14,5 +14,12 @@ API.interceptors.response.use(
     return Promise.reject({ status, ...data });
   }
 );
+
+export async function get<T = unknown>(
+  url: string,
+  config?: AxiosRequestConfig
+) {
+  return API.get<T>(url, config);
+}
 
 export default API;

@@ -37,7 +37,7 @@ const CabinDashboard = () => {
     );
   };
 
-  const { trigger, isMutating } = useSWRMutation(
+  const { trigger } = useSWRMutation(
     "deleteCabin",
     (key, { arg }: { arg: number }) => deleteCabin(arg)
   );
@@ -79,6 +79,7 @@ const CabinDashboard = () => {
           : "Cabin deleted successfully!",
         type: "success",
       });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setNotification({
         isOpen: true,

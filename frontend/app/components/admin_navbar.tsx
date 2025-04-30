@@ -6,15 +6,30 @@ import styles from "./admin_navbar.module.scss";
 import Link from "next/link";
 import LogoutButton from "./logout-button";
 import useAuth from "../hooks/useAuth";
+import { User } from "../lib/api";
 
 const AdminNavbar: React.FC = () => {
-  const { user } = useAuth();
+  const { user: userData } = useAuth();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isAdminNameBold, setAdminNameBold] = useState(false);
 
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
     setAdminNameBold(!isAdminNameBold);
+  };
+
+  const { user }: { user: User } = {
+    user: {
+      id: "",
+      email: "",
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      isVerified: false,
+      createdAt: "",
+      updatedAt: "",
+    },
+    ...userData,
   };
 
   return (
@@ -35,7 +50,7 @@ const AdminNavbar: React.FC = () => {
             }`}
             onClick={toggleDropdown}
           >
-            {user.user.firstName}
+            {user.firstName !== "" ? user.firstName : "Admin"}
             {isDropdownOpen ? (
               <FaChevronUp className={styles.chevron} />
             ) : (

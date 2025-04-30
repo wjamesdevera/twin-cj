@@ -194,13 +194,16 @@ export default function page() {
                   perfect for birthday celebrations, wedding receptions, and
                   team-building activities. Surrounded by lush greenery and
                   elegant drapery, it offers a charming and versatile space for
-                  any occasion. Whether you're planning an intimate gathering or
-                  a lively festivity, our Gazebo provides the ideal backdrop.
-                  For inquiries, feel free to message us on our Facebook page!
+                  any occasion. Whether you&apos;re planning an intimate
+                  gathering or a lively festivity, our Gazebo provides the ideal
+                  backdrop. For inquiries, feel free to message us on our
+                  Facebook page!
                 </p>
-                <Button variant="outline" className={styles["outline"]}>
-                  Book Now
-                </Button>
+                <Link href="/booking">
+                  <Button variant="outline" className={styles["outline"]}>
+                    Book Now
+                  </Button>
+                </Link>
               </div>
               <div className={styles["img-area"]}>
                 <Image src="/assets/home_gazebo.jpg" alt="Gazebo" fill />
@@ -218,20 +221,22 @@ export default function page() {
                 <h3 className={styles.title}>PHOTOSHOOT</h3>
                 <p className={styles.description}>
                   Capture stunning memories with our exclusive photoshoot
-                  packages at Twin CJ Riverside Glamping Resort. Whether you're
-                  aiming for a simple yet elegant shoot or a grand and elaborate
-                  session, we have the perfect setting for you. Enjoy access to
-                  picturesque locations, including our serene Cabana, cozy Mini
-                  Cabin, spacious Maxi Cabin, or the luxurious Venti Cabin. Each
-                  package offers a unique ambiance, from intimate and charming
-                  spaces to expansive and breathtaking backdrops, ensuring you
-                  have the perfect scene for every shot. Let your creativity
-                  shine as you create timeless memories in a truly enchanting
-                  environment!
+                  packages at Twin CJ Riverside Glamping Resort. Whether
+                  you&apos;re aiming for a simple yet elegant shoot or a grand
+                  and elaborate session, we have the perfect setting for you.
+                  Enjoy access to picturesque locations, including our serene
+                  Cabana, cozy Mini Cabin, spacious Maxi Cabin, or the luxurious
+                  Venti Cabin. Each package offers a unique ambiance, from
+                  intimate and charming spaces to expansive and breathtaking
+                  backdrops, ensuring you have the perfect scene for every shot.
+                  Let your creativity shine as you create timeless memories in a
+                  truly enchanting environment!
                 </p>
-                <Button variant="outline" className={styles["outline"]}>
-                  Book Now
-                </Button>
+                <Link href="/booking">
+                  <Button variant="outline" className={styles["outline"]}>
+                    Book Now
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

@@ -24,7 +24,6 @@ const VerifyOtp: React.FC = () => {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [resendCooldown, setResendCooldown] = useState<number>(120);
   const [isResending, setIsResending] = useState(false);
-  const [otpResent, setOtpResent] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState<"success" | "error">("success");
@@ -75,8 +74,6 @@ const VerifyOtp: React.FC = () => {
 
       if (!response.ok) throw new Error("Failed to resend OTP");
 
-      const result = await response.json();
-
       if (response.ok) {
         setModalMessage("A new OTP has been sent to your email.");
         setModalType("success");
@@ -85,7 +82,6 @@ const VerifyOtp: React.FC = () => {
         setResendCooldown(120);
         setOtp(Array(6).fill(""));
         setValue("otp", "");
-        setOtpResent(true);
         localStorage.setItem("resendCooldown", (120).toString());
       } else {
         Swal.fire({
@@ -208,7 +204,7 @@ const VerifyOtp: React.FC = () => {
       <div className={styles.card}>
         <h2 className={styles.title}>Verify Your Email</h2>
         <p className={styles.subtitle}>
-          We've sent a 6-digit code to{" "}
+          We&apos;ve sent a 6-digit code to{" "}
           <span className={styles.email}>{email}</span>
         </p>
 
@@ -253,7 +249,7 @@ const VerifyOtp: React.FC = () => {
           {/* RESEND OTP SECTION */}
 
           <p className={styles.resendText}>
-            Didn't receive your code?{" "}
+            Didn&apos;t receive your code?{" "}
             <a
               href="#"
               className={`${styles.resendLink} ${

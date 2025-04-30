@@ -1,7 +1,6 @@
 import { z } from "zod";
-import API from "../api";
+import API, { get } from "../api";
 import { feedbackSchema } from "../feedback/[referenceCode]/form";
-
 type LoginData = {
   email: string;
   password: string;
@@ -44,6 +43,21 @@ type SendFeedbackData = {
   message: string;
 };
 
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserResponse {
+  user: User;
+}
+
 // Manage User API
 export const login = async (data: LoginData) =>
   API.post("/api/auth/login", data);
@@ -52,7 +66,7 @@ export const registerAccount = async (data: RegisterData) =>
   API.post("/api/auth/register", data);
 export const forgotPasword = async (data: ForgotPasswordData) =>
   API.post("/api/auth/password/forgot", data);
-export const getUser = async () => API.get("/api/users");
+export const getUser = async () => await get<UserResponse>("/api/users");
 export const resetPassword = async (data: ResetPasswordData) =>
   API.post("/api/auth/password/reset", data);
 export const changePassword = async (data: ChangePasswordData) =>
@@ -68,7 +82,7 @@ export const verifyEmail = async (code: string) =>
 
 // Manage Feedback
 export const sendFeedback = async (data: SendFeedbackData) =>
-  API.post("/api/feedbacks", data);
+  API.post("/api/inquiry", data);
 
 // Cabins API
 export const createCabin = async (data: FormData) =>
@@ -183,7 +197,7 @@ type BookingStatus = {
 };
 // Booking Status API
 
-export const getBookingStatus = async () =>
+export const getBookingStatus = () =>
   API.get<BookingStatus[]>("/api/bookings/statuses");
 
 export const editBookingStatus = async (
@@ -191,75 +205,8 @@ export const editBookingStatus = async (
   bookingStatus: { bookingStatus: string }
 ) => API.patch(`/api/bookings/status/${referenceCode}`, bookingStatus);
 
-type ICategory = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type IServiceCategory = {
-  id: number;
-  categoryId: number;
-  category: ICategory;
-};
-
-type IService = {
-  id: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  createdAt: string;
-  updatedAt: string;
-  serviceCategoryId: number;
-  serviceCategory: IServiceCategory;
-};
-
-type ICustomer = {
-  id: number;
-  personalDetailId: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type IBookingStatus = {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type ITransaction = {
-  id: string;
-  proofOfPaymentImageUrl: string;
-  amount: number;
-  createdAt: string;
-  updatedAt: string;
-  paymentAccountId: number;
-};
-
-type IBookingResponse = {
-  message: string | undefined;
-  id: number;
-  referenceCode: string;
-  checkIn: string;
-  checkOut: string;
-  totalPax: number;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-  customerId: number;
-  bookingStatusId: number;
-  transactionId: string;
-  customer: ICustomer;
-  bookingStatus: IBookingStatus;
-  services: IService[];
-  transaction: ITransaction;
-};
-
 export const getBookingStatuses = async (referenceCode: string) =>
-  await API.get<IBookingResponse>(`/api/bookings/status/${referenceCode}`);
+  await API.get(`/api/bookings/status/${referenceCode}`);
 // return response;
 
 export const getFeedbacks = async () =>
@@ -271,8 +218,26 @@ export const sendFeedbacks = async (data: SendFeedbackSchema) =>
   API.post("/api/feedbacks", data);
 
 export const getFeedbacksAdmin = async () => API.get("/api/feedbacks");
-export const getBooking = async () =>
-  API.get<BookingResponse[]>(`/api/bookings/`);
+export const getBooking = async () => API.get(`/api/bookings/`);
 
 export const updateFeedbackStatus = async (id: string, statusId: number) =>
   API.patch(`/api/feedbacks/${id}`, { statusId });
+
+interface GetAvailableServicesParams {
+  packageType: string;
+  checkInDate: string;
+  checkOutDate: string;
+}
+
+export const getAvailableServices = async (data: GetAvailableServicesParams) =>
+  API.get(
+    `/api/bookings?type=${encodeURIComponent(data.packageType)}&checkInDate=${
+      data.checkInDate ? new Date(data.checkInDate).toISOString() : ""
+    }&checkOutDate=${
+      data.packageType === "cabins" && data.checkOutDate
+        ? new Date(data.checkOutDate).toISOString()
+        : data.checkInDate
+        ? new Date(data.checkInDate).toISOString()
+        : ""
+    }`
+  );

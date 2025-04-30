@@ -9,7 +9,6 @@ import { Loading } from "../../../components/loading";
 import { useRouter } from "next/navigation";
 import useSWRMutation from "swr/mutation";
 import ConfirmModal from "../../../components/confirm_modal";
-import useAuth from "@/app/hooks/useAuth";
 
 interface AdminAccountsTableProps {
   showNotification: (message: string, type: "success" | "error") => void;
@@ -19,7 +18,6 @@ const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({
   showNotification,
 }) => {
   const { data, isLoading: loadingUsers } = useSWR("getUsers", getAllUsers);
-  const { user, isLoading: authLoading } = useAuth();
   const { trigger: deleteUserTrigger } = useSWRMutation(
     "delete",
     (key, { arg }: { arg: string }) => deleteUser(arg),
@@ -52,12 +50,14 @@ const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({
 
         mutate(
           "getUsers",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           async (currentData: any) => {
             if (!currentData) return;
             return {
               ...currentData,
               data: {
                 users: currentData.data.users.filter(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   (user: any) => user.id !== selectedUserId
                 ),
               },
@@ -67,6 +67,7 @@ const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({
         );
 
         showNotification("Admin Account deleted successfully!", "success");
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         showNotification("Failed to delete Admin Account.", "error");
       }
@@ -133,9 +134,7 @@ const AdminAccountsTable: React.FC<AdminAccountsTableProps> = ({
         onConfirm={handleConfirmDelete}
         title="Are you sure you want to delete this Admin Account?"
         confirmText="Delete"
-        confirmColor="#A80000"
         cancelText="Cancel"
-        cancelColor="#CCCCCC"
       />
     </div>
   );

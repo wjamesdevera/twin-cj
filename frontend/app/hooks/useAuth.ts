@@ -23,6 +23,7 @@ const useAuth = (opts?: SWRConfiguration) => {
     isValidating,
     mutate,
   } = useSWR([AUTH], fetcher, opts);
+
   return {
     user,
     isLoading: !error && !user,

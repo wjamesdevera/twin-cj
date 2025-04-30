@@ -3,6 +3,7 @@ import { hashPassword } from "../src/utils/password";
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { generateReferenceCode } from "../src/utils/referenceCodeGenerator";
+import { connect } from "node:http2";
 const prisma = new PrismaClient();
 async function main() {
   const hashedPassword = await hashPassword("Pa$$w0rd123");
@@ -166,7 +167,11 @@ Additional Inclusions:
 
   const paymentAccount = await prisma.paymentAccount.create({
     data: {
-      paymentMethodId: paymentMethod.id,
+      paymentMethod: {
+        connect: {
+          id: paymentMethod.id,
+        },
+      },
     },
   });
 

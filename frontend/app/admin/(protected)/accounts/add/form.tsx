@@ -226,7 +226,12 @@ const Form: React.FC = () => {
         <label>
           Password <span className={styles.required}>*</span>
         </label>
-        <input type="password" {...register("password")} placeholder="Enter your password" required />
+        <input
+          type="password"
+          {...register("password")}
+          placeholder="Enter your password"
+          required
+        />
         {errors.password && (
           <span className={styles.error}>{errors.password.message}</span>
         )}
@@ -237,7 +242,12 @@ const Form: React.FC = () => {
         <label>
           Confirm Password <span className={styles.required}>*</span>
         </label>
-        <input type="password" {...register("confirmPassword")} placeholder="Confirm your password" required />
+        <input
+          type="password"
+          {...register("confirmPassword")}
+          placeholder="Confirm your password"
+          required
+        />
         {errors.confirmPassword && (
           <span className={styles.error}>{errors.confirmPassword.message}</span>
         )}
@@ -256,9 +266,7 @@ const Form: React.FC = () => {
         }}
         onClose={closeModal}
         confirmText="Yes"
-        confirmColor="#A80000"
         cancelText="No"
-        cancelColor="#CCCCCC"
       />
 
       <div className={`${styles.form_group} ${styles.full_width}`}>
