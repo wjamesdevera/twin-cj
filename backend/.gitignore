@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+pnpm-lock.yaml
+twincj.db
+
+/uploads

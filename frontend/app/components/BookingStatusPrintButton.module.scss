@@ -1,0 +1,39 @@
+.booking-status-print-button-section {
+    font-family: 'Open Sans', sans-serif;
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.booking-status-print-button-section button {
+    width: 327px;
+    height: 43px;
+    border-radius: 10px;
+    border: 0;
+    background-color: #D9AD7C;
+    color: #FFFFFF;
+    font-weight: 600;
+    letter-spacing: .1cm;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease-in-out, box-shadow 0.3s ease;
+    font-size: 14px;
+}
+
+.booking-status-print-button-section button:hover {
+    background-color: #C8965E;
+}
+
+.booking-status-print-button-section button:active {
+    background-color: #A77C4E;
+}
+
+.booking-status-print-button-section button:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(217, 173, 124, 0.5);
+}
+
+@media (max-width: 768px) {
+    .booking-status-print-button-section {
+        margin-bottom: 26px;
+    }
+}

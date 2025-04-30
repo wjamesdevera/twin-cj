@@ -1,0 +1,12 @@
+model DayTourActivities {
+    id        Int      @id @default(autoincrement()) @map("day_tour_activity_id")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    serviceId Int
+    service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+
+    @@map("day_tour_activities")
+}

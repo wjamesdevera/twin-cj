@@ -1,0 +1,122 @@
+.adminNavbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: white;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  font-family: "Lato", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 1rem;
+  z-index: 8;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.viewSiteLink {
+  color: #555555;
+  text-decoration: none;
+  font-weight: normal;
+  margin-right: 1rem;
+
+  &:hover,
+  &:focus {
+    color: #a45f14;
+    font-weight: bold;
+    text-decoration: none;
+  }
+}
+
+/* Admin Dropdown */
+.adminDropdown {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-right: 1rem;
+}
+
+.adminButton {
+  color: #a45f14;
+  background: none;
+  border: none;
+  font-weight: normal;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.adminButton:hover {
+  font-weight: bold;
+}
+
+.chevron {
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.adminDropdown.open .chevron {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu */
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #ffffff;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+  width: 150px;
+  z-index: 10;
+  display: none;
+}
+
+.dropdownMenu li {
+  margin: 0;
+}
+
+.dropdownMenu a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: #a45f14;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: normal;
+
+  &:hover {
+    background-color: #f4f4f4;
+  }
+}
+
+.adminDropdown.open .dropdownMenu {
+  display: block;
+}
+
+.logoutBtn {
+  all: inherit;
+  width: 100%;
+  cursor: pointer;
+  display: block;
+  padding: 0.5rem 1rem;
+  color: #a45f14;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: normal;
+
+  &:hover {
+    background-color: #f4f4f4;
+  }
+}

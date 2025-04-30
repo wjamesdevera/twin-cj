@@ -1,0 +1,23 @@
+model UserAccount {
+    id         String   @id @default(uuid()) @map("user_account_id")
+    password   String
+    isVerified Boolean  @default(false) @map("is_verified")
+    createdAt  DateTime @default(now()) @map("created_at")
+    updatedAt  DateTime @updatedAt @map("updated_at")
+
+    // Relations
+    personalDetail PersonalDetail @relation(fields: [personalId], references: [id], onDelete: Cascade)
+    personalId     String         @unique @map("personal_id")
+
+    userAccountStatus UserAccountStatus? @relation(fields: [statusId], references: [id])
+    statusId          Int?               @unique @map("user_account_status_id")
+
+    passwordResetToken PasswordResetToken[]
+    session            Session[]
+
+    verificationCode VerificationCode[]
+
+    auditLog AuditLog[]
+
+    @@map("user_accounts")
+}

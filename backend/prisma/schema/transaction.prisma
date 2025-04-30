@@ -1,0 +1,18 @@
+model Transaction {
+  id                     String   @id @default(uuid()) @map("transaction_id")
+  proofOfPaymentImageUrl String?  @map("proof_of_payment_image_url")
+  amount                 Float    @map("amount")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  // Relations
+
+  paymentAccount   PaymentAccount? @relation(fields: [paymentAccountId], references: [id], name: "TransactionPaymentAccount")
+  paymentAccountId Int?            @map("payment_account_id")
+
+ 
+
+  booking Booking?
+
+  @@map("transactions")
+}

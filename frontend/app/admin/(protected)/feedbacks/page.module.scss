@@ -1,0 +1,149 @@
+.page_container {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 3rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.page_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.875rem;
+}
+
+.title {
+  font-size: var(--text-size-2xl);
+  line-height: var(--text-line-height-2xl);
+  font-weight: bold;
+  color: var(--color-sunset-orange-500);
+}
+
+.subheader_container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.button_container {
+  display: flex;
+  gap: 1rem;
+}
+
+.subheader {
+  font-size: var(--text-size-base);
+  line-height: var(--text-line-height-base);
+  color: var(--color-neutral-500);
+}
+
+@media (max-width: 1024px) {
+  .title {
+    font-size: 22px;
+  }
+
+  .button_container {
+    width: 100%;
+    justify-content: right;
+  }
+
+  .page_header {
+    margin-bottom: 20px;
+  }
+
+  .button,
+  .delete_selected_button {
+    padding: 8px 18px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page_header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .subheader {
+    font-size: 14px;
+  }
+
+  .button_container {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .button,
+  .delete_selected_button {
+    padding: 7px 15px;
+    font-size: 14px;
+  }
+
+  .view_page_link {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 18px;
+  }
+
+  .subheader {
+    font-size: 13px;
+  }
+
+  .view_page_link {
+    font-size: 13px;
+  }
+  .button_container {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .button,
+  .delete_selected_button {
+    width: 100%;
+    text-align: center;
+    min-width: unset;
+    max-width: 100%;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 16px;
+  }
+
+  .subheader {
+    font-size: 12px;
+  }
+
+  .view_page_container {
+    text-align: left;
+  }
+
+  .button_container {
+    flex-wrap: nowrap;
+    justify-content: right;
+  }
+
+  .button,
+  .delete_selected_button {
+    padding: 5px 10px;
+    font-size: 12px;
+    min-width: 90px;
+    border-radius: 12px;
+  }
+
+  .view_page_link {
+    font-size: 12px;
+  }
+}
