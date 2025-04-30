@@ -12,7 +12,7 @@ export default function NotFound() {
         <h1 className={styles.title}>Page Not Found</h1>
 
         <p className={styles.message}>
-          We're sorry, we couldn't find the page you requested.
+          We&apos;re sorry, we couldn&apos;t find the page you requested.
         </p>
 
         <Link href="/">Return Home</Link>

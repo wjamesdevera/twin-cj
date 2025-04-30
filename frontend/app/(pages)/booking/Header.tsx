@@ -5,6 +5,8 @@ import headerImage from "@/public/assets/header.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
+import { options } from "@/app/api";
+import { format } from "date-fns";
 
 type GuestType = "adults" | "children";
 type Action = "increment" | "decrement";
@@ -131,7 +133,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
 
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleApplyGuests = (counts: { adults: number; children: number }) => {
     setGuestCounts(counts);
@@ -163,13 +164,9 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       return;
     }
 
-    setIsLoading(true);
-
-    const queryParams = new URLSearchParams({
-      checkInDate: new Date(checkInDate).toISOString(),
-      checkOutDate: new Date(checkOutDate).toISOString(),
-    }).toString();
-    const url = `http://localhost:8080/api/bookings?type=cabins&checkInDate=${checkInDate.toISOString()}&checkOutDate=${checkOutDate.toISOString()}&_=${new Date().getTime()}`;
+    const url = `${
+      options.baseURL
+    }/api/bookings?type=cabins&checkInDate=${checkInDate.toISOString()}&checkOutDate=${checkOutDate.toISOString()}&_=${new Date().getTime()}`;
 
     try {
       const response = await fetch(url, {
@@ -203,8 +200,6 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
       }
     } catch (error) {
       console.error("Error fetching availability:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -233,10 +228,15 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
             </label>
             <DatePicker
               selected={checkInDate}
-              onChange={(date: Date | null) => setCheckInDate(date)}
+              onChange={(date: Date | null) => {
+                if (date) {
+                  const formattedDate = format(date, "yyyy-MM-dd");
+                  setCheckInDate(new Date(formattedDate));
+                }
+              }}
               placeholderText="Select check-in date"
               className={styles["form-input"]}
-              dateFormat="MMMM d, yyyy"
+              dateFormat="MM/dd/yyyy"
               minDate={new Date()}
             />
           </div>
@@ -247,10 +247,15 @@ const Header: React.FC<HeaderProps> = ({ onCheckAvailability }) => {
             </label>
             <DatePicker
               selected={checkOutDate}
-              onChange={(date: Date | null) => setCheckOutDate(date)}
+              onChange={(date: Date | null) => {
+                if (date) {
+                  const formattedDate = format(date, "yyyy-MM-dd");
+                  setCheckOutDate(new Date(formattedDate));
+                }
+              }}
               placeholderText="Select check-out date"
               className={styles["form-input"]}
-              dateFormat="MMMM d, yyyy"
+              dateFormat="MM/dd/yyyy"
               minDate={checkInDate || new Date()}
             />
           </div>

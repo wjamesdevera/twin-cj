@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Footer from "../components/footer";
 import Navbar from "../components/navbar";
 
@@ -9,7 +10,7 @@ export default function PageLayout({
   return (
     <>
       <Navbar />
-      {children}
+      <Suspense>{children}</Suspense>
       <Footer />
     </>
   );

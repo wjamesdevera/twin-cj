@@ -573,6 +573,8 @@
   .exportButton {
     font-size: 12px;
     padding: 6px 10px;
+    width: 100%; 
+    justify-content: center; 
   }
 
   .tableCell select {
@@ -604,6 +606,8 @@
 
   .rightGroup {
     flex-direction: column;
+    align-items: stretch;
+    width: 100%;
     gap: 10px;
   }
 
@@ -611,7 +615,20 @@
   .filterSelect {
     width: 100%;
   }
+
+  .headerContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .buttonGroup {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
 }
+
 
 @media (max-width: 480px) {
   .tableContainer {
@@ -646,5 +663,15 @@
   .filterSelect {
     width: 100%;
     font-size: 12px;
+  }
+  .rightGroup {
+    gap: 8px;
+  }
+
+  .exportButton,
+  .addButton {
+    font-size: 12px;
+    padding: 8px;
+    width: 100%;
   }
 }

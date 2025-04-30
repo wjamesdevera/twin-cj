@@ -1,9 +1,12 @@
+import { Suspense } from "react";
 import Form from "./form";
 
 const page = () => {
   return (
     <>
-      <Form />
+      <Suspense>
+        <Form />
+      </Suspense>
     </>
   );
 };

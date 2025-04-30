@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import styles from "./bookingcard.module.scss";
+import Image from "next/image";
 
 interface BookingCardProps {
   title: string;
@@ -40,7 +41,13 @@ const BookingCard: React.FC<BookingCardProps> = ({
           </div>
         </div>
         <div className={styles.imageContainer}>
-          <img className={styles.image} src={imageSrc} alt={title} />
+          <Image
+            className={styles.image}
+            src={imageSrc}
+            alt={title}
+            width={500}
+            height={500}
+          />
         </div>
       </div>
     </div>

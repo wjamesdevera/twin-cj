@@ -3,10 +3,11 @@ import { Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import styles from "./chart.module.scss";
 import { Loading } from "./loading";
+import { options } from "../api";
 
 Chart.register(...registerables);
 
-const options = {
+const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   aspectRatio: 2,
@@ -32,6 +33,7 @@ const options = {
 };
 
 const BookingsChart: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [chartData, setChartData] = useState<any>(null);
   const [filter, setFilter] = useState("monthly");
 
@@ -39,7 +41,7 @@ const BookingsChart: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/bookings/${filter}`,
+          `${options.baseURL}/api/bookings/${filter}`,
           {
             headers: {
               "Cache-Control": "no-store",
@@ -101,7 +103,7 @@ const BookingsChart: React.FC = () => {
       </div>
       <div className={styles.chartTitle}>Bookings</div>
       <div className={styles.chartWrapper}>
-        {chartData ? <Bar data={chartData} options={options} /> : <Loading />}
+        {chartData ? <Bar data={chartData} options={chartOptions} /> : <Loading />}
       </div>
     </div>
   );

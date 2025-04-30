@@ -12,13 +12,13 @@ import { Box, Modal } from "@mui/material";
 const ITEMS_PER_PAGE = 10;
 
 interface Feedback {
-  id: string;
+  id: number;
   name: string;
   text: string;
   createdAt: string;
   updatedAt: string;
   status: {
-    id: string;
+    id: number;
   };
 }
 
@@ -36,8 +36,8 @@ const formatDate = (isoString?: string) => {
 };
 
 const FeedbackStatusDropdown: React.FC<{
-  id: string;
-  defaultValue: string;
+  id: number;
+  defaultValue: number;
 }> = ({ id, defaultValue }) => {
   const style = {
     position: "absolute",
@@ -52,13 +52,12 @@ const FeedbackStatusDropdown: React.FC<{
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [statusId, setStatusId] = useState(defaultValue);
-
+  const [statusId, setStatusId] = useState(defaultValue.toString());
   const handleOpen = () => setIsModalOpen(true);
   const handleClose = () => setIsModalOpen(false);
 
   const { trigger, isMutating } = useSWRMutation(
-    id,
+    id.toString(),
     (key: string, { arg }: { arg: { statusId: string } }) =>
       updateFeedbackStatus(key, Number(arg.statusId)),
     {
@@ -77,8 +76,8 @@ const FeedbackStatusDropdown: React.FC<{
     await trigger({ statusId });
   };
 
-  const onCancel = () => {
-    setStatusId(defaultValue);
+  const onCancel = async () => {
+    setStatusId(defaultValue.toString());
     handleClose();
   };
 

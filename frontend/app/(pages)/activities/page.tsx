@@ -77,7 +77,7 @@ export default function Page() {
                 { label: "Entrance fee", price: "₱20 per head" },
               ]}
               buttonLabel="Book Now"
-              buttonLink="#" // add link to booking page nalang :"D
+              buttonLink="/booking"
             />
             <ActivityCard
               imageSrc="/assets/activities-swimming.png"
@@ -96,7 +96,7 @@ export default function Page() {
                 { label: "Kitchen Use:", price: "₱200" },
               ]}
               buttonLabel="Book Now"
-              buttonLink="#" // add link to booking page nalang :"D
+              buttonLink="/booking"
               reverse
             />
             <ActivityCard
@@ -106,7 +106,7 @@ export default function Page() {
               description="Host the perfect event in our scenic Gazebo. Ideal for birthday celebrations, receptions, and team-building activities. For inquiries, message us on our Facebook page!"
               rates={[{ label: "Gazebo Rental:", price: "₱3,000" }]}
               buttonLabel="Book Now"
-              buttonLink="#" // add link to booking page nalang :"D
+              buttonLink="/booking"
             />
           </>
         );

@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import styles from "./bookNowButton.module.scss";
 
 interface BookNowButtonProps {
@@ -8,9 +9,9 @@ interface BookNowButtonProps {
 
 const BookNowButton: React.FC<BookNowButtonProps> = ({ label, link }) => {
   return (
-    <a href={link} className={styles.button}>
-      {label}
-    </a>
+    <Link href={link} passHref>
+      <div className={styles.button}>{label}</div>
+    </Link>
   );
 };
 
