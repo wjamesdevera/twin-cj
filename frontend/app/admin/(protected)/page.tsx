@@ -6,6 +6,7 @@ import Chart from "../../components/Chart";
 import BookingTable from "../../components/BookingTable";
 import styles from "./../(protected)/page.module.scss";
 import { Loading } from "@/app/components/loading";
+import { options } from "@/app/api";
 
 interface BookingData {
   referenceNo: string;
@@ -39,7 +40,7 @@ const Page = () => {
     const fetchBookingData = async () => {
       try {
         const latestBookingResponse = await fetch(
-          "http://localhost:8080/api/bookings/latest-bookings"
+          `${options.baseURL}/api/bookings/latest-bookings`
         );
 
         const contentType = latestBookingResponse.headers.get("Content-Type");
@@ -68,6 +69,7 @@ const Page = () => {
           activeReservations: latestBookingData.activeReservations,
         });
         setLoading(false);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         setError("An error occurred while fetching bookings");
         setLoading(false);

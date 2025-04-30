@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./BookingStatusDetails.module.scss";
 import { options } from "../api";
 import NotificationModal from "./notification_modal";
@@ -6,11 +6,6 @@ import { mutate } from "swr";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { useUnavailableDates } from "../hooks/useUnavailableDates";
-
-interface Service {
-  id: string;
-  name: string;
-}
 
 interface BookingStatusDetailsProps {
   status: string;
@@ -23,6 +18,7 @@ interface BookingStatusDetailsProps {
   checkOut?: string;
   notes?: string | null;
   message?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bookingData?: any;
 }
 
@@ -35,7 +31,6 @@ const BookingStatusDetails = ({
   checkIn,
   checkOut,
   message,
-  bookingData,
 }: BookingStatusDetailsProps) => {
   const formatDate = (dateString?: string, type?: "checkIn" | "checkOut") => {
     if (!dateString) return "N/A";
@@ -59,6 +54,24 @@ const BookingStatusDetails = ({
       hour12: true,
     });
   };
+
+  const [newCheckIn, setNewCheckIn] = useState(checkIn || "");
+  const [newCheckOut, setNewCheckOut] = useState(checkOut || "");
+  const [editedDates, setEditedDates] = useState<{
+    checkIn: string;
+    checkOut: string;
+  }>({ checkIn: "", checkOut: "" });
+
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState<"success" | "error">(
+    "success"
+  );
+
+  const { unavailableDates } = useUnavailableDates({
+    baseURL: options.baseURL,
+    referenceCode: referenceCode || "",
+  });
 
   const BookingDetails = () => (
     <>
@@ -299,28 +312,6 @@ const BookingStatusDetails = ({
       );
 
     case "rescheduled":
-      const [newCheckIn, setNewCheckIn] = useState(checkIn || "");
-      const [newCheckOut, setNewCheckOut] = useState(checkOut || "");
-      const [editedDates, setEditedDates] = useState<{
-        checkIn: string;
-        checkOut: string;
-      }>({ checkIn: "", checkOut: "" });
-      const [isDateChanged, setIsDateChanged] = useState(false);
-      const [unavailableServices, setUnavailableServices] = useState<
-        { id: string; name: string }[]
-      >([]);
-
-      const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-      const [notificationMessage, setNotificationMessage] = useState("");
-      const [notificationType, setNotificationType] = useState<
-        "success" | "error"
-      >("success");
-
-      const { unavailableDates } = useUnavailableDates({
-        baseURL: options.baseURL,
-        referenceCode: referenceCode || "",
-      });
-
       const handleCheckInChange = (date: Date | null) => {
         if (!date) return;
 
@@ -330,8 +321,6 @@ const BookingStatusDetails = ({
           ...prev,
           checkIn: newDate,
         }));
-
-        setIsDateChanged(newDate !== checkIn || newCheckOut !== checkOut);
       };
 
       const handleCheckOutChange = (date: Date | null) => {
@@ -343,7 +332,6 @@ const BookingStatusDetails = ({
           ...prev,
           checkOut: newDate,
         }));
-        setIsDateChanged(newCheckIn !== checkIn || newDate !== checkOut);
       };
 
       const calculateDuration = (checkIn: string, checkOut: string) => {
@@ -397,13 +385,12 @@ const BookingStatusDetails = ({
           const result = await response.json();
 
           if (response.ok) {
-            setUnavailableServices([]);
             setNotificationMessage("Schedule has been updated.");
             setNotificationType("success");
             setIsNotificationOpen(true);
             mutate("");
 
-            window.location.href = `http://localhost:3000/booking-status?referenceCode=${referenceCode}`;
+            window.location.href = `/booking-status?referenceCode=${referenceCode}`;
           } else {
             if (result.message) {
               setNotificationMessage(result.message);

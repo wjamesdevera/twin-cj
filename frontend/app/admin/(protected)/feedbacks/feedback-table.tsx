@@ -6,8 +6,7 @@ import s from "@/app/table.module.scss";
 import ts from "./feedback-table.module.scss";
 import { Loading } from "@/app/components/loading";
 import useSWRMutation from "swr/mutation";
-import { Box, Modal, Typography } from "@mui/material";
-import { TbBorderRadius } from "react-icons/tb";
+import { Box, Modal } from "@mui/material";
 
 const formatDate = (isoString?: string) => {
   if (!isoString) return "N/A";
@@ -22,9 +21,21 @@ const formatDate = (isoString?: string) => {
   });
 };
 
+interface Feedback {
+  id: number;
+  name: string;
+  text: string;
+  createdAt: string;
+  updatedAt: string;
+  status: {
+    id: number;
+    name: string;
+  };
+}
+
 const FeedbackStatusDropdown: React.FC<{
-  id: string;
-  defaultValue: string;
+  id: number;
+  defaultValue: number;
 }> = ({ id, defaultValue }) => {
   const style = {
     position: "absolute",
@@ -38,11 +49,11 @@ const FeedbackStatusDropdown: React.FC<{
     p: 4,
   };
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [statusId, setStatusId] = useState(defaultValue);
+  const [statusId, setStatusId] = useState(defaultValue.toString());
   const handleOpen = () => setIsModalOpen(true);
   const handleClose = () => setIsModalOpen(false);
   const { trigger, isMutating } = useSWRMutation(
-    id,
+    id.toString(),
     (key: string, { arg }: { arg: { statusId: string } }) =>
       updateFeedbackStatus(key, Number(arg.statusId)),
     {
@@ -61,17 +72,12 @@ const FeedbackStatusDropdown: React.FC<{
   };
 
   const onCancel = async () => {
-    setStatusId(defaultValue);
+    setStatusId(defaultValue.toString());
     handleClose();
   };
 
   return (
-    <select
-      className={ts.select}
-      value={statusId}
-      defaultValue={defaultValue}
-      onChange={handleChange}
-    >
+    <select className={ts.select} value={statusId} onChange={handleChange}>
       <option value="1">For Review</option>
       <option value="2">Approved</option>
       <Modal
@@ -118,7 +124,7 @@ const FeedbackTable = () => {
             </tr>
           </thead>
           <tbody>
-            {feedbacks.map((feedback) => (
+            {feedbacks.map((feedback: Feedback) => (
               <tr key={feedback.id}>
                 <td>{feedback.name}</td>
                 <td>{feedback.text}</td>

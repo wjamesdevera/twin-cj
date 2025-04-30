@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,6 @@ import styles from "../page.module.scss";
 import useSWRMutation from "swr/mutation";
 import { getBookingStatuses } from "../lib/api";
 import { Loading } from "../components/loading";
-import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 
 // Temporary Schema (remove upon integrating the centralized zod file)
@@ -20,12 +19,7 @@ const bookingSchema = z.object({
   referenceCode: z.string().min(1, "Reference Code is required"),
 });
 
-interface BookingStatus {
-  name: string;
-}
-
 type CheckBookingStatus = z.infer<typeof bookingSchema>;
-type BookingResponse = Awaited<ReturnType<typeof getBookingStatuses>>;
 
 const formatDate = (dateString?: string, type?: "checkIn" | "checkOut") => {
   if (!dateString) return "N/A";
@@ -40,14 +34,11 @@ const formatDate = (dateString?: string, type?: "checkIn" | "checkOut") => {
 };
 
 export default function Home() {
-  const searchParams = useSearchParams();
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [referenceCode, setReferenceCode] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<CheckBookingStatus>({
     resolver: zodResolver(bookingSchema),
@@ -55,7 +46,7 @@ export default function Home() {
 
   const {
     trigger,
-    data: fetchedBookingData,
+    data: bookingResponse,
     isMutating,
   } = useSWRMutation(
     "booking-status",
@@ -63,17 +54,7 @@ export default function Home() {
       getBookingStatuses(arg.referenceCode)
   );
 
-  useEffect(() => {
-    const code = searchParams.get("referenceCode");
-    if (code) setReferenceCode(code);
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (referenceCode) {
-      setValue("referenceCode", referenceCode);
-      trigger({ referenceCode });
-    }
-  }, [referenceCode, setValue, trigger]);
+  const { bookingStatus } = bookingResponse ? bookingResponse.data : {};
 
   const fetchBookingData = useCallback(
     async (data: CheckBookingStatus) => {
@@ -100,20 +81,17 @@ export default function Home() {
         errors={errors}
         fetchBookingData={fetchBookingData}
       />
-      {fetchedBookingData ? (
+      {bookingStatus ? (
         <BookingStatusDetails
-          status={fetchedBookingData.bookingStatus.name}
-          referenceCode={fetchedBookingData?.referenceCode}
-          service={fetchedBookingData?.services[0]?.name}
-          category={
-            fetchedBookingData?.services[0]?.serviceCategory?.category.name
-          }
-          totalPax={fetchedBookingData?.totalPax}
-          checkIn={formatDate(fetchedBookingData.checkIn, "checkIn")}
-          checkOut={formatDate(fetchedBookingData.checkOut, "checkOut")}
-          notes={fetchedBookingData?.notes}
-          message={fetchedBookingData?.message}
-          bookingData={fetchedBookingData}
+          status={bookingStatus.bookingStatus.name}
+          referenceCode={bookingStatus?.referenceCode}
+          service={bookingStatus?.services[0]?.name}
+          category={bookingStatus?.services[0]?.serviceCategory?.category.name}
+          totalPax={bookingStatus?.totalPax}
+          checkIn={formatDate(bookingStatus?.checkIn)}
+          checkOut={formatDate(bookingStatus?.checkOut)}
+          message={bookingStatus?.message}
+          bookingData={bookingStatus}
         />
       ) : hasSubmitted ? (
         <BookingStatusDetails status="invalid" referenceCode="" />

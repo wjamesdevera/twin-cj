@@ -63,6 +63,7 @@ const Timer = () => {
     return () => {
       if (Ref.current) clearInterval(Ref.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onClickReset = () => {

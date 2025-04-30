@@ -2,10 +2,9 @@
 
 import { walkinSchema } from "@/app/lib/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import useSWR from "swr";
 import styles from "./form.module.scss";
 import CustomButton from "@/app/components/custom_button";
 import ConfirmModal from "@/app/components/confirm_modal";
@@ -14,6 +13,9 @@ import { z } from "zod";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import useSWRMutation from "swr/mutation";
+import { getAvailableServices } from "@/app/lib/api";
+import { options } from "@/app/api";
 
 type FormFields = {
   firstName: string;
@@ -31,6 +33,12 @@ type FormFields = {
   amount: string;
 };
 
+interface GetAvailableServicesParams {
+  packageType: string;
+  checkInDate: string;
+  checkOutDate: string;
+}
+
 interface Service {
   id: number;
   serviceCategoryId: number;
@@ -38,20 +46,6 @@ interface Service {
   description: string;
   imageUrl: string;
   price: number;
-}
-
-interface BookingTypeData {
-  id: string;
-  name: string;
-  price?: number;
-  capacity?: number;
-  description?: string;
-  services?: Service[];
-}
-
-interface BookingResponse {
-  status: string;
-  data: Record<string, BookingTypeData>;
 }
 
 type FormData = z.infer<typeof walkinSchema>;
@@ -104,45 +98,6 @@ export default function WalkInForm() {
   const checkInDate = watch("checkInDate");
   const checkOutDate = watch("checkOutDate");
 
-  useEffect(() => {
-    if (packageType === "day-tour") {
-      setValue("checkOutDate", watch("checkInDate"));
-      trigger("checkOutDate");
-    }
-
-    const selectedPackage = availablePackages.find(
-      (pkg) => pkg.id.toString() === watch("selectedPackageId")
-    );
-
-    if (selectedPackage) {
-      if (packageType === "day-tour") {
-        const halfPrice = selectedPackage.price / 2;
-        setSelectedPackagePrice(halfPrice);
-        setValue("amount", halfPrice.toString());
-      } else if (packageType === "cabins") {
-        const checkIn = new Date(checkInDate);
-        const checkOut = new Date(checkOutDate);
-        const duration = checkOut.getTime() - checkIn.getTime();
-        const numberOfNights = Math.ceil(duration / (1000 * 60 * 60 * 24));
-
-        if (numberOfNights > 1) {
-          let additionalCardPrice =
-            (selectedPackage.price + 500) * (numberOfNights - 1);
-          let finalPrice = (selectedPackage.price + additionalCardPrice) / 2;
-          setSelectedPackagePrice(finalPrice);
-          setValue("amount", finalPrice.toString());
-        } else {
-          const halfPrice = selectedPackage.price / 2;
-          setSelectedPackagePrice(halfPrice);
-          setValue("amount", halfPrice.toString());
-        }
-      }
-    } else {
-      setSelectedPackagePrice(null);
-      setValue("amount", "");
-    }
-  }, [packageType, watch("checkInDate"), watch("selectedPackageId")]);
-
   const today = new Date();
   const minDate = today.toISOString().split("T")[0];
 
@@ -154,37 +109,64 @@ export default function WalkInForm() {
 
   const minCheckOutDate = checkInDate ? getNextDay(checkInDate) : minDate;
 
-  const fetcher = async (url: string) => {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      throw error;
+  const {
+    data,
+    trigger: fetchAvailableService,
+    isMutating,
+  } = useSWRMutation(
+    "edit",
+    (key, { arg }: { arg: GetAvailableServicesParams }) =>
+      getAvailableServices(arg),
+    {
+      onSuccess: () => {
+        console.log(data);
+
+        const selectedPackage = availablePackages.find(
+          (pkg) => pkg.id.toString() === watch("selectedPackageId")
+        );
+
+        if (selectedPackage) {
+          if (packageType === "day-tour") {
+            const halfPrice = selectedPackage.price / 2;
+            setSelectedPackagePrice(halfPrice);
+            setValue("amount", halfPrice.toString());
+          } else if (packageType === "cabins") {
+            const checkIn = new Date(checkInDate);
+            const checkOut = new Date(checkOutDate);
+            const duration = checkOut.getTime() - checkIn.getTime();
+            const numberOfNights = Math.ceil(duration / (1000 * 60 * 60 * 24));
+
+            if (numberOfNights > 1) {
+              const additionalCardPrice =
+                (selectedPackage.price + 500) * (numberOfNights - 1);
+              const finalPrice =
+                (selectedPackage.price + additionalCardPrice) / 2;
+              setSelectedPackagePrice(finalPrice);
+              setValue("amount", finalPrice.toString());
+            } else {
+              const halfPrice = selectedPackage.price / 2;
+              setSelectedPackagePrice(halfPrice);
+              setValue("amount", halfPrice.toString());
+            }
+          }
+        } else {
+          setSelectedPackagePrice(null);
+          setValue("amount", "");
+        }
+      },
+    }
+  );
+
+  const handleBookingDetailChange = () => {
+    if (checkInDate !== "" && checkOutDate !== "") {
+      console.log("fetching....");
+      fetchAvailableService({ packageType, checkInDate, checkOutDate });
+    }
+    if (packageType === "day-tour") {
+      setValue("checkOutDate", watch("checkInDate"));
+      trigger("checkOutDate");
     }
   };
-
-  // fetch available services
-  const { data, error } = useSWR<BookingResponse>(
-    packageType && checkInDate
-      ? `http://localhost:8080/api/bookings?type=${encodeURIComponent(
-          packageType
-        )}&checkInDate=${
-          checkInDate ? new Date(checkInDate).toISOString() : ""
-        }&checkOutDate=${
-          packageType === "cabins" && checkOutDate
-            ? new Date(checkOutDate).toISOString()
-            : checkInDate
-            ? new Date(checkInDate).toISOString()
-            : ""
-        }`
-      : null,
-    fetcher
-  );
 
   const availablePackages: Service[] =
     data?.data?.[packageType]?.services || [];
@@ -213,7 +195,7 @@ export default function WalkInForm() {
         formDataToSend.append("packageType", formData.packageType);
 
         const response = await fetch(
-          "http://localhost:8080/api/bookings/walk-in",
+          `${options.baseURL}/api/bookings/walk-in`,
           {
             method: "POST",
             body: formDataToSend,
@@ -229,8 +211,9 @@ export default function WalkInForm() {
         setIsNotificationModalOpen(true);
 
         setTimeout(() => {
-          router.push("http://localhost:3000/admin/bookings");
+          router.push("/admin/bookings");
         }, 1500);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("Error submitting booking:", error);
         setNotificationMessage("Error submitting booking: " + error.message);
@@ -246,9 +229,7 @@ export default function WalkInForm() {
     setConfirmMessage(
       "Are you sure you want to cancel? Any unsaved progress will be lost."
     );
-    setConfirmAction(
-      () => () => router.push("http://localhost:3000/admin/bookings")
-    );
+    setConfirmAction(() => () => router.push("/admin/bookings"));
     setIsConfirmModalOpen(true);
   };
 
@@ -379,6 +360,7 @@ export default function WalkInForm() {
                       setValue("checkInDate", formattedDate);
                       trigger("checkInDate");
                     }
+                    handleBookingDetailChange();
                   }}
                   minDate={new Date(minDate)}
                   dateFormat="MM/dd/yyyy"
@@ -402,6 +384,16 @@ export default function WalkInForm() {
               <select
                 defaultValue=""
                 onBlur={() => trigger("selectedPackageId")}
+                onFocus={() => {
+                  if (checkInDate !== "" && checkOutDate !== "") {
+                    console.log("fetching....");
+                    fetchAvailableService({
+                      packageType,
+                      checkInDate,
+                      checkOutDate,
+                    });
+                  }
+                }}
                 onChange={(e) => {
                   const selectedOption = availablePackages.find(
                     (pkg) => pkg.id.toString() === e.target.value
@@ -413,21 +405,30 @@ export default function WalkInForm() {
                       selectedPackageName: selectedOption.name,
                     });
                   }
+                  handleBookingDetailChange();
                 }}
               >
-                <option value="" disabled>
-                  Select an Option
-                </option>
-                {availablePackages.length > 0 ? (
-                  availablePackages.map((pkg) => (
-                    <option key={pkg.id} value={pkg.id}>
-                      {pkg.name}
-                    </option>
-                  ))
-                ) : (
+                {isMutating ? (
                   <option value="" disabled>
-                    No options available!
+                    Loading options...
                   </option>
+                ) : (
+                  <>
+                    <option value="" disabled>
+                      Select an Option
+                    </option>
+                    {availablePackages.length > 0 ? (
+                      availablePackages.map((pkg) => (
+                        <option key={pkg.id} value={pkg.id}>
+                          {pkg.name}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        No options available!
+                      </option>
+                    )}
+                  </>
                 )}
               </select>
               {errors.selectedPackageId && (
@@ -462,12 +463,14 @@ export default function WalkInForm() {
               </label>
               <DatePicker
                 selected={checkOutDate ? new Date(checkOutDate) : null}
+                {...register("checkOutDate")}
                 onChange={(date: Date | null) => {
                   if (date) {
                     const formattedDate = format(date, "yyyy-MM-dd");
                     setValue("checkOutDate", formattedDate);
                     trigger("checkOutDate");
                   }
+                  handleBookingDetailChange();
                 }}
                 minDate={new Date(minCheckOutDate)}
                 dateFormat="MM/dd/yyyy"

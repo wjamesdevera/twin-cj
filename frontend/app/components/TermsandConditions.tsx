@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./termsandconditions.module.scss";
 import BookingButton from "./BookingButton";
 
@@ -23,7 +23,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
 
   const closeModal = () => setIsOpen(false);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (contentRef.current && !isButtonEnabled) {
       const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
       // Check if scrolled to the bottom + a small buffer for rounding errors
@@ -32,7 +32,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
         setIsButtonEnabled(true); // Enable the button only once
       }
     }
-  };
+  }, [isButtonEnabled]);
 
   const handleAgree = () => {
     onAgree();
@@ -49,7 +49,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({
       // Cleanup event listener on unmount
       return () => contentEl.removeEventListener("scroll", handleScroll);
     }
-  }, [isOpen]); // run effect again when modal opens/closes
+  }, [handleScroll, isOpen]); // run effect again when modal opens/closes
 
   return (
     <>

@@ -1017,21 +1017,9 @@ export const getUnavailableDates = async (referenceCode: string) => {
   return conflictDates;
 };
 
-export const getBookingStatuses = async (referenceCode: string) => {
-  const response = await prisma.booking.findUnique({
-    where: { referenceCode },
-    include: {
-      bookingStatus: true,
-      services: true,
-      transaction: true,
-      customer: true,
-    },
-  });
-
-  return {
-    ...response,
-    message: response?.message || null,
-  };
+export const getBookingStatuses = async () => {
+  const response = await prisma.bookingStatus.findMany();
+  return response;
 };
 
 export const getBookingByReferenceCode = async (referenceCode: string) => {

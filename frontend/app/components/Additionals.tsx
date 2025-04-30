@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./additionals.module.scss";
+import Image from "next/image";
 
 interface AdditionalsProps {
   title: string;
@@ -30,7 +31,13 @@ const Additionals: React.FC<AdditionalsProps> = ({
           <span className={styles.price}>{price}</span>
         </div>
         <div className={styles.imageContainer}>
-          <img className={styles.image} src={imageSrc} alt={title} />
+          <Image
+            className={styles.image}
+            src={imageSrc}
+            alt={title}
+            width={500}
+            height={500}
+          />
         </div>
       </div>
     </div>
