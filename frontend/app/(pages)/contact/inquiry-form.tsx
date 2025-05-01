@@ -5,7 +5,6 @@ import styles from "./inquiryform.module.scss";
 import Button from "../../components/button";
 import useSWRMutation from "swr/mutation";
 import { sendFeedback } from "../../lib/api";
-import { Loading } from "../../components/loading";
 import { z } from "zod";
 import Swal from "sweetalert2";
 import {
@@ -308,7 +307,7 @@ const InquiryForm: React.FC = () => {
               className={styles["submit-btn"]}
               disabled={isMutating}
             >
-              {isMutating ? <Loading /> : "SUBMIT"}
+              {isMutating ? "Submiting..." : "SUBMIT"}
             </Button>
           </div>
         </div>
