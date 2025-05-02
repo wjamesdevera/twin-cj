@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 
 export const options = {
-  baseURL: process.env.API_ORIGIN || "http://localhost:8080",
+  baseURL: process.env.API_ORIGIN || "http://159.65.9.112",
   withCredentials: true,
 };
 
