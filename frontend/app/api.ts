@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 
 export const options = {
-  baseURL: process.env.API_ORIGIN || "http://api.twincjresort.com",
+  baseURL: process.env.API_ORIGIN || "https://api.twincjresort.com",
   withCredentials: true,
 };
 
