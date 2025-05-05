@@ -9,6 +9,7 @@ import BookingStatusReference from "@/app/components/BookingStatusReference";
 import Hero from "../components/Hero";
 import styles from "../page.module.scss";
 import useSWRMutation from "swr/mutation";
+import { useSearchParams } from "next/navigation";
 import { getBookingStatuses } from "../lib/api";
 import { Loading } from "../components/loading";
 import { format } from "date-fns";
@@ -34,6 +35,8 @@ const formatDate = (dateString?: string, type?: "checkIn" | "checkOut") => {
 };
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const referenceCode = searchParams.get("referenceCode");
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const {
@@ -53,6 +56,10 @@ export default function Home() {
     (key, { arg }: { arg: CheckBookingStatus }) =>
       getBookingStatuses(arg.referenceCode)
   );
+
+  if (referenceCode) {
+    trigger({ referenceCode: referenceCode });
+  }
 
   const { bookingStatus } = bookingResponse ? bookingResponse.data : {};
 
