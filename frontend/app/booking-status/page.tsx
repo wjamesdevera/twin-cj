@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,9 +57,12 @@ export default function Home() {
       getBookingStatuses(arg.referenceCode)
   );
 
-  if (referenceCode) {
-    trigger({ referenceCode: referenceCode });
-  }
+  useEffect(() => {
+    if (referenceCode) {
+      trigger({ referenceCode })
+    }
+  
+  }, [referenceCode, trigger])
 
   const { bookingStatus } = bookingResponse ? bookingResponse.data : {};
 
